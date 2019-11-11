@@ -65,6 +65,6 @@ setup(
     ],
     package_data={"cliboa.template": ["requirements.txt"]},
     python_requires=">=3.0",
-    install_requires=["PyYaml==3.13"],
+    install_requires=["PyYaml==5.1"],
     entry_points={"console_scripts": ["cliboadmin = cliboa.cli.cliboadmin:main"]},
 )
