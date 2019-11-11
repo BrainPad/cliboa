@@ -1,0 +1,11 @@
+__pycache__
+.coverage
+.eggs
+.egg-info
+cliboa.egg-info
+tests/__pycache__
+common
+conf
+logs
+project
+Pipfile.lock
