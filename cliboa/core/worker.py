@@ -1,0 +1,87 @@
+#
+# Copyright 2019 BrainPad Inc. All Rights Reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+from cliboa.util.constant import StepStatus
+from cliboa.util.exception import CliboaException
+from cliboa.util.lisboa_log import LisboaLog
+from cliboa.core.factory import StepExecutorFactory
+from cliboa.core.listener import StepStatusListener
+from cliboa.core.scenario_queue import ScenarioQueue
+
+
+class ScenarioWorker(object):
+    """
+    Worker for scenario
+    """
+
+    def __init__(self, cmd_args):
+        """
+        Args:
+            cmd_args: command line arguments
+        """
+        self._logger = LisboaLog.get_logger(__name__)
+        self._scenario_queue = ScenarioQueue
+        self._cmd_args = cmd_args
+        self._listeners = []
+
+    def get_scenario_queue_status(self):
+        """
+        Get current scenario_queue status
+        """
+        q = self._scenario_queue.step_queue.__class__.__name__
+        q_size = self._scenario_queue.step_queue.size()
+        return f"{q} size is {q_size}."
+
+    def _before_scenario(self):
+        """
+        Notify to registerd listener
+        """
+        for l in self._listeners:
+            l.before_scenario(self)
+
+    def _after_scenario(self):
+        """
+        Notify to registerd listener
+        """
+        for l in self._listeners:
+            l.after_scenario(self)
+
+    def regist_listeners(self, listener):
+        """
+        Regist multiple listeners to activate
+        """
+        self._listeners.append(listener)
+
+    def execute_scenario(self):
+        self._before_scenario()
+        self.__execute_steps()
+        self._after_scenario()
+
+    def __execute_steps(self):
+        """
+        Execute steps in scenario.yml
+        """
+        while not self._scenario_queue.step_queue.is_empty():
+            strategy = StepExecutorFactory.create(self._scenario_queue.step_queue.pop())
+            strategy.regist_listeners(StepStatusListener())
+            res = strategy.execute_steps(self._cmd_args)
+            if res is None:
+                continue
+            if res == StepStatus.SUCCESSFUL_TERMINATION:
+                self._logger.info("Step response [successful termination]. Scenario will be end.")
+                break
+            elif res == StepStatus.ABNORMAL_TERMINATION:
+                self._logger.error("Step response [abnormal termination]. Scenario will be end.")
+                break
+            else:
+                raise CliboaException('Undefined response code [%s]' % res)
