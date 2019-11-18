@@ -27,7 +27,7 @@ class S3Download(BaseS3):
     def __init__(self):
         super().__init__()
         self._prefix = ""
-        self._delimiter = "/"
+        self._delimiter = ""
         self._src_pattern = None
         self._dest_dir = "."
 

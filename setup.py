@@ -25,7 +25,7 @@ def read(filename):
 
 setup(
     name="cliboa",
-    version="1.2.2beta",
+    version="1.2.3beta",
     description="application framework for etl(extract, transform, load) processing",
     #long_description=read("README.md"),
     #long_description_content_type='text/markdown',
