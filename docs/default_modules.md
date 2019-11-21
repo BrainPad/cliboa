@@ -28,6 +28,7 @@ Can use modules as below by default.
 |[ExcelConvert](/docs/modules/excel_convert.md)|Convert a excel file to a csv file|
 |[CsvMerge](/docs/modules/csv_merge.md)|Merge two csv files to a csv file|
 |[CsvHeaderConvert](/docs/modules/csv_header_convert.md)|Convert headers of a csv file|
+|[FileRename](/docs/modules/file_rename.md)|Change file names with adding either prefix or suffix|
 
 
 ## Load Modules
