@@ -22,6 +22,7 @@ from cliboa.conf import env
 from cliboa.scenario.base import BaseSqlite
 from cliboa.scenario.extract.sqlite import SqliteRead
 from cliboa.util.cache import StorageIO
+from cliboa.util.lisboa_log import LisboaLog
 
 
 class TestSqliteRead(object):
@@ -40,6 +41,7 @@ class TestSqliteRead(object):
             conn.commit()
 
             instance = SqliteRead()
+            instance.logger = LisboaLog.get_logger(__name__)
             setattr(instance, "dbname", db_file)
             setattr(instance, "tblname", "spam_table")
             setattr(instance, "io", "input")
@@ -68,6 +70,7 @@ class TestSqliteRead(object):
             conn.commit()
 
             instance = SqliteRead()
+            instance.logger = LisboaLog.get_logger(__name__)
             setattr(instance, "dbname", db_file)
             setattr(instance, "tblname", "spam_table")
             setattr(instance, "columns", ["id"])
@@ -97,6 +100,7 @@ class TestSqliteRead(object):
             conn.commit()
 
             instance = SqliteRead()
+            instance.logger = LisboaLog.get_logger(__name__)
             setattr(instance, "dbname", db_file)
             setattr(instance, "tblname", "spam_table")
             setattr(instance, "raw_query", "select name from spam_table")

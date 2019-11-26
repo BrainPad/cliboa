@@ -23,17 +23,20 @@ from cliboa.conf import env
 from cliboa.scenario.load.file import FileWrite, CsvWrite
 from cliboa.util.cache import StorageIO
 from cliboa.util.exception import CliboaException, FileNotFound
+from cliboa.util.lisboa_log import LisboaLog
+
 
 class TestFileWrite(object):
     def setup_method(self, method):
         self._data_dir = os.path.join(env.BASE_DIR, "data")
 
-class TestCsvWrite(TestFileWrite):
 
+class TestCsvWrite(TestFileWrite):
     def test_execute_ok(self):
         os.makedirs(self._data_dir)
         # create dummy input data
         instance = CsvWrite()
+        instance.logger = LisboaLog.get_logger(__name__)
         instance.__dict__["_s"].save({"id": 1, "name": 1, "age": 1})
         test_csv = os.path.join(self._data_dir, "test.csv")
         setattr(instance, "io", "output")

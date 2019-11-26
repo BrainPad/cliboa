@@ -19,6 +19,8 @@ from pprint import pprint
 
 from cliboa.conf import env
 from cliboa.scenario.extract.http import HttpDownload
+from cliboa.util.lisboa_log import LisboaLog
+
 
 class TestHttpDownload(object):
     def setup_method(self, method):
@@ -27,11 +29,12 @@ class TestHttpDownload(object):
     def test_execute_ok(self):
         os.makedirs(self._data_dir)
         instance = HttpDownload()
+        instance.logger = LisboaLog.get_logger(__name__)
         # use Postman echo
-        setattr(instance, "src_url", "https://postman-echo.com") 
-        setattr(instance, "src_pattern", "get?foo1=bar1&foo2=bar2") 
-        setattr(instance, "dest_dir", self._data_dir) 
-        setattr(instance, "dest_pattern", "test.result") 
+        setattr(instance, "src_url", "https://postman-echo.com")
+        setattr(instance, "src_pattern", "get?foo1=bar1&foo2=bar2")
+        setattr(instance, "dest_dir", self._data_dir)
+        setattr(instance, "dest_pattern", "test.result")
         instance.execute()
         f = open(os.path.join(self._data_dir, "test.result"), "r")
         result = f.read()
