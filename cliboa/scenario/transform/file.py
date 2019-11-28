@@ -494,3 +494,61 @@ class CsvHeaderConvert(FileBaseTransform):
                     new_headers.append(old_and_new_headers[oh])
                     break
         return new_headers
+
+
+class FileRename(FileBaseTransform):
+    """
+    Change file names with adding either prefix or suffix.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self._prefix = ""
+        self._suffix = ""
+
+    @property
+    def prefix(self):
+        return self._prefix
+
+    @prefix.setter
+    def prefix(self, prefix):
+        self._prefix = prefix
+
+    @property
+    def suffix(self):
+        return self._suffix
+
+    @suffix.setter
+    def suffix(self, suffix):
+        self._suffix = suffix
+
+    def execute(self, *args):
+        for k, v in self.__dict__.items():
+            self._logger.debug("%s : %s" % (k, v))
+
+        # essential parameters check
+        valid = EssentialParameters(
+            self.__class__.__name__, [self._src_dir, self._src_pattern]
+        )
+        valid()
+
+        files = File().get_target_files(self._src_dir, self._src_pattern)
+        if len(files) == 0:
+            self._logger.info('No files are found. Nothing to do.')
+            return
+
+        for file in files:
+            dirname = os.path.dirname(file)
+            basename = os.path.basename(file)
+
+            if '.' in basename:
+                nameonly, ext = basename.split(".", 1)
+                ext = "." + ext
+            else:
+                nameonly = basename
+                ext = ""
+
+            newfilename = self._prefix + nameonly + self._suffix + ext
+            newfilepath = os.path.join(dirname, newfilename)
+            os.rename(file, newfilepath)
+            self._logger.info("File name changed %s -> %s" % (file, newfilepath))
