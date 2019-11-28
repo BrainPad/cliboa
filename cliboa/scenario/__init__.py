@@ -39,6 +39,7 @@ from .transform.file import (
     ExcelConvert,
     CsvMerge,
     CsvHeaderConvert,
+    FileRename,
 )
 
 from .load.aws import S3Upload
