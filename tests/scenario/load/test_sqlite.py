@@ -22,6 +22,7 @@ from cliboa.conf import env
 from cliboa.scenario.load.sqlite import SqliteCreation
 from cliboa.util.cache import StorageIO
 from cliboa.util.exception import SqliteInvalid
+from cliboa.util.lisboa_log import LisboaLog
 
 
 class TestSqliteCreation(object):
@@ -38,6 +39,7 @@ class TestSqliteCreation(object):
 
             # set the essential attributes
             instance = SqliteCreation()
+            instance.logger = LisboaLog.get_logger(__name__)
             setattr(instance, "dbname", db_file)
             setattr(instance, "tblname", "spam_table")
             setattr(instance, "io", "output")
@@ -62,6 +64,7 @@ class TestSqliteCreation(object):
             s.save({"id": 1, "name": 1, "age": 1})
 
             instance = SqliteCreation()
+            instance.logger = LisboaLog.get_logger(__name__)
             setattr(instance, "dbname", db_file)
             setattr(instance, "tblname", "spam_table")
             setattr(instance, "io", "output")
@@ -90,6 +93,7 @@ class TestSqliteCreation(object):
             o.save({"id": 1, "name": 1, "age": 1})
 
             instance = SqliteCreation()
+            instance.logger = LisboaLog.get_logger(__name__)
             setattr(instance, "dbname", db_file)
             setattr(instance, "tblname", "spam_table")
             setattr(instance, "io", "output")
@@ -119,6 +123,7 @@ class TestSqliteCreation(object):
             s.save({"id": 1, "name": 1, "age": 1})
 
             instance = SqliteCreation()
+            instance.logger = LisboaLog.get_logger(__name__)
             setattr(instance, "dbname", db_file)
             setattr(instance, "tblname", "spam_table")
             setattr(instance, "io", "output")

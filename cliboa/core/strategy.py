@@ -20,8 +20,6 @@ from cliboa.util.exception import StepExecutionFailed
 
 __all__ = ["SingleProcExecutor", "MultiProcExecutor"]
 
-from pprint import pprint
-
 
 class StepExecutor(object):
     """

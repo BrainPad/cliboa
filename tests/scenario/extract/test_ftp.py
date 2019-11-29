@@ -19,6 +19,8 @@ from pprint import pprint
 
 from cliboa.conf import env
 from cliboa.scenario.extract.ftp import FtpDownload
+from cliboa.util.lisboa_log import LisboaLog
+
 
 class TestFtpDownload(object):
     def setup_method(self, method):
@@ -27,15 +29,15 @@ class TestFtpDownload(object):
     def test_execute_ok(self):
         os.makedirs(self._data_dir)
         instance = FtpDownload()
+        instance.logger = LisboaLog.get_logger(__name__)
         # use public ftp
-        setattr(instance, "host", "test.rebex.net") 
+        setattr(instance, "host", "test.rebex.net")
         setattr(instance, "user", "demo")
-        setattr(instance, "password", "password") 
-        setattr(instance, "src_dir", "/") 
-        setattr(instance, "src_pattern", "(.*).txt") 
-        setattr(instance, "dest_dir", self._data_dir) 
+        setattr(instance, "password", "password")
+        setattr(instance, "src_dir", "/")
+        setattr(instance, "src_pattern", "(.*).txt")
+        setattr(instance, "dest_dir", self._data_dir)
         instance.execute()
         exists_file = os.path.exists(os.path.join(self._data_dir, "readme.txt"))
         shutil.rmtree(self._data_dir)
         assert exists_file is True
-
