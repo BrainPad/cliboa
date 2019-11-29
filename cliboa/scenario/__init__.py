@@ -17,7 +17,6 @@ from .extract.aws import S3Download
 from .extract.file import CsvRead
 from .extract.ftp import FtpDownload, FtpDownloadFileDelete
 from .extract.sftp import (
-    SftpFileExtract,
     SftpDownload,
     SftpDelete,
     SftpDownloadFileDelete,

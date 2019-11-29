@@ -45,7 +45,7 @@ class TestYamlScenarioManager(object):
                 {
                     "arguments": {"retry_count": 10},
                     "class": "SftpDownload",
-                    "step": "sftp_file_extract",
+                    "step": "sftp_download",
                 }
             ]
         }
@@ -69,7 +69,7 @@ class TestYamlScenarioManager(object):
         """
         os.makedirs(self._pj_dir)
         pj_yaml_dict = {
-            "scenario": [{"class": "SftpDownload", "step": "sftp_file_extract"}]
+            "scenario": [{"class": "SftpDownload", "step": "sftp_download"}]
         }
         with open(self._pj_scenario_file, "w") as f:
             f.write(yaml.dump(pj_yaml_dict, default_flow_style=False))
@@ -161,7 +161,7 @@ class TestYamlScenarioManager(object):
                         "with_vars": {"today": "date '+%Y%m%d'"},
                     },
                     "class": "SftpDownload",
-                    "step": "sftp_file_extract",
+                    "step": "sftp_download",
                 }
             ]
         }
