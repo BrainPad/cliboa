@@ -33,12 +33,14 @@ from .extract.sqlite import SqliteRead, SqliteReadRow
 
 from .transform.file import (
     FileDecompress,
+    FileCompress,
     CsvColsExtract,
     ColumnLengthAdjust,
     DateFormatConvert,
     ExcelConvert,
     CsvMerge,
     CsvHeaderConvert,
+    FileDivide,
     FileRename,
 )
 

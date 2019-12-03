@@ -18,6 +18,7 @@ import gzip
 import os
 import pandas
 import re
+import shutil
 import tarfile
 import zipfile
 
@@ -167,6 +168,58 @@ class FileDecompress(FileBaseTransform):
                     o.write(i.read())
             else:
                 raise CliboaException("Unmatched any available decompress type %s" % f)
+
+
+class FileCompress(FileBaseTransform):
+    """
+    Compress files
+    """
+    def __init__(self):
+        super().__init__()
+        self._format = None
+
+    @property
+    def format(self):
+        return self._format
+
+    @format.setter
+    def format(self, format):
+        self._format = format.lower()
+
+    def execute(self, *args):
+        for k, v in self.__dict__.items():
+            self._logger.info("%s : %s" % (k, v))
+
+        # essential parameters check
+        valid = EssentialParameters(
+            self.__class__.__name__,
+            [
+                self._src_dir,
+                self._src_pattern,
+                self._format,
+            ],
+        )
+        valid()
+
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+        self._logger.info("Files found %s" % files)
+
+        dir = self._dest_dir if self._dest_dir is not None else self._src_dir
+        for f in files:
+            if self._format == 'zip':
+                self._logger.info("Compress file %s to zip." % f)
+                with zipfile.ZipFile(os.path.join(dir, (os.path.basename(f) + '.zip')), 'w', zipfile.ZIP_DEFLATED) as o:
+                    o.write(f, arcname=os.path.basename(f))
+            elif self._format in ('gz', 'gzip'):
+                with open(f, 'rb') as i:
+                    self._logger.info("Compress file %s to gzip." % f)
+                    with gzip.open(os.path.join(dir, (os.path.basename(f) + '.gz')), 'wb') as o:
+                        shutil.copyfileobj(i, o)
+            elif self._format in ('bz2', 'bzip2'):
+                with open(f, 'rb') as i:
+                    self._logger.info("Compress file %s to bzip2." % f)
+                    with open(os.path.join(dir, (os.path.basename(f) + '.bz2')), 'wb') as o:
+                        o.write(bz2.compress(i.read()))
 
 
 class CsvColsExtract(FileBaseTransform):
@@ -494,6 +547,101 @@ class CsvHeaderConvert(FileBaseTransform):
                     new_headers.append(old_and_new_headers[oh])
                     break
         return new_headers
+
+
+class FileDivide(FileBaseTransform):
+    """
+    Divide a file to plural files
+    """
+    def __init__(self):
+        super().__init__()
+        self._divide_rows = None
+        self._header = False
+
+    @property
+    def divide_rows(self):
+        return self._divide_rows
+
+    @divide_rows.setter
+    def divide_rows(self, divide_rows):
+        self._divide_rows = divide_rows
+
+    @property
+    def header(self):
+        return self._header
+
+    @header.setter
+    def header(self, header):
+        self._header = header
+
+    def execute(self, *args):
+        for k, v in self.__dict__.items():
+            self._logger.info("%s : %s" % (k, v))
+
+        # essential parameters check
+        valid = EssentialParameters(
+            self.__class__.__name__,
+            [
+                self._src_dir,
+                self._src_pattern,
+                self._dest_dir,
+                self._dest_pattern,
+                self._divide_rows,
+            ],
+        )
+        valid()
+
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+        self._logger.info("Files found %s" % files)
+
+        file = files[0]
+        if self._dest_pattern is None:
+            fname = os.path.basename(file)
+        else:
+            fname = self._dest_pattern
+
+        if "." in fname:
+            nameonly, ext = fname.split(".", 1)
+            ext = "." + ext
+        else:
+            nameonly = fname
+            ext = ""
+
+        if self._header:
+            with open(file, encoding=self._encoding) as i:
+                self._header_row = i.readline()
+
+        row = self._ifile_reader(file)
+        newfilename = nameonly + '.%s' + ext
+        has_left = True
+        index = 1
+        while has_left:
+            ofile_path = os.path.join(self._dest_dir, newfilename % str(index))
+            has_left = self._ofile_generator(ofile_path, row)
+            index = index + 1
+
+    def _ifile_reader(self, filepath):
+        with open(filepath, encoding=self._encoding) as i:
+            if self._header is True:
+                i.readline()
+            for line in i:
+                yield line
+
+    def _ofile_generator(self, filepath, row):
+        left = False
+        written = False
+        with open(filepath, mode="w", encoding=self._encoding) as o:
+            if self._header is True:
+                o.write(self._header_row)
+            for i, line in enumerate(row):
+                written = True
+                o.write(line)
+                if i + 1 >= self._divide_rows:
+                    left = True
+                    break
+        if written is False:
+            os.remove(filepath)
+        return left
 
 
 class FileRename(FileBaseTransform):
