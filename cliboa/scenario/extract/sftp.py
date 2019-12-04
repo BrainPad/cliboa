@@ -116,59 +116,6 @@ class SftpExtract(BaseStep):
         self._retry_count = retry_count
 
 
-# deprecated
-class SftpFileExtract(SftpExtract):
-    """
-    Fetch file from sftp server
-    """
-
-    def __init__(self):
-        super().__init__()
-        self._quit = False
-
-    @property
-    def quit(self):
-        return self._quit
-
-    @quit.setter
-    def quit(self, quit):
-        self._quit = quit
-
-    def execute(self, *args):
-        for k, v in self.__dict__.items():
-            self._logger.info("%s : %s" % (k, v))
-
-        # essential parameters check
-        valid = EssentialParameters(
-            self.__class__.__name__,
-            [self._host, self._user, self._src_dir, self._src_pattern],
-        )
-        valid()
-
-        # fetch src
-        sftp = Sftp(
-            self._host,
-            self._user,
-            self._password,
-            self._key,
-            self._timeout,
-            self._retry_count,
-            self._port,
-        )
-        files = sftp.list_files(
-            self._src_dir, self._dest_dir, re.compile(self._src_pattern)
-        )
-
-        if self._quit is True and len(files) == 0:
-            self._logger.info("No file was found. After process will not be processed")
-            return 0
-
-        # cache downloaded file names
-        ObjectStore.put(self._step, files)
-
-        return 1
-
-
 class SftpDownload(SftpExtract):
     """
     Download files from sftp server
