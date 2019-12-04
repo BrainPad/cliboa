@@ -22,12 +22,14 @@ Can use modules as below by default.
 |Step Class Name|Role|
 |----------|-----------|
 |[FileDecompress](/docs/modules/file_decompress.md)|Decompress a file|
+|[FileCompress](/docs/modules/file_compress.md)|Compress a file|
 |[CsvColsExtract](/docs/modules/csv_cols_extract.md)|Remove specific columns from a csv file.|
 |[ColumnLengthAdjust](/docs/modules/column_length_adjust.md)|Adjust columns of a csv file or a tsv file to the specified length.|
 |[DateFormatConvert](/docs/modules/date_format_convert.md)|Convert date format of columns of a csv file to another date format|
 |[ExcelConvert](/docs/modules/excel_convert.md)|Convert a excel file to a csv file|
 |[CsvMerge](/docs/modules/csv_merge.md)|Merge two csv files to a csv file|
 |[CsvHeaderConvert](/docs/modules/csv_header_convert.md)|Convert headers of a csv file|
+|[FileDivide](/docs/modules/file_divide.md)|Divide a file to plural files|
 |[FileRename](/docs/modules/file_rename.md)|Change file names with adding either prefix or suffix|
 
 
