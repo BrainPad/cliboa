@@ -50,8 +50,8 @@ class TestYamlScenarioParser(object):
             "scenario": [
                 {
                     "arguments": {"retry_count": 10},
-                    "class": "SftpFileExtract",
-                    "step": "sftp_file_extract",
+                    "class": "SftpDownload",
+                    "step": "sftp_download",
                 }
             ]
         }
@@ -62,8 +62,8 @@ class TestYamlScenarioParser(object):
             "scenario": [
                 {
                     "arguments": {"retry_count": 10},
-                    "class": "SftpFileExtract",
-                    "step": "sftp_file_extract",
+                    "class": "SftpDownload",
+                    "step": "sftp_download",
                 }
             ]
         }
@@ -89,7 +89,7 @@ class TestYamlScenarioParser(object):
         os.makedirs(self._pj_dir)
         os.makedirs(self._cmn_scenario_dir)
         pj_yaml_dict = {
-            "scenario": [{"class": "SftpFileExtract", "step": "sftp_file_extract"}]
+            "scenario": [{"class": "SftpDownload", "step": "sftp_download"}]
         }
         with open(self._pj_scenario_file, "w") as f:
             f.write(yaml.dump(pj_yaml_dict, default_flow_style=False))
@@ -98,8 +98,8 @@ class TestYamlScenarioParser(object):
             "scenario": [
                 {
                     "arguments": {"retry_count": 10},
-                    "class": "SftpFileExtract",
-                    "step": "sftp_file_extract",
+                    "class": "SftpDownload",
+                    "step": "sftp_download",
                 }
             ]
         }
@@ -128,8 +128,8 @@ class TestYamlScenarioParser(object):
             "scenario": [
                 {
                     "arguments": {"retry_count": 10},
-                    "class": "SftpFileExtract",
-                    "step": "sftp_file_extract",
+                    "class": "SftpDownload",
+                    "step": "sftp_download",
                 }
             ]
         }
@@ -137,7 +137,7 @@ class TestYamlScenarioParser(object):
             f.write(yaml.dump(pj_yaml_dict, default_flow_style=False))
 
         cmn_yaml_dict = {
-            "scenario": [{"class": "SftpFileExtract", "step": "sftp_file_extract"}]
+            "scenario": [{"class": "SftpDownload", "step": "sftp_download"}]
         }
         with open(self._cmn_scenario_file, "w") as f:
             f.write(yaml.dump(cmn_yaml_dict, default_flow_style=False))
@@ -173,7 +173,7 @@ class TestYamlScenarioParser(object):
             f.write(yaml.dump(pj_yaml_dict, default_flow_style=False))
 
         cmn_yaml_dict = {
-            "scenario": [{"class": "SftpFileExtract", "step": "sftp_file_extract"}]
+            "scenario": [{"class": "SftpDownload", "step": "sftp_download"}]
         }
         with open(self._cmn_scenario_file, "w") as f:
             f.write(yaml.dump(cmn_yaml_dict, default_flow_style=False))
@@ -199,8 +199,8 @@ class TestYamlScenarioParser(object):
             "scenario": [
                 {
                     "arguments": {"retry_count": 10},
-                    "class": "SftpFileExtract",
-                    "step": "sftp_file_extract",
+                    "class": "SftpDownload",
+                    "step": "sftp_download",
                 }
             ]
         }
@@ -227,8 +227,8 @@ class TestYamlScenarioParser(object):
         pj_yaml_dict = [
             {
                 "arguments": {"retry_count": 10},
-                "class": "SftpFileExtract",
-                "step": "sftp_file_extract",
+                "class": "SftpDownload",
+                "step": "sftp_download",
             }
         ]
         with open(self._pj_scenario_file, "w") as f:
@@ -238,8 +238,8 @@ class TestYamlScenarioParser(object):
             "scenario": [
                 {
                     "arguments": {"retry_count": 10},
-                    "class": "SftpFileExtract",
-                    "step": "sftp_file_extract",
+                    "class": "SftpDownload",
+                    "step": "sftp_download",
                 }
             ]
         }
@@ -262,7 +262,7 @@ class TestYamlScenarioParser(object):
         os.makedirs(self._cmn_scenario_dir)
         pj_yaml_dict = {
             "scenario": [
-                {"arguments": {"retry_count": 10}, "step": "sftp_file_extract"}
+                {"arguments": {"retry_count": 10}, "step": "sftp_download"}
             ]
         }
         with open(self._pj_scenario_file, "w") as f:
@@ -272,8 +272,8 @@ class TestYamlScenarioParser(object):
             "scenario": [
                 {
                     "arguments": {"retry_count": 10},
-                    "class": "SftpFileExtract",
-                    "step": "sftp_file_extract",
+                    "class": "SftpDownload",
+                    "step": "sftp_download",
                 }
             ]
         }
@@ -299,8 +299,8 @@ class TestYamlScenarioParser(object):
             "scenario": [
                 {
                     "arguments": {"retry_count": 10},
-                    "class": "SftpFileExtract",
-                    "step": "sftp_file_extract",
+                    "class": "SftpDownload",
+                    "step": "sftp_download",
                 }
             ]
         }
@@ -312,7 +312,7 @@ class TestYamlScenarioParser(object):
                 {
                     "arguments": {"retry_count": 10},
                     "class": "",
-                    "step": "sftp_file_extract",
+                    "step": "sftp_download",
                 }
             ]
         }

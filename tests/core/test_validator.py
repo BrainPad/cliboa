@@ -45,8 +45,8 @@ class TestValidators(object):
             "scenario": [
                 {
                     "arguments": {"retry_count": 10},
-                    "class": "SftpFileExtract",
-                    "step": "sftp_file_extract",
+                    "class": "SftpDownload",
+                    "step": "sftp_download",
                 }
             ]
         }
@@ -74,8 +74,8 @@ class TestValidators(object):
             {
                 "scenario": {
                     "arguments": {"retry_count": 10},
-                    "class": "SftpFileExtract",
-                    "step": "sftp_file_extract",
+                    "class": "SftpDownload",
+                    "step": "sftp_download",
                 }
             }
         ]
@@ -103,8 +103,8 @@ class TestValidators(object):
             "scenario": [
                 {
                     "arguments": {"retry_count": 10},
-                    "class": "SftpFileExtract",
-                    "step": "sftp_file_extract",
+                    "class": "SftpDownload",
+                    "step": "sftp_download",
                 }
             ]
         }

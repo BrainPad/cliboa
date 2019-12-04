@@ -44,8 +44,8 @@ class TestYamlScenarioManager(object):
             "scenario": [
                 {
                     "arguments": {"retry_count": 10},
-                    "class": "SftpFileExtract",
-                    "step": "sftp_file_extract",
+                    "class": "SftpDownload",
+                    "step": "sftp_download",
                 }
             ]
         }
@@ -69,7 +69,7 @@ class TestYamlScenarioManager(object):
         """
         os.makedirs(self._pj_dir)
         pj_yaml_dict = {
-            "scenario": [{"class": "SftpFileExtract", "step": "sftp_file_extract"}]
+            "scenario": [{"class": "SftpDownload", "step": "sftp_download"}]
         }
         with open(self._pj_scenario_file, "w") as f:
             f.write(yaml.dump(pj_yaml_dict, default_flow_style=False))
@@ -160,8 +160,8 @@ class TestYamlScenarioManager(object):
                         "src_pattern": "foo_{{ today }}.csv",
                         "with_vars": {"today": "date '+%Y%m%d'"},
                     },
-                    "class": "SftpFileExtract",
-                    "step": "sftp_file_extract",
+                    "class": "SftpDownload",
+                    "step": "sftp_download",
                 }
             ]
         }
@@ -200,24 +200,6 @@ class TestYamlScenarioManager(object):
         """
         os.makedirs(self._pj_dir)
         pj_yaml_dict = {"scenario": {"arguments", "spam"}}
-        with open(self._pj_scenario_file, "w") as f:
-            f.write(yaml.dump(pj_yaml_dict, default_flow_style=False))
-
-        with pytest.raises(ScenarioFileInvalid) as excinfo:
-            manager = YamlScenarioManager(self._cmd_args)
-            manager.create_scenario_queue()
-        shutil.rmtree(self._pj_dir)
-        assert "invalid" in str(excinfo.value)
-
-    def test_create_scenario_queue_ng_with_no_step(self):
-        """
-        Invalid scenario.yml. There is no 'step: '.
-        """
-        os.makedirs(self._pj_dir)
-        pj_yaml_dict = {
-            "scenario": [{"arguments": {"retry_count": 10}, "class": "SftpFileExtract"}]
-        }
-
         with open(self._pj_scenario_file, "w") as f:
             f.write(yaml.dump(pj_yaml_dict, default_flow_style=False))
 
