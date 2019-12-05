@@ -25,6 +25,7 @@ pandas = "~=0.24.0"
 google-auth = "~=1.6.3"
 google-cloud-storage = "~=1.16.1"
 pandas-gbq = "~=0.10.0"
+cloudpickle = "~=1.2.2"
 
 [requires]
 python_version = "3.0"
