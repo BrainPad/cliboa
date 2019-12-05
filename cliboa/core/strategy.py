@@ -11,6 +11,9 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+import pickle
+import cloudpickle
+
 from abc import abstractmethod
 from multiprocessing import Pool
 
@@ -19,8 +22,6 @@ from cliboa.util.lisboa_log import LisboaLog
 from cliboa.util.exception import StepExecutionFailed
 
 __all__ = ["SingleProcExecutor", "MultiProcExecutor"]
-
-from pprint import pprint
 
 
 class StepExecutor(object):
@@ -110,24 +111,27 @@ class MultiProcExecutor(StepExecutor):
     Execute steps in queue with multi process
     """
 
-    def _async_step_execute(self, cls):
+    @staticmethod
+    def _async_step_execute(cls):
         try:
-            self._before_step()
-            cls.execute()
-            self._after_step()
+            clz, before, after = pickle.loads(cls)
+            before()
+            clz.execute()
+            after()
             return "OK"
         except Exception as e:
-            self._logger.error(e)
+            LisboaLog.get_logger(__name__).error(e)
             return "NG"
 
     def execute_steps(self, args):
         self._logger.info(
             "Multi process start. Execute step count=%s." % len(self._step)
         )
+        packed = [cloudpickle.dumps([x, self._before_step, self._after_step]) for x in self._step]
 
         try:
             with Pool(processes=ScenarioQueue.step_queue.multi_proc_cnt) as p:
-                for r in p.imap_unordered(self._async_step_execute, self._step):
+                for r in p.imap_unordered(self._async_step_execute, packed):
                     if r == "NG":
                         raise StepExecutionFailed("Multi process response. %s" % r)
         except Exception as e:
