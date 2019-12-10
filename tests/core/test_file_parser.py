@@ -261,9 +261,7 @@ class TestYamlScenarioParser(object):
         os.makedirs(self._pj_dir)
         os.makedirs(self._cmn_scenario_dir)
         pj_yaml_dict = {
-            "scenario": [
-                {"arguments": {"retry_count": 10}, "step": "sftp_download"}
-            ]
+            "scenario": [{"arguments": {"retry_count": 10}, "step": "sftp_download"}]
         }
         with open(self._pj_scenario_file, "w") as f:
             f.write(yaml.dump(pj_yaml_dict, default_flow_style=False))
@@ -309,11 +307,7 @@ class TestYamlScenarioParser(object):
 
         cmn_yaml_dict = {
             "scenario": [
-                {
-                    "arguments": {"retry_count": 10},
-                    "class": "",
-                    "step": "sftp_download",
-                }
+                {"arguments": {"retry_count": 10}, "class": "", "step": "sftp_download"}
             ]
         }
         with open(self._cmn_scenario_file, "w") as f:

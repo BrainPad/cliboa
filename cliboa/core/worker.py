@@ -40,7 +40,7 @@ class ScenarioWorker(object):
         """
         q = self._scenario_queue.step_queue.__class__.__name__
         q_size = self._scenario_queue.step_queue.size()
-        return f"{q} size is {q_size}."
+        return "{} size is {} .".format(q, q_size)
 
     def _before_scenario(self):
         """

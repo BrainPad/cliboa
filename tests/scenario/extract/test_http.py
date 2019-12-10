@@ -11,10 +11,7 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import os
-import sys
-import pytest
-import shutil
+import os, pytest, sys, shutil
 from pprint import pprint
 
 from cliboa.conf import env
@@ -27,17 +24,19 @@ class TestHttpDownload(object):
         self._data_dir = os.path.join(env.BASE_DIR, "data")
 
     def test_execute_ok(self):
-        os.makedirs(self._data_dir)
-        instance = HttpDownload()
-        instance.logger = LisboaLog.get_logger(__name__)
-        # use Postman echo
-        setattr(instance, "src_url", "https://postman-echo.com")
-        setattr(instance, "src_pattern", "get?foo1=bar1&foo2=bar2")
-        setattr(instance, "dest_dir", self._data_dir)
-        setattr(instance, "dest_pattern", "test.result")
-        instance.execute()
-        f = open(os.path.join(self._data_dir, "test.result"), "r")
-        result = f.read()
-        f.close()
-        shutil.rmtree(self._data_dir)
+        try:
+            os.makedirs(self._data_dir)
+            instance = HttpDownload()
+            instance.logger = LisboaLog.get_logger(__name__)
+            # use Postman echo
+            setattr(instance, "src_url", "https://postman-echo.com")
+            setattr(instance, "src_pattern", "get?foo1=bar1&foo2=bar2")
+            setattr(instance, "dest_dir", self._data_dir)
+            setattr(instance, "dest_pattern", "test.result")
+            instance.execute()
+            f = open(os.path.join(self._data_dir, "test.result"), "r")
+            result = f.read()
+            f.close()
+        finally:
+            shutil.rmtree(self._data_dir)
         assert "postman-echo.com" in result
