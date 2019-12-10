@@ -15,3 +15,8 @@ Thumbs.db
 #Python
 __pycache__
 .pydevproject
+
+# cliboa
+.coverage
+.eggs
+cliboa.egg-info

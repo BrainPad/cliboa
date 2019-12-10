@@ -20,12 +20,9 @@ from glob import glob
 from pprint import pprint
 
 from cliboa.conf import env
-from cliboa.scenario.transform.file import (
-    ExcelConvert,
-    CsvMerge,
-    CsvHeaderConvert,
-)
+from cliboa.scenario.transform.file import ExcelConvert, CsvMerge, CsvHeaderConvert
 from cliboa.util.exception import InvalidFormat, InvalidCount
+from cliboa.util.lisboa_log import LisboaLog
 
 
 class TestFileTransform(object):
@@ -45,6 +42,7 @@ class TestExcelConvert(TestFileTransform):
 
             # set the essential attributes
             instance = ExcelConvert()
+            instance.logger = LisboaLog.get_logger(__name__)
             setattr(instance, "src_dir", self._data_dir)
             setattr(instance, "src_pattern", "test.xlxs")
             setattr(instance, "dest_dir", self._data_dir)
@@ -65,6 +63,7 @@ class TestExcelConvert(TestFileTransform):
 
             # set the essential attributes
             instance = ExcelConvert()
+            instance.logger = LisboaLog.get_logger(__name__)
             setattr(instance, "src_dir", self._data_dir)
             setattr(instance, "src_pattern", "test(.*).xlxs")
             setattr(instance, "dest_dir", self._data_dir)
@@ -82,6 +81,7 @@ class TestExcelConvert(TestFileTransform):
 
         # set the essential attributes
         instance = ExcelConvert()
+        instance.logger = LisboaLog.get_logger(__name__)
         setattr(instance, "src_dir", self._data_dir)
         setattr(instance, "src_pattern", "test.xlxs")
         setattr(instance, "dest_dir", self._data_dir)
@@ -111,6 +111,7 @@ class TestCsvMerge(TestFileTransform):
 
         # set the essential attributes
         instance = CsvMerge()
+        instance.logger = LisboaLog.get_logger(__name__)
         setattr(instance, "src_dir", self._data_dir)
         setattr(instance, "src1_pattern", "test1.csv")
         setattr(instance, "src2_pattern", "test2.csv")
@@ -139,6 +140,7 @@ class TestCsvMerge(TestFileTransform):
 
         # set the essential attributes
         instance = CsvMerge()
+        instance.logger = LisboaLog.get_logger(__name__)
         setattr(instance, "src_dir", self._data_dir)
         setattr(instance, "src1_pattern", "test1.csv")
         setattr(instance, "src2_pattern", "test2.csv")
@@ -163,6 +165,7 @@ class TestCsvMerge(TestFileTransform):
 
             # set the essential attributes
             instance = CsvMerge()
+            instance.logger = LisboaLog.get_logger(__name__)
             setattr(instance, "src_dir", self._data_dir)
             setattr(instance, "src1_pattern", "test1(.*).csv")
             setattr(instance, "src2_pattern", "test2.csv")
@@ -185,6 +188,7 @@ class TestCsvMerge(TestFileTransform):
 
             # set the essential attributes
             instance = CsvMerge()
+            instance.logger = LisboaLog.get_logger(__name__)
             setattr(instance, "src_dir", self._data_dir)
             setattr(instance, "src1_pattern", "test1.csv")
             setattr(instance, "src2_pattern", "test2(.*).csv")
@@ -207,6 +211,7 @@ class TestCsvHeaderConvert(TestFileTransform):
 
         # set the essential attributes
         instance = CsvHeaderConvert()
+        instance.logger = LisboaLog.get_logger(__name__)
         setattr(instance, "src_dir", self._data_dir)
         setattr(instance, "src_pattern", "test.csv")
         setattr(instance, "dest_dir", self._data_dir)
@@ -227,6 +232,7 @@ class TestCsvHeaderConvert(TestFileTransform):
         with pytest.raises(InvalidCount) as execinfo:
             # set the essential attributes
             instance = CsvHeaderConvert()
+            instance.logger = LisboaLog.get_logger(__name__)
             setattr(instance, "src_dir", self._data_dir)
             setattr(instance, "src_pattern", "test.csv")
             setattr(instance, "dest_dir", self._data_dir)
@@ -248,6 +254,7 @@ class TestCsvHeaderConvert(TestFileTransform):
         with pytest.raises(InvalidCount) as execinfo:
             # set the essential attributes
             instance = CsvHeaderConvert()
+            instance.logger = LisboaLog.get_logger(__name__)
             setattr(instance, "src_dir", self._data_dir)
             setattr(instance, "src_pattern", "test(.*).csv")
             setattr(instance, "dest_dir", self._data_dir)

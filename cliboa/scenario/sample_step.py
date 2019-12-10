@@ -13,6 +13,7 @@
 #
 import cliboa
 from cliboa.scenario.base import BaseStep
+from cliboa.util.lisboa_log import LisboaLog
 
 
 class SampleStep(BaseStep):
@@ -23,6 +24,7 @@ class SampleStep(BaseStep):
     def __init__(self):
         super().__init__()
         self._retry_count = 3
+        self._logger = LisboaLog.get_logger(__name__)
 
     @property
     def retry_count(self):
