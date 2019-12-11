@@ -13,5 +13,5 @@ jobs:
           echo spam
 workflows:
   dummy_test:
-	  jobs:
-	    - test
+    jobs:
+      - test
