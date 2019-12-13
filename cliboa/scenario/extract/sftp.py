@@ -123,15 +123,15 @@ class SftpDownload(SftpExtract):
 
     def __init__(self):
         super().__init__()
-        self.__quit = False
+        self._quit = False
 
     @property
     def quit(self):
-        return self.__quit
+        return self._quit
 
     @quit.setter
     def quit(self, quit):
-        self.__quit = quit
+        self._quit = quit
 
     def execute(self, *args):
         for k, v in self.__dict__.items():
@@ -160,7 +160,7 @@ class SftpDownload(SftpExtract):
             self._src_dir, self._dest_dir, re.compile(self._src_pattern)
         )
 
-        if self.__quit is True and len(files) == 0:
+        if self._quit is True and len(files) == 0:
             self._logger.info("No file was found. After process will not be processed")
             return StepStatus.SUCCESSFUL_TERMINATION
 

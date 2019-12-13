@@ -161,6 +161,15 @@ class SftpUpload(SftpBaseLoad):
 
     def __init__(self):
         super().__init__()
+        self._quit = False
+
+    @property
+    def quit(self):
+        return self._quit
+
+    @quit.setter
+    def quit(self, quit):
+        self._quit = quit
 
     def execute(self, *args):
         for k, v in self.__dict__.items():
@@ -195,4 +204,5 @@ class SftpUpload(SftpBaseLoad):
                     os.path.join(self._src_dir, self._src_pattern)
                 )
             )
-            return StepStatus.SUCCESSFUL_TERMINATION
+            if self._quit is True:
+                return StepStatus.SUCCESSFUL_TERMINATION
