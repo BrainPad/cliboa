@@ -31,6 +31,8 @@ class TestStrategy(object):
     Test class for strategy.py
     """
 
+    MULTI_PROC_SUPPORT_VER = 35
+
     def setup_method(self, method):
         cmd_parser = CommandArgumentParser()
         sys.argv.clear()
@@ -51,8 +53,13 @@ class TestStrategy(object):
         """
         Test MultiProcExecutor::execute_steps
         """
-        instance1 = SampleStep()
-        instance2 = SampleStep()
-        strategy = MultiProcExecutor([instance1, instance2])
-        strategy.regist_listeners(StepStatusListener())
-        strategy.execute_steps(self._cmd_args)
+        py_info = sys.version_info
+        major_ver = py_info[0]
+        minor_ver = py_info[1]
+        py_ver = major_ver + minor_ver
+        if py_ver >= self.MULTI_PROC_SUPPORT_VER:
+            instance1 = SampleStep()
+            instance2 = SampleStep()
+            strategy = MultiProcExecutor([instance1, instance2])
+            strategy.regist_listeners(StepStatusListener())
+            strategy.execute_steps(self._cmd_args)

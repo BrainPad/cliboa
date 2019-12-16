@@ -1,6 +1,6 @@
 version: 2.1
 jobs:
-  test:
+  test_python37:
     environment:
       TZ: "Asia/Tokyo"
     docker:
@@ -8,10 +8,70 @@ jobs:
     steps:
     - checkout
     - run:
-        name:
+        name: install dependencies
         command: |
-          echo spam
+          mv Pipfile.above37 Pipfile
+          sed -ie "s/python_version = \"3.0\"/python_version = \"3.7\"/g" Pipfile
+          pipenv install --dev
+    - run:
+        name: unittest with python3.7
+        command: |
+          pipenv run unittest
+  test_python36:
+    environment:
+      TZ: "Asia/Tokyo"
+    docker:
+      - image: circleci/python:3.6
+    steps:
+    - checkout
+    - run:
+        name: install dependencies
+        command: |
+          mv Pipfile.above34 Pipfile
+          sed -ie "s/python_version = \"3.0\"/python_version = \"3.6\"/g" Pipfile
+          pipenv install --dev
+    - run:
+        name: unittest with python3.6
+        command: |
+          pipenv run unittest
+  test_python35:
+    environment:
+      TZ: "Asia/Tokyo"
+    docker:
+      - image: circleci/python:3.5
+    steps:
+    - checkout
+    - run:
+        name: install dependencies
+        command: |
+          mv Pipfile.above34 Pipfile
+          sed -ie "s/python_version = \"3.0\"/python_version = \"3.5\"/g" Pipfile
+          pipenv install --dev
+    - run:
+        name: unittest with python3.5
+        command: |
+          pipenv run unittest
+  test_python34:
+    environment:
+      TZ: "Asia/Tokyo"
+    docker:
+      - image: circleci/python:3.4
+    steps:
+    - checkout
+    - run:
+        name: install dependencies
+        command: |
+          mv Pipfile.above34 Pipfile
+          sed -ie "s/python_version = \"3.0\"/python_version = \"3.4\"/g" Pipfile
+          pipenv install --dev
+    - run:
+        name: unittest with python3.4
+        command: |
+          pipenv run unittest
 workflows:
-  dummy_test:
+  test_all_support_python_ver:
     jobs:
-      - test
+      - test_python37
+      - test_python36
+      - test_python35
+      - test_python34

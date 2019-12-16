@@ -29,4 +29,3 @@ from cliboa.util.lisboa_log import LisboaLog
 class TestFileWrite(object):
     def setup_method(self, method):
         self._data_dir = os.path.join(env.BASE_DIR, "data")
-

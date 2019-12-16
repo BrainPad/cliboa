@@ -45,8 +45,7 @@ class StepExecutor(object):
         """
         Get current execution queue status
         """
-        q_name = self._step[0].__class__.__name__
-        return f"{q_name}"
+        return self._step[0].__class__.__name__
 
     @abstractmethod
     def execute_steps(self):
