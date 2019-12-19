@@ -54,12 +54,7 @@ class SqliteTransaction(BaseSqlite):
             func()
             self._sqlite_adptr.commit()
         finally:
-            self._sqlite_adptr.close()
-            try:
-                self._sqlite_adptr.connect(self._dbname)
-                self._sqlite_adptr.execute("VACUUM")
-            finally:
-                self._sqlite_adptr.close()
+            super()._close_database()
         self._logger.info("Finish DB Transaction")
 
 
@@ -308,8 +303,7 @@ class CsvReadSqliteCreate(SqliteTransaction):
         if len(files) == 0:
             raise FileNotFound('No csv file was found.')
 
-        self._sqlite_adptr.connect(self._dbname)
-        try:
+        def func():
             if self._refresh is True:
                 # Drop table in advance, If refresh is True
                 self._sqlite_adptr.execute("DROP TABLE IF EXISTS %s" % self._tblname)
@@ -347,5 +341,5 @@ class CsvReadSqliteCreate(SqliteTransaction):
                 self._logger.info("Add index")
                 self._sqlite_adptr.add_index(self._tblname, self._index)
                 self._sqlite_adptr.commit()
-        finally:
-            self._sqlite_adptr.close()
+
+        super().execute(func)
