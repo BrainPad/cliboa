@@ -96,7 +96,7 @@ class FileBaseTransform(BaseStep):
     def execute(self, *args):
         # essential parameters check
         valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir, self._src_pattern, self._dest_path]
+            self.__class__.__name__, [self._src_dir, self._src_pattern]
         )
         valid()
 
