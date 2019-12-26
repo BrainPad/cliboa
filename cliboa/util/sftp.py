@@ -250,10 +250,19 @@ def put_file_func(**kwargs):
     Function that is to upload a file.
     '.' as prefix is added to the file name while uploading and then the prefix '.' will be removed (rename the file) when upload complete.
     """
+    dirname = os.path.dirname(kwargs["dest"])
+
+    # Create directory if it doesn't exist
+    try:
+        kwargs["sftp"].stat(dirname)
+    except FileNotFoundError:
+        kwargs["sftp"].mkdir(dirname)
+
     tmp_dest = os.path.join(
-        os.path.dirname(kwargs["dest"]), "." + os.path.basename(kwargs["dest"])
+        dirname, "." + os.path.basename(kwargs["dest"])
     )
     kwargs["sftp"].put(kwargs["src"], tmp_dest)
+
     # Same file name is removed in advance, if exists
     try:
         f = kwargs["sftp"].stat(kwargs["dest"])
