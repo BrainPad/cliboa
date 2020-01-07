@@ -120,6 +120,7 @@ class BaseSqlite(BaseStep):
         self._sqlite_adptr = SqliteAdapter()
         self._dbname = None
         self._columns = []
+        self._vacuum = False
 
     @property
     def dbname(self):
@@ -137,6 +138,14 @@ class BaseSqlite(BaseStep):
     def columns(self, columns):
         self._columns = columns
 
+    @property
+    def vacuum(self):
+        return self._vacuum
+
+    @vacuum.setter
+    def vacuum(self, vacuum):
+        self._vacuum = vacuum
+
     def execute(self, *args):
         # essential parameters check
         param_valid = EssentialParameters(self.__class__.__name__, [self._dbname])
@@ -147,6 +156,18 @@ class BaseSqlite(BaseStep):
         for i, col in enumerate(cursor.description):
             d[col[0]] = row[i]
         return d
+
+    def _close_database(self):
+        """
+        Disconnect sqlite database (execute vacuume if necessary)
+        """
+        self._sqlite_adptr.close()
+        if self._vacuum is True:
+            try:
+                self._sqlite_adptr.connect(self._dbname)
+                self._sqlite_adptr.execute("VACUUM")
+            finally:
+                self._sqlite_adptr.close()
 
 
 class SqliteQueryExecute(BaseSqlite):
