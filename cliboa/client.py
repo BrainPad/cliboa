@@ -14,6 +14,7 @@
 import os
 import sys
 import argparse
+import logging.config
 
 from cliboa.conf import env
 from cliboa.util.lisboa_log import LisboaLog
@@ -36,6 +37,9 @@ class ScenarioRunner(object):
         """
         Set project directory, scenario file path, scenario file format, other command line arguments
         """
+        logging.config.fileConfig(
+            env.BASE_DIR + "/conf/logging.conf", disable_existing_loggers=False
+        )
         self._logger = LisboaLog.get_logger(__name__)
         self._pj_scenario_dir = os.path.join(
             env.PROJECT_DIR, cmd_args.project_name, env.SCENARIO_DIR_NAME

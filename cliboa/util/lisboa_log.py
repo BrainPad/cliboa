@@ -1,8 +1,5 @@
-import logging.config
+import logging
 
-import cliboa
-from cliboa.conf import env
-from multiprocessing_logging import install_mp_handler
 
 class LisboaLog(object):
     """
@@ -10,7 +7,7 @@ class LisboaLog(object):
     """
 
     @staticmethod
-    def get_logger(modname, is_multi_proc=False):
+    def get_logger(modname):
         """
         Get logger
 
@@ -19,11 +16,4 @@ class LisboaLog(object):
         Returns:
             logger instance
         """
-        # load logging.conf
-        logging.config.fileConfig(
-            env.BASE_DIR + "/conf/logging.conf", disable_existing_loggers=False
-        )
-        logger = logging.getLogger(modname)
-        if is_multi_proc is True:
-            install_mp_handler(logger)
-        return logger
+        return logging.getLogger(modname)
