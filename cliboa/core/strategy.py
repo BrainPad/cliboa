@@ -11,11 +11,11 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import pickle
 import cloudpickle
 
 from abc import abstractmethod
 from multiprocessing import Pool
+from multiprocessing_logging import install_mp_handler
 
 from cliboa.core.scenario_queue import ScenarioQueue
 from cliboa.util.lisboa_log import LisboaLog
@@ -113,7 +113,7 @@ class MultiProcExecutor(StepExecutor):
     @staticmethod
     def _async_step_execute(cls):
         try:
-            clz, before, after = pickle.loads(cls)
+            clz, before, after = cloudpickle.loads(cls)
             before()
             clz.execute()
             after()
@@ -124,8 +124,9 @@ class MultiProcExecutor(StepExecutor):
 
     def execute_steps(self, args):
         self._logger.info(
-            "Multi process start. Execute step count=%s." % len(self._step)
+            "Multi process start. Execute step count=%s." % ScenarioQueue.step_queue.multi_proc_cnt
         )
+        install_mp_handler()
         packed = [cloudpickle.dumps([x, self._before_step, self._after_step]) for x in self._step]
 
         try:
