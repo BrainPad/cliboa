@@ -178,6 +178,9 @@ class GcsFileUpload(BaseGcs):
         self._dest_dir = dest_dir
 
     def execute(self, *args):
+        for k, v in self.__dict__.items():
+            self._logger.debug("%s : %s" % (k, v))
+
         super().execute()
 
         valid = EssentialParameters(
@@ -188,9 +191,12 @@ class GcsFileUpload(BaseGcs):
         gcs_client = storage.Client.from_service_account_json(self._credentials)
         bucket = gcs_client.get_bucket(self._bucket)
         files = super().get_target_files(self._src_dir, self._src_pattern)
+        self._logger.info("Upload files %s" % files)
         for file in files:
+            self._logger.info("Start upload %s" % file)
             blob = bucket.blob(os.path.join(self._dest_dir, os.path.basename(file)))
             blob.upload_from_filename(file)
+            self._logger.info("Finish upload %s" % file)
 
 
 class CsvReadBigQueryCreate(BaseBigQuery, FileRead):
