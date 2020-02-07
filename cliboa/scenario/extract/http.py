@@ -91,7 +91,7 @@ class HttpDownload(HttpExtract):
 
     def execute(self, *args):
         for k, v in self.__dict__.items():
-            self._logger.debug("%s : %s" % (k, v))
+            self._logger.info("%s : %s" % (k, v))
         super().execute()
 
         os.makedirs(self._dest_dir, exist_ok=True)
