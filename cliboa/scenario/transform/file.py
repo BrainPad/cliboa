@@ -355,7 +355,7 @@ class ExcelConvert(FileBaseTransform):
 
     def execute(self, *args):
         for k, v in self.__dict__.items():
-            self._logger.debug("%s : %s" % (k, v))
+            self._logger.info("%s : %s" % (k, v))
 
         # essential parameters check
         valid = EssentialParameters(
@@ -420,7 +420,7 @@ class CsvMerge(FileBaseTransform):
 
     def execute(self, *args):
         for k, v in self.__dict__.items():
-            self._logger.debug("%s : %s" % (k, v))
+            self._logger.info("%s : %s" % (k, v))
 
         # essential parameters check
         valid = EssentialParameters(
@@ -494,7 +494,7 @@ class CsvHeaderConvert(FileBaseTransform):
 
     def execute(self, *args):
         for k, v in self.__dict__.items():
-            self._logger.debug("%s : %s" % (k, v))
+            self._logger.info("%s : %s" % (k, v))
 
         # essential parameters check
         valid = EssentialParameters(
@@ -672,7 +672,7 @@ class FileRename(FileBaseTransform):
 
     def execute(self, *args):
         for k, v in self.__dict__.items():
-            self._logger.debug("%s : %s" % (k, v))
+            self._logger.info("%s : %s" % (k, v))
 
         # essential parameters check
         valid = EssentialParameters(
