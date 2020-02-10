@@ -61,7 +61,7 @@ class BigQueryCreate(BaseBigQuery):
 
     def execute(self, *args):
         for k, v in self.__dict__.items():
-            self._logger.debug("%s : %s" % (k, v))
+            self._logger.info("%s : %s" % (k, v))
 
         super().execute()
 
@@ -179,7 +179,7 @@ class GcsFileUpload(BaseGcs):
 
     def execute(self, *args):
         for k, v in self.__dict__.items():
-            self._logger.debug("%s : %s" % (k, v))
+            self._logger.info("%s : %s" % (k, v))
 
         super().execute()
 
