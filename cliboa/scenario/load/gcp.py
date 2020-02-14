@@ -188,7 +188,7 @@ class GcsFileUpload(BaseGcs):
         )
         valid()
 
-        gcs_client = storage.Client.from_service_account_json(self._credentials)
+        gcs_client = self._gcs_client()
         bucket = gcs_client.get_bucket(self._bucket)
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self._logger.info("Upload files %s" % files)

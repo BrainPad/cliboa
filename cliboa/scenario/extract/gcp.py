@@ -123,10 +123,10 @@ class BigQueryFileDownload(BaseBigQuery):
 
         os.makedirs(self._dest_dir, exist_ok=True)
 
-        gbq_client = bigquery.Client.from_service_account_json(self._credentials)
+        gbq_client = self._bigquery_client()
         gbq_ref = gbq_client.dataset(self._dataset).table(self._tblname)
 
-        gcs_client = storage.Client.from_service_account_json(self._credentials)
+        gcs_client = self._gcs_client()
         gcs_bucket = gcs_client.get_bucket(self._bucket)
 
         ymd_hms = datetime.now().strftime("%Y%m%d%H%M%S%f")
@@ -212,10 +212,8 @@ class GcsDownload(BaseGcs):
         valid = EssentialParameters(self.__class__.__name__, [self._src_pattern])
         valid()
 
-        c = storage.Client(
-            self._project_id, credentials=ServiceAccount.auth(self._credentials)
-        )
-        bucket = c.get_bucket(self._bucket)
+        client = self._gcs_client()
+        bucket = client.get_bucket(self._bucket)
         dl_files = []
         for blob in bucket.list_blobs(prefix=self._prefix, delimiter=self._delimiter):
             r = re.compile(self._src_pattern)
@@ -244,13 +242,8 @@ class GcsDownloadFileDelete(BaseGcs):
 
         if len(dl_files) > 0:
             self._logger.info("Delete files %s" % dl_files)
-            c = storage.Client(
-                super().get_step_argument("project_id"),
-                credentials=ServiceAccount.auth(
-                    super().get_step_argument("credentials")
-                ),
-            )
-            bucket = c.get_bucket(super().get_step_argument("bucket"))
+            client = self._gcs_client()
+            bucket = client.get_bucket(super().get_step_argument("bucket"))
             for blob in bucket.list_blobs(
                 prefix=super().get_step_argument("prefix"),
                 delimiter=super().get_step_argument("delimiter"),
