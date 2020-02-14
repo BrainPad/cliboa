@@ -11,6 +11,7 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+from google.cloud import storage, bigquery
 from google.oauth2 import service_account
 
 from cliboa.scenario.base import BaseStep
@@ -44,13 +45,24 @@ class BaseGcp(BaseStep):
         self._credentials = credentials
 
     def execute(self, *args):
-        valid = EssentialParameters(
-            self.__class__.__name__, [self._project_id, self._credentials]
-        )
+        valid = EssentialParameters(self.__class__.__name__, [self._project_id])
         valid()
 
     def _auth(self):
-        return service_account.Credentials.from_service_account_file(self._credentials)
+        if self._credentials:
+            return service_account.Credentials.from_service_account_file(self._credentials)
+
+    def _bigquery_client(self):
+        if self._credentials:
+            return bigquery.Client.from_service_account_json(self._credentials)
+        else:
+            return bigquery.Client()
+
+    def _gcs_client(self):
+        if self._credentials:
+            return storage.Client.from_service_account_json(self._credentials)
+        else:
+            return storage.Client()
 
 
 class BaseBigQuery(BaseGcp):
