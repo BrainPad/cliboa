@@ -66,12 +66,8 @@ class S3Upload(BaseS3):
         )
         valid()
 
-        session = None
-        if self._access_key and self._secret_key:
-            session = Session(self._access_key, self._secret_key, self._region)
-
-        s3 = session.resource("s3") if session else boto3.resource("s3")
-        bucket = s3.Bucket(self._bucket)
+        resource = self._s3_resource()
+        bucket = resource.Bucket(self._bucket)
         files = super().get_target_files(self._src_dir, self._src_pattern)
         if len(files) == 0:
             raise FileNotFound(
