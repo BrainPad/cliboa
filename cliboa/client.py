@@ -68,7 +68,7 @@ class ScenarioRunner(object):
         """
         worker = ScenarioWorker(self._cmd_args)
         worker.regist_listeners(ScenarioStatusListener())
-        worker.execute_scenario()
+        return worker.execute_scenario()
 
 
 class CommandArgumentParser:
@@ -99,4 +99,4 @@ def run():
     runner = ScenarioRunner(cmd_args)
     runner.add_system_path()
     runner.create_scenario_queue()
-    runner.execute_scenario()
+    return runner.execute_scenario()
