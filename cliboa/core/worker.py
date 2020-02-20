@@ -64,24 +64,29 @@ class ScenarioWorker(object):
 
     def execute_scenario(self):
         self._before_scenario()
-        self.__execute_steps()
-        self._after_scenario()
+        ret = self.__execute_steps()
+        try:
+            self._after_scenario()
+        except Exception as e:
+            self._logger.error(e)
+        return ret
 
     def __execute_steps(self):
         """
         Execute steps in scenario.yml
         """
+        res = None
         while not self._scenario_queue.step_queue.is_empty():
             strategy = StepExecutorFactory.create(self._scenario_queue.step_queue.pop())
             strategy.regist_listeners(StepStatusListener())
             res = strategy.execute_steps(self._cmd_args)
             if res is None:
                 continue
-            if res == StepStatus.SUCCESSFUL_TERMINATION:
+            elif res == StepStatus.SUCCESSFUL_TERMINATION:
                 self._logger.info("Step response [successful termination]. Scenario will be end.")
                 break
-            elif res == StepStatus.ABNORMAL_TERMINATION:
-                self._logger.error("Step response [abnormal termination]. Scenario will be end.")
-                break
             else:
-                raise CliboaException('Undefined response code [%s]' % res)
+                self._logger.error("Step response [%s]. Scenario will be end." % res)
+                break
+
+        return StepStatus.SUCCESSFUL_TERMINATION if res is None else res
