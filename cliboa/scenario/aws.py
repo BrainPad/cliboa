@@ -11,7 +11,8 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-
+import boto3
+from boto3.session import Session
 from cliboa.scenario.base import BaseStep
 from cliboa.scenario.validator import EssentialParameters
 
@@ -55,6 +56,26 @@ class BaseAws(BaseStep):
         valid = EssentialParameters(self.__class__.__name__, [self._region])
         valid()
 
+    def _client(self, service_name):
+        if self._access_key and self._secret_key:
+            return boto3.client(
+                service_name=service_name,
+                aws_access_key_id=self._access_key,
+                aws_secret_access_key=self._secret_key,
+                region_name=self._region)
+        else:
+            return boto3.client(service_name)
+
+    def _resource(self, service_name):
+        if self._access_key and self._secret_key:
+            session = Session(
+                aws_access_key_id=self._access_key,
+                aws_secret_access_key=self._secret_key,
+                region_name=self._region)
+            return session.resource(service_name)
+        else:
+            return boto3.resource("s3")
+
 
 class BaseS3(BaseAws):
     """
@@ -76,3 +97,9 @@ class BaseS3(BaseAws):
     def execute(self, *args):
         valid = EssentialParameters(self.__class__.__name__, [self._bucket])
         valid()
+
+    def _s3_client(self):
+        return self._client("s3")
+
+    def _s3_resource(self):
+        return self._resource("s3")

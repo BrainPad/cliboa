@@ -71,7 +71,7 @@ class S3Download(BaseS3):
         valid = EssentialParameters(self.__class__.__name__, [self._src_pattern])
         valid()
 
-        client = boto3.client("s3")
+        client = self._s3_client()
         p = client.get_paginator("list_objects")
         for page in p.paginate(
             Bucket=self._bucket, Delimiter=self._delimiter, Prefix=self._prefix
