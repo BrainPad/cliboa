@@ -91,7 +91,7 @@ class SingleProcExecutor(StepExecutor):
         try:
             self._before_step()
             cls = self._step[0]
-            ret = cls.execute(args)
+            ret = cls.trigger(args)
             self._after_step()
             return ret
 
@@ -115,7 +115,7 @@ class MultiProcExecutor(StepExecutor):
         try:
             clz, before, after = cloudpickle.loads(cls)
             before()
-            clz.execute()
+            clz.trigger()
             after()
             return "OK"
         except Exception as e:

@@ -69,13 +69,17 @@ class S3Upload(BaseS3):
         resource = self._s3_resource()
         bucket = resource.Bucket(self._bucket)
         files = super().get_target_files(self._src_dir, self._src_pattern)
-        if len(files) == 0:
-            raise FileNotFound(
-                "Files matching to the specified pattern %s is not found."
-                % os.path.join(self._src_dir, self._src_pattern)
-            )
-        else:
+
+        if len(files) > 0:
             for f in files:
                 bucket.upload_file(
                     Key=os.path.join(self._key, os.path.basename(f)), Filename=f
                 )
+        else:
+            self._logger.info(
+                "Files to upload do not exist. File pattern: {}".format(
+                    os.path.join(self._src_dir, self._src_pattern)
+                )
+            )
+            if self._quit is True:
+                return StepStatus.SUCCESSFUL_TERMINATION
