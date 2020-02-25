@@ -12,6 +12,7 @@
 # all copies or substantial portions of the Software.
 #
 import fnmatch
+import json
 import os
 import pandas
 import random
@@ -21,7 +22,7 @@ from datetime import datetime
 from google.cloud import storage, bigquery
 
 from cliboa.scenario.validator import EssentialParameters
-from cliboa.scenario.gcp import BaseBigQuery, BaseGcs
+from cliboa.scenario.gcp import BaseBigQuery, BaseGcs, BaseFirestore
 from cliboa.util.cache import ObjectStore
 from cliboa.util.gcp import ServiceAccount
 
@@ -254,3 +255,40 @@ class GcsDownloadFileDelete(BaseGcs):
                         break
         else:
             self._logger.info("No files to delete.")
+
+
+class FirestoreDownloadDocument(BaseFirestore):
+    """
+    Download a document from Firestore
+    """
+
+    def __init__(self):
+        super().__init__()
+
+        self._dest_dir = None
+
+    @property
+    def dest_dir(self):
+        return self._dest_dir
+
+    @dest_dir.setter
+    def dest_dir(self, dest_dir):
+        self._dest_dir = dest_dir
+
+    def execute(self, *args):
+        for k, v in self.__dict__.items():
+            self._logger.info("%s : %s" % (k, v))
+
+        super().execute()
+
+        valid = EssentialParameters(
+            self.__class__.__name__, [self._collection, self._document, self._dest_dir]
+        )
+        valid()
+
+        firestore_client = self._firestore_client()
+        ref = firestore_client.document(self._collection, self._document)
+        doc = ref.get()
+
+        with open(os.path.join(self.dest_dir, doc.id), mode='wt') as f:
+            f.write(json.dumps(doc.to_dict()))
