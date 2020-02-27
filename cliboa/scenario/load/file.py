@@ -75,9 +75,6 @@ class CsvWrite(FileWrite):
         input_valid = IOOutput(self._io)
         input_valid()
 
-        for k, v in self.__dict__.items():
-            self._logger.info("%s : %s" % (k, v))
-
         with open(self._s.cache_file, "r", encoding=self._encoding) as i, open(
             self._dest_path, self._mode, encoding=self._encoding
         ) as o:

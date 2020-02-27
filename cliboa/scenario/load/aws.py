@@ -57,8 +57,6 @@ class S3Upload(BaseS3):
         self._src_pattern = src_pattern
 
     def execute(self, *args):
-        for k, v in self.__dict__.items():
-            self._logger.info("%s : %s" % (k, v))
         super().execute()
 
         valid = EssentialParameters(

@@ -113,8 +113,6 @@ class SqliteCreation(SqliteTransaction):
 
     def execute(self, *args):
         super().execute()
-        for k, v in self.__dict__.items():
-            self._logger.info("%s : %s" % (k, v))
 
         param_valid = EssentialParameters(self.__class__.__name__, [self._tblname])
         param_valid()
@@ -287,9 +285,6 @@ class CsvReadSqliteCreate(SqliteTransaction):
         self._encoding = encoding
 
     def execute(self, *args):
-        for k, v in self.__dict__.items():
-            self._logger.info("%s : %s" % (k, v))
-
         # essential parameters check
         valid = EssentialParameters(self.__class__.__name__, [self._src_dir, self.src_pattern, self._tblname])
         valid()
