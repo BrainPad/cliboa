@@ -23,7 +23,7 @@ from cliboa.scenario.validator import (
 from cliboa.util.cache import StorageIO, StepArgument
 from cliboa.util.file import File
 from cliboa.util.sqlite import SqliteAdapter
-from cliboa.util.exception import SqliteInvalid, FileNotFound
+from cliboa.util.exception import *
 
 
 class BaseStep(object):
@@ -79,6 +79,12 @@ class BaseStep(object):
     def logger(self, logger):
         self._logger = logger
 
+    def trigger(self, *args):
+        try:
+            return self.execute(args)
+        except Exception as e:
+            return self._exception_dispatcher(e)
+
     @abstractmethod
     def execute(self, *args):
         pass
@@ -108,6 +114,13 @@ class BaseStep(object):
             with open(fpath, mode="r", encoding=encoding) as f:
                 return f.read()
         return src
+
+    def _exception_dispatcher(self, e):
+        """
+        Handle and dispath CliboaExceptions
+        """
+        # TODO Currently not doing anything
+        raise e
 
 
 class BaseSqlite(BaseStep):
