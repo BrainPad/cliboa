@@ -11,14 +11,11 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import boto3
 import os
-import re
-from boto3.session import Session
 
 from cliboa.scenario.aws import BaseS3
+from cliboa.util.constant import StepStatus
 from cliboa.scenario.validator import EssentialParameters
-from cliboa.util.exception import FileNotFound
 
 
 class S3Upload(BaseS3):
@@ -31,6 +28,7 @@ class S3Upload(BaseS3):
         self._key = None
         self._src_dir = None
         self._src_pattern = None
+        self._quit = False
 
     @property
     def key(self):
@@ -55,6 +53,14 @@ class S3Upload(BaseS3):
     @src_pattern.setter
     def src_pattern(self, src_pattern):
         self._src_pattern = src_pattern
+
+    @property
+    def quit(self):
+        return self._quit
+
+    @quit.setter
+    def quit(self, quit):
+        self._quit = quit
 
     def execute(self, *args):
         for k, v in self.__dict__.items():
