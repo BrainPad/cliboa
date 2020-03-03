@@ -27,6 +27,7 @@ from .extract.gcp import (
     BigQueryFileDownload,
     GcsDownload,
     GcsDownloadFileDelete,
+    FirestoreDownloadDocument,
 )
 from .extract.sqlite import SqliteRead, SqliteReadRow
 
@@ -47,4 +48,9 @@ from .load.aws import S3Upload
 from .load.file import CsvWrite
 from .load.sftp import SftpFileLoad, SftpUpload
 from .load.sqlite import SqliteCreation, CsvReadSqliteCreate
-from .load.gcp import BigQueryCreate, GcsFileUpload, CsvReadBigQueryCreate
+from .load.gcp import (
+    BigQueryCreate,
+    GcsFileUpload,
+    CsvReadBigQueryCreate,
+    FirestoreDocumentCreate,
+)

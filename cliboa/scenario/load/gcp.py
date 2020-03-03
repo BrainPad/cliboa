@@ -13,6 +13,7 @@
 #
 import ast
 import csv
+import json
 import os
 import pandas
 from datetime import datetime
@@ -21,7 +22,7 @@ from google.oauth2 import service_account
 
 from cliboa.core.validator import EssentialParameters
 from cliboa.scenario.extract.file import FileRead
-from cliboa.scenario.gcp import BaseBigQuery, BaseGcs
+from cliboa.scenario.gcp import BaseBigQuery, BaseGcs, BaseFirestore
 from cliboa.util.cache import ObjectStore
 from cliboa.util.exception import InvalidFormat, InvalidFileCount, FileNotFound
 
@@ -321,3 +322,53 @@ class CsvReadBigQueryCreate(BaseBigQuery, FileRead):
                 )
             insert_data[c] = v_list
         return insert_data
+
+
+class FirestoreDocumentCreate(BaseFirestore):
+    """
+    Create document on FIrestore
+    """
+
+    def __init__(self):
+        super().__init__()
+        self._src_dir = None
+        self._src_pattern = None
+
+    @property
+    def src_dir(self):
+        return self._src_dir
+
+    @src_dir.setter
+    def src_dir(self, src_dir):
+        self._src_dir = src_dir
+
+    @property
+    def src_pattern(self):
+        return self._src_pattern
+
+    @src_pattern.setter
+    def src_pattern(self, src_pattern):
+        self._src_pattern = src_pattern
+
+    def execute(self, *args):
+        for k, v in self.__dict__.items():
+            self._logger.info("%s : %s" % (k, v))
+
+        super().execute()
+
+        valid = EssentialParameters(
+            self.__class__.__name__, [self._collection, self._src_dir, self._src_pattern]
+        )
+        valid()
+
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+        if len(files) == 0:
+            raise FileNotFound('No files are found.')
+
+        firestore_client = self._firestore_client()
+
+        for file in files:
+            with open(file) as f:
+                fname = os.path.splitext(os.path.basename(file))[0]
+                doc = firestore_client.collection(self._collection).document(fname)
+                doc.set(json.load(f))

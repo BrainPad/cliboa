@@ -16,6 +16,7 @@ Can use modules as below by default.
 |[SqliteReadRow](/docs/modules/sqlite_read_row.md)|Execute query and call result handler|
 |[BigQueryReadCache](/docs/modules/bigquery_read_cache.md)|Read from bigquery table|
 |[BigQueryFileDownload](/docs/modules/bigquery_file_download.md)|Execute select query and download result as a csv file|
+|[FirestoreDocumentDownload](/docs/modules/firestore_document_download.md)|Download a document from Firestore|
 
 
 ## Transform Modules
@@ -42,6 +43,7 @@ Can use modules as below by default.
 |[CsvReadBigQueryCreate](/docs/modules/csv_read_bigquery_create.md)|Read content from a file and insert it into a table of bigquery|
 |[CsvReadSqliteCreate](/docs/modules/csv_read_sqlite_create.md)|Read content from a file and insert it into a table of sqlite|
 |[GcsFileUpload](/docs/modules/gcs_file_upload.md)|Upload files to GCS|
+|[FirestoreDocumentCreate](/docs/modules/firestore_document_create.md)|Create document|
 
 
 ## Other Modules
