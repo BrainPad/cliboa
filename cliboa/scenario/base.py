@@ -11,10 +11,11 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+import os
+import re
+
 from abc import abstractmethod
 from google.oauth2 import service_account
-import os
-
 from cliboa.scenario.validator import (
     EssentialParameters,
     SqliteTableExistence,
@@ -80,6 +81,8 @@ class BaseStep(object):
         self._logger = logger
 
     def trigger(self, *args):
+        for k, v in self.__dict__.items():
+            self._logger.info("%s : %s" % (k, v))
         try:
             return self.execute(args)
         except Exception as e:
