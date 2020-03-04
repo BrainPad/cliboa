@@ -61,9 +61,6 @@ class BigQueryCreate(BaseBigQuery):
         self.__replace = replace
 
     def execute(self, *args):
-        for k, v in self.__dict__.items():
-            self._logger.info("%s : %s" % (k, v))
-
         super().execute()
 
         param_valid = EssentialParameters(
@@ -179,9 +176,6 @@ class GcsFileUpload(BaseGcs):
         self._dest_dir = dest_dir
 
     def execute(self, *args):
-        for k, v in self.__dict__.items():
-            self._logger.info("%s : %s" % (k, v))
-
         super().execute()
 
         valid = EssentialParameters(
@@ -235,9 +229,6 @@ class CsvReadBigQueryCreate(BaseBigQuery, FileRead):
         self.__replace = replace
 
     def execute(self, *args):
-        for k, v in self.__dict__.items():
-            self._logger.info("%s : %s" % (k, v))
-
         BaseBigQuery.execute(self)
         FileRead.execute(self)
 

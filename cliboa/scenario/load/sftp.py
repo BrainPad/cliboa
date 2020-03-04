@@ -129,9 +129,6 @@ class SftpFileLoad(SftpBaseLoad):
         SftpBaseLoad.__init__(self)
 
     def execute(self, *args):
-        for k, v in self.__dict__.items():
-            self._logger.info("%s : %s" % (k, v))
-
         # essential parameters check
         valid = EssentialParameters(
             self.__class__.__name__,
@@ -172,9 +169,6 @@ class SftpUpload(SftpBaseLoad):
         self._quit = quit
 
     def execute(self, *args):
-        for k, v in self.__dict__.items():
-            self._logger.info("%s : %s" % (k, v))
-
         # essential parameters check
         valid = EssentialParameters(
             self.__class__.__name__,

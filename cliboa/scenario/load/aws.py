@@ -63,8 +63,6 @@ class S3Upload(BaseS3):
         self._quit = quit
 
     def execute(self, *args):
-        for k, v in self.__dict__.items():
-            self._logger.info("%s : %s" % (k, v))
         super().execute()
 
         valid = EssentialParameters(
