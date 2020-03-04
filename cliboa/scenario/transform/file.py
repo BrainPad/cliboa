@@ -125,9 +125,6 @@ class FileDecompress(FileBaseTransform):
         self._dest_dir = dest_dir
 
     def execute(self, *args):
-        for k, v in self.__dict__.items():
-            self._logger.info("%s : %s" % (k, v))
-
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self._logger.info("Files found %s" % files)
         for f in files:
@@ -187,9 +184,6 @@ class FileCompress(FileBaseTransform):
         self._format = format.lower()
 
     def execute(self, *args):
-        for k, v in self.__dict__.items():
-            self._logger.info("%s : %s" % (k, v))
-
         # essential parameters check
         valid = EssentialParameters(
             self.__class__.__name__,
@@ -354,9 +348,6 @@ class ExcelConvert(FileBaseTransform):
         super().__init__()
 
     def execute(self, *args):
-        for k, v in self.__dict__.items():
-            self._logger.info("%s : %s" % (k, v))
-
         # essential parameters check
         valid = EssentialParameters(
             self.__class__.__name__,
@@ -419,9 +410,6 @@ class CsvMerge(FileBaseTransform):
         self.__src2_pattern = src2_pattern
 
     def execute(self, *args):
-        for k, v in self.__dict__.items():
-            self._logger.info("%s : %s" % (k, v))
-
         # essential parameters check
         valid = EssentialParameters(
             self.__class__.__name__,
@@ -493,9 +481,6 @@ class CsvHeaderConvert(FileBaseTransform):
         self.__headers = headers
 
     def execute(self, *args):
-        for k, v in self.__dict__.items():
-            self._logger.info("%s : %s" % (k, v))
-
         # essential parameters check
         valid = EssentialParameters(
             self.__class__.__name__,
@@ -575,9 +560,6 @@ class FileDivide(FileBaseTransform):
         self._header = header
 
     def execute(self, *args):
-        for k, v in self.__dict__.items():
-            self._logger.info("%s : %s" % (k, v))
-
         # essential parameters check
         valid = EssentialParameters(
             self.__class__.__name__,
@@ -671,9 +653,6 @@ class FileRename(FileBaseTransform):
         self._suffix = suffix
 
     def execute(self, *args):
-        for k, v in self.__dict__.items():
-            self._logger.info("%s : %s" % (k, v))
-
         # essential parameters check
         valid = EssentialParameters(
             self.__class__.__name__, [self._src_dir, self._src_pattern]
