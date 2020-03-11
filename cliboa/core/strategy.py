@@ -99,7 +99,7 @@ class SingleProcExecutor(StepExecutor):
             self._logger.error(
                 "Exception occurred during %s execution. " % cls.__class__.__name__
             )
-            raise StepExecutionFailed(e)
+            raise e
 
         finally:
             self._after_completion()
@@ -136,6 +136,6 @@ class MultiProcExecutor(StepExecutor):
                         raise StepExecutionFailed("Multi process response. %s" % r)
         except Exception as e:
             self._logger.error("Exception occurred during multi process execution.")
-            raise StepExecutionFailed(e)
+            raise e
         finally:
             self._after_completion()
