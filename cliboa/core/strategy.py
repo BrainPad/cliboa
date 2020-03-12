@@ -99,7 +99,7 @@ class SingleProcExecutor(StepExecutor):
             self._logger.error(
                 "Exception occurred during %s execution. " % cls.__class__.__name__
             )
-            raise StepExecutionFailed(e)
+            raise e
 
         finally:
             self._after_completion()
@@ -124,10 +124,14 @@ class MultiProcExecutor(StepExecutor):
 
     def execute_steps(self, args):
         self._logger.info(
-            "Multi process start. Execute step count=%s." % ScenarioQueue.step_queue.multi_proc_cnt
+            "Multi process start. Execute step count=%s."
+            % ScenarioQueue.step_queue.multi_proc_cnt
         )
         install_mp_handler()
-        packed = [cloudpickle.dumps([x, self._before_step, self._after_step]) for x in self._step]
+        packed = [
+            cloudpickle.dumps([x, self._before_step, self._after_step])
+            for x in self._step
+        ]
 
         try:
             with Pool(processes=ScenarioQueue.step_queue.multi_proc_cnt) as p:
@@ -136,6 +140,6 @@ class MultiProcExecutor(StepExecutor):
                         raise StepExecutionFailed("Multi process response. %s" % r)
         except Exception as e:
             self._logger.error("Exception occurred during multi process execution.")
-            raise StepExecutionFailed(e)
+            raise e
         finally:
             self._after_completion()
