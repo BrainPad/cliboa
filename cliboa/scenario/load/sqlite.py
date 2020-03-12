@@ -213,7 +213,6 @@ class SqliteCreation(SqliteTransaction):
             )
 
 
-
 class CsvReadSqliteCreate(SqliteTransaction):
 
     COMMIT_COUNT = 100
@@ -226,7 +225,7 @@ class CsvReadSqliteCreate(SqliteTransaction):
         self._primary_key = None
         self._index = []
         self._refresh = True
-        self._encoding = 'utf-8'
+        self._encoding = "utf-8"
 
     @property
     def src_dir(self):
@@ -286,17 +285,19 @@ class CsvReadSqliteCreate(SqliteTransaction):
 
     def execute(self, *args):
         # essential parameters check
-        valid = EssentialParameters(self.__class__.__name__, [self._src_dir, self.src_pattern, self._tblname])
+        valid = EssentialParameters(
+            self.__class__.__name__, [self._src_dir, self.src_pattern, self._tblname]
+        )
         valid()
 
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self._logger.info("Files found %s" % files)
 
         if len(files) > 1:
-            raise Exception('Input file must be only one.')
+            raise Exception("Input file must be only one.")
 
         if len(files) == 0:
-            raise FileNotFound('No csv file was found.')
+            raise FileNotFound("No csv file was found.")
 
         def func():
             if self._refresh is True:
@@ -312,23 +313,38 @@ class CsvReadSqliteCreate(SqliteTransaction):
                 self._logger.info("Create table [%s]" % self._tblname)
                 if self._primary_key is None:
                     sql = "CREATE TABLE IF NOT EXISTS %s (%s)"
-                    self._sqlite_adptr.execute(sql % (self._tblname, " TEXT, ".join(escaped_columns) + " TEXT"))
+                    self._sqlite_adptr.execute(
+                        sql % (self._tblname, " TEXT, ".join(escaped_columns) + " TEXT")
+                    )
                 else:
                     sql = "CREATE TABLE IF NOT EXISTS %s (%s, PRIMARY KEY(%s))"
-                    self._sqlite_adptr.execute(sql % (self._tblname, " TEXT, ".join(escaped_columns) + " TEXT", self._primary_key))
+                    self._sqlite_adptr.execute(
+                        sql
+                        % (
+                            self._tblname,
+                            " TEXT, ".join(escaped_columns) + " TEXT",
+                            self._primary_key,
+                        )
+                    )
                 self._sqlite_adptr.commit()
 
                 # Put all csv records into the table.
-                self._logger.info("Insert all csv records into table[%s]" % self._tblname)
+                self._logger.info(
+                    "Insert all csv records into table[%s]" % self._tblname
+                )
                 params = []
                 for row in reader:
                     params.append(row)
                     if len(params) == self.COMMIT_COUNT:
-                        self._sqlite_adptr.execute_many_insert(self._tblname, reader.fieldnames, params, False)
+                        self._sqlite_adptr.execute_many_insert(
+                            self._tblname, reader.fieldnames, params, False
+                        )
                         self._sqlite_adptr.commit()
                         params.clear()
                 if len(params) > 0:
-                    self._sqlite_adptr.execute_many_insert(self._tblname, reader.fieldnames, params, False)
+                    self._sqlite_adptr.execute_many_insert(
+                        self._tblname, reader.fieldnames, params, False
+                    )
                     self._sqlite_adptr.commit()
 
             if self._index and len(self._index) > 0:

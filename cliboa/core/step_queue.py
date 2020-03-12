@@ -20,6 +20,7 @@ class StepQueue(Queue):
     """
     Queue for processing
     """
+
     DEFAULT_PARALLEL_CNT = 2
 
     def __init__(self):

@@ -15,7 +15,6 @@ from google.oauth2 import service_account
 
 
 class ServiceAccount(object):
-
     @staticmethod
     def auth(credentials):
         return service_account.Credentials.from_service_account_file(credentials)

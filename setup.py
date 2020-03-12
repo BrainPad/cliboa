@@ -62,7 +62,7 @@ setup(
         "cliboa.template",
         "cliboa.template.bin",
     ],
-    package_data={"cliboa.template": ["requirements.txt"]},
-    python_requires=">=3.0",
+    package_data={"cliboa.template": ["Pipfile.above34", "Pipfile.above35", "Pipfile.above36", "Pipfile.above37"]},
+    python_requires=">=3.4",
     entry_points={"console_scripts": ["cliboadmin = cliboa.cli.cliboadmin:main"]},
 )

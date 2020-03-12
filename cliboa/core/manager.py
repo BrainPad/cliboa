@@ -143,12 +143,20 @@ class YamlScenarioManager(ScenarioManager):
             if "parallel" in s_dict.keys():
                 for row in s_dict.get("parallel"):
                     instance = self.__create_instance(row, yaml_scenario_list)
-                    setattr(instance, "logger", LisboaLog.get_logger(instance.__class__.__name__))
+                    setattr(
+                        instance,
+                        "logger",
+                        LisboaLog.get_logger(instance.__class__.__name__),
+                    )
                     instances.append(instance)
                     StepArgument._put(row["step"], instance)
             else:
                 instance = self.__create_instance(s_dict, yaml_scenario_list)
-                setattr(instance, "logger", LisboaLog.get_logger(instance.__class__.__name__))
+                setattr(
+                    instance,
+                    "logger",
+                    LisboaLog.get_logger(instance.__class__.__name__),
+                )
                 instances.append(instance)
                 StepArgument._put(s_dict["step"], instance)
 

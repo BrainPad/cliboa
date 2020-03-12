@@ -290,5 +290,5 @@ class FirestoreDownloadDocument(BaseFirestore):
         ref = firestore_client.document(self._collection, self._document)
         doc = ref.get()
 
-        with open(os.path.join(self.dest_dir, doc.id), mode='wt') as f:
+        with open(os.path.join(self.dest_dir, doc.id), mode="wt") as f:
             f.write(json.dumps(doc.to_dict()))

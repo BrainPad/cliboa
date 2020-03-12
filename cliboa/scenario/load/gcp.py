@@ -348,13 +348,14 @@ class FirestoreDocumentCreate(BaseFirestore):
         super().execute()
 
         valid = EssentialParameters(
-            self.__class__.__name__, [self._collection, self._src_dir, self._src_pattern]
+            self.__class__.__name__,
+            [self._collection, self._src_dir, self._src_pattern],
         )
         valid()
 
         files = super().get_target_files(self._src_dir, self._src_pattern)
         if len(files) == 0:
-            raise FileNotFound('No files are found.')
+            raise FileNotFound("No files are found.")
 
         firestore_client = self._firestore_client()
 

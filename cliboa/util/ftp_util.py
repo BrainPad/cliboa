@@ -102,7 +102,6 @@ class FtpUtil(object):
         """
         self.__execute(remove_specific_file_func, dir=dir, fname=fname)
 
-
     def file_mdtm(self, dir, unixtime=False):
         """
         Returns dictionary of file name and timestamp from target directory
@@ -202,8 +201,8 @@ def remove_specific_file_func(**kwargs):
 def file_mdtm_func(**kwargs):
     res = {}
     for src in kwargs["ftp"].nlst(kwargs["dir"]):
-        mdtm = kwargs['ftp'].voidcmd('MDTM %s' % src)[4:].strip()
-        if kwargs['unixtime'] is True:
-            mdtm = int(datetime.strptime(mdtm, '%Y%m%d%H%M%S').timestamp())
+        mdtm = kwargs["ftp"].voidcmd("MDTM %s" % src)[4:].strip()
+        if kwargs["unixtime"] is True:
+            mdtm = int(datetime.strptime(mdtm, "%Y%m%d%H%M%S").timestamp())
         res[os.path.basename(src)] = mdtm
     return res

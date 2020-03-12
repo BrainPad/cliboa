@@ -103,7 +103,9 @@ class SqliteReadRow(BaseSqlite):
 
         self._sqlite_adptr.connect(self._dbname)
         try:
-            cur = self._sqlite_adptr.fetch(sql=self._get_query(), row_factory=self._get_factory())
+            cur = self._sqlite_adptr.fetch(
+                sql=self._get_query(), row_factory=self._get_factory()
+            )
             self._callback_handler(cur)
         finally:
             self._sqlite_adptr.close()
@@ -118,4 +120,6 @@ class SqliteReadRow(BaseSqlite):
         raise NotImplementedError("Method 'get_query' must be implemented by subclass")
 
     def _callback_handler(self, cursor):
-        raise NotImplementedError("Method 'callback_handler' must be implemented by subclass")
+        raise NotImplementedError(
+            "Method 'callback_handler' must be implemented by subclass"
+        )

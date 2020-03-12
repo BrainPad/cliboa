@@ -10,7 +10,7 @@ jobs:
     - run:
         name: install dependencies
         command: |
-          mv Pipfile.above37 Pipfile
+          mv cliboa/template/Pipfile.above37 Pipfile
           pipenv install --dev
     - run:
         name: unittest with python3.7
@@ -26,8 +26,7 @@ jobs:
     - run:
         name: install dependencies
         command: |
-          mv Pipfile.above35 Pipfile
-          sed -ie "s/python_version = \"3.5\"/python_version = \"3.6\"/g" Pipfile
+          mv cliboa/template/Pipfile.above36 Pipfile
           pipenv install --dev
     - run:
         name: unittest with python3.6
@@ -43,7 +42,7 @@ jobs:
     - run:
         name: install dependencies
         command: |
-          mv Pipfile.above35 Pipfile
+          mv cliboa/template/Pipfile.above35 Pipfile
           pipenv install --dev
     - run:
         name: unittest with python3.5
@@ -59,7 +58,7 @@ jobs:
     - run:
         name: install dependencies
         command: |
-          mv Pipfile.above34 Pipfile
+          mv cliboa/template/Pipfile.above34 Pipfile
           pipenv install --dev
     - run:
         name: unittest with python3.4

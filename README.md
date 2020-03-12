@@ -33,10 +33,11 @@ See [CONTRIBUTING.md](/CONTRIBUTING.md)
 Available on any Linux distributions, like Debian, Ubuntu, CentOS, REL, or etc.
 
 ## Install Cliboa
-python version 3.0 or later is required. In the environemnt which pip can be used, execute as below.
+python version 3.4 or later and pipenv are required. In the environemnt which pip can be used, execute as below.
 
 ```
-pip install cliboa
+sudo pip3 install pipenv
+sudo pip3 install cliboa
 ```
 
 ## Configuration of a Simple ETL Processing
@@ -55,29 +56,32 @@ $ cliboadmin create simple-etl
 Directory tree which was created aforementioned commands is as below.
 
 ```
-sample
-|-- bin
-|   `-- clibomanager.py
-|-- common
-|   |-- __init__.py
-|   |-- environment.py
-|   |-- scenario
-|   `-- scenario.yml
-|-- conf
-|-- logs
-|-- project
-|   `-- simple-etl
-|       |-- scenario
-|       `-- scenario.yml
-`-- requirements.txt
-9 directories, 8 files
+├── bin
+│   └── clibomanager.py
+├── common
+│   ├── environment.py
+│   ├── __init__.py
+│   ├── scenario
+│   └── scenario.yml
+├── conf
+├── logs
+├── Pipfile
+└── project
+    └── simple-etl
+            ├── scenario
+                    └── scenario.yml
 ```
 
-## Install Python Modules
-Execute pip install by specifying dependencies.
+## Install PyPI packages
 ```
 $ cd sample
-$ pip install -r requirements.txt
+$ pipenv install --dev
+```
+or
+```
+$ cd sample
+$ pipenv lock -r > requirments.txt
+$ sudo pip3 install -r requirements.txt
 ```
 
 ## Write a Scenario of ETL Processing
@@ -94,6 +98,11 @@ To make the above scenario available, set a local machine as a sftp server accor
 After wrote scenario.yml and set the environment, execute a scenario by as below command.
 ```
 cd sample
-bin/clibomanager.py saimple-etl
+pipenv run python3 bin/clibomanager.py saimple-etl
+```
+or
+```
+cd sample
+python3 bin/clibomanager.py saimple-etl
 ```
 

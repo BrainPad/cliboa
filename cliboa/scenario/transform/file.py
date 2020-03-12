@@ -171,6 +171,7 @@ class FileCompress(FileBaseTransform):
     """
     Compress files
     """
+
     def __init__(self):
         super().__init__()
         self._format = None
@@ -186,12 +187,7 @@ class FileCompress(FileBaseTransform):
     def execute(self, *args):
         # essential parameters check
         valid = EssentialParameters(
-            self.__class__.__name__,
-            [
-                self._src_dir,
-                self._src_pattern,
-                self._format,
-            ],
+            self.__class__.__name__, [self._src_dir, self._src_pattern, self._format,],
         )
         valid()
 
@@ -200,19 +196,27 @@ class FileCompress(FileBaseTransform):
 
         dir = self._dest_dir if self._dest_dir is not None else self._src_dir
         for f in files:
-            if self._format == 'zip':
+            if self._format == "zip":
                 self._logger.info("Compress file %s to zip." % f)
-                with zipfile.ZipFile(os.path.join(dir, (os.path.basename(f) + '.zip')), 'w', zipfile.ZIP_DEFLATED) as o:
+                with zipfile.ZipFile(
+                    os.path.join(dir, (os.path.basename(f) + ".zip")),
+                    "w",
+                    zipfile.ZIP_DEFLATED,
+                ) as o:
                     o.write(f, arcname=os.path.basename(f))
-            elif self._format in ('gz', 'gzip'):
-                with open(f, 'rb') as i:
+            elif self._format in ("gz", "gzip"):
+                with open(f, "rb") as i:
                     self._logger.info("Compress file %s to gzip." % f)
-                    with gzip.open(os.path.join(dir, (os.path.basename(f) + '.gz')), 'wb') as o:
+                    with gzip.open(
+                        os.path.join(dir, (os.path.basename(f) + ".gz")), "wb"
+                    ) as o:
                         shutil.copyfileobj(i, o)
-            elif self._format in ('bz2', 'bzip2'):
-                with open(f, 'rb') as i:
+            elif self._format in ("bz2", "bzip2"):
+                with open(f, "rb") as i:
                     self._logger.info("Compress file %s to bzip2." % f)
-                    with open(os.path.join(dir, (os.path.basename(f) + '.bz2')), 'wb') as o:
+                    with open(
+                        os.path.join(dir, (os.path.basename(f) + ".bz2")), "wb"
+                    ) as o:
                         o.write(bz2.compress(i.read()))
 
 
@@ -538,6 +542,7 @@ class FileDivide(FileBaseTransform):
     """
     Divide a file to plural files
     """
+
     def __init__(self):
         super().__init__()
         self._divide_rows = None
@@ -594,7 +599,7 @@ class FileDivide(FileBaseTransform):
                 self._header_row = i.readline()
 
         row = self._ifile_reader(file)
-        newfilename = nameonly + '.%s' + ext
+        newfilename = nameonly + ".%s" + ext
         has_left = True
         index = 1
         while has_left:
@@ -661,14 +666,14 @@ class FileRename(FileBaseTransform):
 
         files = File().get_target_files(self._src_dir, self._src_pattern)
         if len(files) == 0:
-            self._logger.info('No files are found. Nothing to do.')
+            self._logger.info("No files are found. Nothing to do.")
             return
 
         for file in files:
             dirname = os.path.dirname(file)
             basename = os.path.basename(file)
 
-            if '.' in basename:
+            if "." in basename:
                 nameonly, ext = basename.split(".", 1)
                 ext = "." + ext
             else:

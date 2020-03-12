@@ -258,9 +258,7 @@ def put_file_func(**kwargs):
     except FileNotFoundError:
         kwargs["sftp"].mkdir(dirname)
 
-    tmp_dest = os.path.join(
-        dirname, "." + os.path.basename(kwargs["dest"])
-    )
+    tmp_dest = os.path.join(dirname, "." + os.path.basename(kwargs["dest"]))
     kwargs["sftp"].put(kwargs["src"], tmp_dest)
 
     # Same file name is removed in advance, if exists

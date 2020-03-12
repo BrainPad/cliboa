@@ -50,7 +50,9 @@ class BaseGcp(BaseStep):
 
     def _auth(self):
         if self._credentials:
-            return service_account.Credentials.from_service_account_file(self._credentials)
+            return service_account.Credentials.from_service_account_file(
+                self._credentials
+            )
 
     def _bigquery_client(self):
         if self._credentials:
@@ -143,6 +145,7 @@ class BaseFirestore(BaseGcp):
     Base class of Firebase use.
 
     """
+
     def __init__(self):
         super().__init__()
         self._collection = None

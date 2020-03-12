@@ -28,9 +28,9 @@ class CliboAdmin(object):
     """
 
     def __init__(self, args):
-        self.__args = args
-        self.__cmn_dir = None
-        self.__bin_dir = None
+        self._args = args
+        self._cmn_dir = None
+        self._bin_dir = None
 
     def main(self):
         """
@@ -38,65 +38,61 @@ class CliboAdmin(object):
             cliboadmin init $directory_name
             cliboadmin create $project_name
         """
-        if self.__args.option == "init":
-            self.__init_pj(self.__args.dir_name)
+        if self._args.option == "init":
+            self._init_pj(self._args.dir_name)
             print(
                 "Initialization of cliboa project '"
-                + self.__args.dir_name
+                + self._args.dir_name
                 + "' was successful."
             )
-        elif self.__args.option == "create":
-            self.__create_new_pj(self.__args.dir_name)
-            print(
-                "Adding a new project '" + self.__args.dir_name + "' was successfule."
-            )
+        elif self._args.option == "create":
+            self._create_new_pj(self._args.dir_name)
+            print("Adding a new project '" + self._args.dir_name + "' was successfule.")
 
-    def __init_pj(self, ini_dir):
+    def _init_pj(self, ini_dir):
         """
         Initialize program configuration
         """
-        self.__create_ess_dirs(ini_dir)
-        self.__create_ess_files(ini_dir)
+        self._create_ess_dirs(ini_dir)
+        self._create_ess_files(ini_dir)
 
-    def __create_ess_dirs(self, ini_dir):
+    def _create_ess_dirs(self, ini_dir):
         """
         create essential directories
         """
         os.makedirs(ini_dir, exist_ok=False)
-        self.__bin_dir = os.path.join(ini_dir, "bin")
-        os.makedirs(self.__bin_dir, exist_ok=False)
-        self.__cmn_dir = os.path.join(ini_dir, "common")
-        os.makedirs(self.__cmn_dir, exist_ok=False)
-        os.makedirs(os.path.join(self.__cmn_dir, "scenario"), exist_ok=False)
+        self._bin_dir = os.path.join(ini_dir, "bin")
+        os.makedirs(self._bin_dir, exist_ok=False)
+        self._cmn_dir = os.path.join(ini_dir, "common")
+        os.makedirs(self._cmn_dir, exist_ok=False)
+        os.makedirs(os.path.join(self._cmn_dir, "scenario"), exist_ok=False)
         os.makedirs(os.path.join(ini_dir, "conf"), exist_ok=False)
         os.makedirs(os.path.join(ini_dir, "logs"), exist_ok=False)
         os.makedirs(os.path.join(ini_dir, "project"), exist_ok=False)
 
-    def __create_ess_files(self, ini_dir):
+    def _create_ess_files(self, ini_dir):
         """
         create essential files
         """
-        lisboa_install_paths = site.getsitepackages()
-        lisboa_install_path = (
-            lisboa_install_paths[0]
-            if os.path.exists(os.path.join(lisboa_install_paths[0], "cliboa"))
-            else lisboa_install_paths[1]
+        cliboa_install_paths = site.getsitepackages()
+        cliboa_install_path = (
+            cliboa_install_paths[0]
+            if os.path.exists(os.path.join(cliboa_install_paths[0], "cliboa"))
+            else cliboa_install_paths[1]
         )
 
         run_cmd_path = os.path.join(
-            lisboa_install_path, "cliboa", "template", "bin", "clibomanager.py"
+            cliboa_install_path, "cliboa", "template", "bin", "clibomanager.py"
         )
-        copyfile(run_cmd_path, os.path.join(self.__bin_dir, "clibomanager.py"))
+        copyfile(run_cmd_path, os.path.join(self._bin_dir, "clibomanager.py"))
 
-        requirements_path = os.path.join(
-            lisboa_install_path, "cliboa/template", "requirements.txt"
-        )
-        copyfile(requirements_path, os.path.join(ini_dir, "requirements.txt"))
+        pipfile_path = self._get_pipfile_path(cliboa_install_path)
+        copyfile(pipfile_path, os.path.join(ini_dir, "Pipfile"))
 
         cmn_env_path = os.path.join(
-            lisboa_install_path, "cliboa", "conf", "default_environment.py"
+            cliboa_install_path, "cliboa", "conf", "default_environment.py"
         )
-        copyfile(cmn_env_path, os.path.join(self.__cmn_dir, "environment.py"))
+        copyfile(cmn_env_path, os.path.join(self._cmn_dir, "environment.py"))
 
         cmn_scenario_path = os.path.join(ini_dir, "common", "scenario.yml")
         with open(cmn_scenario_path, "w") as yaml:
@@ -105,11 +101,11 @@ class CliboAdmin(object):
         cmn_ini_path = os.path.join(ini_dir, "common", "__init__.py")
         open(cmn_ini_path, "w").close()
 
-    def __create_new_pj(self, new_pj_dir):
+    def _create_new_pj(self, new_pj_dir):
         """
         Create an individual project configuration
         """
-        # check if being under lisboa project directory
+        # check if being under cliboa project directory
         sys.path.append(os.getcwd())
         env = import_module("common.environment")
 
@@ -118,6 +114,26 @@ class CliboAdmin(object):
         os.makedirs(os.path.join("project", new_pj_dir, "scenario"), exist_ok=False)
         with open(os.path.join("project", new_pj_dir, "scenario.yml"), "w") as yaml:
             yaml.write("scenario:" + "\n")
+
+    def _get_pipfile_path(self, cliboa_install_path):
+        """
+        Get Pipfile for current python version
+        """
+        py_ver_info = sys.version
+        py_ver_info = py_ver_info.split(" ")
+        py_ver = py_ver_info[0].split(".")
+        py_major_ver = py_ver[0] + "." + py_ver[1]
+        py_major_ver_and_pipfile = {
+            "3.4": "Pipfile.above34",
+            "3.5": "Pipfile.above35",
+            "3.6": "Pipfile.above36",
+            "3.7": "Pipfile.above37",
+        }
+        return os.path.join(
+            cliboa_install_path,
+            "cliboa/template",
+            py_major_ver_and_pipfile[py_major_ver],
+        )
 
 
 class CommandArgumentParser(object):
