@@ -22,7 +22,7 @@ class SqliteAdapter(object):
     """
 
     def __init__(self):
-        self.__logger = LisboaLog.get_logger(__name__)
+        self._logger = LisboaLog.get_logger(__name__)
         self.__cur = None
         self.__con = None
 
@@ -108,7 +108,7 @@ class SqliteAdapter(object):
             ",".join('"' + column + '"' for column in column_def),
             ",".join(list(holders)),
         )
-        self.__logger.debug("sql: %s" % sql)
+        self._logger.debug("sql: %s" % sql)
         values = []
         for row in insert_rows:
             vs = []

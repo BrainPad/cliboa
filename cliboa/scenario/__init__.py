@@ -43,6 +43,7 @@ from .transform.file import (
     FileDivide,
     FileRename,
     CsvFormatChange,
+    FileConvert,
 )
 
 from .load.aws import S3Upload

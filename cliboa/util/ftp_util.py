@@ -57,7 +57,7 @@ class FtpUtil(object):
         self.__retryTimes = retryTimes
         self.__port = port
         self.__tls = tls
-        self.__logger = LisboaLog.get_logger(__name__)
+        self._logger = LisboaLog.get_logger(__name__)
 
     def list_files(self, dir, dest, pattern):
         """
@@ -139,10 +139,10 @@ class FtpUtil(object):
             try:
                 return self.__ftp_call(func, **kwargs)
             except Exception as e:
-                self.__logger.warning(e)
-                self.__logger.warning(kwargs)
+                self._logger.warning(e)
+                self._logger.warning(kwargs)
 
-            self.__logger.warning(
+            self._logger.warning(
                 "Unexpected error occurred. Retry will start in 10 sec."
             )
             sleep(FtpUtil.RETRY_SEC)

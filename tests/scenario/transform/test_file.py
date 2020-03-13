@@ -17,10 +17,14 @@ import pytest
 import shutil
 import xlsxwriter
 from glob import glob
-from pprint import pprint
 
 from cliboa.conf import env
-from cliboa.scenario.transform.file import ExcelConvert, CsvMerge, CsvHeaderConvert
+from cliboa.scenario.transform.file import (
+    ExcelConvert,
+    CsvMerge,
+    CsvHeaderConvert,
+    FileConvert,
+)
 from cliboa.util.exception import InvalidFormat, InvalidCount
 from cliboa.util.lisboa_log import LisboaLog
 from cliboa.util.helper import Helper
@@ -241,7 +245,9 @@ class TestCsvHeaderConvert(TestFileTransform):
             Helper.set_property(instance, "src_pattern", "test\.csv")
             Helper.set_property(instance, "dest_dir", self._data_dir)
             Helper.set_property(instance, "dest_pattern", "test_new.csv")
-            Helper.set_property(instance, "headers", [{"key": "new_key"}, {"data": "new_data"}])
+            Helper.set_property(
+                instance, "headers", [{"key": "new_key"}, {"data": "new_data"}]
+            )
             instance.execute()
 
             test_new_csv = os.path.join(self._data_dir, "test_new.csv")
@@ -262,7 +268,9 @@ class TestCsvHeaderConvert(TestFileTransform):
             Helper.set_property(instance, "src_pattern", "test\.csv")
             Helper.set_property(instance, "dest_dir", self._data_dir)
             Helper.set_property(instance, "dest_pattern", "test_new.csv")
-            Helper.set_property(instance, "headers", [{"key": "new_key"}, {"data": "new_data"}])
+            Helper.set_property(
+                instance, "headers", [{"key": "new_key"}, {"data": "new_data"}]
+            )
             instance.execute()
 
         shutil.rmtree(self._data_dir)
@@ -284,8 +292,53 @@ class TestCsvHeaderConvert(TestFileTransform):
             Helper.set_property(instance, "src_pattern", "test(.*)\.csv")
             Helper.set_property(instance, "dest_dir", self._data_dir)
             Helper.set_property(instance, "dest_pattern", "test_new.csv")
-            Helper.set_property(instance, "headers", [{"key": "new_key"}, {"data": "new_data"}])
+            Helper.set_property(
+                instance, "headers", [{"key": "new_key"}, {"data": "new_data"}]
+            )
             instance.execute()
 
         shutil.rmtree(self._data_dir)
         assert "only one" in str(execinfo.value)
+
+
+class TestFileConvert(TestFileTransform):
+    def test_execute(self):
+        STR_UTF8 = "いろはにほへと"
+        try:
+            # create test file
+            os.makedirs(self._data_dir)
+            test_file = os.path.join(self._data_dir, "test.txt")
+
+            with open(test_file, "w") as t:
+                t.write(STR_UTF8)
+
+            # set the essential attributes
+            instance = FileConvert()
+            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "src_dir", self._data_dir)
+            Helper.set_property(instance, "src_pattern", r"test\.txt")
+            Helper.set_property(instance, "encoding_from", "utf-8")
+            Helper.set_property(instance, "encoding_to", "utf-16")
+            instance.execute()
+
+            with open(test_file, errors="ignore") as t:
+                str_utf16 = t.read()
+
+            assert str_utf16 != STR_UTF8
+
+            # set the essential attributes
+            instance = FileConvert()
+            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "src_dir", self._data_dir)
+            Helper.set_property(instance, "src_pattern", r"test\.txt")
+            Helper.set_property(instance, "encoding_from", "utf-16")
+            Helper.set_property(instance, "encoding_to", "utf-8")
+            instance.execute()
+
+            with open(test_file) as t:
+                str_utf8 = t.read()
+
+            assert str_utf8 == STR_UTF8
+
+        finally:
+            shutil.rmtree(self._data_dir)

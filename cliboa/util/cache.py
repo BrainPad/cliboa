@@ -101,7 +101,7 @@ class StorageIO(object):
     CACHE_SUFFIX = ".tmp"
 
     def __init__(self):
-        self.__logger = LisboaLog.get_logger(__name__)
+        self._logger = LisboaLog.get_logger(__name__)
         # Add process id to create an unique cache file name
         self.__cache_file = (
             "/tmp/" + self.CACHE_PREFIX + str(os.getpid()) + self.CACHE_SUFFIX
