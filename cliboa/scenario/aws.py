@@ -28,27 +28,12 @@ class BaseAws(BaseStep):
         self._access_key = None
         self._secret_key = None
 
-    @property
-    def region(self):
-        return self._region
-
-    @region.setter
     def region(self, region):
         self._region = region
 
-    @property
-    def access_key(self):
-        return self._access_key
-
-    @access_key.setter
     def access_key(self, access_key):
         self._access_key = access_key
 
-    @property
-    def secret_key(self):
-        return self._secret_key
-
-    @secret_key.setter
     def secret_key(self, secret_key):
         self._secret_key = secret_key
 
@@ -88,11 +73,6 @@ class BaseS3(BaseAws):
         super().__init__()
         self._bucket = None
 
-    @property
-    def bucket(self):
-        return self._bucket
-
-    @bucket.setter
     def bucket(self, bucket):
         self._bucket = bucket
 

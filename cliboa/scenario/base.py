@@ -40,43 +40,18 @@ class BaseStep(object):
         self._io = None
         self._logger = None
 
-    @property
-    def step(self):
-        return self._step
-
-    @step.setter
     def step(self, step):
         self._step = step
 
-    @property
-    def symbol(self):
-        return self._symbol
-
-    @symbol.setter
     def symbol(self, symbol):
         self._symbol = symbol
 
-    @property
-    def parallel(self):
-        return self._parallel
-
-    @parallel.setter
     def parallel(self, parallel):
         self._parallel = parallel
 
-    @property
-    def io(self):
-        return self._io
-
-    @io.setter
     def io(self, io):
         self._io = io
 
-    @property
-    def logger(self):
-        return self._logger
-
-    @logger.setter
     def logger(self, logger):
         self._logger = logger
 
@@ -138,27 +113,12 @@ class BaseSqlite(BaseStep):
         self._columns = []
         self._vacuum = False
 
-    @property
-    def dbname(self):
-        return self._dbname
-
-    @dbname.setter
     def dbname(self, dbname):
         self._dbname = dbname
 
-    @property
-    def columns(self):
-        return self._columns
-
-    @columns.setter
     def columns(self, columns):
         self._columns = columns
 
-    @property
-    def vacuum(self):
-        return self._vacuum
-
-    @vacuum.setter
     def vacuum(self, vacuum):
         self._vacuum = vacuum
 
@@ -194,29 +154,19 @@ class SqliteQueryExecute(BaseSqlite):
 
     def __init__(self):
         super().__init__()
-        self.__tblname = None
-        self.__raw_query = None
+        self._tblname = None
+        self._raw_query = None
 
-    @property
-    def tblname(self):
-        return self.__tblname
-
-    @tblname.setter
     def tblname(self, tblname):
-        self.__tblname = tblname
+        self._tblname = tblname
 
-    @property
-    def raw_query(self):
-        return self.__raw_query
-
-    @raw_query.setter
     def raw_query(self, raw_query):
-        self.__raw_query = raw_query
+        self._raw_query = raw_query
 
     def execute(self, *args):
         super().execute()
         self._sqlite_adptr.connect(self._dbname)
-        self._sqlite_adptr.execute(self.__raw_query)
+        self._sqlite_adptr.execute(self._raw_query)
         self._sqlite_adptr.commit()
 
 

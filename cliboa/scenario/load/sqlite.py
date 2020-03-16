@@ -71,43 +71,18 @@ class SqliteCreation(SqliteTransaction):
         self._primary_key = None
         self._refresh = False
 
-    @property
-    def tblname(self):
-        return self._tblname
-
-    @tblname.setter
     def tblname(self, tblname):
         self._tblname = tblname
 
-    @property
-    def replace_into(self):
-        return self._replace_into
-
-    @replace_into.setter
     def replace_into(self, replace_into):
         self._replace_into = replace_into
 
-    @property
-    def insert_cnt(self):
-        return self._insert_cnt
-
-    @insert_cnt.setter
     def insert_cnt(self, insert_cnt):
         self._insert_cnt = insert_cnt
 
-    @property
-    def primary_key(self):
-        return self._primary_key
-
-    @primary_key.setter
     def primary_key(self, primary_key):
         self._primary_key = primary_key
 
-    @property
-    def refresh(self):
-        return self._refresh
-
-    @refresh.setter
     def refresh(self, refresh):
         self._refresh = refresh
 
@@ -227,66 +202,31 @@ class CsvReadSqliteCreate(SqliteTransaction):
         self._refresh = True
         self._encoding = "utf-8"
 
-    @property
-    def src_dir(self):
-        return self._src_dir
-
-    @src_dir.setter
     def src_dir(self, src_dir):
         self._src_dir = src_dir
 
-    @property
-    def src_pattern(self):
-        return self._src_pattern
-
-    @src_pattern.setter
     def src_pattern(self, src_pattern):
         self._src_pattern = src_pattern
 
-    @property
-    def tblname(self):
-        return self._tblname
-
-    @tblname.setter
     def tblname(self, tblname):
         self._tblname = tblname
 
-    @property
-    def primary_key(self):
-        return self._primary_key
-
-    @primary_key.setter
     def primary_key(self, primary_key):
         self._primary_key = primary_key
 
-    @property
-    def index(self):
-        return self._index
-
-    @index.setter
     def index(self, index):
         self._index = index
 
-    @property
-    def refresh(self):
-        return self._refresh
-
-    @refresh.setter
     def refresh(self, refresh):
         self._refresh = refresh
 
-    @property
-    def encoding(self):
-        return self._encoding
-
-    @encoding.setter
     def encoding(self, encoding):
         self._encoding = encoding
 
     def execute(self, *args):
         # essential parameters check
         valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir, self.src_pattern, self._tblname]
+            self.__class__.__name__, [self._src_dir, self._src_pattern, self._tblname]
         )
         valid()
 

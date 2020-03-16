@@ -34,87 +34,33 @@ class SftpBaseLoad(BaseStep):
         self._timeout = 30
         self._retry_count = 3
 
-    @property
-    def src_dir(self):
-        return self._src_dir
-
-    @src_dir.setter
     def src_dir(self, src_dir):
         self._src_dir = src_dir
 
-    @property
-    def src_pattern(self):
-        return self._src_pattern
-
-    @src_pattern.setter
     def src_pattern(self, src_pattern):
         self._src_pattern = src_pattern
 
-    @property
-    def dest_dir(self):
-        return self._dest_dir
-
-    @dest_dir.setter
     def dest_dir(self, dest_dir):
         self._dest_dir = dest_dir
 
-    @src_pattern.setter
-    def src_pattern(self, src_pattern):
-        self._src_pattern = src_pattern
-
-    @property
-    def host(self):
-        return self._host
-
-    @host.setter
     def host(self, host):
         self._host = host
 
-    @property
-    def port(self):
-        return self._port
-
-    @port.setter
     def port(self, port):
         self._port = port
 
-    @property
-    def user(self):
-        return self._user
-
-    @user.setter
     def user(self, user):
         self._user = user
 
-    @property
-    def password(self):
-        return self._password
-
-    @password.setter
     def password(self, password):
         self._password = password
 
-    @property
-    def key(self):
-        return self._key
-
-    @key.setter
     def key(self, key):
         self._key = key
 
-    @property
-    def timeout(self):
-        return self._timeout
-
-    @timeout.setter
     def timeout(self, timeout):
         self._timeout = timeout
 
-    @property
-    def retry_count(self):
-        return self._retry_count
-
-    @retry_count.setter
     def retry_count(self, retry_count):
         self._retry_count = retry_count
 
@@ -160,11 +106,6 @@ class SftpUpload(SftpBaseLoad):
         super().__init__()
         self._quit = False
 
-    @property
-    def quit(self):
-        return self._quit
-
-    @quit.setter
     def quit(self, quit):
         self._quit = quit
 

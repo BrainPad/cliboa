@@ -20,6 +20,7 @@ from pprint import pprint
 from cliboa.conf import env
 from cliboa.scenario.extract.sftp import SftpDownload
 from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.helper import Helper
 
 
 class TestSftpDownload(object):
@@ -30,14 +31,14 @@ class TestSftpDownload(object):
     def test_execute_ok(self):
         os.makedirs(self._data_dir)
         instance = SftpDownload()
-        instance.logger = LisboaLog.get_logger(__name__)
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
         # use public sftp
-        setattr(instance, "host", "test.rebex.net")
-        setattr(instance, "user", "demo")
-        setattr(instance, "password", "password")
-        setattr(instance, "src_dir", "/")
-        setattr(instance, "src_pattern", "(.*).txt")
-        setattr(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "host", "test.rebex.net")
+        Helper.set_property(instance, "user", "demo")
+        Helper.set_property(instance, "password", "password")
+        Helper.set_property(instance, "src_dir", "/")
+        Helper.set_property(instance, "src_pattern", "(.*).txt")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
         instance.execute()
         exists_file = os.path.exists(os.path.join(self._data_dir, "readme.txt"))
         shutil.rmtree(self._data_dir)

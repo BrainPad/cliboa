@@ -43,53 +43,23 @@ class FileBaseTransform(BaseStep):
         self._dest_pattern = None
         self._encoding = "utf-8"
 
-    @property
-    def src_dir(self):
-        return self._src_dir
-
-    @src_dir.setter
     def src_dir(self, src_dir):
         self._src_dir = src_dir
 
-    @property
-    def src_pattern(self):
-        return self._src_pattern
-
-    @src_pattern.setter
     def src_pattern(self, src_pattern):
         self._src_pattern = src_pattern
 
-    @property
-    def dest_path(self):
-        return self._dest_path
-
-    @dest_path.setter
     def dest_path(self, dest_path):
         self._dest_path = dest_path
 
-    @property
-    def dest_dir(self):
-        return self._dest_dir
-
-    @dest_dir.setter
     def dest_dir(self, dest_dir):
         if os.path.exists(dest_dir) is False:
             os.makedirs(dest_dir)
         self._dest_dir = dest_dir
 
-    @property
-    def dest_pattern(self):
-        return self._dest_pattern
-
-    @dest_pattern.setter
     def dest_pattern(self, dest_pattern):
         self._dest_pattern = dest_pattern
 
-    @property
-    def encoding(self):
-        return self._encoding
-
-    @encoding.setter
     def encoding(self, encoding):
         self._encoding = encoding
 
@@ -110,19 +80,8 @@ class FileDecompress(FileBaseTransform):
     """
     Decompress the specified file
     """
-
     def __init__(self):
         super().__init__()
-
-        self._dest_dir = None
-
-    @property
-    def dest_dir(self):
-        return self._dest_dir
-
-    @dest_dir.setter
-    def dest_dir(self, dest_dir):
-        self._dest_dir = dest_dir
 
     def execute(self, *args):
         files = super().get_target_files(self._src_dir, self._src_pattern)
@@ -176,11 +135,6 @@ class FileCompress(FileBaseTransform):
         super().__init__()
         self._format = None
 
-    @property
-    def format(self):
-        return self._format
-
-    @format.setter
     def format(self, format):
         self._format = format.lower()
 
@@ -229,11 +183,6 @@ class CsvColsExtract(FileBaseTransform):
         super().__init__()
         self._columns = None
 
-    @property
-    def columns(self):
-        return self._columns
-
-    @columns.setter
     def columns(self, columns):
         self._columns = columns
 
@@ -254,11 +203,6 @@ class ColumnLengthAdjust(FileBaseTransform):
         super().__init__()
         self._adjust = {}
 
-    @property
-    def adjust(self):
-        return self._adjust
-
-    @adjust.setter
     def adjust(self, adjust):
         self._adjust = adjust
 
@@ -296,19 +240,9 @@ class DateFormatConvert(FileBaseTransform):
         self._columns = []
         self._formatter = None
 
-    @property
-    def columns(self):
-        return self._columns
-
-    @columns.setter
     def columns(self, columns):
         self._columns = columns
 
-    @property
-    def formatter(self):
-        return self._formatter
-
-    @formatter.setter
     def formatter(self, formatter):
         self._formatter = formatter
 
@@ -394,24 +328,14 @@ class CsvMerge(FileBaseTransform):
 
     def __init__(self):
         super().__init__()
-        self.__src1_pattern = None
-        self.__src2_pattern = None
+        self._src1_pattern = None
+        self._src2_pattern = None
 
-    @property
-    def src1_pattern(self):
-        return self.__src1_pattern
-
-    @src1_pattern.setter
     def src1_pattern(self, src1_pattern):
-        self.__src1_pattern = src1_pattern
+        self._src1_pattern = src1_pattern
 
-    @property
-    def src2_pattern(self):
-        return self.__src2_pattern
-
-    @src2_pattern.setter
     def src2_pattern(self, src2_pattern):
-        self.__src2_pattern = src2_pattern
+        self._src2_pattern = src2_pattern
 
     def execute(self, *args):
         # essential parameters check
@@ -419,25 +343,25 @@ class CsvMerge(FileBaseTransform):
             self.__class__.__name__,
             [
                 self._src_dir,
-                self.__src1_pattern,
-                self.__src2_pattern,
+                self._src1_pattern,
+                self._src2_pattern,
                 self._dest_dir,
                 self._dest_pattern,
             ],
         )
         valid()
 
-        target1_files = File().get_target_files(self._src_dir, self.__src1_pattern)
-        target2_files = File().get_target_files(self._src_dir, self.__src2_pattern)
+        target1_files = File().get_target_files(self._src_dir, self._src1_pattern)
+        target2_files = File().get_target_files(self._src_dir, self._src2_pattern)
         if len(target1_files) == 0:
             raise InvalidCount(
                 "An input file %s does not exist."
-                % os.path.join(self._src_dir, self.__src1_pattern)
+                % os.path.join(self._src_dir, self._src1_pattern)
             )
         elif len(target2_files) == 0:
             raise InvalidCount(
                 "An input file %s does not exist."
-                % os.path.join(self._src_dir, self.__src2_pattern)
+                % os.path.join(self._src_dir, self._src2_pattern)
             )
         elif len(target1_files) > 1:
             self._logger.error("Hit target files %s" % target1_files)
@@ -474,15 +398,10 @@ class CsvHeaderConvert(FileBaseTransform):
 
     def __init__(self):
         super().__init__()
-        self.__headers = []
+        self._headers = []
 
-    @property
-    def headers(self):
-        return self.__headers
-
-    @headers.setter
     def headers(self, headers):
-        self.__headers = headers
+        self._headers = headers
 
     def execute(self, *args):
         # essential parameters check
@@ -493,7 +412,7 @@ class CsvHeaderConvert(FileBaseTransform):
                 self._src_pattern,
                 self._dest_dir,
                 self._dest_pattern,
-                self.__headers,
+                self._headers,
             ],
         )
         valid()
@@ -530,7 +449,7 @@ class CsvHeaderConvert(FileBaseTransform):
         Replace old headers to new headers
         """
         new_headers = []
-        for old_and_new_headers in self.__headers:
+        for old_and_new_headers in self._headers:
             for oh in old_headers:
                 if old_and_new_headers.get(oh):
                     new_headers.append(old_and_new_headers[oh])
@@ -548,19 +467,9 @@ class FileDivide(FileBaseTransform):
         self._divide_rows = None
         self._header = False
 
-    @property
-    def divide_rows(self):
-        return self._divide_rows
-
-    @divide_rows.setter
     def divide_rows(self, divide_rows):
         self._divide_rows = divide_rows
 
-    @property
-    def header(self):
-        return self._header
-
-    @header.setter
     def header(self, header):
         self._header = header
 
@@ -641,19 +550,9 @@ class FileRename(FileBaseTransform):
         self._prefix = ""
         self._suffix = ""
 
-    @property
-    def prefix(self):
-        return self._prefix
-
-    @prefix.setter
     def prefix(self, prefix):
         self._prefix = prefix
 
-    @property
-    def suffix(self):
-        return self._suffix
-
-    @suffix.setter
     def suffix(self, suffix):
         self._suffix = suffix
 
