@@ -684,3 +684,120 @@ class FileRename(FileBaseTransform):
             newfilepath = os.path.join(dirname, newfilename)
             os.rename(file, newfilepath)
             self._logger.info("File name changed %s -> %s" % (file, newfilepath))
+
+
+class CsvFormatChange(FileBaseTransform):
+    """
+    Change csv format
+    """
+
+    def __init__(self):
+        super().__init__()
+        self._before_format = None
+        self._before_enc = None
+        self._after_format = None
+        self._after_enc = None
+        self._after_nl = "LF"
+        self._quote = "QUOTE_MINIMAL"
+
+    @property
+    def before_format(self):
+        return self._before_format
+
+    @before_format.setter
+    def before_format(self, before_format):
+        self._before_format = before_format
+
+    @property
+    def before_enc(self):
+        return self._before_enc
+
+    @before_enc.setter
+    def before_enc(self, before_enc):
+        self._before_enc = before_enc
+
+    @property
+    def after_format(self):
+        return self._after_format
+
+    @after_format.setter
+    def after_format(self, after_format):
+        self._after_format = after_format
+
+    @property
+    def after_enc(self):
+        return self._after_enc
+
+    @after_enc.setter
+    def after_enc(self, after_enc):
+        self._after_enc = after_enc
+
+    @property
+    def after_nl(self):
+        return self._after_nl
+
+    @after_nl.setter
+    def after_nl(self, after_nl):
+        self._after_nl = after_nl
+
+    @property
+    def quote(self):
+        return self._quote
+
+    @quote.setter
+    def quote(self, quote):
+        self._quote = quote
+
+    def execute(self, *args):
+        file = super().execute()
+        # essential parameters check
+        valid = EssentialParameters(
+            self.__class__.__name__,
+            [
+                self._before_format,
+                self._before_enc,
+                self._after_format,
+                self._after_enc,
+                self._dest_dir,
+                self._dest_pattern,
+            ]
+        )
+        valid()
+
+        with open(file, mode="rt", encoding=self._before_enc) as i:
+            reader = csv.reader(i, delimiter=self._csv_delimiter(self._before_format))
+            with open(os.path.join(self._dest_dir, self._dest_pattern), mode="wt", newline="", encoding=self._after_enc) as o:
+                writer = csv.writer(o, delimiter=self._csv_delimiter(self._after_format), quoting=self._csv_quote(), lineterminator=self._csv_newline())
+                for line in reader:
+                    writer.writerow(line)
+
+    def _csv_newline(self):
+        if self._after_nl.upper() == "LF":
+            return "\n"
+        elif self._after_nl.upper() == "CR":
+            return "\r"
+        elif self._after_nl.upper() == "CRLF":
+            return "\r\n"
+        else:
+            raise CliboaException("Unknown New LIne. One of the followings are allowd [LF, CR, CRLF]")
+
+    def _csv_delimiter(self, ext):
+        if ext.upper() == "CSV" :
+            return ","
+        elif ext.upper() == "TSV" :
+            return "\t"
+        else:
+            raise CliboaException("Unknown ext. One of the followings are allowd [CSV, TSV]")
+
+    def _csv_quote(self):
+        if "QUOTE_ALL"  == self._quote:
+            return csv.QUOTE_ALL
+        elif "QUOTE_MINIMAL"  == self._quote:
+            return csv.QUOTE_MINIMAL
+        elif "QUOTE_NONNUMERIC"  == self._quote:
+            return csv.QUOTE_NONNUMERIC
+        elif "QUOTE_NONE"  == self._quote:
+            return csv.QUOTE_NONE
+        else:
+            raise CliboaException(
+                "Unknown quote. One of the followings are allowd [QUOTE_ALL, QUOTE_MINIMAL, QUOTE_NONNUMERIC, QUOTE_NONE]")
