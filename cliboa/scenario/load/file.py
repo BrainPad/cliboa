@@ -32,27 +32,12 @@ class FileWrite(BaseStep):
         self._encoding = "utf-8"
         self._mode = "a"
 
-    @property
-    def dest_path(self):
-        return self._dest_path
-
-    @dest_path.setter
     def dest_path(self, dest_path):
         self._dest_path = dest_path
 
-    @property
-    def encoding(self):
-        return self._encoding
-
-    @encoding.setter
     def encoding(self, encoding):
         self._encoding = encoding
 
-    @property
-    def mode(self):
-        return self._mode
-
-    @mode.setter
     def mode(self, mode):
         self._mode = mode
 

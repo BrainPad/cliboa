@@ -23,6 +23,7 @@ from cliboa.conf import env
 from cliboa.scenario.transform.file import ExcelConvert, CsvMerge, CsvHeaderConvert
 from cliboa.util.exception import InvalidFormat, InvalidCount
 from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.helper import Helper
 
 
 class TestFileTransform(object):
@@ -43,11 +44,11 @@ class TestExcelConvert(TestFileTransform):
 
                 # set the essential attributes
                 instance = ExcelConvert()
-                instance.logger = LisboaLog.get_logger(__name__)
-                setattr(instance, "src_dir", self._data_dir)
-                setattr(instance, "src_pattern", "test\.xlxs")
-                setattr(instance, "dest_dir", self._data_dir)
-                setattr(instance, "dest_pattern", "test.xlxs")
+                Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+                Helper.set_property(instance, "src_dir", self._data_dir)
+                Helper.set_property(instance, "src_pattern", "test\.xlxs")
+                Helper.set_property(instance, "dest_dir", self._data_dir)
+                Helper.set_property(instance, "dest_pattern", "test.xlxs")
                 instance.execute()
             finally:
                 shutil.rmtree(self._data_dir)
@@ -65,11 +66,11 @@ class TestExcelConvert(TestFileTransform):
 
                 # set the essential attributes
                 instance = ExcelConvert()
-                instance.logger = LisboaLog.get_logger(__name__)
-                setattr(instance, "src_dir", self._data_dir)
-                setattr(instance, "src_pattern", "test(.*)\.xlxs")
-                setattr(instance, "dest_dir", self._data_dir)
-                setattr(instance, "dest_pattern", "test(.*).xlxs")
+                Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+                Helper.set_property(instance, "src_dir", self._data_dir)
+                Helper.set_property(instance, "src_pattern", "test(.*)\.xlxs")
+                Helper.set_property(instance, "dest_dir", self._data_dir)
+                Helper.set_property(instance, "dest_pattern", "test(.*).xlxs")
                 instance.execute()
             finally:
                 shutil.rmtree(self._data_dir)
@@ -85,11 +86,11 @@ class TestExcelConvert(TestFileTransform):
 
             # set the essential attributes
             instance = ExcelConvert()
-            instance.logger = LisboaLog.get_logger(__name__)
-            setattr(instance, "src_dir", self._data_dir)
-            setattr(instance, "src_pattern", "test\.xlxs")
-            setattr(instance, "dest_dir", self._data_dir)
-            setattr(instance, "dest_pattern", "test.csv")
+            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "src_dir", self._data_dir)
+            Helper.set_property(instance, "src_pattern", "test\.xlxs")
+            Helper.set_property(instance, "dest_dir", self._data_dir)
+            Helper.set_property(instance, "dest_pattern", "test.csv")
             instance.execute()
 
             exists_csv = glob(os.path.join(self._data_dir, "test.csv"))
@@ -122,12 +123,12 @@ class TestCsvMerge(TestFileTransform):
 
             # set the essential attributes
             instance = CsvMerge()
-            instance.logger = LisboaLog.get_logger(__name__)
-            setattr(instance, "src_dir", self._data_dir)
-            setattr(instance, "src1_pattern", "test1\.csv")
-            setattr(instance, "src2_pattern", "test2\.csv")
-            setattr(instance, "dest_dir", self._data_dir)
-            setattr(instance, "dest_pattern", "test.csv")
+            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "src_dir", self._data_dir)
+            Helper.set_property(instance, "src1_pattern", "test1\.csv")
+            Helper.set_property(instance, "src2_pattern", "test2\.csv")
+            Helper.set_property(instance, "dest_dir", self._data_dir)
+            Helper.set_property(instance, "dest_pattern", "test.csv")
             instance.execute()
 
             exists_csv = glob(os.path.join(self._data_dir, "test.csv"))
@@ -158,12 +159,12 @@ class TestCsvMerge(TestFileTransform):
 
             # set the essential attributes
             instance = CsvMerge()
-            instance.logger = LisboaLog.get_logger(__name__)
-            setattr(instance, "src_dir", self._data_dir)
-            setattr(instance, "src1_pattern", "test1\.csv")
-            setattr(instance, "src2_pattern", "test2\.csv")
-            setattr(instance, "dest_dir", self._data_dir)
-            setattr(instance, "dest_pattern", "test.csv")
+            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "src_dir", self._data_dir)
+            Helper.set_property(instance, "src1_pattern", "test1\.csv")
+            Helper.set_property(instance, "src2_pattern", "test2\.csv")
+            Helper.set_property(instance, "dest_dir", self._data_dir)
+            Helper.set_property(instance, "dest_pattern", "test.csv")
             instance.execute()
 
             exists_csv = glob(os.path.join(self._data_dir, "test.csv"))
@@ -185,12 +186,12 @@ class TestCsvMerge(TestFileTransform):
 
                 # set the essential attributes
                 instance = CsvMerge()
-                instance.logger = LisboaLog.get_logger(__name__)
-                setattr(instance, "src_dir", self._data_dir)
-                setattr(instance, "src1_pattern", "test1(.*).csv")
-                setattr(instance, "src2_pattern", "test2.csv")
-                setattr(instance, "dest_dir", self._data_dir)
-                setattr(instance, "dest_pattern", "test.csv")
+                Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+                Helper.set_property(instance, "src_dir", self._data_dir)
+                Helper.set_property(instance, "src1_pattern", "test1(.*).csv")
+                Helper.set_property(instance, "src2_pattern", "test2.csv")
+                Helper.set_property(instance, "dest_dir", self._data_dir)
+                Helper.set_property(instance, "dest_pattern", "test.csv")
                 instance.execute()
             finally:
                 shutil.rmtree(self._data_dir)
@@ -210,12 +211,12 @@ class TestCsvMerge(TestFileTransform):
 
                 # set the essential attributes
                 instance = CsvMerge()
-                instance.logger = LisboaLog.get_logger(__name__)
-                setattr(instance, "src_dir", self._data_dir)
-                setattr(instance, "src1_pattern", "test1.csv")
-                setattr(instance, "src2_pattern", "test2(.*).csv")
-                setattr(instance, "dest_dir", self._data_dir)
-                setattr(instance, "dest_pattern", "test.csv")
+                Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+                Helper.set_property(instance, "src_dir", self._data_dir)
+                Helper.set_property(instance, "src1_pattern", "test1.csv")
+                Helper.set_property(instance, "src2_pattern", "test2(.*).csv")
+                Helper.set_property(instance, "dest_dir", self._data_dir)
+                Helper.set_property(instance, "dest_pattern", "test.csv")
                 instance.execute()
             finally:
                 shutil.rmtree(self._data_dir)
@@ -235,12 +236,12 @@ class TestCsvHeaderConvert(TestFileTransform):
 
             # set the essential attributes
             instance = CsvHeaderConvert()
-            instance.logger = LisboaLog.get_logger(__name__)
-            setattr(instance, "src_dir", self._data_dir)
-            setattr(instance, "src_pattern", "test\.csv")
-            setattr(instance, "dest_dir", self._data_dir)
-            setattr(instance, "dest_pattern", "test_new.csv")
-            setattr(instance, "headers", [{"key": "new_key"}, {"data": "new_data"}])
+            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "src_dir", self._data_dir)
+            Helper.set_property(instance, "src_pattern", "test\.csv")
+            Helper.set_property(instance, "dest_dir", self._data_dir)
+            Helper.set_property(instance, "dest_pattern", "test_new.csv")
+            Helper.set_property(instance, "headers", [{"key": "new_key"}, {"data": "new_data"}])
             instance.execute()
 
             test_new_csv = os.path.join(self._data_dir, "test_new.csv")
@@ -256,12 +257,12 @@ class TestCsvHeaderConvert(TestFileTransform):
         with pytest.raises(InvalidCount) as execinfo:
             # set the essential attributes
             instance = CsvHeaderConvert()
-            instance.logger = LisboaLog.get_logger(__name__)
-            setattr(instance, "src_dir", self._data_dir)
-            setattr(instance, "src_pattern", "test\.csv")
-            setattr(instance, "dest_dir", self._data_dir)
-            setattr(instance, "dest_pattern", "test_new.csv")
-            setattr(instance, "headers", [{"key": "new_key"}, {"data": "new_data"}])
+            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "src_dir", self._data_dir)
+            Helper.set_property(instance, "src_pattern", "test\.csv")
+            Helper.set_property(instance, "dest_dir", self._data_dir)
+            Helper.set_property(instance, "dest_pattern", "test_new.csv")
+            Helper.set_property(instance, "headers", [{"key": "new_key"}, {"data": "new_data"}])
             instance.execute()
 
         shutil.rmtree(self._data_dir)
@@ -278,12 +279,12 @@ class TestCsvHeaderConvert(TestFileTransform):
         with pytest.raises(InvalidCount) as execinfo:
             # set the essential attributes
             instance = CsvHeaderConvert()
-            instance.logger = LisboaLog.get_logger(__name__)
-            setattr(instance, "src_dir", self._data_dir)
-            setattr(instance, "src_pattern", "test(.*)\.csv")
-            setattr(instance, "dest_dir", self._data_dir)
-            setattr(instance, "dest_pattern", "test_new.csv")
-            setattr(instance, "headers", [{"key": "new_key"}, {"data": "new_data"}])
+            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "src_dir", self._data_dir)
+            Helper.set_property(instance, "src_pattern", "test(.*)\.csv")
+            Helper.set_property(instance, "dest_dir", self._data_dir)
+            Helper.set_property(instance, "dest_pattern", "test_new.csv")
+            Helper.set_property(instance, "headers", [{"key": "new_key"}, {"data": "new_data"}])
             instance.execute()
 
         shutil.rmtree(self._data_dir)

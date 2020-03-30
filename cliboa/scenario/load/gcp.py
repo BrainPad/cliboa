@@ -41,37 +41,27 @@ class BigQueryCreate(BaseBigQuery):
 
     def __init__(self):
         super().__init__()
-        self.__table_schema = None
-        self.__replace = True
+        self._table_schema = None
+        self._replace = True
 
-    @property
-    def table_schema(self):
-        return self.__table_schema
-
-    @table_schema.setter
     def table_schema(self, table_schema):
-        self.__table_schema = table_schema
+        self._table_schema = table_schema
 
-    @property
-    def replace(self):
-        return self.__replace
-
-    @replace.setter
     def replace(self, replace):
-        self.__replace = replace
+        self._replace = replace
 
     def execute(self, *args):
         super().execute()
 
         param_valid = EssentialParameters(
-            self.__class__.__name__, [self.__table_schema]
+            self.__class__.__name__, [self._table_schema]
         )
         param_valid()
 
         cache_list = []
         inserts = False
         # initial if_exists
-        if_exists = self.REPLACE if self.__replace is True else self.APPEND
+        if_exists = self.REPLACE if self._replace is True else self.APPEND
         with open(self._s.cache_file, "r", encoding="utf-8") as f:
             for i, l_str in enumerate(f):
                 l_dict = ast.literal_eval(l_str)
@@ -89,7 +79,7 @@ class BigQueryCreate(BaseBigQuery):
                         dest_tbl,
                         project_id=self._project_id,
                         if_exists=if_exists,
-                        table_schema=self.__table_schema,
+                        table_schema=self._table_schema,
                         location=self._location,
                         credentials=self._auth(),
                     )
@@ -108,7 +98,7 @@ class BigQueryCreate(BaseBigQuery):
                     dest_tbl,
                     project_id=self._project_id,
                     if_exists=if_exists,
-                    table_schema=self.__table_schema,
+                    table_schema=self._table_schema,
                     location=self._location,
                     credentials=self._auth(),
                 )
@@ -128,7 +118,7 @@ class BigQueryCreate(BaseBigQuery):
             cache_list: dictionary list of input cache
         """
         insert_data = {}
-        columns = [name_and_type["name"] for name_and_type in self.__table_schema]
+        columns = [name_and_type["name"] for name_and_type in self._table_schema]
         for c in columns:
             v_list = [d.get(c) for d in cache_list]
             if not v_list:
@@ -146,32 +136,16 @@ class GcsFileUpload(BaseGcs):
 
     def __init__(self):
         super().__init__()
-
         self._src_dir = None
         self._src_pattern = None
         self._dest_dir = ""
 
-    @property
-    def src_dir(self):
-        return self._src_dir
-
-    @src_dir.setter
     def src_dir(self, src_dir):
         self._src_dir = src_dir
 
-    @property
-    def src_pattern(self):
-        return self._src_pattern
-
-    @src_pattern.setter
     def src_pattern(self, src_pattern):
         self._src_pattern = src_pattern
 
-    @property
-    def dest_dir(self):
-        return self._dest_dir
-
-    @dest_dir.setter
     def dest_dir(self, dest_dir):
         self._dest_dir = dest_dir
 
@@ -208,32 +182,22 @@ class CsvReadBigQueryCreate(BaseBigQuery, FileRead):
 
     def __init__(self):
         super().__init__()
-        self.__table_schema = None
-        self.__replace = True
+        self._table_schema = None
+        self._replace = True
         self.__columns = []
 
-    @property
-    def table_schema(self):
-        return self.__table_schema
-
-    @table_schema.setter
     def table_schema(self, table_schema):
-        self.__table_schema = table_schema
+        self._table_schema = table_schema
 
-    @property
-    def replace(self):
-        return self.__replace
-
-    @replace.setter
     def replace(self, replace):
-        self.__replace = replace
+        self._replace = replace
 
     def execute(self, *args):
         BaseBigQuery.execute(self)
         FileRead.execute(self)
 
         param_valid = EssentialParameters(
-            self.__class__.__name__, [self.__table_schema]
+            self.__class__.__name__, [self._table_schema]
         )
         param_valid()
 
@@ -246,9 +210,9 @@ class CsvReadBigQueryCreate(BaseBigQuery, FileRead):
         insert_rows = []
         is_inserted = False
         # initial if_exists
-        if_exists = self.REPLACE if self.__replace is True else self.APPEND
+        if_exists = self.REPLACE if self._replace is True else self.APPEND
         self.__columns = [
-            name_and_type["name"] for name_and_type in self.__table_schema
+            name_and_type["name"] for name_and_type in self._table_schema
         ]
         with open(files[0], "r", encoding=self._encoding) as f:
             reader = csv.DictReader(f, delimiter=",")
@@ -286,7 +250,7 @@ class CsvReadBigQueryCreate(BaseBigQuery, FileRead):
             dest_tbl,
             project_id=self._project_id,
             if_exists=if_exists,
-            table_schema=self.__table_schema,
+            table_schema=self._table_schema,
             location=self._location,
             credentials=self._auth(),
         )
@@ -325,26 +289,13 @@ class FirestoreDocumentCreate(BaseFirestore):
         self._src_dir = None
         self._src_pattern = None
 
-    @property
-    def src_dir(self):
-        return self._src_dir
-
-    @src_dir.setter
     def src_dir(self, src_dir):
         self._src_dir = src_dir
 
-    @property
-    def src_pattern(self):
-        return self._src_pattern
-
-    @src_pattern.setter
     def src_pattern(self, src_pattern):
         self._src_pattern = src_pattern
 
     def execute(self, *args):
-        for k, v in self.__dict__.items():
-            self._logger.info("%s : %s" % (k, v))
-
         super().execute()
 
         valid = EssentialParameters(

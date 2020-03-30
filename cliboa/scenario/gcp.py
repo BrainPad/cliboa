@@ -28,19 +28,9 @@ class BaseGcp(BaseStep):
         self._project_id = None
         self._credentials = None
 
-    @property
-    def project_id(self):
-        return self._project_id
-
-    @project_id.setter
     def project_id(self, project_id):
         self._project_id = project_id
 
-    @property
-    def credentials(self):
-        return self._credentials
-
-    @credentials.setter
     def credentials(self, credentials):
         self._credentials = credentials
 
@@ -86,27 +76,12 @@ class BaseBigQuery(BaseGcp):
         self._tblname = None
         self._location = None
 
-    @property
-    def dataset(self):
-        return self._dataset
-
-    @dataset.setter
     def dataset(self, dataset):
         self._dataset = dataset
 
-    @property
-    def tblname(self):
-        return self._tblname
-
-    @tblname.setter
     def tblname(self, tblname):
         self._tblname = tblname
 
-    @property
-    def location(self):
-        return self._location
-
-    @location.setter
     def location(self, location):
         self._location = location
 
@@ -127,11 +102,6 @@ class BaseGcs(BaseGcp):
         super().__init__()
         self._bucket = None
 
-    @property
-    def bucket(self):
-        return self._bucket
-
-    @bucket.setter
     def bucket(self, bucket):
         self._bucket = bucket
 
@@ -151,18 +121,8 @@ class BaseFirestore(BaseGcp):
         self._collection = None
         self._document = None
 
-    @property
-    def collection(self):
-        return self._collection
-
-    @collection.setter
     def collection(self, collection):
         self._collection = collection
 
-    @property
-    def document(self):
-        return self._document
-
-    @document.setter
     def document(self, document):
         self._document = document

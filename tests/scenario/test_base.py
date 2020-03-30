@@ -20,7 +20,7 @@ from pprint import pprint
 from cliboa.conf import env
 from cliboa.scenario.base import BaseSqlite
 from cliboa.util.exception import SqliteInvalid
-
+from cliboa.util.helper import Helper
 
 class TestBaseSqlite(object):
     def setup_method(self, method):
@@ -33,8 +33,8 @@ class TestBaseSqlite(object):
         try:
             instance = BaseSqlite()
             db_file = os.path.join(self._db_dir, "spam.db")
-            setattr(instance, "dbname", db_file)
-            setattr(instance, "tblname", "spam_table")
+            Helper.set_property(instance, "dbname", db_file)
+            Helper.set_property(instance, "tblname", "spam_table")
             instance.execute()
         except Exception as e:
             tb = sys.exc_info()[2]
