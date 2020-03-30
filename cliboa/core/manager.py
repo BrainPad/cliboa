@@ -30,6 +30,7 @@ from cliboa.util.lisboa_log import LisboaLog
 from cliboa.util.cache import StepArgument
 from cliboa.util.exception import *
 from cliboa.util.http import FormAuth, BasicAuth
+from cliboa.util.helper import Helper
 
 __all__ = ["YamlScenarioManager", "JsonScenarioManager"]
 
@@ -143,20 +144,13 @@ class YamlScenarioManager(ScenarioManager):
             if "parallel" in s_dict.keys():
                 for row in s_dict.get("parallel"):
                     instance = self.__create_instance(row, yaml_scenario_list)
-                    setattr(
-                        instance,
-                        "logger",
-                        LisboaLog.get_logger(instance.__class__.__name__),
-                    )
+                    Helper.set_property(instance, "logger", LisboaLog.get_logger(instance.__class__.__name__))
+
                     instances.append(instance)
                     StepArgument._put(row["step"], instance)
             else:
                 instance = self.__create_instance(s_dict, yaml_scenario_list)
-                setattr(
-                    instance,
-                    "logger",
-                    LisboaLog.get_logger(instance.__class__.__name__),
-                )
+                Helper.set_property(instance, "logger", LisboaLog.get_logger(instance.__class__.__name__))
                 instances.append(instance)
                 StepArgument._put(s_dict["step"], instance)
 
@@ -181,7 +175,7 @@ class YamlScenarioManager(ScenarioManager):
 
         base_args = ["step", "symbol", "parallel", "io"]
         for arg in base_args:
-            setattr(instance, arg, s_dict.get(arg))
+            Helper.set_property(instance, arg, s_dict.get(arg))
 
         cls_attrs_dict = {}
         if isinstance(yaml_scenario_list, list) and "arguments" in s_dict.keys():
@@ -214,8 +208,7 @@ class YamlScenarioManager(ScenarioManager):
                         var_name = exists_var.group(1).strip()
                         yaml_v = self.__replace_vars(yaml_v, var_name)
 
-                # set attribute to step class
-                setattr(instance, yaml_k, yaml_v)
+                Helper.set_property(instance, yaml_k, yaml_v)
 
         return instance
 
@@ -303,7 +296,7 @@ class YamlScenarioManager(ScenarioManager):
                 # set attributes to instance
                 if di_params:
                     for k, v in di_params.items():
-                        setattr(di_instance, k, v)
+                        Helper.set_property(di_instance, k, v)
                 di_instances.append(di_instance)
         return di_keys, di_instances
 
