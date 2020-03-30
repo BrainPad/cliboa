@@ -30,19 +30,9 @@ class SqliteRead(BaseSqlite):
         self._tblname = None
         self._raw_query = None
 
-    @property
-    def tblname(self):
-        return self._tblname
-
-    @tblname.setter
     def tblname(self, tblname):
         self._tblname = tblname
 
-    @property
-    def raw_query(self):
-        return self._raw_query
-
-    @raw_query.setter
     def raw_query(self, raw_query):
         self._raw_query = raw_query
 
@@ -51,9 +41,6 @@ class SqliteRead(BaseSqlite):
 
         input_valid = IOInput(self._io)
         input_valid()
-
-        for k, v in self.__dict__.items():
-            self._logger.info("%s : %s" % (k, v))
 
         param_valid = EssentialParameters(self.__class__.__name__, [self._tblname])
         param_valid()
@@ -98,8 +85,6 @@ class SqliteReadRow(BaseSqlite):
 
     def execute(self, *args):
         super().execute()
-        for k, v in self.__dict__.items():
-            self._logger.info("%s : %s" % (k, v))
 
         self._sqlite_adptr.connect(self._dbname)
         try:

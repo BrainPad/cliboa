@@ -26,11 +26,6 @@ class SampleStep(BaseStep):
         self._retry_count = 3
         self._logger = LisboaLog.get_logger(__name__)
 
-    @property
-    def retry_count(self):
-        return self._retry_count
-
-    @retry_count.setter
     def retry_count(self, retry_count):
         self._retry_count = retry_count
 
@@ -48,11 +43,6 @@ class SampleCustomStep(BaseStep):
         BaseStep.__init__(self)
         self._retry_count = 3
 
-    @property
-    def retry_count(self):
-        return self._retry_count
-
-    @retry_count.setter
     def retry_count(self, retry_count):
         self._retry_count = retry_count
 

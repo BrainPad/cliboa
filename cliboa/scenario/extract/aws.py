@@ -31,41 +31,19 @@ class S3Download(BaseS3):
         self._src_pattern = None
         self._dest_dir = "."
 
-    @property
-    def prefix(self):
-        return self._prefix
-
-    @prefix.setter
     def prefix(self, prefix):
         self._prefix = prefix
 
-    @property
-    def delimiter(self):
-        return self._delimiter
-
-    @delimiter.setter
     def delimiter(self, delimiter):
         self._delimiter = delimiter
 
-    @property
-    def src_pattern(self):
-        return self._src_pattern
-
-    @src_pattern.setter
     def src_pattern(self, src_pattern):
         self._src_pattern = src_pattern
 
-    @property
-    def dest_dir(self):
-        return self._dest_dir
-
-    @dest_dir.setter
     def dest_dir(self, dest_dir):
         self._dest_dir = dest_dir
 
     def execute(self, *args):
-        for k, v in self.__dict__.items():
-            self._logger.info("%s : %s" % (k, v))
         super().execute()
 
         valid = EssentialParameters(self.__class__.__name__, [self._src_pattern])

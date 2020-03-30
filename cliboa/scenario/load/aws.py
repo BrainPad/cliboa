@@ -30,35 +30,15 @@ class S3Upload(BaseS3):
         self._src_pattern = None
         self._quit = False
 
-    @property
-    def key(self):
-        return self._key
-
-    @key.setter
     def key(self, key):
         self._key = key
 
-    @property
-    def src_dir(self):
-        return self._src_dir
-
-    @src_dir.setter
     def src_dir(self, src_dir):
         self._src_dir = src_dir
 
-    @property
-    def src_pattern(self):
-        return self._src_pattern
-
-    @src_pattern.setter
     def src_pattern(self, src_pattern):
         self._src_pattern = src_pattern
 
-    @property
-    def quit(self):
-        return self._quit
-
-    @quit.setter
     def quit(self, quit):
         self._quit = quit
 

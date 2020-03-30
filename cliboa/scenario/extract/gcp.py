@@ -39,19 +39,9 @@ class BigQueryReadCache(BaseBigQuery):
         self._key = None
         self._query = None
 
-    @property
-    def key(self):
-        return self._key
-
-    @key.setter
     def key(self, key):
         self._key = key
 
-    @property
-    def query(self):
-        return self._query
-
-    @query.setter
     def query(self, query):
         self._query = query
 
@@ -90,27 +80,12 @@ class BigQueryFileDownload(BaseBigQuery):
         self._dest_dir = None
         self._filename = None
 
-    @property
-    def bucket(self):
-        return self._bucket
-
-    @bucket.setter
     def bucket(self, bucket):
         self._bucket = bucket
 
-    @property
-    def dest_dir(self):
-        return self._dest_dir
-
-    @dest_dir.setter
     def dest_dir(self, dest_dir):
         self._dest_dir = dest_dir
 
-    @property
-    def filename(self):
-        return self._filename
-
-    @filename.setter
     def filename(self, filename):
         self._filename = filename
 
@@ -173,41 +148,19 @@ class GcsDownload(BaseGcs):
         self._src_pattern = None
         self._dest_dir = "."
 
-    @property
-    def prefix(self):
-        return self._prefix
-
-    @prefix.setter
     def prefix(self, prefix):
         self._prefix = prefix
 
-    @property
-    def delimiter(self):
-        return self._delimiter
-
-    @delimiter.setter
     def delimiter(self, delimiter):
         self._delimiter = delimiter
 
-    @property
-    def src_pattern(self):
-        return self._src_pattern
-
-    @src_pattern.setter
     def src_pattern(self, src_pattern):
         self._src_pattern = src_pattern
 
-    @property
-    def dest_dir(self):
-        return self._dest_dir
-
-    @dest_dir.setter
     def dest_dir(self, dest_dir):
         self._dest_dir = dest_dir
 
     def execute(self, *args):
-        for k, v in self.__dict__.items():
-            self._logger.info("%s : %s" % (k, v))
         super().execute()
 
         valid = EssentialParameters(self.__class__.__name__, [self._src_pattern])
@@ -237,8 +190,6 @@ class GcsDownloadFileDelete(BaseGcs):
         super().__init__()
 
     def execute(self, *args):
-        for k, v in self.__dict__.items():
-            self._logger.info("%s : %s" % (k, v))
         dl_files = ObjectStore.get(self._symbol)
 
         if len(dl_files) > 0:
@@ -264,21 +215,12 @@ class FirestoreDownloadDocument(BaseFirestore):
 
     def __init__(self):
         super().__init__()
-
         self._dest_dir = None
 
-    @property
-    def dest_dir(self):
-        return self._dest_dir
-
-    @dest_dir.setter
     def dest_dir(self, dest_dir):
         self._dest_dir = dest_dir
 
     def execute(self, *args):
-        for k, v in self.__dict__.items():
-            self._logger.info("%s : %s" % (k, v))
-
         super().execute()
 
         valid = EssentialParameters(
@@ -290,5 +232,5 @@ class FirestoreDownloadDocument(BaseFirestore):
         ref = firestore_client.document(self._collection, self._document)
         doc = ref.get()
 
-        with open(os.path.join(self.dest_dir, doc.id), mode="wt") as f:
+        with open(os.path.join(self._dest_dir, doc.id), mode="wt") as f:
             f.write(json.dumps(doc.to_dict()))
