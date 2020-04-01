@@ -63,3 +63,18 @@ class File(object):
                 if r.fullmatch(file):
                     target_files.append(os.path.join(dir, file))
         return target_files
+
+    def convert_encoding(self, src, dest, encoding_from, encoding_to):
+        """
+        Copy file with specified encoding
+
+        Args:
+            src (str): Copy source file name
+            dest (str): Copy destination file name
+            enc_from (str): Encoding of source file
+            enc_to (str): Encoding of destination file
+        """
+        with open(src, "r", encoding=encoding_from) as input:
+            with open(dest, "w", encoding=encoding_to) as output:
+                for i in input:
+                    output.write(i)

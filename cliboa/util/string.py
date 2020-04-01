@@ -11,30 +11,25 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import dateutil.parser as parser
+import random
+import string
 from cliboa.util.lisboa_log import LisboaLog
 
 
-class DateUtil(object):
+class StringUtil(object):
     def __init__(self):
         self._logger = LisboaLog.get_logger(__name__)
 
-    def convert_date_format(self, str, format):
+    def random_str(self, length):
         """
-        Convert date string to other format date string.
-        The converter parser is based on the specifications below.
-
-        https://dateutil.readthedocs.io/en/stable/parser.html
+        Generate a random string
 
         Args:
-            str: string before convert
-            format: formatter
+            length: Length of characters
 
         Returns:
-            str: new format date string or None if str is None
+            str: New randomly generated string
         """
-        if not str:
-            return None
-
-        p = parser.parse(str)
-        return p.strftime(format)
+        return "".join(
+            [random.choice(string.ascii_letters + string.digits) for i in range(length)]
+        )

@@ -17,7 +17,6 @@ import csv
 import gzip
 import os
 import pandas
-import re
 import shutil
 import tarfile
 import zipfile
@@ -27,6 +26,7 @@ from cliboa.scenario.base import BaseStep
 from cliboa.util.date import DateUtil
 from cliboa.util.exception import CliboaException, InvalidFormat, InvalidCount
 from cliboa.util.file import File
+from cliboa.util.string import StringUtil
 
 
 class FileBaseTransform(BaseStep):
@@ -53,8 +53,7 @@ class FileBaseTransform(BaseStep):
         self._dest_path = dest_path
 
     def dest_dir(self, dest_dir):
-        if os.path.exists(dest_dir) is False:
-            os.makedirs(dest_dir)
+        os.makedirs(dest_dir, exist_ok=True)
         self._dest_dir = dest_dir
 
     def dest_pattern(self, dest_pattern):
@@ -80,6 +79,7 @@ class FileDecompress(FileBaseTransform):
     """
     Decompress the specified file
     """
+
     def __init__(self):
         super().__init__()
 
@@ -141,7 +141,7 @@ class FileCompress(FileBaseTransform):
     def execute(self, *args):
         # essential parameters check
         valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir, self._src_pattern, self._format,],
+            self.__class__.__name__, [self._src_dir, self._src_pattern, self._format],
         )
         valid()
 
@@ -294,7 +294,7 @@ class ExcelConvert(FileBaseTransform):
         valid()
 
         # get a target file
-        target_files = File().get_target_files(self._src_dir, self._src_pattern)
+        target_files = super().get_target_files(self._src_dir, self._src_pattern)
         if len(target_files) == 0:
             raise InvalidCount(
                 "An input file %s does not exist."
@@ -417,7 +417,7 @@ class CsvHeaderConvert(FileBaseTransform):
         )
         valid()
 
-        target_files = File().get_target_files(self._src_dir, self._src_pattern)
+        target_files = super().get_target_files(self._src_dir, self._src_pattern)
         if len(target_files) == 0:
             raise InvalidCount(
                 "An input file %s does not exist."
@@ -563,7 +563,7 @@ class FileRename(FileBaseTransform):
         )
         valid()
 
-        files = File().get_target_files(self._src_dir, self._src_pattern)
+        files = super().get_target_files(self._src_dir, self._src_pattern)
         if len(files) == 0:
             self._logger.info("No files are found. Nothing to do.")
             return
@@ -659,14 +659,24 @@ class CsvFormatChange(FileBaseTransform):
                 self._after_enc,
                 self._dest_dir,
                 self._dest_pattern,
-            ]
+            ],
         )
         valid()
 
         with open(file, mode="rt", encoding=self._before_enc) as i:
             reader = csv.reader(i, delimiter=self._csv_delimiter(self._before_format))
-            with open(os.path.join(self._dest_dir, self._dest_pattern), mode="wt", newline="", encoding=self._after_enc) as o:
-                writer = csv.writer(o, delimiter=self._csv_delimiter(self._after_format), quoting=self._csv_quote(), lineterminator=self._csv_newline())
+            with open(
+                os.path.join(self._dest_dir, self._dest_pattern),
+                mode="wt",
+                newline="",
+                encoding=self._after_enc,
+            ) as o:
+                writer = csv.writer(
+                    o,
+                    delimiter=self._csv_delimiter(self._after_format),
+                    quoting=self._csv_quote(),
+                    lineterminator=self._csv_newline(),
+                )
                 for line in reader:
                     writer.writerow(line)
 
@@ -678,25 +688,83 @@ class CsvFormatChange(FileBaseTransform):
         elif self._after_nl.upper() == "CRLF":
             return "\r\n"
         else:
-            raise CliboaException("Unknown New LIne. One of the followings are allowd [LF, CR, CRLF]")
+            raise CliboaException(
+                "Unknown New LIne. One of the followings are allowd [LF, CR, CRLF]"
+            )
 
     def _csv_delimiter(self, ext):
-        if ext.upper() == "CSV" :
+        if ext.upper() == "CSV":
             return ","
-        elif ext.upper() == "TSV" :
+        elif ext.upper() == "TSV":
             return "\t"
         else:
-            raise CliboaException("Unknown ext. One of the followings are allowd [CSV, TSV]")
+            raise CliboaException(
+                "Unknown ext. One of the followings are allowd [CSV, TSV]"
+            )
 
     def _csv_quote(self):
-        if "QUOTE_ALL"  == self._quote:
+        if "QUOTE_ALL" == self._quote:
             return csv.QUOTE_ALL
-        elif "QUOTE_MINIMAL"  == self._quote:
+        elif "QUOTE_MINIMAL" == self._quote:
             return csv.QUOTE_MINIMAL
-        elif "QUOTE_NONNUMERIC"  == self._quote:
+        elif "QUOTE_NONNUMERIC" == self._quote:
             return csv.QUOTE_NONNUMERIC
-        elif "QUOTE_NONE"  == self._quote:
+        elif "QUOTE_NONE" == self._quote:
             return csv.QUOTE_NONE
         else:
             raise CliboaException(
-                "Unknown quote. One of the followings are allowd [QUOTE_ALL, QUOTE_MINIMAL, QUOTE_NONNUMERIC, QUOTE_NONE]")
+                "Unknown quote. One of the followings are allowd [QUOTE_ALL, QUOTE_MINIMAL, QUOTE_NONNUMERIC, QUOTE_NONE]"
+            )
+
+
+class FileConvert(FileBaseTransform):
+    """
+    Convert file encoding
+    """
+
+    def __init__(self):
+        super().__init__()
+        self._encoding_from = None
+        self._encoding_to = None
+
+    def encoding_from(self, encoding_from):
+        self._encoding_from = encoding_from
+
+    def encoding_to(self, encoding_to):
+        self._encoding_to = encoding_to
+
+    def execute(self, *args):
+        # essential parameters check
+        valid = EssentialParameters(
+            self.__class__.__name__,
+            [self._src_dir, self._src_pattern, self._encoding_from, self._encoding_to],
+        )
+        valid()
+
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+        if len(files) == 0:
+            self._logger.info("No files are found. Nothing to do.")
+            return
+
+        for file in files:
+            basename = os.path.basename(file)
+
+            if self._dest_dir:
+                File().convert_encoding(
+                    file,
+                    os.path.join(self._dest_dir, basename),
+                    self._encoding_from,
+                    self._encoding_to,
+                )
+            else:
+                tmpfile = os.path.join(
+                    os.path.dirname(file),
+                    "." + StringUtil().random_str(10) + "." + basename,
+                )
+                File().convert_encoding(
+                    file, tmpfile, self._encoding_from, self._encoding_to
+                )
+                os.remove(file)
+                os.rename(tmpfile, file)
+
+            self._logger.info("Encoded file %s" % basename)
