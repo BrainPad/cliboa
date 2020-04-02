@@ -66,6 +66,7 @@ class CliboAdmin(object):
         self._cmn_dir = os.path.join(ini_dir, "common")
         os.makedirs(self._cmn_dir, exist_ok=False)
         os.makedirs(os.path.join(self._cmn_dir, "scenario"), exist_ok=False)
+        os.makedirs(os.path.join(ini_dir, "cliboa/conf"), exist_ok=False)
         os.makedirs(os.path.join(ini_dir, "conf"), exist_ok=False)
         os.makedirs(os.path.join(ini_dir, "logs"), exist_ok=False)
         os.makedirs(os.path.join(ini_dir, "project"), exist_ok=False)
@@ -93,6 +94,9 @@ class CliboAdmin(object):
             cliboa_install_path, "cliboa", "conf", "default_environment.py"
         )
         copyfile(cmn_env_path, os.path.join(self._cmn_dir, "environment.py"))
+
+        conf_path = os.path.join(cliboa_install_path, "cliboa", "conf", "cliboa.ini")
+        copyfile(conf_path, os.path.join(ini_dir, "cliboa", "conf", "cliboa.ini"))
 
         cmn_scenario_path = os.path.join(ini_dir, "common", "scenario.yml")
         with open(cmn_scenario_path, "w") as yaml:

@@ -19,8 +19,31 @@ from pprint import pprint
 
 from cliboa.conf import env
 from cliboa.scenario.base import BaseSqlite
-from cliboa.util.exception import SqliteInvalid
+from cliboa.scenario.sample_step import SampleStep
 
+from cliboa.util.exception import SqliteInvalid
+from cliboa.util.helper import Helper
+from cliboa.util.lisboa_log import LisboaLog
+
+
+
+class TestBase(object):
+    def setup_method(self, method):
+        self._log_file = os.path.join(env.BASE_DIR, "logs", "app.log")
+
+    def test_logging_mask(self):
+        instance = SampleStep()
+        instance.logger = LisboaLog.get_logger(__name__)
+        setattr(instance, "user", "admin")
+        setattr(instance, "password", "test")
+        instance.trigger()
+        ret = False
+        with open(self._log_file, mode="r", encoding="utf-8") as f:
+            for line in f:
+                if "password : ****" in line:
+                    ret = True
+                    break
+        assert ret is True
 
 class TestBaseSqlite(object):
     def setup_method(self, method):
@@ -33,8 +56,8 @@ class TestBaseSqlite(object):
         try:
             instance = BaseSqlite()
             db_file = os.path.join(self._db_dir, "spam.db")
-            setattr(instance, "dbname", db_file)
-            setattr(instance, "tblname", "spam_table")
+            Helper.set_property(instance, "dbname", db_file)
+            Helper.set_property(instance, "tblname", "spam_table")
             instance.execute()
         except Exception as e:
             tb = sys.exc_info()[2]
