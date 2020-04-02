@@ -11,15 +11,15 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import cloudpickle
-
 from abc import abstractmethod
 from multiprocessing import Pool
+
+import cloudpickle
 from multiprocessing_logging import install_mp_handler
 
 from cliboa.core.scenario_queue import ScenarioQueue
-from cliboa.util.lisboa_log import LisboaLog
 from cliboa.util.exception import StepExecutionFailed
+from cliboa.util.lisboa_log import LisboaLog
 
 __all__ = ["SingleProcExecutor", "MultiProcExecutor"]
 
@@ -52,7 +52,6 @@ class StepExecutor(object):
         """
         Execute steps in scenario file
         """
-        pass
 
     def regist_listeners(self, listener):
         """

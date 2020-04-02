@@ -11,10 +11,6 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import os
-import sys
-import pytest
-from pprint import pprint
 
 from cliboa.core.step_queue import StepQueue
 

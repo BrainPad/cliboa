@@ -11,11 +11,12 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import os
 import errno
 import logging
-from paramiko import SSHClient, AutoAddPolicy
+import os
 from time import sleep
+
+from paramiko import AutoAddPolicy, SSHClient
 
 
 class Sftp(object):

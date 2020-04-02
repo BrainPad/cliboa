@@ -4,6 +4,9 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+autoflake = "==1.3.1"
+flake8 = "==3.7.9"
+isort = "==4.3.21"
 pycodestyle = "==2.5.0"
 pytest = "==4.6.1"
 XlsxWriter = "==1.1.8"
@@ -28,6 +31,7 @@ google-auth = "==1.11.0"
 google-cloud-storage = "==1.25.0"
 google-cloud-bigquery = "==1.24.0"
 google-cloud-firestore = "==1.6.2"
+grpcio = "==1.26.0"
 pandas-gbq = "==0.13.0"
 PyYaml = "==5.1"
 
@@ -35,4 +39,5 @@ PyYaml = "==5.1"
 python_version = "3.5"
 
 [scripts]
+lintfix = "bash -c 'autoflake -ri --ignore-init-module-imports --remove-unused-variables . && isort -rc . && flake8 --ignore=E501,F401,F403,W503,W605 .'"
 unittest = "python3 setup.py test"

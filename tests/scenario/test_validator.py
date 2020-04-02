@@ -12,16 +12,14 @@
 # all copies or substantial portions of the Software.
 #
 import os
-import sys
 import shutil
-import yaml
-import pytest
 import sqlite3
-from pprint import pprint
+
+import pytest
 
 from cliboa.conf import env
-from cliboa.scenario.validator import *
-from cliboa.util.exception import *
+from cliboa.scenario.validator import EssentialParameters, SqliteTableExistence
+from cliboa.util.exception import CliboaException, SqliteInvalid
 
 
 class TestEssentialParameters(object):

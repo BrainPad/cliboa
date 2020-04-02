@@ -14,8 +14,8 @@
 import os
 
 from cliboa.scenario.aws import BaseS3
-from cliboa.util.constant import StepStatus
 from cliboa.scenario.validator import EssentialParameters
+from cliboa.util.constant import StepStatus
 
 
 class S3Upload(BaseS3):

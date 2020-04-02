@@ -13,10 +13,9 @@
 #
 import os
 
-import cliboa
-from cliboa.conf import env
 from cliboa.core.step_queue import StepQueue
-from cliboa.util.exception import *
+from cliboa.util.exception import (DirStructureInvalid, FileNotFound,
+                                   InvalidCount, ScenarioFileInvalid)
 
 
 class ValidatorChain(object):
@@ -158,7 +157,7 @@ class EssentialKeys(object):
                 self.__exists_class(scenario_yaml_dict)
 
     def __exists_step(self, dict):
-        if not "step" in dict.keys():
+        if "step" not in dict.keys():
             raise ScenarioFileInvalid(
                 "scenario.yml is invalid. 'step:' does not exist."
             )

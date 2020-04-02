@@ -11,12 +11,11 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-from cliboa.util.constant import StepStatus
-from cliboa.util.exception import CliboaException
-from cliboa.util.lisboa_log import LisboaLog
 from cliboa.core.factory import StepExecutorFactory
 from cliboa.core.listener import StepStatusListener
 from cliboa.core.scenario_queue import ScenarioQueue
+from cliboa.util.constant import StepStatus
+from cliboa.util.lisboa_log import LisboaLog
 
 
 class ScenarioWorker(object):

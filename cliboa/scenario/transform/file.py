@@ -16,15 +16,16 @@ import codecs
 import csv
 import gzip
 import os
-import pandas
 import shutil
 import tarfile
 import zipfile
 
+import pandas
+
 from cliboa.core.validator import EssentialParameters
 from cliboa.scenario.base import BaseStep
 from cliboa.util.date import DateUtil
-from cliboa.util.exception import CliboaException, InvalidFormat, InvalidCount
+from cliboa.util.exception import CliboaException, InvalidCount, InvalidFormat
 from cliboa.util.file import File
 from cliboa.util.string import StringUtil
 
@@ -141,7 +142,7 @@ class FileCompress(FileBaseTransform):
     def execute(self, *args):
         # essential parameters check
         valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir, self._src_pattern, self._format],
+            self.__class__.__name__, [self._src_dir, self._src_pattern, self._format]
         )
         valid()
 

@@ -11,19 +11,12 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import shutil
-import os
 import sys
-import pytest
-from pprint import pprint
 
 from cliboa.client import CommandArgumentParser
-from cliboa.conf import env
 from cliboa.core.scenario_queue import ScenarioQueue
-from cliboa.core.step_queue import *
-from cliboa.core.strategy import *
 from cliboa.core.worker import ScenarioWorker
-from cliboa.scenario.sample_step import *
+from cliboa.scenario.sample_step import SampleStep
 
 
 class TestWorker(object):

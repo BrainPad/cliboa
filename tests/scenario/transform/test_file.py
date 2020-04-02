@@ -13,21 +13,18 @@
 #
 import csv
 import os
-import pytest
 import shutil
-import xlsxwriter
 from glob import glob
 
+import pytest
+import xlsxwriter
+
 from cliboa.conf import env
-from cliboa.scenario.transform.file import (
-    ExcelConvert,
-    CsvMerge,
-    CsvHeaderConvert,
-    FileConvert,
-)
-from cliboa.util.exception import InvalidFormat, InvalidCount
-from cliboa.util.lisboa_log import LisboaLog
+from cliboa.scenario.transform.file import (CsvHeaderConvert, CsvMerge,
+                                            ExcelConvert, FileConvert)
+from cliboa.util.exception import InvalidCount, InvalidFormat
 from cliboa.util.helper import Helper
+from cliboa.util.lisboa_log import LisboaLog
 
 
 class TestFileTransform(object):
@@ -253,10 +250,10 @@ class TestCsvHeaderConvert(TestFileTransform):
             test_new_csv = os.path.join(self._data_dir, "test_new.csv")
             with open(test_new_csv, "r") as t:
                 reader = csv.reader(t)
-                l = next(reader)
+                line = next(reader)
         finally:
             shutil.rmtree(self._data_dir)
-        assert l == ["new_key", "new_data"]
+        assert line == ["new_key", "new_data"]
 
     def test_execute_ng_no_src_file(self):
         os.makedirs(self._data_dir)

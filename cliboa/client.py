@@ -11,21 +11,16 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import os
-import sys
 import argparse
 import logging.config
+import os
+import sys
 
 from cliboa.conf import env
-from cliboa.util.lisboa_log import LisboaLog
-from cliboa.core.validator import (
-    ProjectDirectoryExistence,
-    ScenarioFileExistence,
-)
 from cliboa.core.factory import ScenarioManagerFactory
-from cliboa.core.worker import ScenarioWorker
 from cliboa.core.listener import ScenarioStatusListener
-from cliboa.core.scenario_queue import ScenarioQueue
+from cliboa.core.worker import ScenarioWorker
+from cliboa.util.lisboa_log import LisboaLog
 
 
 class ScenarioRunner(object):

@@ -11,14 +11,14 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-from abc import abstractmethod
 import os
+from abc import abstractmethod
+
 import yaml
 
-from cliboa.conf import env
-from cliboa.core.validator import ScenarioYamlKey, ScenarioYamlType, EssentialKeys
+from cliboa.core.validator import (EssentialKeys, ScenarioYamlKey,
+                                   ScenarioYamlType)
 from cliboa.util.lisboa_log import LisboaLog
-from cliboa.util.exception import *
 
 
 class ScenarioParser(object):
@@ -36,7 +36,6 @@ class ScenarioParser(object):
         """
         Parse scenario file
         """
-        pass
 
 
 class YamlScenarioParser(ScenarioParser):
@@ -50,7 +49,6 @@ class YamlScenarioParser(ScenarioParser):
         pj_yaml_dict = yaml.safe_load(pj_f)
 
         self.__valid_scenario_yaml(pj_yaml_dict)
-
         exists_cmn_scenario_file = os.path.isfile(self._cmn_scenario_file)
         if exists_cmn_scenario_file:
             cmn_f = open(self._cmn_scenario_file, "r")
@@ -114,5 +112,3 @@ class JsonScenarioParser:
     """
     TODO: implement in the future
     """
-
-    pass

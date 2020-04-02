@@ -11,8 +11,8 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import re
 import os
+import re
 
 from cliboa.scenario.base import BaseStep
 from cliboa.scenario.validator import EssentialParameters

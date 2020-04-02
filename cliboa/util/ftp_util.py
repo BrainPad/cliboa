@@ -11,12 +11,13 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import os
 import errno
-from cliboa.util.lisboa_log import LisboaLog
+import os
 from datetime import datetime
-from time import sleep
 from ftplib import FTP, FTP_TLS
+from time import sleep
+
+from cliboa.util.lisboa_log import LisboaLog
 
 
 class FtpUtil(object):
@@ -171,7 +172,7 @@ def list_file_func(**kwargs):
         if kwargs["pattern"].match(fname) is None:
             continue
 
-        fPath = os.path.join(kwargs["dir"], src)
+        os.path.join(kwargs["dir"], src)
         try:
             with open(os.path.join(kwargs["dest"], fname), "wb") as f:
                 kwargs["ftp"].retrbinary("RETR " + src, f.write)
@@ -189,7 +190,7 @@ def clear_file_func(**kwargs):
             continue
         try:
             kwargs["ftp"].delete(src)
-        except Exception as e:
+        except Exception:
             # ignore erros. Directory cannot be deleted by ftp#delete.
             pass
 

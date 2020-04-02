@@ -1,11 +1,9 @@
 import os
 import re
-import sys
-import pytest
 import shutil
-from pprint import pprint
 
-from cliboa.conf import env
+import pytest
+
 from cliboa.util.ftp_util import FtpUtil
 
 
@@ -20,7 +18,7 @@ class TestFtpUtil(object):
         src_dir = "/"
         pattern = "(.*).txt"
         os.makedirs(self.__dest_dir)
-        files = ftp_util.list_files(src_dir, self.__dest_dir, re.compile(pattern))
+        ftp_util.list_files(src_dir, self.__dest_dir, re.compile(pattern))
         exists_downloaded_file = os.path.exists(
             os.path.join(self.__dest_dir, "readme.txt")
         )
@@ -38,6 +36,6 @@ class TestFtpUtil(object):
         pattern = "(.*).txt"
         os.makedirs(self.__dest_dir)
         with pytest.raises(IOError) as execinfo:
-            files = ftp_util.list_files(src_dir, self.__dest_dir, re.compile(pattern))
+            ftp_util.list_files(src_dir, self.__dest_dir, re.compile(pattern))
         shutil.rmtree(self.__dest_dir)
         assert "FTP failed." in str(execinfo.value)

@@ -11,16 +11,14 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import argparse
 import os
-import pytest
 import shutil
 import sys
-import yaml
-from pprint import pprint
 
+import yaml
+
+from cliboa.client import CommandArgumentParser, ScenarioRunner
 from cliboa.conf import env
-from cliboa.client import ScenarioRunner, CommandArgumentParser
 
 
 class TestCommandArgumentParser(object):

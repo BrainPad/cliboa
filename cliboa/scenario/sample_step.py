@@ -11,7 +11,6 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import cliboa
 from cliboa.scenario.base import BaseStep
 from cliboa.util.lisboa_log import LisboaLog
 

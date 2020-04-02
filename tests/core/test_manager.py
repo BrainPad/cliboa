@@ -12,17 +12,17 @@
 # all copies or substantial portions of the Software.
 #
 import os
-import pytest
 import shutil
 import sys
+
+import pytest
 import yaml
-from pprint import pprint
 
 from cliboa.client import CommandArgumentParser
 from cliboa.conf import env
 from cliboa.core.manager import YamlScenarioManager
 from cliboa.core.scenario_queue import ScenarioQueue
-from cliboa.util.exception import *
+from cliboa.util.exception import ScenarioFileInvalid
 
 
 class TestYamlScenarioManager(object):

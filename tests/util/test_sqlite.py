@@ -1,15 +1,10 @@
 import os
-import sys
-import pytest
 import shutil
-import sqlite3
-from pprint import pprint
+
+import pytest
 
 from cliboa.conf import env
-from cliboa.scenario.load.sqlite import SqliteCreation
-from cliboa.util.cache import StorageIO
 from cliboa.util.sqlite import SqliteAdapter
-from cliboa.util.exception import SqliteInvalid
 
 
 class TestSqliteCreation(object):
@@ -42,11 +37,11 @@ class TestSqliteCreation(object):
         db_file = os.path.join(self.__db_dir, "spam.db")
         self.__adptr.connect(db_file)
         self.__adptr.execute("create table spam_table (id, name, age);")
-        cursor = self.__adptr.fetch("select * from spam_table")
-        exists_db_file = os.path.exists(db_file)
-        conn = sqlite3.connect(db_file)
+        cursor1 = self.__adptr.fetch("select * from spam_table")
+        cursor2 = self.__adptr.fetch("select * from spam_table")
+        os.path.exists(db_file)
         shutil.rmtree(self.__db_dir)
-        assert type(cursor) == type(conn.cursor())
+        assert isinstance(type(cursor1), type(cursor2)) is False
 
     def test_execute_many_insert_ok(self):
         # create spam.db

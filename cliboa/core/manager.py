@@ -11,26 +11,22 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-from abc import abstractmethod
-from importlib import import_module
 import os
 import re
 import subprocess
+from abc import abstractmethod
 
 from cliboa.conf import env
-from cliboa.core.validator import (
-    ProjectDirectoryExistence,
-    ScenarioFileExistence,
-    DIScenarioFormat,
-)
 from cliboa.core.file_parser import YamlScenarioParser
 from cliboa.core.scenario_queue import ScenarioQueue
+from cliboa.core.validator import (DIScenarioFormat, ProjectDirectoryExistence,
+                                   ScenarioFileExistence)
 from cliboa.scenario import *
-from cliboa.util.lisboa_log import LisboaLog
 from cliboa.util.cache import StepArgument
-from cliboa.util.exception import *
-from cliboa.util.http import FormAuth, BasicAuth
+from cliboa.util.exception import ScenarioFileInvalid
 from cliboa.util.helper import Helper
+from cliboa.util.http import BasicAuth, FormAuth
+from cliboa.util.lisboa_log import LisboaLog
 
 __all__ = ["YamlScenarioManager", "JsonScenarioManager"]
 
@@ -82,7 +78,6 @@ class ScenarioManager(object):
         """
         Create Scenario Queue
         """
-        pass
 
 
 class YamlScenarioManager(ScenarioManager):
@@ -144,13 +139,21 @@ class YamlScenarioManager(ScenarioManager):
             if "parallel" in s_dict.keys():
                 for row in s_dict.get("parallel"):
                     instance = self.__create_instance(row, yaml_scenario_list)
-                    Helper.set_property(instance, "logger", LisboaLog.get_logger(instance.__class__.__name__))
+                    Helper.set_property(
+                        instance,
+                        "logger",
+                        LisboaLog.get_logger(instance.__class__.__name__),
+                    )
 
                     instances.append(instance)
                     StepArgument._put(row["step"], instance)
             else:
                 instance = self.__create_instance(s_dict, yaml_scenario_list)
-                Helper.set_property(instance, "logger", LisboaLog.get_logger(instance.__class__.__name__))
+                Helper.set_property(
+                    instance,
+                    "logger",
+                    LisboaLog.get_logger(instance.__class__.__name__),
+                )
                 instances.append(instance)
                 StepArgument._put(s_dict["step"], instance)
 
@@ -310,4 +313,3 @@ class JsonScenarioManager(ScenarioManager):
         """
         TODO: implement in the future
         """
-        pass

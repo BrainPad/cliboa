@@ -11,15 +11,10 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import os
 
-from cliboa.conf import env
+from cliboa.util.exception import (CliboaException, ScenarioFileInvalid,
+                                   SqliteInvalid)
 from cliboa.util.lisboa_log import LisboaLog
-from cliboa.util.exception import (
-    CliboaException,
-    SqliteInvalid,
-    ScenarioFileInvalid,
-)
 from cliboa.util.sqlite import SqliteAdapter
 
 

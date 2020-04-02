@@ -12,9 +12,8 @@
 # all copies or substantial portions of the Software.
 #
 
-from importlib import import_module
 import os
-import sys
+from importlib import import_module
 
 
 class Environment:

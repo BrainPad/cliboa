@@ -12,16 +12,17 @@
 # all copies or substantial portions of the Software.
 #
 import os
-import pytest
 import shutil
 import sys
-import yaml
 from pprint import pprint
 
-from cliboa.conf import env
+import pytest
+import yaml
+
 from cliboa.client import CommandArgumentParser
+from cliboa.conf import env
 from cliboa.core.file_parser import YamlScenarioParser
-from cliboa.util.exception import *
+from cliboa.util.exception import ScenarioFileInvalid
 
 
 class TestYamlScenarioParser(object):
@@ -249,7 +250,7 @@ class TestYamlScenarioParser(object):
         with pytest.raises(ScenarioFileInvalid) as excinfo:
             parser = YamlScenarioParser(self._pj_scenario_file, self._cmn_scenario_file)
             yaml_scenario = parser.parse()
-            exists_step = any("step" in y for y in yaml_scenario)
+            any("step" in y for y in yaml_scenario)
         shutil.rmtree(self._pj_dir)
         shutil.rmtree(self._cmn_dir)
         assert "invalid" in str(excinfo.value)
@@ -281,7 +282,7 @@ class TestYamlScenarioParser(object):
         with pytest.raises(ScenarioFileInvalid) as excinfo:
             parser = YamlScenarioParser(self._pj_scenario_file, self._cmn_scenario_file)
             yaml_scenario = parser.parse()
-            exists_step = any("step" in y for y in yaml_scenario)
+            any("step" in y for y in yaml_scenario)
 
         shutil.rmtree(self._pj_dir)
         shutil.rmtree(self._cmn_dir)
@@ -313,11 +314,10 @@ class TestYamlScenarioParser(object):
         with open(self._cmn_scenario_file, "w") as f:
             f.write(yaml.dump(cmn_yaml_dict, default_flow_style=False))
 
-        exists_step = True
         with pytest.raises(ScenarioFileInvalid) as excinfo:
             parser = YamlScenarioParser(self._pj_scenario_file, self._cmn_scenario_file)
             yaml_scenario = parser.parse()
-            exists_step = any("step" in y for y in yaml_scenario)
+            any("step" in y for y in yaml_scenario)
 
         shutil.rmtree(self._pj_dir)
         shutil.rmtree(self._cmn_dir)

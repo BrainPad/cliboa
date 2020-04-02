@@ -13,22 +13,23 @@
 # all copies or substantial portions of the Software.
 #
 # Always prefer setuptools over distutils
-import sys
-from setuptools import setup, find_packages
-from setuptools.command.test import test as TestCommand
-from os import path
 from io import open
+from os import path
+
+from setuptools import setup
+
 
 def read(filename):
     with open(path.join(path.dirname(__file__), filename), encoding="utf-8") as f:
         return f.read()
 
+
 setup(
     name="cliboa",
     version="1.3.0beta",
     description="application framework for etl(extract, transform, load) processing",
-    #long_description=read("README.md"),
-    #long_description_content_type='text/markdown',
+    # long_description=read("README.md"),
+    # long_description_content_type='text/markdown',
     url="https://github.com/BrainPad/cliboa",  # Optional
     author="BrainPad",
     # author_email='brainpad.co.jp',
@@ -62,7 +63,14 @@ setup(
         "cliboa.template",
         "cliboa.template.bin",
     ],
-    package_data={"cliboa.template": ["Pipfile.above34", "Pipfile.above35", "Pipfile.above36", "Pipfile.above37"]},
+    package_data={
+        "cliboa.template": [
+            "Pipfile.above34",
+            "Pipfile.above35",
+            "Pipfile.above36",
+            "Pipfile.above37",
+        ]
+    },
     python_requires=">=3.4",
     entry_points={"console_scripts": ["cliboadmin = cliboa.cli.cliboadmin:main"]},
 )

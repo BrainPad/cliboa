@@ -1,7 +1,4 @@
-
-
 class Helper(object):
-
     @staticmethod
     def set_property(cls, method, value):
         """

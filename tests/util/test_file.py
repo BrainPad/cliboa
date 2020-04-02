@@ -12,14 +12,9 @@
 # all copies or substantial portions of the Software.
 #
 import os
-import sys
-import pytest
 import shutil
-import sqlite3
-from pprint import pprint
 
 from cliboa.conf import env
-from cliboa.util.exception import InvalidCount
 from cliboa.util.file import File
 
 

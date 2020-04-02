@@ -15,11 +15,11 @@
 #
 
 import argparse
-from importlib import import_module
 import os
-import sys
-from shutil import copyfile
 import site
+import sys
+from importlib import import_module
+from shutil import copyfile
 
 
 class CliboAdmin(object):
@@ -111,7 +111,7 @@ class CliboAdmin(object):
         """
         # check if being under cliboa project directory
         sys.path.append(os.getcwd())
-        env = import_module("common.environment")
+        import_module("common.environment")
 
         # make essential directories and files
         os.makedirs(os.path.join("project", new_pj_dir), exist_ok=False)

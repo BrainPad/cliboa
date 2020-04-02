@@ -16,12 +16,9 @@ import codecs
 import csv
 
 from cliboa.scenario.base import BaseSqlite
-from cliboa.scenario.validator import (
-    EssentialParameters,
-    SqliteTableExistence,
-    IOOutput,
-)
-from cliboa.util.exception import SqliteInvalid, FileNotFound
+from cliboa.scenario.validator import (EssentialParameters, IOOutput,
+                                       SqliteTableExistence)
+from cliboa.util.exception import FileNotFound, SqliteInvalid
 
 
 class SqliteTransaction(BaseSqlite):

@@ -11,17 +11,14 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import os
 import sys
+
 import pytest
-from pprint import pprint
 
 from cliboa.client import CommandArgumentParser
-from cliboa.conf import env
-from cliboa.core.manager import *
-from cliboa.core.factory import *
-from cliboa.core.scenario_queue import *
-from cliboa.core.strategy import *
+from cliboa.core.factory import ScenarioManagerFactory, StepExecutorFactory
+from cliboa.core.manager import YamlScenarioManager
+from cliboa.core.strategy import MultiProcExecutor, SingleProcExecutor
 
 
 class TestFactory(object):
@@ -44,7 +41,7 @@ class TestFactory(object):
         Failed to create instance
         """
         with pytest.raises(AttributeError) as excinfo:
-            manager = ScenarioManagerFactory.create("")
+            ScenarioManagerFactory.create("")
         assert "object has no attribute" in str(excinfo.value)
 
     def test_step_executor_strategy_factory_ok_single(self):

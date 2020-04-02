@@ -12,22 +12,23 @@
 # all copies or substantial portions of the Software.
 #
 import os
-import sys
 import shutil
-import yaml
+import sys
+
 import pytest
-from pprint import pprint
+import yaml
 
 from cliboa.client import CommandArgumentParser
 from cliboa.conf import env
-from cliboa.core.validator import *
-from cliboa.scenario.validator import *
-from cliboa.util.exception import *
+from cliboa.core.validator import (ProjectDirectoryExistence,
+                                   ScenarioFileExistence, ScenarioYamlKey,
+                                   ScenarioYamlType)
+from cliboa.util.exception import FileNotFound, ScenarioFileInvalid
 
 
 class TestValidators(object):
     def setup_method(self, method):
-        cmd_parser = CommandArgumentParser()
+        CommandArgumentParser()
         sys.argv.clear()
         sys.argv.append("spam")
         sys.argv.append("spam")
@@ -149,7 +150,6 @@ class TestValidators(object):
             f.write(yaml.dump(test_data, default_flow_style=False))
         pj_f = open(self._scenario_file, "r")
         pj_yaml_dict = yaml.safe_load(pj_f)
-        is_dict = True
         with pytest.raises(ScenarioFileInvalid) as excinfo:
             valid_instance = ScenarioYamlKey(pj_yaml_dict)
             valid_instance()

@@ -13,14 +13,14 @@
 #
 
 import os
-import sys
-import pytest
 import shutil
-from pprint import pprint
+
+import pytest
+
 from cliboa.conf import env
 from cliboa.scenario.extract.sftp import SftpDownload
-from cliboa.util.lisboa_log import LisboaLog
 from cliboa.util.helper import Helper
+from cliboa.util.lisboa_log import LisboaLog
 
 
 class TestSftpDownload(object):

@@ -11,7 +11,7 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-from google.cloud import storage, bigquery, firestore
+from google.cloud import bigquery, firestore, storage
 from google.oauth2 import service_account
 
 from cliboa.scenario.base import BaseStep
@@ -90,6 +90,7 @@ class BaseBigQuery(BaseGcp):
         valid = EssentialParameters(
             self.__class__.__name__, [self._dataset, self._location]
         )
+        valid()
 
 
 class BaseGcs(BaseGcp):
@@ -108,6 +109,7 @@ class BaseGcs(BaseGcp):
     def execute(self, *args):
         super().execute()
         valid = EssentialParameters(self.__class__.__name__, [self._bucket])
+        valid()
 
 
 class BaseFirestore(BaseGcp):

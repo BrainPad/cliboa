@@ -11,18 +11,9 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import csv
 import os
-import sys
-import pytest
-import shutil
-import sqlite3
-from pprint import pprint
 
 from cliboa.conf import env
-from cliboa.scenario.extract.file import FileRead, CsvRead
-from cliboa.util.cache import StorageIO
-from cliboa.util.exception import CliboaException, FileNotFound
 
 
 class TestFileRead(object):

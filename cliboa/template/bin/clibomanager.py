@@ -14,8 +14,8 @@
 #
 # -*- coding: utf-8 -*-
 
-import sys
 import os
+import sys
 
 if __name__ == "__main__":
     # setting of environment values

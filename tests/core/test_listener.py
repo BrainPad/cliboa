@@ -13,16 +13,12 @@
 #
 import os
 import sys
-import pytest
-from pprint import pprint
 
 from cliboa.client import CommandArgumentParser
 from cliboa.conf import env
-from cliboa.core.listener import *
-from cliboa.core.worker import *
-from cliboa.core.scenario_queue import ScenarioQueue
-from cliboa.core.step_queue import *
+from cliboa.core.listener import ScenarioStatusListener, StepStatusListener
 from cliboa.core.strategy import StepExecutor
+from cliboa.core.worker import ScenarioWorker
 
 
 class TestScenarioStatusListener(object):
@@ -54,7 +50,7 @@ class TestScenarioStatusListener(object):
 
 class TestStepStatusListener(object):
     def setup_method(self, method):
-        cmd_parser = CommandArgumentParser()
+        CommandArgumentParser()
         sys.argv.clear()
         sys.argv.append("spam")
         sys.argv.append("spam")

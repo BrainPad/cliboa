@@ -12,11 +12,12 @@
 # all copies or substantial portions of the Software.
 #
 from abc import ABC, abstractmethod
-import os
-import requests
 from time import sleep
+
+import requests
 from requests.exceptions import HTTPError
 
+from cliboa.scenario.validator import EssentialParameters
 from cliboa.util.lisboa_log import LisboaLog
 
 
@@ -60,10 +61,11 @@ class FormAuth(object):
                 self.__class__.__name__,
                 [self.__form_url, self.__form_id, self.__form_password],
             )
+            valid()
 
 
 class BasicAuth(object):
-    """ 
+    """
     TBD implement in the future
     """
 

@@ -12,17 +12,8 @@
 # all copies or substantial portions of the Software.
 #
 import os
-import sys
-import pytest
-import shutil
-import sqlite3
-from pprint import pprint
 
 from cliboa.conf import env
-from cliboa.scenario.load.sqlite import SqliteCreation
-from cliboa.util.cache import StorageIO
-from cliboa.util.exception import SqliteInvalid
-from cliboa.util.lisboa_log import LisboaLog
 
 
 class TestSqliteCreation(object):

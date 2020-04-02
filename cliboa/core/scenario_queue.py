@@ -11,10 +11,8 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-from queue import Queue
 
-import cliboa
-from cliboa.core.step_queue import *
+from cliboa.core.step_queue import StepQueue
 
 
 class ScenarioQueue(object):

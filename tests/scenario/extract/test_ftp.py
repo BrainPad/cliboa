@@ -11,13 +11,13 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import os, pytest, sys, shutil
-from pprint import pprint
+import os
+import shutil
 
 from cliboa.conf import env
 from cliboa.scenario.extract.ftp import FtpDownload
-from cliboa.util.lisboa_log import LisboaLog
 from cliboa.util.helper import Helper
+from cliboa.util.lisboa_log import LisboaLog
 
 
 class TestFtpDownload(object):

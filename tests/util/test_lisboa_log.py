@@ -11,11 +11,9 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+import logging
 import os
 import sys
-import pytest
-from pprint import pprint
-import logging
 
 from cliboa.client import CommandArgumentParser
 from cliboa.conf import env
@@ -24,7 +22,7 @@ from cliboa.util.lisboa_log import LisboaLog
 
 class TestLisboaLog(object):
     def setup_method(self, method):
-        cmd_parser = CommandArgumentParser()
+        CommandArgumentParser()
         sys.argv.clear()
         sys.argv.append("hoge")
         sys.argv.append("hoge")

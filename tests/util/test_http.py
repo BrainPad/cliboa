@@ -1,11 +1,8 @@
 import os
-import sys
+
 import pytest
-import shutil
-from pprint import pprint
 from requests.exceptions import HTTPError
 
-from cliboa.conf import env
 from cliboa.util.http import Download
 
 

@@ -35,14 +35,12 @@ class ScenarioListener(BaseListener):
         """
         Update scenario execution status before scenario execution
         """
-        pass
 
     @abstractmethod
     def after_scenario(self, worker):
         """
         Update scenario execution status after scenario completion
         """
-        pass
 
 
 class StepListener(BaseListener):
@@ -55,21 +53,18 @@ class StepListener(BaseListener):
         """
         Update step status before step execution
         """
-        pass
 
     @abstractmethod
     def after_step(self, strategy):
         """
         Update step status after step
         """
-        pass
 
     @abstractmethod
     def after_completion(self):
         """
         Update step status after step completion
         """
-        pass
 
 
 class ScenarioStatusListener(BaseListener):

@@ -16,7 +16,6 @@ import os
 from cliboa.core.validator import EssentialParameters
 from cliboa.scenario.base import BaseStep
 from cliboa.util.constant import StepStatus
-from cliboa.util.exception import FileNotFound
 from cliboa.util.sftp import Sftp
 
 

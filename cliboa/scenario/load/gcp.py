@@ -15,16 +15,13 @@ import ast
 import csv
 import json
 import os
+
 import pandas
-from datetime import datetime
-from google.cloud import bigquery, storage
-from google.oauth2 import service_account
 
 from cliboa.core.validator import EssentialParameters
 from cliboa.scenario.extract.file import FileRead
-from cliboa.scenario.gcp import BaseBigQuery, BaseGcs, BaseFirestore
-from cliboa.util.cache import ObjectStore
-from cliboa.util.exception import InvalidFormat, InvalidFileCount, FileNotFound
+from cliboa.scenario.gcp import BaseBigQuery, BaseFirestore, BaseGcs
+from cliboa.util.exception import FileNotFound, InvalidFileCount, InvalidFormat
 
 
 class BigQueryCreate(BaseBigQuery):
@@ -53,9 +50,7 @@ class BigQueryCreate(BaseBigQuery):
     def execute(self, *args):
         super().execute()
 
-        param_valid = EssentialParameters(
-            self.__class__.__name__, [self._table_schema]
-        )
+        param_valid = EssentialParameters(self.__class__.__name__, [self._table_schema])
         param_valid()
 
         cache_list = []
@@ -196,9 +191,7 @@ class CsvReadBigQueryCreate(BaseBigQuery, FileRead):
         BaseBigQuery.execute(self)
         FileRead.execute(self)
 
-        param_valid = EssentialParameters(
-            self.__class__.__name__, [self._table_schema]
-        )
+        param_valid = EssentialParameters(self.__class__.__name__, [self._table_schema])
         param_valid()
 
         files = super().get_target_files(self._src_dir, self._src_pattern)
@@ -211,9 +204,7 @@ class CsvReadBigQueryCreate(BaseBigQuery, FileRead):
         is_inserted = False
         # initial if_exists
         if_exists = self.REPLACE if self._replace is True else self.APPEND
-        self.__columns = [
-            name_and_type["name"] for name_and_type in self._table_schema
-        ]
+        self.__columns = [name_and_type["name"] for name_and_type in self._table_schema]
         with open(files[0], "r", encoding=self._encoding) as f:
             reader = csv.DictReader(f, delimiter=",")
             for r in reader:

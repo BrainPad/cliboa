@@ -13,18 +13,13 @@
 #
 import os
 import sys
-import pytest
-import shutil
-from pprint import pprint
 
 from cliboa.conf import env
 from cliboa.scenario.base import BaseSqlite
 from cliboa.scenario.sample_step import SampleStep
-
 from cliboa.util.exception import SqliteInvalid
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
-
 
 
 class TestBase(object):
@@ -44,6 +39,7 @@ class TestBase(object):
                     ret = True
                     break
         assert ret is True
+
 
 class TestBaseSqlite(object):
     def setup_method(self, method):

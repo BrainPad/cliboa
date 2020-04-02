@@ -12,8 +12,8 @@
 # all copies or substantial portions of the Software.
 #
 import csv
-import os
 from glob import glob
+
 from cliboa.scenario.base import BaseStep
 from cliboa.scenario.validator import EssentialParameters, IOInput
 from cliboa.util.cache import ObjectStore
