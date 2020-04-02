@@ -11,11 +11,13 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+import configparser
 import os
 import re
 
 from abc import abstractmethod
 from google.oauth2 import service_account
+from cliboa.conf import env
 from cliboa.scenario.validator import (
     EssentialParameters,
     SqliteTableExistence,
@@ -56,8 +58,22 @@ class BaseStep(object):
         self._logger = logger
 
     def trigger(self, *args):
+        mask = None
+        path = os.path.join(env.BASE_DIR, "cliboa", "conf", "cliboa.ini")
+        if os.path.exists(path):
+            try:
+                conf = configparser.ConfigParser()
+                conf.read(path, encoding="utf-8")
+                mask = conf.get("logging", "mask")
+                pattern = re.compile(mask)
+            except Exception as e:
+                self._logger.warning(e)
+
         for k, v in self.__dict__.items():
-            self._logger.info("%s : %s" % (k, v))
+            if mask is not None and pattern.search(k):
+                self._logger.info("%s : ****" % k)
+            else:
+                self._logger.info("%s : %s" % (k, v))
         try:
             return self.execute(args)
         except Exception as e:
