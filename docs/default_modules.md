@@ -44,7 +44,7 @@ Can use modules as below by default.
 |[CsvWrite](/docs/modules/csv_write.md)|Write contents read by 'io: input' to a csv file|
 |[CsvReadBigQueryCreate](/docs/modules/csv_read_bigquery_create.md)|Read content from a file and insert it into a table of bigquery|
 |[CsvReadSqliteCreate](/docs/modules/csv_read_sqlite_create.md)|Read content from a file and insert it into a table of sqlite|
-|[GcsFileUpload](/docs/modules/gcs_file_upload.md)|Upload files to GCS|
+|[GcsUpload](/docs/modules/gcs_upload.md)|Upload files to GCS|
 |[FirestoreDocumentCreate](/docs/modules/firestore_document_create.md)|Create document|
 
 

@@ -1,5 +1,5 @@
-# GcsFileUpload
-Upload a file to GCS.
+# GcsUpload
+Upload files to GCS.
 
 # Parameters
 |Parameters|Explanation|Required|Default|Remarks|
@@ -7,6 +7,7 @@ Upload a file to GCS.
 |project_id|GCP project id|Yes|None||
 |location|GCP location|Yes|None||
 |credentials|A file path of credential for GCP authentication|Yes|None||
+|bucket|GCS bucket name|Yes|None||
 |src_dir|Directory of source to upload|Yes|None||
 |src_pattern|File pattern of source to upload. Regexp is available|Yes|None||
 |dest_dir|Destination directory to upload|No|None||
@@ -14,11 +15,12 @@ Upload a file to GCS.
 # Examples
 ```
 - step:
-  class: GcsFileUpload
+  class: GcsUpload
   arguments:
     project_id: test_gcp
     location: asia-northeast1
     credentials: /root/gcp_credential.json
+    bucker: gcs-test-bucket
     src_dir: /root
     src_pattern: test_(.*)_.csv
     dest_dir: /tmp

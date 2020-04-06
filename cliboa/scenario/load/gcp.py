@@ -126,6 +126,46 @@ class BigQueryCreate(BaseBigQuery):
 
 class GcsFileUpload(BaseGcs):
     """
+    @deprecated
+    Upload local files to GCS
+    """
+
+    def __init__(self):
+        super().__init__()
+        self._src_dir = None
+        self._src_pattern = None
+        self._dest_dir = ""
+
+    def src_dir(self, src_dir):
+        self._src_dir = src_dir
+
+    def src_pattern(self, src_pattern):
+        self._src_pattern = src_pattern
+
+    def dest_dir(self, dest_dir):
+        self._dest_dir = dest_dir
+
+    def execute(self, *args):
+        super().execute()
+
+        valid = EssentialParameters(
+            self.__class__.__name__, [self._src_dir, self._src_pattern]
+        )
+        valid()
+
+        gcs_client = self._gcs_client()
+        bucket = gcs_client.get_bucket(self._bucket)
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+        self._logger.info("Upload files %s" % files)
+        for file in files:
+            self._logger.info("Start upload %s" % file)
+            blob = bucket.blob(os.path.join(self._dest_dir, os.path.basename(file)))
+            blob.upload_from_filename(file)
+            self._logger.info("Finish upload %s" % file)
+
+
+class GcsUpload(BaseGcs):
+    """
     Upload local files to GCS
     """
 
