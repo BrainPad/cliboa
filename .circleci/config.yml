@@ -11,7 +11,7 @@ jobs:
         name: install dependencies
         command: |
           mv cliboa/template/Pipfile.above37 Pipfile
-          pipenv install --dev
+          pipenv install --dev --skip-lock
     - run:
         name: lintfix with python3.7
         command: |
@@ -19,6 +19,9 @@ jobs:
     - run:
         name: unittest with python3.7
         command: |
+          mkdir conf
+          cp -rp cliboa/conf/logging.conf conf/logging.conf
+          cp -rp cliboa/conf/cliboa.ini conf/cliboa.ini
           pipenv run unittest
   test_python36:
     environment:
@@ -31,7 +34,7 @@ jobs:
         name: install dependencies
         command: |
           mv cliboa/template/Pipfile.above36 Pipfile
-          pipenv install --dev
+          pipenv install --dev --skip-lock
     - run:
         name: lintfix with python3.6
         command: |
@@ -39,6 +42,9 @@ jobs:
     - run:
         name: unittest with python3.6
         command: |
+          mkdir conf
+          cp -rp cliboa/conf/logging.conf conf/logging.conf
+          cp -rp cliboa/conf/cliboa.ini conf/cliboa.ini
           pipenv run unittest
   test_python35:
     environment:
@@ -51,7 +57,7 @@ jobs:
         name: install dependencies
         command: |
           mv cliboa/template/Pipfile.above35 Pipfile
-          pipenv install --dev
+          pipenv install --dev --skip-lock
     - run:
         name: lintfix with python3.5
         command: |
@@ -59,6 +65,9 @@ jobs:
     - run:
         name: unittest with python3.5
         command: |
+          mkdir conf
+          cp -rp cliboa/conf/logging.conf conf/logging.conf
+          cp -rp cliboa/conf/cliboa.ini conf/cliboa.ini
           pipenv run unittest
   test_python34:
     environment:
@@ -71,7 +80,7 @@ jobs:
         name: install dependencies
         command: |
           mv cliboa/template/Pipfile.above34 Pipfile
-          pipenv install --dev
+          pipenv install --dev --skip-lock
     - run:
         name: lintfix with python3.4
         command: |
@@ -79,6 +88,9 @@ jobs:
     - run:
         name: unittest with python3.4
         command: |
+          mkdir conf
+          cp -rp cliboa/conf/logging.conf conf/logging.conf
+          cp -rp cliboa/conf/cliboa.ini conf/cliboa.ini
           pipenv run unittest
 workflows:
   test_all_support_python_ver:

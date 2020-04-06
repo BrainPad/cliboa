@@ -95,8 +95,13 @@ class CliboAdmin(object):
         )
         copyfile(cmn_env_path, os.path.join(self._cmn_dir, "environment.py"))
 
+        # copy logging.conf
+        conf_path = os.path.join(cliboa_install_path, "cliboa", "conf", "logging.conf")
+        copyfile(conf_path, os.path.join(ini_dir, "conf", "logging.conf"))
+
+        # copy cliboa.ini
         conf_path = os.path.join(cliboa_install_path, "cliboa", "conf", "cliboa.ini")
-        copyfile(conf_path, os.path.join(ini_dir, "cliboa", "conf", "cliboa.ini"))
+        copyfile(conf_path, os.path.join(ini_dir, "conf", "cliboa.ini"))
 
         cmn_scenario_path = os.path.join(ini_dir, "common", "scenario.yml")
         with open(cmn_scenario_path, "w") as yaml:

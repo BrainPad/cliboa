@@ -57,7 +57,7 @@ class BaseStep(object):
 
     def trigger(self, *args):
         mask = None
-        path = os.path.join(env.BASE_DIR, "cliboa", "conf", "cliboa.ini")
+        path = os.path.join(env.BASE_DIR, "conf", "cliboa.ini")
         if os.path.exists(path):
             try:
                 conf = configparser.ConfigParser()

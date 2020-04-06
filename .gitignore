@@ -22,3 +22,6 @@ Pipfilee
 .eggs
 build
 cliboa.egg-info
+conf
+conf/logging.conf
+Pipfile

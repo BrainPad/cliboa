@@ -64,12 +64,13 @@ setup(
         "cliboa.template.bin",
     ],
     package_data={
+        "cliboa.conf": ["logging.conf", "cliboa.ini"],
         "cliboa.template": [
             "Pipfile.above34",
             "Pipfile.above35",
             "Pipfile.above36",
             "Pipfile.above37",
-        ]
+        ],
     },
     python_requires=">=3.4",
     entry_points={"console_scripts": ["cliboadmin = cliboa.cli.cliboadmin:main"]},
