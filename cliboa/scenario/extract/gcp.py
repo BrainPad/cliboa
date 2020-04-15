@@ -1,5 +1,5 @@
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
+# Copyright BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -24,10 +24,150 @@ from google.cloud import bigquery
 from cliboa.scenario.gcp import BaseBigQuery, BaseFirestore, BaseGcs
 from cliboa.scenario.validator import EssentialParameters
 from cliboa.util.cache import ObjectStore
+from cliboa.util.exception import InvalidParameter
+from cliboa.util.gcp import BigQuery, Gcs, ServiceAccount
+from cliboa.util.string import StringUtil
+
+
+class BigQueryRead(BaseBigQuery):
+    """
+    Read data from BigQuery and put them into on-memory or export to a file via GCS.
+    """
+
+    _RANDOM_STR_LENGTH = 8
+
+    def __init__(self):
+        super().__init__()
+        self._key = None
+        self._bucket = None
+        self._dest_dir = None
+        self._filename = None
+        self._query = None
+
+    def key(self, key):
+        self._key = key
+
+    def query(self, query):
+        self._query = query
+
+    def bucket(self, bucket):
+        self._bucket = bucket
+
+    def dest_dir(self, dest_dir):
+        self._dest_dir = dest_dir
+
+    def filename(self, filename):
+        self._filename = filename
+
+    def execute(self, *args):
+        super().execute()
+        if not self._key and not self._bucket:
+            raise InvalidParameter("Specifying either 'key' or 'bucket' is essential.")
+        if self._key and self._bucket:
+            raise InvalidParameter("Cannot specify both 'key' and 'bucket'.")
+
+        # fetch records and save to on-memory
+        if self._key:
+            valid = EssentialParameters(self.__class__.__name__, [self._tblname])
+            valid()
+            self._save_to_cache()
+        elif self._bucket:
+            valid = EssentialParameters(self.__class__.__name__, [self._dest_dir])
+            valid()
+            self._save_as_file_via_gcs()
+
+    def _save_to_cache(self):
+        self._logger.info("Save data to on memory")
+        df = pandas.read_gbq(
+            query="SELECT * FROM %s.%s" % (self._dataset, self._tblname)
+            if self._query is None
+            else self._query,
+            dialect="standard",
+            location=self._location,
+            project_id=self._project_id,
+            credentials=ServiceAccount.auth(self._credentials),
+        )
+        ObjectStore.put(self._key, df)
+
+    def _save_as_file_via_gcs(self):
+        self._logger.info("Save data as a file via GCS")
+        os.makedirs(self._dest_dir, exist_ok=True)
+
+        ymd_hms = datetime.now().strftime("%Y%m%d%H%M%S%f")
+        path = "%s-%s" % (StringUtil().random_str(self._RANDOM_STR_LENGTH), ymd_hms,)
+        prefix = "%s/%s/%s" % (self._dataset, self._tblname, path)
+
+        gbq_client = BigQuery.get_bigquery_client(self._credentials)
+        if self._dataset and self._tblname:
+            table_ref = gbq_client.dataset(self._dataset).table(self._tblname)
+        elif self._dataset and not self._tblname:
+            tmp_tbl = (
+                "tmp_"
+                + StringUtil().random_str(self._RANDOM_STR_LENGTH)
+                + "_"
+                + ymd_hms
+            )
+            table_ref = gbq_client.dataset(self._dataset).table(tmp_tbl)
+
+        gcs_client = Gcs.get_gcs_client(self._credentials)
+        gcs_bucket = gcs_client.get_bucket(self._bucket)
+
+        # extract job config settings
+        ext_job_config = BigQuery.get_extract_job_config()
+        ext_job_config.compression = BigQuery.get_compression_type()
+        ext = ".csv"
+        if self._filename:
+            _, ext = os.path.splitext(self._filename)
+            support_ext = [".csv", ".json"]
+            if ext not in support_ext:
+                raise InvalidParameter("%s is not supported as filename." % ext)
+        ext_job_config.destination_format = BigQuery.get_destination_format(ext)
+
+        comp_format_and_ext = {"GZIP": ".gz"}
+        comp_ext = comp_format_and_ext.get(str(BigQuery.get_compression_type()))
+        if self._filename:
+            dest_gcs = "gs://%s/%s/%s%s" % (
+                self._bucket,
+                prefix,
+                self._filename,
+                comp_ext,
+            )
+        else:
+            dest_gcs = "gs://%s/%s/*%s%s" % (self._bucket, prefix, ext, comp_ext)
+
+        # Execute query.
+        if self._query:
+            query_job_config = BigQuery.get_query_job_config()
+            query_job_config.destination = table_ref
+            query_job_config.write_disposition = BigQuery.get_write_disposition()
+            query_job = gbq_client.query(
+                self._query, location=self._location, job_config=query_job_config
+            )
+            query_job.result()
+
+        # Extract to GCS
+        extract_job = gbq_client.extract_table(
+            table_ref, dest_gcs, job_config=ext_job_config, location=self._location
+        )
+        extract_job.result()
+
+        # Download from gcs
+        for blob in gcs_bucket.list_blobs(prefix=prefix):
+            dest = os.path.join(self._dest_dir, os.path.basename(blob.name))
+            blob.download_to_filename(dest)
+
+        # Cleanup temporary table
+        if self._query:
+            gbq_client.delete_table(table_ref)
+
+        # Cleanup temporary files
+        for blob in gcs_bucket.list_blobs(prefix=prefix):
+            blob.delete()
 
 
 class BigQueryReadCache(BaseBigQuery):
     """
+    @deprecated
     Get data from BigQuery and cache them as pandas.dataframe format.
 
     Use {BigQueryFileDownload} if the result query is estimated to be large.
@@ -67,6 +207,7 @@ class BigQueryReadCache(BaseBigQuery):
 
 class BigQueryFileDownload(BaseBigQuery):
     """
+    @deprecated
     Download query result as a csv file.
 
     This class saves BigQuery result as a temporary file in GCS, and then download.

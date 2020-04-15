@@ -1,5 +1,5 @@
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
+# Copyright 2020 BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -39,18 +39,30 @@ class BaseGcp(BaseStep):
         valid()
 
     def _auth(self):
+        """
+        @deprecated
+        use ServiceAccount.auth() in util.gcp
+        """
         if self._credentials:
             return service_account.Credentials.from_service_account_file(
                 self._credentials
             )
 
     def _bigquery_client(self):
+        """
+        @deprecated
+        use BigQuery.get_bigquery_client() in util.gcp
+        """
         if self._credentials:
             return bigquery.Client.from_service_account_json(self._credentials)
         else:
             return bigquery.Client()
 
     def _gcs_client(self):
+        """
+        @deprecated
+        use Gcs.get_client() in util.gcp
+        """
         if self._credentials:
             return storage.Client.from_service_account_json(self._credentials)
         else:
@@ -88,7 +100,7 @@ class BaseBigQuery(BaseGcp):
     def execute(self, *args):
         super().execute()
         valid = EssentialParameters(
-            self.__class__.__name__, [self._dataset, self._location]
+            self.__class__.__name__, [self._location, self._dataset]
         )
         valid()
 

@@ -36,6 +36,11 @@ class InvalidFileCount(CliboaException):
     pass
 
 
+class InvalidParameter(CliboaException):
+    # Exception when parameters are invalid
+    pass
+
+
 class InvalidCount(CliboaException):
     # Exception when invalid count was specified
     pass

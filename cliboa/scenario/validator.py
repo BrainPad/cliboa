@@ -12,7 +12,7 @@
 # all copies or substantial portions of the Software.
 #
 
-from cliboa.util.exception import (CliboaException, ScenarioFileInvalid,
+from cliboa.util.exception import (InvalidParameter, ScenarioFileInvalid,
                                    SqliteInvalid)
 from cliboa.util.lisboa_log import LisboaLog
 from cliboa.util.sqlite import SqliteAdapter
@@ -35,7 +35,7 @@ class EssentialParameters(object):
     def __call__(self):
         for p in self.__param_list:
             if not p:
-                raise CliboaException(
+                raise InvalidParameter(
                     "The essential parameter is not specified in %s." % self.__cls_name
                 )
 

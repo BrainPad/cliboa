@@ -4,8 +4,7 @@ Can use modules as below by default.
 ## Extract Modules
 |Step Class Name|Role|
 |----------|-----------|
-|[BigQueryFileDownload](/docs/modules/bigquery_file_download.md)|Execute select query and download result as a csv file|
-|[BigQueryReadCache](/docs/modules/bigquery_read_cache.md)|Read from bigquery table|
+|[BigQueryRead](/docs/modules/bigquery_read.md)|Read from bigquery table|
 |[FirestoreDocumentDownload](/docs/modules/firestore_document_download.md)|Download a document from Firestore|
 |[FtpDownload](/docs/modules/ftp_download.md)|Download a file via ftp|
 |[GcsDownload](/docs/modules/gcs_download.md)|Download files from GCS|
@@ -13,6 +12,7 @@ Can use modules as below by default.
 |[SftpDownload](/docs/modules/sftp_download.md)|Download a file via sftp|
 |[S3Download](/docs/modules/s3_download.md)|Download files from S3|
 |[SqliteReadRow](/docs/modules/sqlite_read_row.md)|Execute query and call result handler|
+|[FirestoreDocumentDownload](/docs/modules/firestore_document_download.md)|Download a document from Firestore|
 
 
 ## Transform Modules

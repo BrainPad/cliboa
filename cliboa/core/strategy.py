@@ -96,7 +96,8 @@ class SingleProcExecutor(StepExecutor):
 
         except Exception as e:
             self._logger.error(
-                "Exception occurred during %s execution. " % cls.__class__.__name__
+                "Exception occurred during %s execution. Erorr Message: %s"
+                % (cls.__class__.__name__, str(e))
             )
             raise e
 
