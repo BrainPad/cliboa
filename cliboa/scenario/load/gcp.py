@@ -24,8 +24,109 @@ from cliboa.scenario.gcp import BaseBigQuery, BaseFirestore, BaseGcs
 from cliboa.util.exception import FileNotFound, InvalidFileCount, InvalidFormat
 
 
+class BigQueryWrite(BaseBigQuery):
+    """
+    Insert data into BigQuery table
+    """
+
+    # default bulk line count to change to dataframe object
+    _BULK_LINE_CNT = 10000
+
+    # BigQuery insert mode
+    _REPLACE = "replace"
+    _APPEND = "append"
+
+    def __init__(self):
+        super().__init__()
+        self._table_schema = None
+        self._replace = True
+
+    def table_schema(self, table_schema):
+        self._table_schema = table_schema
+
+    def replace(self, replace):
+        self._replace = replace
+
+    def execute(self, *args):
+        super().execute()
+
+        param_valid = EssentialParameters(self.__class__.__name__, [self._table_schema])
+        param_valid()
+
+        cache_list = []
+        inserts = False
+        # initial if_exists
+        if_exists = self._REPLACE if self._replace is True else self._APPEND
+        with open(self._s.cache_file, "r", encoding="utf-8") as f:
+            for i, l_str in enumerate(f):
+                l_dict = ast.literal_eval(l_str)
+                cache_list.append(l_dict)
+                if len(cache_list) == self._BULK_LINE_CNT:
+                    df = pandas.DataFrame(self._create_insert_data(cache_list))
+                    if inserts is True:
+                        # if_exists after the first insert execution
+                        if_exists = self._APPEND
+                    dest_tbl = self._dataset + "." + self._tblname
+                    self._logger.info(
+                        "Start insert %s rows to %s" % (len(cache_list), dest_tbl)
+                    )
+                    df.to_gbq(
+                        dest_tbl,
+                        project_id=self._project_id,
+                        if_exists=if_exists,
+                        table_schema=self._table_schema,
+                        location=self._location,
+                        credentials=self._auth(),
+                    )
+                    cache_list.clear()
+                    inserts = True
+            if len(cache_list) > 0:
+                df = pandas.DataFrame(self._create_insert_data(cache_list))
+                if inserts is True:
+                    # if_exists after the first insert execution
+                    if_exists = self._APPEND
+                dest_tbl = self._dataset + "." + self._tblname
+                self._logger.info(
+                    "Start insert %s rows to %s" % (len(cache_list), dest_tbl)
+                )
+                df.to_gbq(
+                    dest_tbl,
+                    project_id=self._project_id,
+                    if_exists=if_exists,
+                    table_schema=self._table_schema,
+                    location=self._location,
+                    credentials=self._auth(),
+                )
+        self._s.remove()
+
+    def _create_insert_data(self, cache_list):
+        """
+        Create insert data like the below.
+
+        insert_data = {
+            "column1": [1, 2],
+            "column2": ["spam", "spam"],
+            ...
+        }
+
+        Args
+            cache_list: dictionary list of input cache
+        """
+        insert_data = {}
+        columns = [name_and_type["name"] for name_and_type in self._table_schema]
+        for c in columns:
+            v_list = [d.get(c) for d in cache_list]
+            if not v_list:
+                raise InvalidFormat(
+                    "Specified column %s does not exist in an input file." % c
+                )
+            insert_data[c] = v_list
+        return insert_data
+
+
 class BigQueryCreate(BaseBigQuery):
     """
+    @deprecated
     Insert data into BigQuery table
     """
 

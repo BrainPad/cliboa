@@ -23,7 +23,7 @@ from .extract.sftp import SftpDelete, SftpDownload, SftpDownloadFileDelete
 from .extract.sqlite import SqliteRead, SqliteReadRow
 from .load.aws import S3Upload
 from .load.file import CsvWrite
-from .load.gcp import (BigQueryCreate, CsvReadBigQueryCreate,
+from .load.gcp import (BigQueryCreate, BigQueryWrite, CsvReadBigQueryCreate,
                        FirestoreDocumentCreate, GcsFileUpload, GcsUpload)
 from .load.sftp import SftpFileLoad, SftpUpload
 from .load.sqlite import CsvReadSqliteCreate, SqliteCreation

@@ -36,7 +36,7 @@ Can use modules as below by default.
 |Step Class Name|Role|
 |----------|-----------|
 |[CsvWrite](/docs/modules/csv_write.md)|Write contents read by 'io: input' to a csv file|
-|[CsvReadBigQueryCreate](/docs/modules/csv_read_bigquery_create.md)|Read content from a file and insert it into a table of bigquery|
+|[BigQueryWrite](/docs/modules/bigquery_write.md)|Read content from a file and insert it into a table of bigquery|
 |[CsvReadSqliteCreate](/docs/modules/csv_read_sqlite_create.md)|Read content from a file and insert it into a table of sqlite|
 |[FirestoreDocumentCreate](/docs/modules/firestore_document_create.md)|Create document|
 |[GcsUpload](/docs/modules/gcs_upload.md)|Upload files to GCS|

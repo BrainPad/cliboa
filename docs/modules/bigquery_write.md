@@ -1,4 +1,4 @@
-# BigQueryCreate
+# BigQueryWrite
 Read content from a file and insert it into a bigquery table.
 
 # Parameters
@@ -18,7 +18,7 @@ Read content from a file and insert it into a bigquery table.
 ```
 # Read content from a csv file and insert it into bigquery table.
 - step:
-  class: CsvReadBigQueryCreate
+  class: BigQueryWrite
   arguments:
     src_dir: /tmp
     src_pattern: (.*)\.csv
