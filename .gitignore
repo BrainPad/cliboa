@@ -25,3 +25,4 @@ cliboa.egg-info
 conf
 conf/logging.conf
 Pipfile
+Pipfile.lock

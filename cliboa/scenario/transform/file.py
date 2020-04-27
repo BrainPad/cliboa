@@ -1,5 +1,5 @@
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
+# Copyright BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -192,7 +192,7 @@ class CsvColsExtract(FileBaseTransform):
         valid = EssentialParameters(self.__class__.__name__, [self._columns])
         valid()
 
-        File().remove_csv_col(file, self._dest_path, self._columns)
+        File().remove_columns(file, self._dest_path, self._columns)
 
 
 class ColumnLengthAdjust(FileBaseTransform):

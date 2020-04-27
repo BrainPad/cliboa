@@ -19,7 +19,7 @@ Can use modules as below by default.
 |Step Class Name|Role|
 |----------|-----------|
 |[ColumnLengthAdjust](/docs/modules/column_length_adjust.md)|Adjust columns of a csv file or a tsv file to the specified length.|
-|[CsvColsExtract](/docs/modules/csv_cols_extract.md)|Remove specific columns from a csv file.|
+|[CsvColumnExtract](/docs/modules/csv_column_extract.md)|Extract specific columns from csv files.|
 |[CsvConvert](/docs/modules/csv_convert.md)|Create new csv(tsv) file with given parameters|
 |[CsvMerge](/docs/modules/csv_merge.md)|Merge two csv files to a csv file|
 |[CsvHeaderConvert](/docs/modules/csv_header_convert.md)|Convert headers of a csv file|

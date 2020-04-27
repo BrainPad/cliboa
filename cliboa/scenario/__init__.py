@@ -27,6 +27,7 @@ from .load.gcp import (BigQueryCreate, BigQueryWrite, CsvReadBigQueryCreate,
                        FirestoreDocumentCreate, GcsFileUpload, GcsUpload)
 from .load.sftp import SftpFileLoad, SftpUpload
 from .load.sqlite import CsvReadSqliteCreate, SqliteCreation
+from .transform.csv import CsvColumnExtract
 from .transform.file import (ColumnLengthAdjust, CsvColsExtract,
                              CsvHeaderConvert, CsvMerge, DateFormatConvert,
                              ExcelConvert, FileCompress, FileConvert,
