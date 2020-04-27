@@ -1,16 +1,18 @@
 # BigQueryWrite
-Read content from a file and insert it into a bigquery table.
+Read content from csv files and insert them into a bigquery table.
 
 # Parameters
 |Parameters|Explanation|Required|Default|Remarks|
 |----------|-----------|--------|-------|-------|
-|src_dir|Directory of a file |Yes|None||
-|src_pattern|File pattern to read. Regexp is available.|Yes|None||
+|src_dir|Directory of files |Yes|None||
+|src_pattern|Csv file pattern to read. Regexp is available.|Yes|None||
+|has_header|Csv has header or not. Specify either True or False|No|True||
 |project_id|GCP project id|Yes|None||
 |location|GCP location|Yes|None||
 |credentials|a file path of credential for GCP authentication|Yes|None||
 |dataset|BigQuery dataset|Yes|None||
 |tblname|BigQuery table name to insert|Yes|None||
+|replace|BigQuery insert mode. Specify either True or False|No|True||
 |table_schema|table schema to insert. Syntax is same as table_schema of [pandas.DataFrame.to_gbq](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_gbq.html).|Yes|None||
 
 
@@ -22,11 +24,13 @@ Read content from a file and insert it into a bigquery table.
   arguments:
     src_dir: /tmp
     src_pattern: (.*)\.csv
+    has_header: False
     project_id: test_gcp
     location: asia-northeast1
     credentials: /root/gcp_credential.json
     dataset: test_dataset
     tblname: test_tbl
+    replace: False
     table_schema:
       - { name: column1, type: NUMERIC }
       - { name: column2, type: STRING }

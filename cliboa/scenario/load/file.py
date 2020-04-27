@@ -25,9 +25,17 @@ class FileWrite(BaseStep):
 
     def __init__(self):
         super().__init__()
+        self._src_dir = None
+        self._src_pattern = None
         self._dest_path = None
         self._encoding = "utf-8"
         self._mode = "a"
+
+    def src_dir(self, src_dir):
+        self._src_dir = src_dir
+
+    def src_pattern(self, src_pattern):
+        self._src_pattern = src_pattern
 
     def dest_path(self, dest_path):
         self._dest_path = dest_path
@@ -37,11 +45,6 @@ class FileWrite(BaseStep):
 
     def mode(self, mode):
         self._mode = mode
-
-    def execute(self, *args):
-        # essential parameters check
-        valid = EssentialParameters(self.__class__.__name__, [self._dest_path])
-        valid()
 
 
 class CsvWrite(FileWrite):
