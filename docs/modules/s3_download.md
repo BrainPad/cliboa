@@ -1,4 +1,4 @@
-# GcsDownload
+# S3Download
 Download files from S3.
 
 # Parameters
