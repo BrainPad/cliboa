@@ -13,10 +13,6 @@ jobs:
           mv cliboa/template/Pipfile.above37 Pipfile
           pipenv install --dev --skip-lock
     - run:
-        name: lintfix with python3.7
-        command: |
-          pipenv run lintfix
-    - run:
         name: unittest with python3.7
         command: |
           mkdir conf
@@ -35,10 +31,6 @@ jobs:
         command: |
           mv cliboa/template/Pipfile.above36 Pipfile
           pipenv install --dev --skip-lock
-    - run:
-        name: lintfix with python3.6
-        command: |
-          pipenv run lintfix
     - run:
         name: unittest with python3.6
         command: |
@@ -59,10 +51,6 @@ jobs:
           mv cliboa/template/Pipfile.above35 Pipfile
           pipenv install --dev --skip-lock
     - run:
-        name: lintfix with python3.5
-        command: |
-          pipenv run lintfix
-    - run:
         name: unittest with python3.5
         command: |
           mkdir conf
@@ -81,10 +69,6 @@ jobs:
         command: |
           mv cliboa/template/Pipfile.above34 Pipfile
           pipenv install --dev --skip-lock
-    - run:
-        name: lintfix with python3.4
-        command: |
-          pipenv run lintfix
     - run:
         name: unittest with python3.4
         command: |

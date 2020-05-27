@@ -40,4 +40,4 @@ python_version = "3.6"
 
 [scripts]
 lintfix = "bash -c 'autoflake -ri --ignore-init-module-imports --remove-unused-variables . && black . && isort -rc . && flake8 --ignore=E501,F401,F403,W503,W605 .'"
-unittest = "python3 setup.py test"
+unittest = "python3 setup.py coverage"

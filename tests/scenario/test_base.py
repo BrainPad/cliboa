@@ -12,25 +12,40 @@
 # all copies or substantial portions of the Software.
 #
 import os
+from unittest import TestCase
 import sys
 
+from cliboa.client import CommandArgumentParser, ScenarioRunner
 from cliboa.conf import env
 from cliboa.scenario.base import BaseSqlite
-from cliboa.scenario.sample_step import SampleStep
+from cliboa.scenario.sample_step import SampleCustomStep
+
 from cliboa.util.exception import SqliteInvalid
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
 
 
-class TestBase(object):
+class TestBase(TestCase):
     def setup_method(self, method):
+        sys.argv.clear()
+        sys.argv.append("spam")
+        sys.argv.append("spam")
+        cmd_parser = CommandArgumentParser()
+        self._cmd_args = cmd_parser.parse()
         self._log_file = os.path.join(env.BASE_DIR, "logs", "app.log")
+        runner = ScenarioRunner(self._cmd_args)
+        runner.add_system_path()
 
-    def test_logging_mask(self):
-        instance = SampleStep()
-        instance.logger = LisboaLog.get_logger(__name__)
-        setattr(instance, "user", "admin")
-        setattr(instance, "password", "test")
+    def test_logging_mask_password(self):
+        """
+        In log file, 'password' is masked.
+        """
+        instance = SampleCustomStep()
+        instance._logger = LisboaLog.get_logger(__name__)
+        Helper.set_property(
+            instance, "logger", LisboaLog.get_logger(instance.__class__.__name__)
+        )
+        Helper.set_property(instance, "password", "test")
         instance.trigger()
         ret = False
         with open(self._log_file, mode="r", encoding="utf-8") as f:
@@ -38,7 +53,29 @@ class TestBase(object):
                 if "password : ****" in line:
                     ret = True
                     break
-        assert ret is True
+        self.assertTrue(ret)
+
+    def test_logging_mask_aws_keys(self):
+        """
+        In log file, 'access_key' and 'secret_key' of AWS are masked.
+        """
+        instance = SampleCustomStep()
+        Helper.set_property(
+            instance, "logger", LisboaLog.get_logger(instance.__class__.__name__)
+        )
+        Helper.set_property(instance, "access_key", "test")
+        Helper.set_property(instance, "secret_key", "test")
+        instance.trigger()
+        masked_access_key = False
+        masked_secret_key = False
+        with open(self._log_file, mode="r", encoding="utf-8") as f:
+            for line in f:
+                if "access_key : ****" in line:
+                    masked_access_key = True
+                elif "secret_key : ****" in line:
+                    masked_secret_key = True
+        self.assertTrue(masked_access_key)
+        self.assertTrue(masked_secret_key)
 
 
 class TestBaseSqlite(object):
