@@ -255,6 +255,36 @@ class TestCsvHeaderConvert(TestFileTransform):
             shutil.rmtree(self._data_dir)
         assert line == ["new_key", "new_data"]
 
+    def test_execute_ok_2(self):
+        try:
+            # create test file
+            csv_list = [["key", "data"], ["1", "spam"], ["2", "spam"], ["3", "spam"]]
+            os.makedirs(self._data_dir)
+            test_csv = os.path.join(self._data_dir, "test.csv")
+            with open(test_csv, "w") as t:
+                writer = csv.writer(t)
+                writer.writerows(csv_list)
+
+            # set the essential attributes
+            instance = CsvHeaderConvert()
+            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "src_dir", self._data_dir)
+            Helper.set_property(instance, "src_pattern", "test\.csv")
+            Helper.set_property(instance, "dest_dir", self._data_dir)
+            Helper.set_property(instance, "dest_pattern", "test_new.csv")
+            Helper.set_property(
+                instance, "headers", [{"key": "new_key"}]
+            )
+            instance.execute()
+
+            test_new_csv = os.path.join(self._data_dir, "test_new.csv")
+            with open(test_new_csv, "r") as t:
+                reader = csv.reader(t)
+                line = next(reader)
+        finally:
+            shutil.rmtree(self._data_dir)
+        assert line == ["new_key", "data"]
+
     def test_execute_ng_no_src_file(self):
         os.makedirs(self._data_dir)
         with pytest.raises(InvalidCount) as execinfo:
