@@ -449,12 +449,16 @@ class CsvHeaderConvert(FileBaseTransform):
         """
         Replace old headers to new headers
         """
+        converter = {}
+        for headers in self._headers:
+            for k, v in headers.items():
+                converter[k] = v
+
         new_headers = []
-        for old_and_new_headers in self._headers:
-            for oh in old_headers:
-                if old_and_new_headers.get(oh):
-                    new_headers.append(old_and_new_headers[oh])
-                    break
+        for oh in old_headers:
+            r = converter.get(oh)
+            new_headers.append(r if r is not None else oh)
+
         return new_headers
 
 
