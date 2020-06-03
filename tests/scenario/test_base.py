@@ -12,14 +12,13 @@
 # all copies or substantial portions of the Software.
 #
 import os
-from unittest import TestCase
 import sys
+from unittest import TestCase
 
 from cliboa.client import CommandArgumentParser, ScenarioRunner
 from cliboa.conf import env
 from cliboa.scenario.base import BaseSqlite
 from cliboa.scenario.sample_step import SampleCustomStep
-
 from cliboa.util.exception import SqliteInvalid
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
