@@ -272,9 +272,13 @@ class TestCsvHeaderConvert(TestFileTransform):
             Helper.set_property(instance, "src_pattern", "test\.csv")
             Helper.set_property(instance, "dest_dir", self._data_dir)
             Helper.set_property(instance, "dest_pattern", "test_new.csv")
+<<<<<<< HEAD
             Helper.set_property(
                 instance, "headers", [{"key": "new_key"}]
             )
+=======
+            Helper.set_property(instance, "headers", [{"key": "new_key"}])
+>>>>>>> branch 'master' of https://github.com/BrainPad/cliboa.git
             instance.execute()
 
             test_new_csv = os.path.join(self._data_dir, "test_new.csv")

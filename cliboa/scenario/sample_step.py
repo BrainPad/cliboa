@@ -39,12 +39,23 @@ class SampleCustomStep(BaseStep):
     """
 
     def __init__(self):
-        BaseStep.__init__(self)
+        super().__init__()
+        self._password = None
+        self._access_key = None
+        self._secret_key = None
         self._retry_count = 3
+
+    def password(self, password):
+        self._password = password
+
+    def access_key(self, access_key):
+        self._access_key = access_key
+
+    def secret_key(self, secret_key):
+        self._secret_key = secret_key
 
     def retry_count(self, retry_count):
         self._retry_count = retry_count
 
     def execute(self, *args):
-        self._logger.info("Start %s" % self.__class__.__name__)
-        self._logger.info("Finish %s" % self.__class__.__name__)
+        self._logger.info("unit test")

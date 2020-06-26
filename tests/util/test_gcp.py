@@ -11,6 +11,8 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+from unittest import TestCase
+
 import pytest
 from google.cloud import bigquery, storage
 from google.oauth2 import service_account
@@ -18,32 +20,35 @@ from google.oauth2 import service_account
 from cliboa.util.gcp import BigQuery, Gcs, ServiceAccount
 
 
-class TestServiceAccount(object):
+class TestServiceAccount(TestCase):
     @pytest.mark.skip(reason="service account connection is neccesary")
     def test_auth_no_credentials(self):
         assert ServiceAccount.auth(None) == ""
 
 
-class TestBigQuery(object):
+class TestBigQuery(TestCase):
     @pytest.mark.skip(reason="bigquery connection is neccesary")
     def test_get_bigquery_client_no_credentialas(self):
         assert BigQuery.get_bigquery_client(None) == bigquery.Client()
 
-    def test_get_extract_job_config(self):
-        assert (
+    def test_get_extract_job_config_with_header(self):
+        self.assertTrue(
             isinstance(
-                type(BigQuery.get_extract_job_config()),
-                type(bigquery.ExtractJobConfig()),
+                BigQuery.get_extract_job_config(), type(bigquery.ExtractJobConfig())
             )
-            is False
+        )
+
+    def test_get_extract_job_config_with_no_header(self):
+        self.assertTrue(
+            isinstance(
+                BigQuery.get_extract_job_config(print_header=False),
+                type(bigquery.ExtractJobConfig(print_header=False)),
+            ),
         )
 
     def test_get_query_job_config(self):
-        assert (
-            isinstance(
-                type(BigQuery.get_query_job_config()), type(bigquery.QueryJobConfig())
-            )
-            is False
+        self.assertTrue(
+            isinstance(BigQuery.get_query_job_config(), type(bigquery.QueryJobConfig()))
         )
 
     def test_get_comporession_type(self):

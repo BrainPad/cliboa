@@ -48,8 +48,8 @@ class BigQuery(object):
         )
 
     @staticmethod
-    def get_extract_job_config():
-        return bigquery.ExtractJobConfig()
+    def get_extract_job_config(print_header=True):
+        return bigquery.ExtractJobConfig(print_header=print_header)
 
     @staticmethod
     def get_query_job_config():
