@@ -205,7 +205,7 @@ class YamlScenarioManager(ScenarioManager):
             for yaml_k, yaml_v in cls_attrs_dict.items():
                 # if value includes {{ var }}, replace value specified by with_vars
                 if isinstance(yaml_v, str):
-                    pattern = re.compile(r"\{\{(.*)\}\}")
+                    pattern = re.compile(r"{{(.*?)}}")
                     exists_var = pattern.search(yaml_v)
                     if exists_var:
                         var_name = exists_var.group(1).strip()
@@ -267,7 +267,7 @@ class YamlScenarioManager(ScenarioManager):
         shell_output = re.sub("^b", "", str(shell_output))
         # remove '
         shell_output = re.sub("'", "", str(shell_output))
-        return re.sub(r"\{\{(.*)\}\}", shell_output, yaml_v)
+        return re.sub(r"{{(.*?)}}", shell_output, yaml_v)
 
     def __create_di_instance(self, cls_attrs):
         """
