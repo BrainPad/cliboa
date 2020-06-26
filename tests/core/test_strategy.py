@@ -14,7 +14,6 @@
 import sys
 
 from cliboa.client import CommandArgumentParser
-from cliboa.core.listener import StepStatusListener
 from cliboa.core.strategy import MultiProcExecutor, SingleProcExecutor
 from cliboa.scenario.sample_step import SampleStep
 
@@ -39,7 +38,6 @@ class TestStrategy(object):
         """
         instance = SampleStep()
         strategy = SingleProcExecutor([instance])
-        strategy.regist_listeners(StepStatusListener())
         strategy.execute_steps(self._cmd_args)
 
     def test_multi_process_executor_ok(self):
@@ -54,5 +52,4 @@ class TestStrategy(object):
             instance1 = SampleStep()
             instance2 = SampleStep()
             strategy = MultiProcExecutor([instance1, instance2])
-            strategy.regist_listeners(StepStatusListener())
             strategy.execute_steps(self._cmd_args)

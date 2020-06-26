@@ -12,7 +12,6 @@
 # all copies or substantial portions of the Software.
 #
 from cliboa.core.factory import StepExecutorFactory
-from cliboa.core.listener import StepStatusListener
 from cliboa.core.scenario_queue import ScenarioQueue
 from cliboa.util.constant import StepStatus
 from cliboa.util.lisboa_log import LisboaLog
@@ -63,12 +62,13 @@ class ScenarioWorker(object):
 
     def execute_scenario(self):
         self._before_scenario()
-        ret = self.__execute_steps()
         try:
-            self._after_scenario()
+            return self.__execute_steps()
         except Exception as e:
             self._logger.error(e)
-        return ret
+            raise e
+        finally:
+            self._after_scenario()
 
     def __execute_steps(self):
         """
@@ -77,7 +77,6 @@ class ScenarioWorker(object):
         res = None
         while not self._scenario_queue.step_queue.is_empty():
             strategy = StepExecutorFactory.create(self._scenario_queue.step_queue.pop())
-            strategy.regist_listeners(StepStatusListener())
             res = strategy.execute_steps(self._cmd_args)
             if res is None:
                 continue

@@ -15,15 +15,27 @@
 from cliboa.core.step_queue import StepQueue
 
 
-class TestScenairoQueue(object):
+class TestStepQueue(object):
+
+    _DUMMY_PARALLEL_CNT = 9
+
     def setup_method(self):
         self._scenario_queue = StepQueue()
+
+    def test_multi_proc_cnt(self):
+        self._scenario_queue.multi_proc_cnt = self._DUMMY_PARALLEL_CNT
+        assert self._scenario_queue.multi_proc_cnt == self._DUMMY_PARALLEL_CNT
 
     def test_push_and_pop(self):
         instance = "spam"
         self._scenario_queue.push(instance)
         ret = self._scenario_queue.pop()
         ret == "spam"
+
+    def test_peek(self):
+        instance = "spam"
+        self._scenario_queue.push(instance)
+        assert self._scenario_queue.peek() == "spam"
 
     def test_size(self):
         instance = "spam"

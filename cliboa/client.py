@@ -30,7 +30,8 @@ class ScenarioRunner(object):
 
     def __init__(self, cmd_args):
         """
-        Set project directory, scenario file path, scenario file format, other command line arguments
+        Set project directory, scenario file path,
+        scenario file format, other command line arguments
         """
         logging.config.fileConfig(
             env.BASE_DIR + "/conf/logging.conf", disable_existing_loggers=False
@@ -82,7 +83,7 @@ class CommandArgumentParser:
             "--format",
             nargs="?",
             default="yaml",
-            help="Specify yaml or json as FORMAT. That will be the scenario file format. Default foramt is yml",
+            help="Specify yaml or json as FORMAT. Default foramt is yaml",
         )
         args = parser.parse_args()
         return args

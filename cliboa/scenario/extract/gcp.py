@@ -25,7 +25,7 @@ from cliboa.scenario.gcp import BaseBigQuery, BaseFirestore, BaseGcs
 from cliboa.scenario.validator import EssentialParameters
 from cliboa.util.cache import ObjectStore
 from cliboa.util.exception import InvalidParameter
-from cliboa.util.gcp import BigQuery, Gcs, ServiceAccount
+from cliboa.util.gcp import BigQuery, Firestore, Gcs, ServiceAccount
 from cliboa.util.string import StringUtil
 
 
@@ -200,7 +200,7 @@ class BigQueryReadCache(BaseBigQuery):
             dialect="standard",
             location=self._location,
             project_id=self._project_id,
-            credentials=self._auth(),
+            credentials=ServiceAccount.auth(self._credentials),
         )
         ObjectStore.put(self._key, df)
 
@@ -239,17 +239,21 @@ class BigQueryFileDownload(BaseBigQuery):
 
         os.makedirs(self._dest_dir, exist_ok=True)
 
-        gbq_client = self._bigquery_client()
+        gbq_client = BigQuery.get_bigquery_client(self._credentials)
         gbq_ref = gbq_client.dataset(self._dataset).table(self._tblname)
 
-        gcs_client = self._gcs_client()
+        gcs_client = Gcs.get_gcs_client(self._credentials)
         gcs_bucket = gcs_client.get_bucket(self._bucket)
 
         ymd_hms = datetime.now().strftime("%Y%m%d%H%M%S%f")
         path = "%s-%s" % ("".join(random.choices(string.ascii_letters, k=8)), ymd_hms)
         prefix = "%s/%s/%s" % (self._dataset, self._tblname, path)
 
-        # gsc dir -> gs://{bucket_name}/{dataset_name}/{table_name}/{XXXXXXXX}-{yyyyMMddHHmmssSSS}/*.csv.gz
+        """
+        gsc dir -> gs://{bucket_name}
+                       /{dataset_name}/{table_name}
+                       /{XXXXXXXX}-{yyyyMMddHHmmssSSS}/*.csv.gz
+        """
         if self._filename:
             dest_gcs = "gs://%s/%s/%s*.csv.gz" % (self._bucket, prefix, self._filename)
         else:
@@ -306,7 +310,7 @@ class GcsDownload(BaseGcs):
         valid = EssentialParameters(self.__class__.__name__, [self._src_pattern])
         valid()
 
-        client = self._gcs_client()
+        client = Gcs.get_gcs_client(self._credentials)
         bucket = client.get_bucket(self._bucket)
         dl_files = []
         for blob in bucket.list_blobs(prefix=self._prefix, delimiter=self._delimiter):
@@ -368,7 +372,7 @@ class FirestoreDownloadDocument(BaseFirestore):
         )
         valid()
 
-        firestore_client = self._firestore_client()
+        firestore_client = Firestore.get_firestore_client(self._credentials)
         ref = firestore_client.document(self._collection, self._document)
         doc = ref.get()
 

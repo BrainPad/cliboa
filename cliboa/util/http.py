@@ -56,12 +56,11 @@ class FormAuth(object):
         self.__form_password = form_password
 
     def execute(self, *args):
-        if self.__form_auth is True:
-            valid = EssentialParameters(
-                self.__class__.__name__,
-                [self.__form_url, self.__form_id, self.__form_password],
-            )
-            valid()
+        valid = EssentialParameters(
+            self.__class__.__name__,
+            [self.__form_url, self.__form_id, self.__form_password],
+        )
+        valid()
 
 
 class BasicAuth(object):
@@ -87,14 +86,13 @@ class Http(ABC):
     Http client abstract class
     """
 
-    RETRY_INTVL_SEC = 10
-
-    def __init__(self, url, dest_path, timeout, retry_cnt):
+    def __init__(self, url, dest_path, timeout, retry_cnt, retry_intvl_sec):
         self._logger = LisboaLog.get_logger(__name__)
         self._url = url
         self._dest_path = dest_path
         self._timeout = timeout
         self._retry_cnt = retry_cnt
+        self._retry_intvl_sec = retry_intvl_sec
 
     @abstractmethod
     def execute(self):
@@ -108,12 +106,13 @@ class Download(Http):
 
     VALID_HTTP_STATUS = 200
 
-    def __init__(self, url, dest_path, timeout, retry_cnt):
-        super().__init__(url, dest_path, timeout, retry_cnt)
+    def __init__(self, url, dest_path, timeout, retry_cnt, retry_intvl_sec=10):
+        super().__init__(url, dest_path, timeout, retry_cnt, retry_intvl_sec)
 
     def execute(self):
         self._logger.info("Http GET url: %s" % self._url)
         self._logger.info("local path: %s" % self._dest_path)
+        res = None
         for _ in range(self._retry_cnt):
             try:
                 res = requests.get(self._url, timeout=self._timeout)
@@ -127,11 +126,14 @@ class Download(Http):
 
             self._logger.warning(
                 "Unexpected error occurred during http get. Retry will start in %s"
-                % self.RETRY_INTVL_SEC
+                % self._retry_intvl_sec
             )
-            sleep(self.RETRY_INTVL_SEC)
+            sleep(self._retry_intvl_sec)
 
-        raise HTTPError("Http request failed. HTTP Status code: %s" % res.status_code)
+        if res is not None:
+            raise HTTPError(
+                "Http request failed. HTTP Status code: %s" % res.status_code
+            )
 
 
 class DownloadViaBasicAuth(Http):
@@ -140,7 +142,6 @@ class DownloadViaBasicAuth(Http):
     """
 
     def __init__(self, id, password):
-        super().__init__()
         self.__id = id
         self.__pass = password
 

@@ -9,7 +9,7 @@ Read content from csv files and insert them into a bigquery table.
 |has_header|Csv has header or not. Specify either True or False|No|True||
 |project_id|GCP project id|Yes|None||
 |location|GCP location|Yes|None||
-|credentials|a file path of credential for GCP authentication|Yes|None||
+|credentials|A service account .json file path or a dictionary containing service account info in Google format|Yes|None||
 |dataset|BigQuery dataset|Yes|None||
 |tblname|BigQuery table name to insert|Yes|None||
 |replace|BigQuery insert mode. Specify either True or False|No|True||

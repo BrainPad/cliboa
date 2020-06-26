@@ -11,7 +11,7 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-from google.cloud import bigquery, storage
+from google.cloud import bigquery, firestore, storage
 from google.oauth2 import service_account
 
 from cliboa.util.lisboa_log import LisboaLog
@@ -20,11 +20,20 @@ from cliboa.util.lisboa_log import LisboaLog
 class ServiceAccount(object):
     """
     Service Account api wrapper
+    Creates a Signer instance from a service account .json file path
+    or a dictionary containing service account info in Google format.
+    Args:
+        credentials: gcp service account json
     """
 
     @staticmethod
     def auth(credentials):
-        return service_account.Credentials.from_service_account_file(credentials)
+        if not credentials:
+            return None
+        if isinstance(credentials, dict):
+            return service_account.Credentials.from_service_account_info(credentials)
+        else:
+            return service_account.Credentials.from_service_account_file(credentials)
 
 
 class BigQuery(object):
@@ -41,9 +50,10 @@ class BigQuery(object):
         Args:
            credentials: gcp service account json
         """
+        credentials_info = ServiceAccount.auth(credentials)
         return (
-            bigquery.Client.from_service_account_json(credentials)
-            if credentials
+            bigquery.Client(credentials=credentials_info, project=credentials_info.project_id)
+            if credentials_info
             else bigquery.Client()
         )
 
@@ -88,8 +98,24 @@ class Gcs(object):
 
     @staticmethod
     def get_gcs_client(credentials):
+        credentials_info = ServiceAccount.auth(credentials)
         return (
-            storage.Client.from_service_account_json(credentials)
-            if credentials
+            storage.Client(credentials=credentials_info, project=credentials_info.project_id)
+            if credentials_info
             else storage.Client()
+        )
+
+
+class Firestore(object):
+    """
+    google firestore api wrapper
+    """
+
+    @staticmethod
+    def get_firestore_client(credentials):
+        credentials_info = ServiceAccount.auth(credentials)
+        return (
+            firestore.Client(credentials=credentials_info, project=credentials_info.project_id)
+            if credentials_info
+            else firestore.Client()
         )

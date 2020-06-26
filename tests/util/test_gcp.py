@@ -15,7 +15,6 @@ from unittest import TestCase
 
 import pytest
 from google.cloud import bigquery, storage
-from google.oauth2 import service_account
 
 from cliboa.util.gcp import BigQuery, Gcs, ServiceAccount
 
@@ -23,7 +22,7 @@ from cliboa.util.gcp import BigQuery, Gcs, ServiceAccount
 class TestServiceAccount(TestCase):
     @pytest.mark.skip(reason="service account connection is neccesary")
     def test_auth_no_credentials(self):
-        assert ServiceAccount.auth(None) == ""
+        assert ServiceAccount.auth(None) is None
 
 
 class TestBigQuery(TestCase):
