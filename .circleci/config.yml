@@ -13,12 +13,16 @@ jobs:
           mv cliboa/template/Pipfile.above37 Pipfile
           pipenv install --dev --skip-lock
     - run:
-        name: unittest with python3.7
+        name: execute flake8
+        command: |
+          pipenv run flake8
+    - run:
+        name: execute unittest and instrument coverage with python3.7
         command: |
           mkdir conf
           cp -rp cliboa/conf/logging.conf conf/logging.conf
           cp -rp cliboa/conf/cliboa.ini conf/cliboa.ini
-          pipenv run unittest
+          pipenv run coverage
   test_python36:
     environment:
       TZ: "Asia/Tokyo"
@@ -32,12 +36,16 @@ jobs:
           mv cliboa/template/Pipfile.above36 Pipfile
           pipenv install --dev --skip-lock
     - run:
-        name: unittest with python3.6
+        name: execute flake8
+        command: |
+          pipenv run flake8
+    - run:
+        name: execute unittest and instrument coverage with python3.6
         command: |
           mkdir conf
           cp -rp cliboa/conf/logging.conf conf/logging.conf
           cp -rp cliboa/conf/cliboa.ini conf/cliboa.ini
-          pipenv run unittest
+          pipenv run coverage
   test_python35:
     environment:
       TZ: "Asia/Tokyo"
@@ -51,35 +59,43 @@ jobs:
           mv cliboa/template/Pipfile.above35 Pipfile
           pipenv install --dev --skip-lock
     - run:
-        name: unittest with python3.5
+        name: execute flake8
+        command: |
+          pipenv run flake8
+    - run:
+        name: execute unittest and instrument coverage with python3.5
         command: |
           mkdir conf
           cp -rp cliboa/conf/logging.conf conf/logging.conf
           cp -rp cliboa/conf/cliboa.ini conf/cliboa.ini
-          pipenv run unittest
-  test_python34:
-    environment:
-      TZ: "Asia/Tokyo"
-    docker:
-      - image: circleci/python:3.4
-    steps:
-    - checkout
-    - run:
-        name: install dependencies
-        command: |
-          mv cliboa/template/Pipfile.above34 Pipfile
-          pipenv install --dev --skip-lock
-    - run:
-        name: unittest with python3.4
-        command: |
-          mkdir conf
-          cp -rp cliboa/conf/logging.conf conf/logging.conf
-          cp -rp cliboa/conf/cliboa.ini conf/cliboa.ini
-          pipenv run unittest
+          pipenv run coverage
+  #test_python34:
+  #  environment:
+  #    TZ: "Asia/Tokyo"
+  #  docker:
+  #    - image: circleci/python:3.4
+  #  steps:
+  #  - checkout
+  #  - run:
+  #      name: install dependencies
+  #      command: |
+  #        mv cliboa/template/Pipfile.above34 Pipfile
+  #        pipenv install --dev --skip-lock
+  #  - run:
+  #      name: execute flake8
+  #      command: |
+  #        pipenv run flake8
+  #  - run:
+  #      name: execute unittest and instrument coverage with python3.4
+  #      command: |
+  #        mkdir conf
+  #        cp -rp cliboa/conf/logging.conf conf/logging.conf
+  #        cp -rp cliboa/conf/cliboa.ini conf/cliboa.ini
+  #        pipenv run coverage
 workflows:
   test_all_support_python_ver:
     jobs:
       - test_python37
       - test_python36
       - test_python35
-      - test_python34
+      #- test_python34

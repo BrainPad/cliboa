@@ -95,7 +95,8 @@ class SqliteAdapter(object):
             tblname: target table
             column_def: table column definition
             insert_rows(dict[])  rows to be inserted
-            is_replace_into: when using replace into: True, when using insert into: False
+            is_replace_into: when using replace into: True,
+                             when using insert into: False
         """
         if not tblname or not insert_rows:
             raise ValueError("Parameters are missing")
@@ -118,7 +119,7 @@ class SqliteAdapter(object):
 
             if len(vs) != len(column_def):
                 raise ValueError(
-                    "The length of insert rows must be equal to the column definition. Column definition: %s, Insert rows: %s"
+                    "The length of insert rows must be equal to the column definition. Column definition: %s, Insert rows: %s"  # noqa
                     % (column_def, vs)
                 )
         self.__con.executemany(sql, values)

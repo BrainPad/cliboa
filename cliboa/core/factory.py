@@ -12,8 +12,8 @@
 # all copies or substantial portions of the Software.
 #
 from cliboa.conf import env
-from cliboa.core.manager import JsonScenarioManager, YamlScenarioManager
-from cliboa.core.step_queue import StepQueue
+from cliboa.core.manager import JsonScenarioManager, YamlScenarioManager  # noqa
+from cliboa.core.step_queue import StepQueue  # noqa
 from cliboa.core.strategy import MultiProcExecutor, SingleProcExecutor
 
 

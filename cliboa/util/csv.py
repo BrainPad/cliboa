@@ -15,8 +15,6 @@ import codecs
 import csv
 import os
 
-from cliboa.core.validator import EssentialParameters
-
 
 class Csv(object):
     @staticmethod

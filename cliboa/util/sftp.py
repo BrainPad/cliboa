@@ -249,7 +249,9 @@ def get_specific_file_func(**kwargs):
 def put_file_func(**kwargs):
     """
     Function that is to upload a file.
-    '.' as prefix is added to the file name while uploading and then the prefix '.' will be removed (rename the file) when upload complete.
+    '.' as prefix is added to the file name
+    while uploading and then the prefix '.'
+    will be removed (rename the file) when upload complete.
     """
     dirname = os.path.dirname(kwargs["dest"])
 

@@ -19,13 +19,16 @@ from abc import abstractmethod
 from cliboa.conf import env
 from cliboa.core.file_parser import YamlScenarioParser
 from cliboa.core.scenario_queue import ScenarioQueue
-from cliboa.core.validator import (DIScenarioFormat, ProjectDirectoryExistence,
-                                   ScenarioFileExistence)
-from cliboa.scenario import *
+from cliboa.core.validator import (
+    DIScenarioFormat,
+    ProjectDirectoryExistence,
+    ScenarioFileExistence
+)
+from cliboa.scenario import *  # noqa
 from cliboa.util.cache import StepArgument
 from cliboa.util.exception import ScenarioFileInvalid
 from cliboa.util.helper import Helper
-from cliboa.util.http import BasicAuth, FormAuth
+from cliboa.util.http import BasicAuth, FormAuth  # noqa
 from cliboa.util.lisboa_log import LisboaLog
 
 __all__ = ["YamlScenarioManager", "JsonScenarioManager"]
@@ -256,7 +259,7 @@ class YamlScenarioManager(ScenarioManager):
         cmd = self._dynamic_key_and_val[var_name]
         if not cmd:
             raise ScenarioFileInvalid(
-                "scenario.yml is invalid. 'with_vars' definition against %s does not exist."
+                "scenario.yml is invalid. 'with_vars' definition against %s does not exist."  # noqa
                 % var_name
             )
         shell_output = subprocess.Popen(

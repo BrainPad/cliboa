@@ -20,9 +20,12 @@ import yaml
 
 from cliboa.client import CommandArgumentParser
 from cliboa.conf import env
-from cliboa.core.validator import (ProjectDirectoryExistence,
-                                   ScenarioFileExistence, ScenarioYamlKey,
-                                   ScenarioYamlType)
+from cliboa.core.validator import (
+    ProjectDirectoryExistence,
+    ScenarioFileExistence,
+    ScenarioYamlKey,
+    ScenarioYamlType
+)
 from cliboa.util.exception import FileNotFound, ScenarioFileInvalid
 
 

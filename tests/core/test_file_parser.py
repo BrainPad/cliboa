@@ -14,7 +14,6 @@
 import os
 import shutil
 import sys
-from pprint import pprint
 
 import pytest
 import yaml
@@ -27,7 +26,6 @@ from cliboa.util.exception import ScenarioFileInvalid
 
 class TestYamlScenarioParser(object):
     def setup_method(self, method):
-        pprint(env.__dict__)
         cmd_parser = CommandArgumentParser()
         sys.argv.clear()
         sys.argv.append("spam")
@@ -85,7 +83,8 @@ class TestYamlScenarioParser(object):
 
     def test_parse_with_pj_and_cmn_yaml_with_no_pj_args_ok(self):
         """
-        Valid project scenario.yml and common scenario.yml. There is no arguments in project scenario.yml
+        Valid project scenario.yml and common scenario.yml.
+        There is no arguments in project scenario.yml
         """
         os.makedirs(self._pj_dir)
         os.makedirs(self._cmn_scenario_dir)
@@ -121,7 +120,8 @@ class TestYamlScenarioParser(object):
 
     def test_parse_with_pj_and_cmn_yaml_with_no_args_ok(self):
         """
-        Valid project scenario.yml and common scenario.yml. In common scenario.yml, there is no arguments.
+        Valid project scenario.yml and common scenario.yml.
+        In common scenario.yml, there is no arguments.
         """
         os.makedirs(self._pj_dir)
         os.makedirs(self._cmn_scenario_dir)
@@ -157,7 +157,8 @@ class TestYamlScenarioParser(object):
 
     def test_parse_with_pj_and_cmn_yaml_with_diff_cls_ok(self):
         """
-        Valid project scenario.yml and common scenario.yml. In common scenario.yml, There are not same classes.
+        Valid project scenario.yml and common scenario.yml.
+        In common scenario.yml, There are not same classes.
         """
         os.makedirs(self._pj_dir)
         os.makedirs(self._cmn_scenario_dir)
@@ -257,7 +258,8 @@ class TestYamlScenarioParser(object):
 
     def test_parse_with_pj_and_cmn_yaml_no_class_ng(self):
         """
-        project scenario.yml and common scenario.yml. There is no class: in project scenario.yml
+        project scenario.yml and common scenario.yml.
+        There is no class: in project scenario.yml
         """
         os.makedirs(self._pj_dir)
         os.makedirs(self._cmn_scenario_dir)
@@ -290,7 +292,8 @@ class TestYamlScenarioParser(object):
 
     def test_parse_with_pj_and_cmn_yaml_no_class_val_ng(self):
         """
-        project scenario.yml and common scenario.yml. There is no class value: in common scenario.yml
+        project scenario.yml and common scenario.yml.
+        There is no class value: in common scenario.yml
         """
         os.makedirs(self._pj_dir)
         os.makedirs(self._cmn_scenario_dir)

@@ -12,8 +12,7 @@
 # all copies or substantial portions of the Software.
 #
 
-from cliboa.util.exception import (InvalidParameter, ScenarioFileInvalid,
-                                   SqliteInvalid)
+from cliboa.util.exception import InvalidParameter, ScenarioFileInvalid, SqliteInvalid
 from cliboa.util.lisboa_log import LisboaLog
 from cliboa.util.sqlite import SqliteAdapter
 

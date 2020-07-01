@@ -15,7 +15,7 @@ import ast
 import csv
 
 from cliboa.scenario.base import BaseStep
-from cliboa.scenario.validator import EssentialParameters, IOOutput
+from cliboa.scenario.validator import IOOutput
 
 
 class FileWrite(BaseStep):

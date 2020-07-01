@@ -22,7 +22,7 @@ from cliboa.core.validator import EssentialParameters
 from cliboa.scenario.gcp import BaseBigQuery, BaseFirestore, BaseGcs
 from cliboa.scenario.load.file import FileWrite
 from cliboa.util.exception import FileNotFound, InvalidFileCount, InvalidFormat
-from cliboa.util.gcp import BigQuery, Gcs, ServiceAccount
+from cliboa.util.gcp import ServiceAccount
 
 
 class BigQueryWrite(BaseBigQuery, FileWrite):

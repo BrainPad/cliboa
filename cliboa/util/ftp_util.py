@@ -109,7 +109,8 @@ class FtpUtil(object):
 
         Args:
             dir (str): directory
-            unixtime=False (bool): Whether response time returns as str(yyyyMMddHHmmss) or unixtime
+            unixtime=False (bool): Whether response time returns
+                                   as str(yyyyMMddHHmmss) or unixtime
         Returns:
             dict: {file name: update time}
 

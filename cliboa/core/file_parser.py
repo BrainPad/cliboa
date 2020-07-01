@@ -16,8 +16,11 @@ from abc import abstractmethod
 
 import yaml
 
-from cliboa.core.validator import (EssentialKeys, ScenarioYamlKey,
-                                   ScenarioYamlType)
+from cliboa.core.validator import (  # noqa
+    EssentialKeys,
+    ScenarioYamlKey,
+    ScenarioYamlType
+)
 from cliboa.util.lisboa_log import LisboaLog
 
 
@@ -78,7 +81,8 @@ class YamlScenarioParser(ScenarioParser):
     def __merge_scenario_yaml(self, pj_yaml_list, cmn_yaml_list):
         """
         Merge project scenrio.yml and common scenairo.yml.
-        If the same class specification exists, scenario.yml of projet is taken priority.
+        If the same class specification exists,
+        scenario.yml of projet is taken priority.
         """
         for pj_yaml_dict in pj_yaml_list:
             # If same class exists, merge arguments
