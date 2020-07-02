@@ -14,6 +14,7 @@
 import errno
 import logging
 import os
+import stat
 from time import sleep
 
 from paramiko import AutoAddPolicy, SSHClient
@@ -90,10 +91,13 @@ class Sftp(object):
             dir (str): remove target dir
             pattern (object): remove target file pattern
 
+        Returns:
+            list: deleted file names
+
         Raises:
             IOError: failed to remove
         """
-        self.__execute(clear_file_func, dir=dir, pattern=pattern)
+        return self.__execute(clear_file_func, dir=dir, pattern=pattern)
 
     def remove_specific_file(self, dir, fname):
         """
@@ -208,13 +212,10 @@ def list_file_func(**kwargs):
         if kwargs["pattern"].match(f) is None:
             continue
 
-        fPath = os.path.join(kwargs["dir"], f)
-        try:
-            kwargs["sftp"].get(fPath, os.path.join(kwargs["dest"], f))
+        fpath = os.path.join(kwargs["dir"], f)
+        if _is_file(kwargs["sftp"], fpath):
+            kwargs["sftp"].get(fpath, os.path.join(kwargs["dest"], f))
             files.append(f)
-        except IOError:
-            # If error occurred, get all the files which matche to pattern
-            pass
     return files
 
 
@@ -222,14 +223,16 @@ def clear_file_func(**kwargs):
     """
     All the files which match to pattenr.
     """
+    files = []
     for f in kwargs["sftp"].listdir(kwargs["dir"]):
         if kwargs["pattern"].match(f) is None:
             continue
-        try:
-            kwargs["sftp"].remove(os.path.join(kwargs["dir"], f))
-        except IOError:
-            # Neglect because IOError occurs when pattern maches to directory.
-            pass
+
+        fpath = os.path.join(kwargs["dir"], f)
+        if _is_file(kwargs["sftp"], fpath):
+            kwargs["sftp"].remove(fpath)
+            files.append(fpath)
+    return files
 
 
 def remove_specific_file_func(**kwargs):
@@ -273,3 +276,14 @@ def put_file_func(**kwargs):
         pass
 
     kwargs["sftp"].rename(tmp_dest, kwargs["dest"])
+
+
+def _is_file(sftp, path):
+    """
+    Returns True if target object is a file, False if not.
+    """
+    info = sftp.stat(path)
+    if stat.S_ISREG(info.st_mode):
+        return True
+    else:
+        return False

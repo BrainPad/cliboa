@@ -106,6 +106,8 @@ class SftpDownload(SftpExtract):
             self._logger.info("No file was found. After process will not be processed")
             return StepStatus.SUCCESSFUL_TERMINATION
 
+        self._logger.info("Files downloaded %s" % files)
+
         # cache downloaded file names
         ObjectStore.put(self._step, files)
 
@@ -163,5 +165,6 @@ class SftpDownloadFileDelete(SftpExtract):
             )
             for file in files:
                 sftp.remove_specific_file(super().get_step_argument("src_dir"), file)
+                self._logger.info("%s is successfully deleted." % file)
         else:
             self._logger.info("No files to delete.")
