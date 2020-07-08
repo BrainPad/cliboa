@@ -6,7 +6,7 @@ Download files from GCS.
 |----------|-----------|--------|-------|-------|
 |project_id|GCP project id|Yes|None||
 |location|GCP location|Yes|None||
-|credentials|A file path of credential for GCP authentication|Yes|None||
+|credentials|A service account .json file path or a dictionary containing service account info in Google format|Yes|None||
 |bucket|GCS bucket name|Yes|None||
 |prefix|Folder prefix used to filter blobs|No|None||
 |delimiter|Delimiter, used with prefix to emulate hierarchy|No|None||
