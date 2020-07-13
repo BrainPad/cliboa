@@ -33,37 +33,50 @@ class ScenarioListener(BaseListener):
     @abstractmethod
     def before_scenario(self, worker):
         """
-        Update scenario execution status before scenario execution
+        Execute before scenario start.
         """
 
     @abstractmethod
     def after_scenario(self, worker):
         """
-        Update scenario execution status after scenario completion
+        Execute after scenario was finished.
         """
 
 
 class StepListener(BaseListener):
     """
-    Listener for step
+    If you would like to add an extra action for a step,
+    create a custom listener class with extend this class,
+    and implement any methods below.
+    These are called when
+    1. before a step is called.
+    2. after a step is completed, or when error occured while executing the step.
+    3. Very end of the step.
     """
 
     @abstractmethod
-    def before_step(self, strategy):
+    def before_step(self, *args, **kwargs):
         """
-        Update step status before step execution
-        """
-
-    @abstractmethod
-    def after_step(self, strategy):
-        """
-        Update step status after step
+        Execute before a step is called.
         """
 
     @abstractmethod
-    def after_completion(self):
+    def after_step(self, *args, **kwargs):
         """
-        Update step status after step completion
+        Execute after a step was successfully completed.
+        """
+
+    @abstractmethod
+    def error_step(self, *args, **kwargs):
+        """
+        Execute when error occurred while executing a step.
+        """
+
+    @abstractmethod
+    def after_completion(self, *args, **kwargs):
+        """
+        Execute after a step
+        (no matter the step was successfully completed or ended with an error)
         """
 
 
@@ -83,16 +96,17 @@ class ScenarioStatusListener(BaseListener):
         )
 
 
-class StepStatusListener(BaseListener):
+class StepStatusListener(StepListener):
     """
-    Listener for step execution status
+    This listener is only for logging.
+    By default, Cliboa implements StepStatusListener in all steps.
     """
 
-    def before_step(self, strategy):
-        self._logger.info("Start step execution in %s." % strategy.get_queue_status())
+    def before_step(self, *args, **kwargs):
+        self._logger.info("Start step execution. %s" % args[0].__class__.__name__)
 
-    def after_step(self, strategy):
-        self._logger.info("Finish step execution in %s." % strategy.get_queue_status())
+    def after_step(self, *args, **kwargs):
+        self._logger.info("Finish step execution. %s" % args[0].__class__.__name__)
 
-    def after_completion(self):
-        self._logger.info("Complete step execution.")
+    def after_completion(self, *args, **kwargs):
+        self._logger.info("Complete step execution. %s" % args[0].__class__.__name__)
