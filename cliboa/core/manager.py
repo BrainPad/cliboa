@@ -179,7 +179,7 @@ class YamlScenarioManager(ScenarioManager):
             cls = globals()[cls_name]
             instance = cls()
 
-        base_args = ["step", "symbol", "parallel", "io"]
+        base_args = ["step", "symbol", "parallel", "io", "listeners"]
         for arg in base_args:
             Helper.set_property(instance, arg, s_dict.get(arg))
 

@@ -63,11 +63,13 @@ class ScenarioWorker(object):
 
     def execute_scenario(self):
         self._before_scenario()
-        ret = self.__execute_steps()
+
         try:
-            self._after_scenario()
+            ret = self.__execute_steps()
         except Exception as e:
             self._logger.error(e)
+        finally:
+            self._after_scenario()
         return ret
 
     def __execute_steps(self):
@@ -77,7 +79,6 @@ class ScenarioWorker(object):
         res = None
         while not self._scenario_queue.step_queue.is_empty():
             strategy = StepExecutorFactory.create(self._scenario_queue.step_queue.pop())
-            strategy.regist_listeners(StepStatusListener())
             res = strategy.execute_steps(self._cmd_args)
             if res is None:
                 continue

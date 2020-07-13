@@ -18,6 +18,7 @@ import cloudpickle
 from multiprocessing_logging import install_mp_handler
 
 from cliboa.core.scenario_queue import ScenarioQueue
+from cliboa.scenario.base import BaseStep
 from cliboa.util.exception import StepExecutionFailed
 from cliboa.util.lisboa_log import LisboaLog
 
@@ -38,47 +39,11 @@ class StepExecutor(object):
         self._logger = LisboaLog.get_logger(__name__)
         self._step = obj
 
-        # enable to regist multiple listeners
-        self._listeners = []
-
-    def get_queue_status(self):
-        """
-        Get current execution queue status
-        """
-        return self._step[0].__class__.__name__
-
     @abstractmethod
     def execute_steps(self):
         """
         Execute steps in scenario file
         """
-
-    def regist_listeners(self, listener):
-        """
-        Regist multiple listeners to activate
-        """
-        self._listeners.append(listener)
-
-    def _before_step(self):
-        """
-        Notify to registerd listener
-        """
-        for l in self._listeners:
-            l.before_step(self)
-
-    def _after_step(self):
-        """
-        Notify to registerd listener
-        """
-        for l in self._listeners:
-            l.after_step(self)
-
-    def _after_completion(self):
-        """
-        Notify to registerd listener
-        """
-        for l in self._listeners:
-            l.after_completion()
 
 
 class SingleProcExecutor(StepExecutor):
@@ -88,10 +53,8 @@ class SingleProcExecutor(StepExecutor):
 
     def execute_steps(self, args):
         try:
-            self._before_step()
             cls = self._step[0]
             ret = cls.trigger(args)
-            self._after_step()
             return ret
 
         except Exception as e:
@@ -100,9 +63,6 @@ class SingleProcExecutor(StepExecutor):
                 % (cls.__class__.__name__, str(e))
             )
             raise e
-
-        finally:
-            self._after_completion()
 
 
 class MultiProcExecutor(StepExecutor):
@@ -113,10 +73,8 @@ class MultiProcExecutor(StepExecutor):
     @staticmethod
     def _async_step_execute(cls):
         try:
-            clz, before, after = cloudpickle.loads(cls)
-            before()
+            clz = cloudpickle.loads(cls)
             clz.trigger()
-            after()
             return "OK"
         except Exception as e:
             LisboaLog.get_logger(__name__).error(e)
@@ -128,10 +86,7 @@ class MultiProcExecutor(StepExecutor):
             % ScenarioQueue.step_queue.multi_proc_cnt
         )
         install_mp_handler()
-        packed = [
-            cloudpickle.dumps([x, self._before_step, self._after_step])
-            for x in self._step
-        ]
+        packed = [cloudpickle.dumps(step) for step in self._step]
 
         try:
             with Pool(processes=ScenarioQueue.step_queue.multi_proc_cnt) as p:
@@ -141,5 +96,3 @@ class MultiProcExecutor(StepExecutor):
         except Exception as e:
             self._logger.error("Exception occurred during multi process execution.")
             raise e
-        finally:
-            self._after_completion()
