@@ -98,11 +98,11 @@ To make the above scenario available, set a local machine as a sftp server accor
 After wrote scenario.yml and set the environment, execute a scenario by as below command.
 ```
 cd sample
-pipenv run python3 bin/clibomanager.py saimple-etl
+pipenv run python3 bin/clibomanager.py simple-etl
 ```
 or
 ```
 cd sample
-python3 bin/clibomanager.py saimple-etl
+python3 bin/clibomanager.py simple-etl
 ```
 
