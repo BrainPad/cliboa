@@ -7,7 +7,7 @@ Document names will be the same with the file names.
 |----------|-----------|--------|-------|-------|
 |project_id|GCP project id|Yes|None||
 |location|GCP location|Yes|None||
-|credentials|A file path of credential for GCP authentication|Yes|None||
+|credentials|A service account .json file path or a dictionary containing service account info in Google format|Yes|None||
 |collection|Collection name|Yes|None||
 |src_dir|Directory that files exists|Yes|None||
 |src_pattern|File pattern of source. Regexp is available|Yes|None||

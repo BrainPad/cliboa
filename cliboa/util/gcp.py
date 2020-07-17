@@ -11,7 +11,7 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-from google.cloud import bigquery, storage
+from google.cloud import bigquery, firestore, storage
 from google.oauth2 import service_account
 
 from cliboa.util.lisboa_log import LisboaLog
@@ -20,11 +20,19 @@ from cliboa.util.lisboa_log import LisboaLog
 class ServiceAccount(object):
     """
     Service Account api wrapper
+    Creates a Signer instance from a service account .json file path or a dictionary containing service account info in Google format.
+    Args:
+        credentials: gcp service account json
     """
 
     @staticmethod
     def auth(credentials):
-        return service_account.Credentials.from_service_account_file(credentials)
+        if not credentials:
+            return None
+        if isinstance(credentials, dict):
+            return service_account.Credentials.from_service_account_info(credentials)
+        else:
+            return service_account.Credentials.from_service_account_file(credentials)
 
 
 class BigQuery(object):
@@ -41,11 +49,7 @@ class BigQuery(object):
         Args:
            credentials: gcp service account json
         """
-        return (
-            bigquery.Client.from_service_account_json(credentials)
-            if credentials
-            else bigquery.Client()
-        )
+        return bigquery.Client(credentials=ServiceAccount.auth(credentials))
 
     @staticmethod
     def get_extract_job_config(print_header=True):
@@ -88,8 +92,14 @@ class Gcs(object):
 
     @staticmethod
     def get_gcs_client(credentials):
-        return (
-            storage.Client.from_service_account_json(credentials)
-            if credentials
-            else storage.Client()
-        )
+        return storage.Client(credentials=ServiceAccount.auth(credentials))
+
+
+class Firestore(object):
+    """
+    google firestore api wrapper
+    """
+
+    @staticmethod
+    def get_firestore_client(credentials):
+        return firestore.Client(credentials=ServiceAccount.auth(credentials))

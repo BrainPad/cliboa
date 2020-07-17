@@ -61,7 +61,7 @@ class BaseGcp(BaseStep):
     def _gcs_client(self):
         """
         @deprecated
-        use Gcs.get_client() in util.gcp
+        use Gcs.get_gcs_client() in util.gcp
         """
         if self._credentials:
             return storage.Client.from_service_account_json(self._credentials)
@@ -69,6 +69,10 @@ class BaseGcp(BaseStep):
             return storage.Client()
 
     def _firestore_client(self):
+        """
+        @deprecated
+        use Firestore.get_firestore_client() in util.gcp
+        """
         if self._credentials:
             return firestore.Client.from_service_account_json(self._credentials)
         else:

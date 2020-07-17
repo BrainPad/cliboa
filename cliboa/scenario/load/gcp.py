@@ -22,7 +22,7 @@ from cliboa.core.validator import EssentialParameters
 from cliboa.scenario.gcp import BaseBigQuery, BaseFirestore, BaseGcs
 from cliboa.scenario.load.file import FileWrite
 from cliboa.util.exception import FileNotFound, InvalidFileCount, InvalidFormat
-from cliboa.util.gcp import BigQuery, Gcs, ServiceAccount
+from cliboa.util.gcp import Firestore, Gcs, ServiceAccount
 
 
 class BigQueryWrite(BaseBigQuery, FileWrite):
@@ -212,7 +212,7 @@ class BigQueryCreate(BaseBigQuery):
                         if_exists=if_exists,
                         table_schema=self._table_schema,
                         location=self._location,
-                        credentials=self._auth(),
+                        credentials=ServiceAccount.auth(self._credentials),
                     )
                     cache_list.clear()
                     inserts = True
@@ -231,7 +231,7 @@ class BigQueryCreate(BaseBigQuery):
                     if_exists=if_exists,
                     table_schema=self._table_schema,
                     location=self._location,
-                    credentials=self._auth(),
+                    credentials=ServiceAccount.auth(self._credentials),
                 )
         self._s.remove()
 
@@ -289,7 +289,7 @@ class GcsFileUpload(BaseGcs):
         )
         valid()
 
-        gcs_client = self._gcs_client()
+        gcs_client = Gcs.get_gcs_client(self._credentials)
         bucket = gcs_client.get_bucket(self._bucket)
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self._logger.info("Upload files %s" % files)
@@ -328,7 +328,7 @@ class GcsUpload(BaseGcs):
         )
         valid()
 
-        gcs_client = self._gcs_client()
+        gcs_client = Gcs.get_gcs_client(self._credentials)
         bucket = gcs_client.get_bucket(self._bucket)
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self._logger.info("Upload files %s" % files)
@@ -418,7 +418,7 @@ class CsvReadBigQueryCreate(BaseBigQuery, FileWrite):
             if_exists=if_exists,
             table_schema=self._table_schema,
             location=self._location,
-            credentials=self._auth(),
+            credentials=ServiceAccount.auth(self._credentials),
         )
 
     def __format_insert_data(self, insert_rows):
@@ -474,7 +474,7 @@ class FirestoreDocumentCreate(BaseFirestore):
         if len(files) == 0:
             raise FileNotFound("No files are found.")
 
-        firestore_client = self._firestore_client()
+        firestore_client = Firestore.get_firestore_client(self._credentials)
 
         for file in files:
             with open(file) as f:

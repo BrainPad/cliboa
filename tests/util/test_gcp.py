@@ -23,7 +23,7 @@ from cliboa.util.gcp import BigQuery, Gcs, ServiceAccount
 class TestServiceAccount(TestCase):
     @pytest.mark.skip(reason="service account connection is neccesary")
     def test_auth_no_credentials(self):
-        assert ServiceAccount.auth(None) == ""
+        assert ServiceAccount.auth(None) is None
 
 
 class TestBigQuery(TestCase):
