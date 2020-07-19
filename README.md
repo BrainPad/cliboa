@@ -33,7 +33,7 @@ See [CONTRIBUTING.md](/CONTRIBUTING.md)
 Available on any Linux distributions, like Debian, Ubuntu, CentOS, REL, or etc.
 
 ## Install Cliboa
-python version 3.4 or later and pipenv are required. In the environemnt which pip can be used, execute as below.
+python version 3.5 or later and pipenv are required. In the environemnt which pip can be used, execute as below.
 
 ```
 sudo pip3 install pipenv
