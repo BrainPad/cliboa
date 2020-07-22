@@ -18,7 +18,6 @@ import cloudpickle
 from multiprocessing_logging import install_mp_handler
 
 from cliboa.core.scenario_queue import ScenarioQueue
-from cliboa.scenario.base import BaseStep
 from cliboa.util.exception import StepExecutionFailed
 from cliboa.util.lisboa_log import LisboaLog
 

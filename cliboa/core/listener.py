@@ -33,41 +33,25 @@ class ScenarioListener(BaseListener):
     @abstractmethod
     def before_scenario(self, worker):
         """
-<<<<<<< HEAD
-        Execute before the scenario start.
-=======
         Execute before scenario start.
->>>>>>> branch '88' of https://bp-okamoto-naoki@bitbucket.org/brainpad/cliboa.git
         """
 
     @abstractmethod
     def after_scenario(self, worker):
         """
-<<<<<<< HEAD
-        Execute after the scenario was finished.
-=======
         Execute after scenario was finished.
->>>>>>> branch '88' of https://bp-okamoto-naoki@bitbucket.org/brainpad/cliboa.git
         """
 
 
 class StepListener(BaseListener):
     """
     If you would like to add an extra action for a step,
-<<<<<<< HEAD
-    create a custom listener class with extend this class, and implement any methods below.
-    These are called when
-    1. before a step is called.
-    2. after a step is completed, or when error occured while executing the step.
-    3. The very end of a step.
-=======
     create a custom listener class with extend this class,
     and implement any methods below.
     These are called when
     1. before a step is called.
     2. after a step is completed, or when error occured while executing the step.
     3. Very end of the step.
->>>>>>> branch '88' of https://bp-okamoto-naoki@bitbucket.org/brainpad/cliboa.git
     """
 
     @abstractmethod
@@ -91,12 +75,8 @@ class StepListener(BaseListener):
     @abstractmethod
     def after_completion(self, *args, **kwargs):
         """
-<<<<<<< HEAD
-        Execute after a step (no matter the step was successfully completed or ended with an error)
-=======
         Execute after a step
         (no matter the step was successfully completed or ended with an error)
->>>>>>> branch '88' of https://bp-okamoto-naoki@bitbucket.org/brainpad/cliboa.git
         """
 
 

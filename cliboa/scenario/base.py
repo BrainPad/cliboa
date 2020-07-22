@@ -17,7 +17,6 @@ import re
 from abc import abstractmethod
 
 from cliboa.conf import env
-from cliboa.core.listener import StepStatusListener
 from cliboa.scenario.validator import (  # noqa
     EssentialParameters,
     IOOutput,
@@ -41,7 +40,7 @@ class BaseStep(object):
         self._parallel = None
         self._io = None
         self._logger = None
-        self._listeners = [StepStatusListener()]
+        self._listeners = []
 
     def step(self, step):
         self._step = step
@@ -59,15 +58,7 @@ class BaseStep(object):
         self._logger = logger
 
     def listeners(self, listeners):
-        if listeners is not None:
-            from cliboa.core.factory import CustomInstanceFactory
-            if type(listeners) is str:
-                self._listeners.append(
-                    CustomInstanceFactory.create(listeners))
-            elif type(listeners) is list:
-                for listener in listeners:
-                    self._listeners.append(
-                        CustomInstanceFactory.create(listener))
+        self._listeners = listeners
 
     def trigger(self, *args):
         mask = None

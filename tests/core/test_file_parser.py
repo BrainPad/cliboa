@@ -14,7 +14,6 @@
 import os
 import shutil
 import sys
-from pprint import pprint
 
 import pytest
 import yaml
@@ -27,7 +26,6 @@ from cliboa.util.exception import ScenarioFileInvalid
 
 class TestYamlScenarioParser(object):
     def setup_method(self, method):
-        pprint(env.__dict__)
         cmd_parser = CommandArgumentParser()
         sys.argv.clear()
         sys.argv.append("spam")

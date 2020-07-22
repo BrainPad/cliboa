@@ -62,27 +62,13 @@ class ScenarioWorker(object):
 
     def execute_scenario(self):
         self._before_scenario()
-<<<<<<< HEAD
-
-=======
->>>>>>> branch '88' of https://bp-okamoto-naoki@bitbucket.org/brainpad/cliboa.git
         try:
-<<<<<<< HEAD
-            ret = self.__execute_steps()
-=======
             return self.__execute_steps()
->>>>>>> branch '88' of https://bp-okamoto-naoki@bitbucket.org/brainpad/cliboa.git
         except Exception as e:
             self._logger.error(e)
-<<<<<<< HEAD
-        finally:
-            self._after_scenario()
-        return ret
-=======
             raise e
         finally:
             self._after_scenario()
->>>>>>> branch '88' of https://bp-okamoto-naoki@bitbucket.org/brainpad/cliboa.git
 
     def __execute_steps(self):
         """
