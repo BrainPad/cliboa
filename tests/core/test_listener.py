@@ -13,12 +13,19 @@
 #
 import os
 import sys
+import unittest
 
 from cliboa.client import CommandArgumentParser
 from cliboa.conf import env
 from cliboa.core.listener import ScenarioStatusListener, StepStatusListener
-from cliboa.core.strategy import StepExecutor
+from cliboa.core.strategy import SingleProcExecutor, StepExecutor
 from cliboa.core.worker import ScenarioWorker
+from cliboa.scenario.sample_step import SampleCustomStep
+from cliboa.util.exception import CliboaException
+from cliboa.util.helper import Helper
+from cliboa.util.lisboa_log import LisboaLog
+from contextlib import ExitStack
+from unittest.mock import patch
 
 
 class TestScenarioStatusListener(object):
@@ -73,3 +80,72 @@ class TestStepStatusListener(object):
                 pass
             last_line = line
         assert "Start" in last_line
+
+
+class TestAppropriateListnerCall(unittest.TestCase):
+
+    def test_end_with_noerror(self):
+
+        if sys.version_info.minor < 6:
+            # ignore test if python version is less 3.6(assert_called is not supported)
+            return
+
+        with ExitStack() as stack:
+            mock_before_step = stack.enter_context(
+                patch("cliboa.core.listener.StepStatusListener.before_step"))
+            mock_error_step = stack.enter_context(
+                patch("cliboa.core.listener.StepStatusListener.error_step"))
+            mock_after_step = stack.enter_context(
+                patch("cliboa.core.listener.StepStatusListener.after_step"))
+            mock_post_step = stack.enter_context(
+                patch("cliboa.core.listener.StepStatusListener.after_completion"))
+
+            step = SampleCustomStep()
+            Helper.set_property(
+                step, "logger", LisboaLog.get_logger(step.__class__.__name__))
+            Helper.set_property(step, "listeners", [StepStatusListener()])
+            executor = SingleProcExecutor([step])
+            executor.execute_steps(None)
+
+            mock_before_step.assert_called_once()
+            mock_error_step.assert_not_called()
+            mock_after_step.assert_called_once()
+            mock_post_step.assert_called_once()
+
+    def test_end_with_error(self):
+
+        if sys.version_info.minor < 6:
+            # ignore test if python version is less 3.6 (mock#assert_called is not supported)
+            return
+
+        with ExitStack() as stack:
+            mock_before_step = stack.enter_context(patch(
+                "cliboa.core.listener.StepStatusListener.before_step"))
+            mock_error_step = stack.enter_context(patch(
+                "cliboa.core.listener.StepStatusListener.error_step"))
+            mock_after_step = stack.enter_context(patch(
+                "cliboa.core.listener.StepStatusListener.after_step"))
+            mock_post_step = stack.enter_context(patch(
+                "cliboa.core.listener.StepStatusListener.after_completion"))
+
+            step = ErrorSampleCustomStep()
+            Helper.set_property(
+                step, "logger", LisboaLog.get_logger(step.__class__.__name__))
+            Helper.set_property(step, "listeners", [StepStatusListener()])
+            executor = SingleProcExecutor([step])
+
+            with self.assertRaises(CliboaException):
+                executor.execute_steps(None)
+
+            mock_before_step.assert_called_once()
+            mock_error_step.assert_called_once()
+            mock_after_step.assert_not_called()
+            mock_post_step.assert_called_once()
+
+
+class ErrorSampleCustomStep(SampleCustomStep):
+    def __init__(self):
+        super().__init__()
+
+    def execute(self, *args):
+        raise CliboaException("Something wrong")

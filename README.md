@@ -33,7 +33,7 @@ See [CONTRIBUTING.md](/CONTRIBUTING.md)
 Available on any Linux distributions, like Debian, Ubuntu, CentOS, REL, or etc.
 
 ## Install Cliboa
-python version 3.4 or later and pipenv are required. In the environemnt which pip can be used, execute as below.
+python version 3.5 or later and pipenv are required. In the environemnt which pip can be used, execute as below.
 
 ```
 sudo pip3 install pipenv
@@ -98,11 +98,11 @@ To make the above scenario available, set a local machine as a sftp server accor
 After wrote scenario.yml and set the environment, execute a scenario by as below command.
 ```
 cd sample
-pipenv run python3 bin/clibomanager.py saimple-etl
+pipenv run python3 bin/clibomanager.py simple-etl
 ```
 or
 ```
 cd sample
-python3 bin/clibomanager.py saimple-etl
+python3 bin/clibomanager.py simple-etl
 ```
 
