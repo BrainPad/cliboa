@@ -50,7 +50,8 @@ class BigQuery(object):
         Args:
            credentials: gcp service account json
         """
-        return bigquery.Client(credentials=ServiceAccount.auth(credentials))
+        credentials_info = ServiceAccount.auth(credentials)
+        return bigquery.Client(credentials=credentials_info, project=credentials_info.project_id)
 
     @staticmethod
     def get_extract_job_config(print_header=True):
@@ -93,7 +94,8 @@ class Gcs(object):
 
     @staticmethod
     def get_gcs_client(credentials):
-        return storage.Client(credentials=ServiceAccount.auth(credentials))
+        credentials_info = ServiceAccount.auth(credentials)
+        return storage.Client(credentials=credentials_info, project=credentials_info.project_id)
 
 
 class Firestore(object):
@@ -103,4 +105,5 @@ class Firestore(object):
 
     @staticmethod
     def get_firestore_client(credentials):
-        return firestore.Client(credentials=ServiceAccount.auth(credentials))
+        credentials_info = ServiceAccount.auth(credentials)
+        return firestore.Client(credentials=credentials_info, project=credentials_info.project_id)
