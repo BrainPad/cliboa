@@ -6,7 +6,7 @@ Upload files to GCS.
 |----------|-----------|--------|-------|-------|
 |project_id|GCP project id|Yes|None||
 |location|GCP location|Yes|None||
-|credentials|A file path of credential for GCP authentication|Yes|None||
+|credentials|A service account .json file path or a dictionary containing service account info in Google format|Yes|None||
 |bucket|GCS bucket name|Yes|None||
 |src_dir|Directory of source to upload|Yes|None||
 |src_pattern|File pattern of source to upload. Regexp is available|Yes|None||

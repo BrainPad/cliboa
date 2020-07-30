@@ -29,7 +29,7 @@ class Environment:
         env_module = os.environ.get("LISBOA_ENV")
         if not env_module:
             # Assume executing unit test codes
-            mod = import_module("cliboa.conf.default_environment")
+            mod = import_module("cliboa.common.environment")
         else:
             # Assume executing cfmanager.py
             mod = import_module(env_module)

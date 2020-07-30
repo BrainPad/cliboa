@@ -19,9 +19,6 @@ jobs:
     - run:
         name: execute unittest and instrument coverage with python3.7
         command: |
-          mkdir conf
-          cp -rp cliboa/conf/logging.conf conf/logging.conf
-          cp -rp cliboa/conf/cliboa.ini conf/cliboa.ini
           pipenv run coverage
   test_python36:
     environment:
@@ -42,9 +39,6 @@ jobs:
     - run:
         name: execute unittest and instrument coverage with python3.6
         command: |
-          mkdir conf
-          cp -rp cliboa/conf/logging.conf conf/logging.conf
-          cp -rp cliboa/conf/cliboa.ini conf/cliboa.ini
           pipenv run coverage
   test_python35:
     environment:
@@ -65,9 +59,6 @@ jobs:
     - run:
         name: execute unittest and instrument coverage with python3.5
         command: |
-          mkdir conf
-          cp -rp cliboa/conf/logging.conf conf/logging.conf
-          cp -rp cliboa/conf/cliboa.ini conf/cliboa.ini
           pipenv run coverage
   #test_python34:
   #  environment:

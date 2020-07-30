@@ -6,7 +6,7 @@ Execute select query and download result as a csv file. When extract data from G
 |----------|-----------|--------|-------|-------|
 |project_id|GCP project id|Yes|None||
 |location|GCP location|Yes|None||
-|credentials|A file path of credential for GCP authentication|Yes|None||
+|credentials|A service account .json file path or a dictionary containing service account info in Google format|Yes|None||
 |dataset|BigQuery dataset|Yes|None||
 |tblname|BigQuery table name to insert|Yes|None||
 |bucket|Bucket of GCS to save a temporal data|Yes|None||

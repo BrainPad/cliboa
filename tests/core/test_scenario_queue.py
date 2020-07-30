@@ -1,6 +1,4 @@
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
-#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -12,19 +10,12 @@
 # all copies or substantial portions of the Software.
 #
 
+from cliboa.core.scenario_queue import ScenarioQueue
+from cliboa.core.step_queue import StepQueue
+from tests import BaseCliboaTest
 
-class ScenarioQueue(object):
-    """
-    Composition of extract, transform, load queus
-    """
 
-    step_queue = None
-
-    class __metaclass__(type):
-        @property
-        def step_queue(cls):
-            return cls.step_queue  # pragma: no cover
-
-        @step_queue.setter
-        def step_queue(cls, q):
-            cls.step_queue = q  # pragma: no cover
+class TestScenarioQueue(BaseCliboaTest):
+    def test_step_queue(self):
+        setattr(ScenarioQueue, "step_queue", StepQueue())
+        assert isinstance(ScenarioQueue.step_queue, StepQueue)

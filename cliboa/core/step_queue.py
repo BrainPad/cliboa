@@ -21,11 +21,11 @@ class StepQueue(Queue):
     Queue for processing
     """
 
-    DEFAULT_PARALLEL_CNT = 2
+    _DEFAULT_PARALLEL_CNT = 2
 
     def __init__(self):
         super().__init__()
-        self.__multi_proc_cnt = self.DEFAULT_PARALLEL_CNT
+        self.__multi_proc_cnt = self._DEFAULT_PARALLEL_CNT
 
     @property
     def multi_proc_cnt(self):

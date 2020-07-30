@@ -16,11 +16,7 @@ from abc import abstractmethod
 
 import yaml
 
-from cliboa.core.validator import (  # noqa
-    EssentialKeys,
-    ScenarioYamlKey,
-    ScenarioYamlType
-)
+from cliboa.core.validator import EssentialKeys, ScenarioYamlKey, ScenarioYamlType  # noqa
 from cliboa.util.lisboa_log import LisboaLog
 
 
