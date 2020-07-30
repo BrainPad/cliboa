@@ -93,11 +93,7 @@ class Gcs(object):
 
     @staticmethod
     def get_gcs_client(credentials):
-        return (
-            storage.Client.from_service_account_json(credentials)
-            if credentials
-            else storage.Client()
-        )
+        return storage.Client(credentials=ServiceAccount.auth(credentials))
 
 
 class Firestore(object):
