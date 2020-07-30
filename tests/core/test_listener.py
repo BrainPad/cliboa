@@ -103,6 +103,9 @@ class TestAppropriateListnerCall(unittest.TestCase):
             )
 
             step = SampleCustomStep()
+            Helper.set_property(
+                step, "logger", LisboaLog.get_logger(step.__class__.__name__)
+            )
             Helper.set_property(step, "listeners", [StepStatusListener()])
             executor = SingleProcExecutor([step])
             executor.execute_steps(None)

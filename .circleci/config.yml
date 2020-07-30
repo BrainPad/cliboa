@@ -15,7 +15,7 @@ jobs:
     - run:
         name: execute flake8
         command: |
-          pipenv run flake8 --max-line-length 100
+          pipenv run flake8
     - run:
         name: execute unittest and instrument coverage with python3.7
         command: |
@@ -35,7 +35,7 @@ jobs:
     - run:
         name: execute flake8
         command: |
-          pipenv run flake8 --max-line-length 100
+          pipenv run flake8
     - run:
         name: execute unittest and instrument coverage with python3.6
         command: |
@@ -55,7 +55,7 @@ jobs:
     - run:
         name: execute flake8
         command: |
-          pipenv run flake8 --max-line-length 100
+          pipenv run flake8
     - run:
         name: execute unittest and instrument coverage with python3.5
         command: |
