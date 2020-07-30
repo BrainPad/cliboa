@@ -1,10 +1,48 @@
 version: 2.1
-jobs:
-  test_python37:
+executors:
+  python37_executor:
     environment:
       TZ: "Asia/Tokyo"
     docker:
       - image: circleci/python:3.7
+  python36_executor:
+    environment:
+      TZ: "Asia/Tokyo"
+    docker:
+      - image: circleci/python:3.6
+  python35_executor:
+    environment:
+      TZ: "Asia/Tokyo"
+    docker:
+      - image: circleci/python:3.5
+  git_executor:
+    environment:
+      TZ: "Asia/Tokyo"
+    docker:
+      - image: alpine/git
+
+commands:
+  setup_ssh_conf: # setup ssh config for GitHub
+    parameters:
+      github_secret:
+        type: env_var_name
+    steps:
+      - run:
+          name: setup ssh config
+          command: |
+            echo "${<< parameters.github_secret >>}" >> ~/.ssh/id_rsa_github_cliboa
+            user=`whoami`
+            echo "StrictHostKeyChecking no" > ~/.ssh/config
+            echo "Host github.com" >> ~/.ssh/config
+            echo "  HostName github.com" >> ~/.ssh/config
+            echo "  User ${user}" >> ~/.ssh/config
+            echo "  IdentityFile ~/.ssh/id_rsa_github_cliboa" >> ~/.ssh/config
+            chmod 600 ~/.ssh/config
+            cat ~/.ssh/config
+
+jobs:
+  test_python37:
+    executor: python37_executor
     steps:
     - checkout
     - run:
@@ -20,11 +58,9 @@ jobs:
         name: execute unittest and instrument coverage with python3.7
         command: |
           pipenv run coverage
+
   test_python36:
-    environment:
-      TZ: "Asia/Tokyo"
-    docker:
-      - image: circleci/python:3.6
+    executor: python36_executor
     steps:
     - checkout
     - run:
@@ -40,11 +76,9 @@ jobs:
         name: execute unittest and instrument coverage with python3.6
         command: |
           pipenv run coverage
+
   test_python35:
-    environment:
-      TZ: "Asia/Tokyo"
-    docker:
-      - image: circleci/python:3.5
+    executor: python35_executor
     steps:
     - checkout
     - run:
@@ -60,33 +94,32 @@ jobs:
         name: execute unittest and instrument coverage with python3.5
         command: |
           pipenv run coverage
-  #test_python34:
-  #  environment:
-  #    TZ: "Asia/Tokyo"
-  #  docker:
-  #    - image: circleci/python:3.4
-  #  steps:
-  #  - checkout
-  #  - run:
-  #      name: install dependencies
-  #      command: |
-  #        mv cliboa/template/Pipfile.above34 Pipfile
-  #        pipenv install --dev --skip-lock
-  #  - run:
-  #      name: execute flake8
-  #      command: |
-  #        pipenv run flake8
-  #  - run:
-  #      name: execute unittest and instrument coverage with python3.4
-  #      command: |
-  #        mkdir conf
-  #        cp -rp cliboa/conf/logging.conf conf/logging.conf
-  #        cp -rp cliboa/conf/cliboa.ini conf/cliboa.ini
-  #        pipenv run coverage
+
+  push_dev_branch: # push development branch to GitHub
+    executor: git_executor
+    steps:
+      - checkout
+      - setup_ssh_conf:
+          github_secret: GITHUB_CLIBOA_SECRET_KEY
+      - run:
+          name: push development brancht to GitHub
+          command: |
+            cd cliboa
+            git checkout development
+            git remote add upstream git@github.com:BrainPad/cliboa.git
+            git push upstream development
+
+rollout_filter: &rollout_filter
+  filters:
+    branches:
+      only:
+        - development
+  
 workflows:
-  test_all_support_python_ver:
+  build_and_rollout:
     jobs:
       - test_python37
       - test_python36
       - test_python35
-      #- test_python34
+      - push_dev_branch:
+          <<: *rollout_filter
