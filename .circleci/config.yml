@@ -113,7 +113,7 @@ rollout_filter: &rollout_filter
   filters:
     branches:
       only:
-        - 92
+        - "92"
         # - development
   
 workflows:
