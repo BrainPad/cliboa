@@ -101,8 +101,9 @@ jobs:
     executor: git_executor
     steps:
       - checkout
-      - setup_ssh_conf:
-          github_secret: GITHUB_CLIBOA_SECRET_KEY
+      - add_ssh_keys:
+          fingerprints:
+            - "b3:b1:fb:ac:f6:45:cf:83:ef:bc:8b:a8:c3:2a:20:51"
       - run:
           name: push development brancht to GitHub
           command: |
