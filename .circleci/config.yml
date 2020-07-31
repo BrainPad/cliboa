@@ -31,6 +31,7 @@ commands:
           name: setup ssh config
           command: |
             echo "${<< parameters.github_secret >>}" >> ~/.ssh/id_rsa_github_cliboa
+            chmod 600 ~/.ssh/id_rsa_github_cliboa
             user=`whoami`
             echo "StrictHostKeyChecking no" > ~/.ssh/config
             echo "Host github.com" >> ~/.ssh/config
@@ -117,10 +118,14 @@ rollout_filter: &rollout_filter
         # - development
   
 workflows:
-  build_and_rollout:
+  test_all_support_python_ver:
     jobs:
       - test_python37
       - test_python36
       - test_python35
       - push_dev_branch:
           <<: *rollout_filter
+          requires:
+            - test_python37
+            - test_python36
+            - test_python35
