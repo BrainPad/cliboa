@@ -17,7 +17,11 @@ import re
 from abc import abstractmethod
 
 from cliboa.conf import env
-from cliboa.scenario.validator import EssentialParameters, IOOutput, SqliteTableExistence  # noqa
+from cliboa.scenario.validator import (  # noqa
+    EssentialParameters,
+    IOOutput,
+    SqliteTableExistence
+)
 from cliboa.util.cache import StepArgument, StorageIO
 from cliboa.util.exception import FileNotFound
 from cliboa.util.file import File

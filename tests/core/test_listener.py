@@ -84,7 +84,6 @@ class TestStepStatusListener(object):
 
 class TestAppropriateListnerCall(unittest.TestCase):
     def test_end_with_noerror(self):
-
         if sys.version_info.minor < 6:
             # ignore test if python version is less 3.6(assert_called is not supported)
             return
@@ -117,7 +116,6 @@ class TestAppropriateListnerCall(unittest.TestCase):
             mock_post_step.assert_called_once()
 
     def test_end_with_error(self):
-
         if sys.version_info.minor < 6:
             # ignore test if python version is less 3.6 (mock#assert_called is not supported)
             return
