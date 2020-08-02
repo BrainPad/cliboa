@@ -20,8 +20,7 @@ import pytest
 import xlsxwriter
 
 from cliboa.conf import env
-from cliboa.scenario.transform.file import (CsvHeaderConvert, CsvMerge,
-                                            ExcelConvert, FileConvert)
+from cliboa.scenario.transform.file import CsvHeaderConvert, CsvMerge, ExcelConvert, FileConvert
 from cliboa.util.exception import InvalidCount, InvalidFormat
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
@@ -47,7 +46,7 @@ class TestExcelConvert(TestFileTransform):
                 instance = ExcelConvert()
                 Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
                 Helper.set_property(instance, "src_dir", self._data_dir)
-                Helper.set_property(instance, "src_pattern", "test\.xlxs")
+                Helper.set_property(instance, "src_pattern", "test.xlxs")
                 Helper.set_property(instance, "dest_dir", self._data_dir)
                 Helper.set_property(instance, "dest_pattern", "test.xlxs")
                 instance.execute()
@@ -69,9 +68,9 @@ class TestExcelConvert(TestFileTransform):
                 instance = ExcelConvert()
                 Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
                 Helper.set_property(instance, "src_dir", self._data_dir)
-                Helper.set_property(instance, "src_pattern", "test(.*)\.xlxs")
+                Helper.set_property(instance, "src_pattern", r"test(.*)\.xlxs")
                 Helper.set_property(instance, "dest_dir", self._data_dir)
-                Helper.set_property(instance, "dest_pattern", "test(.*).xlxs")
+                Helper.set_property(instance, "dest_pattern", r"test(.*).xlxs")
                 instance.execute()
             finally:
                 shutil.rmtree(self._data_dir)
@@ -89,7 +88,7 @@ class TestExcelConvert(TestFileTransform):
             instance = ExcelConvert()
             Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
             Helper.set_property(instance, "src_dir", self._data_dir)
-            Helper.set_property(instance, "src_pattern", "test\.xlxs")
+            Helper.set_property(instance, "src_pattern", r"test\.xlxs")
             Helper.set_property(instance, "dest_dir", self._data_dir)
             Helper.set_property(instance, "dest_pattern", "test.csv")
             instance.execute()
@@ -126,8 +125,8 @@ class TestCsvMerge(TestFileTransform):
             instance = CsvMerge()
             Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
             Helper.set_property(instance, "src_dir", self._data_dir)
-            Helper.set_property(instance, "src1_pattern", "test1\.csv")
-            Helper.set_property(instance, "src2_pattern", "test2\.csv")
+            Helper.set_property(instance, "src1_pattern", r"test1\.csv")
+            Helper.set_property(instance, "src2_pattern", r"test2\.csv")
             Helper.set_property(instance, "dest_dir", self._data_dir)
             Helper.set_property(instance, "dest_pattern", "test.csv")
             instance.execute()
@@ -162,8 +161,8 @@ class TestCsvMerge(TestFileTransform):
             instance = CsvMerge()
             Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
             Helper.set_property(instance, "src_dir", self._data_dir)
-            Helper.set_property(instance, "src1_pattern", "test1\.csv")
-            Helper.set_property(instance, "src2_pattern", "test2\.csv")
+            Helper.set_property(instance, "src1_pattern", r"test1\.csv")
+            Helper.set_property(instance, "src2_pattern", r"test2\.csv")
             Helper.set_property(instance, "dest_dir", self._data_dir)
             Helper.set_property(instance, "dest_pattern", "test.csv")
             instance.execute()
@@ -239,7 +238,7 @@ class TestCsvHeaderConvert(TestFileTransform):
             instance = CsvHeaderConvert()
             Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
             Helper.set_property(instance, "src_dir", self._data_dir)
-            Helper.set_property(instance, "src_pattern", "test\.csv")
+            Helper.set_property(instance, "src_pattern", r"test\.csv")
             Helper.set_property(instance, "dest_dir", self._data_dir)
             Helper.set_property(instance, "dest_pattern", "test_new.csv")
             Helper.set_property(
@@ -269,7 +268,7 @@ class TestCsvHeaderConvert(TestFileTransform):
             instance = CsvHeaderConvert()
             Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
             Helper.set_property(instance, "src_dir", self._data_dir)
-            Helper.set_property(instance, "src_pattern", "test\.csv")
+            Helper.set_property(instance, "src_pattern", r"test\.csv")
             Helper.set_property(instance, "dest_dir", self._data_dir)
             Helper.set_property(instance, "dest_pattern", "test_new.csv")
             Helper.set_property(instance, "headers", [{"key": "new_key"}])
@@ -290,7 +289,7 @@ class TestCsvHeaderConvert(TestFileTransform):
             instance = CsvHeaderConvert()
             Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
             Helper.set_property(instance, "src_dir", self._data_dir)
-            Helper.set_property(instance, "src_pattern", "test\.csv")
+            Helper.set_property(instance, "src_pattern", r"test\.csv")
             Helper.set_property(instance, "dest_dir", self._data_dir)
             Helper.set_property(instance, "dest_pattern", "test_new.csv")
             Helper.set_property(
@@ -314,7 +313,7 @@ class TestCsvHeaderConvert(TestFileTransform):
             instance = CsvHeaderConvert()
             Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
             Helper.set_property(instance, "src_dir", self._data_dir)
-            Helper.set_property(instance, "src_pattern", "test(.*)\.csv")
+            Helper.set_property(instance, "src_pattern", r"test(.*)\.csv")
             Helper.set_property(instance, "dest_dir", self._data_dir)
             Helper.set_property(instance, "dest_pattern", "test_new.csv")
             Helper.set_property(

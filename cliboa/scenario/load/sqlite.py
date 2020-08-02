@@ -16,8 +16,7 @@ import codecs
 import csv
 
 from cliboa.scenario.base import BaseSqlite
-from cliboa.scenario.validator import (EssentialParameters, IOOutput,
-                                       SqliteTableExistence)
+from cliboa.scenario.validator import EssentialParameters, IOOutput, SqliteTableExistence
 from cliboa.util.exception import FileNotFound, SqliteInvalid
 
 
@@ -285,7 +284,10 @@ class CsvReadSqliteCreate(SqliteTransaction):
                     self._sqlite_adptr.commit()
 
             if self._index and len(self._index) > 0:
-                # Create index (Add the index at the end for better performance when insert data is large)
+                """
+                Create index (Add the index at the end for
+                better performance when insert data is large)
+                """
                 self._logger.info("Add index")
                 self._sqlite_adptr.add_index(self._tblname, self._index)
                 self._sqlite_adptr.commit()

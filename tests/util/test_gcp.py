@@ -15,7 +15,6 @@ from unittest import TestCase
 
 import pytest
 from google.cloud import bigquery, storage
-from google.oauth2 import service_account
 
 from cliboa.util.gcp import BigQuery, Gcs, ServiceAccount
 

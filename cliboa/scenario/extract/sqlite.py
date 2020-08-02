@@ -12,8 +12,7 @@
 # all copies or substantial portions of the Software.
 #
 from cliboa.scenario.base import BaseSqlite
-from cliboa.scenario.validator import (EssentialParameters, IOInput,
-                                       SqliteTableExistence)
+from cliboa.scenario.validator import EssentialParameters, IOInput, SqliteTableExistence
 
 
 # deprecated

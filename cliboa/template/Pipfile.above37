@@ -10,11 +10,13 @@ flake8 = "==3.7.9"
 isort = "==4.3.21"
 pycodestyle = "==2.5.0"
 pytest = "==5.0.1"
+pytest-cov = "==2.10.0"
 XlsxWriter = "==1.1.8"
 
 [packages]
 boto3 = "==1.11.12"
 requests = "==2.20.0"
+cliboa = "*"
 cloudpickle = "==1.2.2"
 configparser = "==4.0.2"
 PyMySQL = "==0.9.2"
@@ -39,5 +41,7 @@ PyYaml = "==5.1"
 python_version = "3.7"
 
 [scripts]
-lintfix = "bash -c 'autoflake -ri --ignore-init-module-imports --remove-unused-variables . && black . && isort -rc . && flake8 --ignore=E501,F401,F403,W503,W605 .'"
-unittest = "python3 setup.py coverage"
+test = "pytest -v"
+coverage = "pytest --cov cliboa --cov-report term-missing ./tests"
+flake8 = "flake8 ."
+lintfix = "bash -c 'autoflake -ri --ignore-init-module-imports --remove-unused-variables . && black cliboa tests && isort -rc . && flake8 --ignore=E501,F401,F403,W503,W605 .'"

@@ -2,8 +2,10 @@ class Helper(object):
     @staticmethod
     def set_property(cls, method, value):
         """
-        This method allows you to set a value to the class with either method directly or via property setter.
-        Either way, the method must be implemented to set the value for the class parameter like below.
+        This method allows you to set a value
+        to the class with either method directly or via property setter.
+        Either way, the method must be implemented
+        to set the value for the class parameter like below.
 
         -- eg1 --
         class Foo():

@@ -49,7 +49,8 @@ class File(object):
         Args:
             src_dir (str): Directory to search
             src_pattern (str): Regular expression
-            tree=True (bool): Set True(by default) to search files include sub directories.
+            tree=True (bool): Set True(by default)
+                              to search files include sub directories.
 
         Returns:
             list: Matched file list

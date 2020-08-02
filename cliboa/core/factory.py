@@ -12,8 +12,8 @@
 # all copies or substantial portions of the Software.
 #
 from cliboa.conf import env
-from cliboa.core.manager import JsonScenarioManager, YamlScenarioManager
-from cliboa.core.step_queue import StepQueue
+from cliboa.core.manager import JsonScenarioManager, YamlScenarioManager  # noqa
+from cliboa.core.step_queue import StepQueue  # noqa
 from cliboa.core.strategy import MultiProcExecutor, SingleProcExecutor
 
 
@@ -35,28 +35,6 @@ class ScenarioManagerFactory(object):
         scenario_manager_cls = scenario_file_format.capitalize() + "ScenarioManager"
         instance = globals()[scenario_manager_cls]
         return instance(cmd_args)
-
-
-class StepQueueFactory(object):
-    """
-    Create scenario queue instance
-    """
-
-    @staticmethod
-    def create(scenario_type):
-        """
-        Args:
-            scenario_type: step or extract ot transform or load or None
-        Returns:
-            scenario queue instance
-        """
-        if scenario_type:
-            queue_cls = scenario_type.capitalize() + "Queue"
-        else:
-            queue_cls = "StepQueue"
-
-        instance = globals()[queue_cls]
-        return instance()
 
 
 class StepExecutorFactory(object):
@@ -85,8 +63,10 @@ class CustomInstanceFactory(object):
 
     @staticmethod
     def create(cls_name):
-        custom_classes = env.COMMON_CUSTOM_CLASSES + env.PROJECT_CUSTOM_CLASSES
-        custom_cls_list = [c for c in custom_classes if cls_name in c]
+        custom_cls_candidates = env.COMMON_CUSTOM_CLASSES + env.PROJECT_CUSTOM_CLASSES
+        custom_cls_list = [c for c in custom_cls_candidates if cls_name in c]
+        if not custom_cls_list:
+            return None
         custom_cls = " ".join(str(c) for c in custom_cls_list)
         components = custom_cls.split(".")
         mod = __import__(components[0])

@@ -18,9 +18,10 @@ from cliboa.conf import env
 from cliboa.scenario.extract.ftp import FtpDownload
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
+from tests import BaseCliboaTest
 
 
-class TestFtpDownload(object):
+class TestFtpDownload(BaseCliboaTest):
     def setup_method(self, method):
         self._data_dir = os.path.join(env.BASE_DIR, "data")
 
@@ -40,4 +41,4 @@ class TestFtpDownload(object):
             exists_file = os.path.exists(os.path.join(self._data_dir, "readme.txt"))
         finally:
             shutil.rmtree(self._data_dir)
-        assert exists_file is True
+        self.assertTrue(exists_file)

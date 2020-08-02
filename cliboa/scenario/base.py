@@ -16,11 +16,12 @@ import os
 import re
 from abc import abstractmethod
 
-from google.oauth2 import service_account
-
 from cliboa.conf import env
-from cliboa.scenario.validator import (EssentialParameters, IOOutput,
-                                       SqliteTableExistence)
+from cliboa.scenario.validator import (  # noqa
+    EssentialParameters,
+    IOOutput,
+    SqliteTableExistence
+)
 from cliboa.util.cache import StepArgument, StorageIO
 from cliboa.util.exception import FileNotFound
 from cliboa.util.file import File
@@ -39,6 +40,7 @@ class BaseStep(object):
         self._parallel = None
         self._io = None
         self._logger = None
+        self._listeners = []
 
     def step(self, step):
         self._step = step
@@ -54,6 +56,9 @@ class BaseStep(object):
 
     def logger(self, logger):
         self._logger = logger
+
+    def listeners(self, listeners):
+        self._listeners = listeners
 
     def trigger(self, *args):
         mask = None
@@ -73,9 +78,24 @@ class BaseStep(object):
             else:
                 self._logger.info("%s : %s" % (k, v))
         try:
-            return self.execute(args)
+            for listener in self._listeners:
+                listener.before_step(self)
+
+            ret = self.execute(args)
+
+            for listener in self._listeners:
+                listener.after_step(self)
+
+            return ret
+
         except Exception as e:
+            for listener in self._listeners:
+                listener.error_step(self, e)
+
             return self._exception_dispatcher(e)
+        finally:
+            for listener in self._listeners:
+                listener.after_completion(self)
 
     @abstractmethod
     def execute(self, *args):
@@ -97,7 +117,8 @@ class BaseStep(object):
 
     def _property_path_reader(self, src, encoding="utf-8"):
         """
-        Returns an resource contents from the path if src starts with "path:", returns src if not
+        Returns an resource contents from the path if src starts with "path:",
+        returns src if not
         """
         if src[:5].upper() == "PATH:":
             fpath = src[5:]

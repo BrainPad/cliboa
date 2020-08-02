@@ -718,7 +718,7 @@ class CsvFormatChange(FileBaseTransform):
             return csv.QUOTE_NONE
         else:
             raise CliboaException(
-                "Unknown quote. One of the followings are allowd [QUOTE_ALL, QUOTE_MINIMAL, QUOTE_NONNUMERIC, QUOTE_NONE]"
+                "Unknown quote. One of the followings are allowd [QUOTE_ALL, QUOTE_MINIMAL, QUOTE_NONNUMERIC, QUOTE_NONE]"  # noqa
             )
 
 

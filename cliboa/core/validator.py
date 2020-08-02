@@ -14,8 +14,12 @@
 import os
 
 from cliboa.core.step_queue import StepQueue
-from cliboa.util.exception import (DirStructureInvalid, FileNotFound,
-                                   InvalidCount, ScenarioFileInvalid)
+from cliboa.util.exception import (
+    DirStructureInvalid,
+    FileNotFound,
+    InvalidCount,
+    ScenarioFileInvalid
+)
 
 
 class ValidatorChain(object):
@@ -52,7 +56,7 @@ class ScenarioYamlKey(ValidatorChain):
         scenario = yaml_dict.get("scenario")
         if not scenario:
             raise ScenarioFileInvalid(
-                "scenario.yml is invalid. 'scenario:' key does not exist, or 'scenario:' key exists but content under 'scenario:' key does not exist."
+                "scenario.yml is invalid. 'scenario:' key does not exist, or 'scenario:' key exists but content under 'scenario:' key does not exist."  # noqa
             )
 
 
@@ -165,5 +169,5 @@ class EssentialKeys(object):
     def __exists_class(self, dict):
         if not dict.get("class"):
             raise ScenarioFileInvalid(
-                "scenario.yml is invalid. 'class:' key does not exist, or 'class:' value does not exist."
+                "scenario.yml is invalid. 'class:' key does not exist, or 'class:' value does not exist."  # noqa
             )

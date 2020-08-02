@@ -39,7 +39,8 @@ class StepArgument(object):
         items = {}
         for k, v in props.items():
             # By default, property keys are changed by python language specification.
-            # Adjust key names to the scenario.yaml defined name(both removed underscore and manglinged prefix)
+            # Adjust key names to the scenario.yaml defined name
+            # (both removed underscore and manglinged prefix)
             sp = "_%s_" % instance.__class__.__name__
             if k.startswith(sp):
                 k = k.split(sp)[1]
