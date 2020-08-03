@@ -89,7 +89,7 @@ jobs:
             cd cliboa
             git checkout development
             git remote add upstream git@github.com:BrainPad/cliboa.git
-            git push upstream development
+            git push upstream development -f
 
 rollout_filter: &rollout_filter
   filters:
