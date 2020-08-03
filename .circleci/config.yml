@@ -84,7 +84,7 @@ jobs:
           fingerprints:
             - "b3:b1:fb:ac:f6:45:cf:83:ef:bc:8b:a8:c3:2a:20:51"
       - run:
-          name: push development brancht to GitHub
+          name: push development branch to GitHub
           command: |
             cd cliboa
             git checkout development
