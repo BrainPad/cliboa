@@ -19,7 +19,7 @@ executors:
     environment:
       TZ: "Asia/Tokyo"
     docker:
-      - image: debian/stable-slim
+      - image: debian:stable-slim
 
 jobs:
   test_python37:
