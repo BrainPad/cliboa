@@ -27,7 +27,7 @@ commands:
       - run:
           name: install hub
           command: |
-            apk update && apk add --no-cache make go
+            apk update && apk add --no-cache bash make go
             git clone https://github.com/github/hub
             cd hub
             make install prefix=/usr/local
