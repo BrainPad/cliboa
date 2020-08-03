@@ -121,7 +121,7 @@ workflows:
       - test_python35
       - push_dev_branch:
           <<: *rollout_filter
-          requires:
-            - test_python37
-            - test_python36
-            - test_python35
+          #requires:
+          #  - test_python37
+          #  - test_python36
+          #  - test_python35
