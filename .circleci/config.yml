@@ -86,10 +86,13 @@ jobs:
       - run:
           name: push development branch to GitHub
           command: |
+            apk add hub
             cd cliboa
             git checkout development
             git remote add upstream git@github.com:BrainPad/cliboa.git
             git push upstream development -f
+            hub ci-status --verbose
+            hub pull-request
 
 rollout_filter: &rollout_filter
   filters:
