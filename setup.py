@@ -48,6 +48,7 @@ setup(
     ],
     packages=[
         "cliboa",
+        "cliboa.adapter",
         "cliboa.cli",
         "cliboa.common",
         "cliboa.conf",
