@@ -36,6 +36,7 @@ google-cloud-bigquery = "==1.24.0"
 google-cloud-firestore = "==1.6.2"
 pandas-gbq = "==0.13.0"
 PyYaml = "==5.1"
+azure-storage-blob = "==12.3.2"
 
 [requires]
 python_version = "3.7"

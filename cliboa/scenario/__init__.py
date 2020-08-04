@@ -14,6 +14,7 @@
 #
 from .base import SqliteQueryExecute, Stdout
 from .extract.aws import S3Download
+from .extract.azure import AzureBlobDownload
 from .extract.file import CsvRead
 from .extract.ftp import FtpDownload, FtpDownloadFileDelete
 from .extract.gcp import (
@@ -28,6 +29,7 @@ from .extract.http import HttpDownload
 from .extract.sftp import SftpDelete, SftpDownload, SftpDownloadFileDelete
 from .extract.sqlite import SqliteRead, SqliteReadRow
 from .load.aws import S3Upload
+from .load.azure import AzureBlobUpload
 from .load.file import CsvWrite
 from .load.gcp import (
     BigQueryCreate,
