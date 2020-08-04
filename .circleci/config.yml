@@ -117,9 +117,8 @@ workflows:
       - test_python37
       - test_python36
       - test_python35
+
+  deploy_github:
+    jobs:
       - push_dev_branch:
           <<: *rollout_filter
-          requires:
-            - test_python37
-            - test_python36
-            - test_python35
