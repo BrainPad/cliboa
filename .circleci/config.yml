@@ -103,7 +103,7 @@ jobs:
             git checkout development
             git remote add upstream git@github.com:BrainPad/cliboa.git
             git push upstream development -f
-            hub pull-request
+            hub request-pull --message="development->master"
 
 rollout_filter: &rollout_filter
   filters:
