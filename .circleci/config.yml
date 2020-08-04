@@ -103,7 +103,7 @@ jobs:
             git checkout development
             git remote add upstream git@github.com:BrainPad/cliboa.git
             git push upstream development -f
-            hub pull-request -m "development->master" -b master -p
+            hub pull-request -m "development->master" -b master
 
 rollout_filter: &rollout_filter
   filters:
@@ -120,7 +120,7 @@ workflows:
       - test_python35
       - push_dev_branch:
           <<: *rollout_filter
-          #requires:
-          #  - test_python37
-          #  - test_python36
-          #  - test_python35
+          requires:
+            - test_python37
+            - test_python36
+            - test_python35
