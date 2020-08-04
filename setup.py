@@ -49,6 +49,7 @@ setup(
     packages=[
         "cliboa",
         "cliboa.cli",
+        "cliboa.common",
         "cliboa.conf",
         "cliboa.core",
         "cliboa.scenario",
