@@ -109,10 +109,10 @@ rollout_filter: &rollout_filter
   filters:
     branches:
       only:
-        - development
+        - "development"
   
 workflows:
-  test_all_support_python_ver:
+  build_and_deploy:
     jobs:
       - test_python37
       - test_python36
