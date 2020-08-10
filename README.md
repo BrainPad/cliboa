@@ -23,7 +23,7 @@ Cliboa is an application framework which can implement ETL processing. It eases 
 ## Features
 - Python based framework.
 - ETL processing is executable by YAML based configuration.
-- Additional modules for ETL processing can be implemented by only a few steps if not enough.
+- Additional modules for ETL processing can be implemented by only a few steps if default modules not enough.
 
 # Manual
 See [MANUAL.md](/MANUAL.md)
