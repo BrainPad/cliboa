@@ -7,8 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python: [3.7.5]
-    #container: circleci/python:3.7
+        python: [3.5, 3.6, 3.7]
     steps:
       - uses: actions/checkout@v2
       - name: Setup Python
@@ -24,3 +23,6 @@ jobs:
       - name: execute flake8
         run: |
           pipenv run flake8
+      - name: execute unittest and instrument coverage
+        run: |
+          pipenv run coverage
