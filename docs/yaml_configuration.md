@@ -29,7 +29,7 @@ It exists under common directory of an executable environment of cliboa. Can def
 
 
 # Default Modules which can be defined in scenario.yml
-See [Default Modules](/docs/default_modules.md)
+See [Default Modules](/docs/default_etl_modules.md)
 
 # Examples
 ## Download a gzip file from the local sftp server, decompress it, and transfer it to the local sftp server.
