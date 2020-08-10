@@ -18,14 +18,15 @@ from abc import abstractmethod
 
 from cliboa.conf import env
 from cliboa.core.file_parser import YamlScenarioParser
+from cliboa.core.listener import StepStatusListener
 from cliboa.core.scenario_queue import ScenarioQueue
-from cliboa.core.validator import (DIScenarioFormat, ProjectDirectoryExistence,
-                                   ScenarioFileExistence)
-from cliboa.scenario import *
+from cliboa.core.step_queue import StepQueue
+from cliboa.core.validator import DIScenarioFormat, ProjectDirectoryExistence, ScenarioFileExistence
+from cliboa.scenario import *  # noqa
 from cliboa.util.cache import StepArgument
 from cliboa.util.exception import ScenarioFileInvalid
 from cliboa.util.helper import Helper
-from cliboa.util.http import BasicAuth, FormAuth
+from cliboa.util.http import BasicAuth, FormAuth  # noqa
 from cliboa.util.lisboa_log import LisboaLog
 
 __all__ = ["YamlScenarioManager", "JsonScenarioManager"]
@@ -126,9 +127,7 @@ class YamlScenarioManager(ScenarioManager):
         self._logger.info("Start to invoke scenario")
 
         # Create queue to save step instances
-        from cliboa.core.factory import StepQueueFactory
-
-        q = StepQueueFactory.create("step")
+        q = StepQueue()
 
         for s_dict in yaml_scenario_list:
             if "multi_process_count" in s_dict.keys():
@@ -176,9 +175,12 @@ class YamlScenarioManager(ScenarioManager):
             cls = globals()[cls_name]
             instance = cls()
 
-        base_args = ["step", "symbol", "parallel", "io"]
+        base_args = ["step", "symbol", "parallel", "io", "listeners"]
         for arg in base_args:
-            Helper.set_property(instance, arg, s_dict.get(arg))
+            if arg == "listeners":
+                self._append_listeners(instance, s_dict.get(arg))
+            else:
+                Helper.set_property(instance, arg, s_dict.get(arg))
 
         cls_attrs_dict = {}
         if isinstance(yaml_scenario_list, list) and "arguments" in s_dict.keys():
@@ -256,7 +258,7 @@ class YamlScenarioManager(ScenarioManager):
         cmd = self._dynamic_key_and_val[var_name]
         if not cmd:
             raise ScenarioFileInvalid(
-                "scenario.yml is invalid. 'with_vars' definition against %s does not exist."
+                "scenario.yml is invalid. 'with_vars' definition against %s does not exist."  # noqa
                 % var_name
             )
         shell_output = subprocess.Popen(
@@ -302,6 +304,18 @@ class YamlScenarioManager(ScenarioManager):
                         Helper.set_property(di_instance, k, v)
                 di_instances.append(di_instance)
         return di_keys, di_instances
+
+    def _append_listeners(self, instance, args):
+        listeners = [StepStatusListener()]
+
+        if args is not None:
+            from cliboa.core.factory import CustomInstanceFactory
+            if type(args) is str:
+                listeners.append(CustomInstanceFactory.create(args))
+            elif type(args) is list:
+                for arg in args:
+                    listeners.append(CustomInstanceFactory.create(arg))
+        Helper.set_property(instance, "listeners", listeners)
 
 
 class JsonScenarioManager(ScenarioManager):

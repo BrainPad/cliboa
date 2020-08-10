@@ -1,5 +1,5 @@
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
+# Copyright BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -12,19 +12,14 @@
 # all copies or substantial portions of the Software.
 #
 
+from azure.storage.blob import BlobServiceClient
 
-class ScenarioQueue(object):
-    """
-    Composition of extract, transform, load queus
-    """
 
-    step_queue = None
-
-    class __metaclass__(type):
-        @property
-        def step_queue(cls):
-            return cls.step_queue  # pragma: no cover
-
-        @step_queue.setter
-        def step_queue(cls, q):
-            cls.step_queue = q  # pragma: no cover
+class BlobServiceAdapter(object):
+    def get_client(self, account_url, account_access_key, connection_string):
+        if connection_string:
+            return BlobServiceClient.from_connection_string(connection_string)
+        else:
+            return BlobServiceClient(
+                account_url=account_url, credential=account_access_key
+            )

@@ -12,17 +12,17 @@ Thumbs.db
 *.swp
 *.bak
 
-#Python
+# Python
 __pycache__
 .pydevproject
-Pipfilee
 
 # cliboa
-.coverage*
+.coverage
 .eggs
 build
 cliboa.egg-info
-conf
-conf/logging.conf
+common/
+conf/
+logs/
 Pipfile
 Pipfile.lock

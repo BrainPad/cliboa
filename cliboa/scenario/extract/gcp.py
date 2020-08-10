@@ -249,7 +249,11 @@ class BigQueryFileDownload(BaseBigQuery):
         path = "%s-%s" % ("".join(random.choices(string.ascii_letters, k=8)), ymd_hms)
         prefix = "%s/%s/%s" % (self._dataset, self._tblname, path)
 
-        # gsc dir -> gs://{bucket_name}/{dataset_name}/{table_name}/{XXXXXXXX}-{yyyyMMddHHmmssSSS}/*.csv.gz
+        """
+        gsc dir -> gs://{bucket_name}
+                       /{dataset_name}/{table_name}
+                       /{XXXXXXXX}-{yyyyMMddHHmmssSSS}/*.csv.gz
+        """
         if self._filename:
             dest_gcs = "gs://%s/%s/%s*.csv.gz" % (self._bucket, prefix, self._filename)
         else:

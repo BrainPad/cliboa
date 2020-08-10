@@ -20,7 +20,8 @@ from cliboa.util.lisboa_log import LisboaLog
 class ServiceAccount(object):
     """
     Service Account api wrapper
-    Creates a Signer instance from a service account .json file path or a dictionary containing service account info in Google format.
+    Creates a Signer instance from a service account .json file path
+    or a dictionary containing service account info in Google format.
     Args:
         credentials: gcp service account json
     """
@@ -49,7 +50,12 @@ class BigQuery(object):
         Args:
            credentials: gcp service account json
         """
-        return bigquery.Client(credentials=ServiceAccount.auth(credentials))
+        credentials_info = ServiceAccount.auth(credentials)
+        return (
+            bigquery.Client(credentials=credentials_info, project=credentials_info.project_id)
+            if credentials_info
+            else bigquery.Client()
+        )
 
     @staticmethod
     def get_extract_job_config(print_header=True):
@@ -92,7 +98,12 @@ class Gcs(object):
 
     @staticmethod
     def get_gcs_client(credentials):
-        return storage.Client(credentials=ServiceAccount.auth(credentials))
+        credentials_info = ServiceAccount.auth(credentials)
+        return (
+            storage.Client(credentials=credentials_info, project=credentials_info.project_id)
+            if credentials_info
+            else storage.Client()
+        )
 
 
 class Firestore(object):
@@ -102,4 +113,9 @@ class Firestore(object):
 
     @staticmethod
     def get_firestore_client(credentials):
-        return firestore.Client(credentials=ServiceAccount.auth(credentials))
+        credentials_info = ServiceAccount.auth(credentials)
+        return (
+            firestore.Client(credentials=credentials_info, project=credentials_info.project_id)
+            if credentials_info
+            else firestore.Client()
+        )

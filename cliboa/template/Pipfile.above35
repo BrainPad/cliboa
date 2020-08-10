@@ -9,11 +9,13 @@ flake8 = "==3.7.9"
 isort = "==4.3.21"
 pycodestyle = "==2.5.0"
 pytest = "==4.6.1"
+pytest-cov = "==2.10.0"
 XlsxWriter = "==1.1.8"
 
 [packages]
 boto3 = "==1.11.12"
 requests = "==2.20.0"
+cliboa = "*"
 cloudpickle = "==1.2.2"
 configparser = "==4.0.2"
 PyMySQL = "==0.9.2"
@@ -34,10 +36,13 @@ google-cloud-firestore = "==1.6.2"
 grpcio = "==1.26.0"
 pandas-gbq = "==0.13.0"
 PyYaml = "==5.1"
+azure-storage-blob = "==12.3.2"
 
 [requires]
 python_version = "3.5"
 
 [scripts]
+test = "pytest -v"
+coverage = "pytest --cov cliboa --cov-report term-missing ./tests"
+flake8 = "flake8 ."
 lintfix = "bash -c 'autoflake -ri --ignore-init-module-imports --remove-unused-variables . && isort -rc . && flake8 --ignore=E501,F401,F403,W503,W605 .'"
-unittest = "python3 setup.py coverage"

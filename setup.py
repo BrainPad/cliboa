@@ -27,7 +27,7 @@ def read(filename):
 setup(
     name="cliboa",
     version="1.3.2beta",
-    description="application framework for etl(extract, transform, load) processing",
+    description="application framework for ETL(ELT) processing",
     # long_description=read("README.md"),
     # long_description_content_type='text/markdown',
     url="https://github.com/BrainPad/cliboa",  # Optional
@@ -42,17 +42,15 @@ setup(
         "Intended Audience :: Developers",
         "Topic :: Software Development :: Build Tools",
         "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
     ],
-    # unit test
-    setup_requires=["pytest-runner"],
-    tests_require=["pytest", "pytest-cov"],
     packages=[
         "cliboa",
+        "cliboa.adapter",
         "cliboa.cli",
+        "cliboa.common",
         "cliboa.conf",
         "cliboa.core",
         "cliboa.scenario",
@@ -66,12 +64,11 @@ setup(
     package_data={
         "cliboa.conf": ["logging.conf", "cliboa.ini"],
         "cliboa.template": [
-            "Pipfile.above34",
             "Pipfile.above35",
             "Pipfile.above36",
             "Pipfile.above37",
         ],
     },
-    python_requires=">=3.4",
+    python_requires=">=3.5",
     entry_points={"console_scripts": ["cliboadmin = cliboa.cli.cliboadmin:main"]},
 )
