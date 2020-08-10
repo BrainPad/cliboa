@@ -1,0 +1,26 @@
+name: cliboa
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: [3.7.5]
+    #container: circleci/python:3.7
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python }}
+      - name: install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pipenv
+          mv cliboa/template/Pipfile.above37 Pipfile
+          pipenv install --dev --skip-lock
+      - name: execute flake8
+        run: |
+          pipenv run flake8
