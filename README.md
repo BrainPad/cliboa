@@ -93,7 +93,7 @@ As a simple etl processing, write scenario.yml in simple-etl as below.
 
 The following example is just download a gzip file from the local sftp server, decompress it, and upload it to the local sftp server.
 
-See [Example1](docs/yaml_configuration.md)
+See [Examples](docs/yaml_configuration.md#examples)
 
 ## Set an Environment
 To make the above scenario available, set a local machine as a sftp server according to respective environments. Also, put "test.csv.gz" under /usr/local.
