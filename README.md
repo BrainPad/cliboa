@@ -111,7 +111,7 @@ python3 bin/clibomanager.py simple-etl
 ```
 
 # YAML Configuration
-see [yaml_configuration.md](/yaml_configuration.md)
+see [yaml_configuration.md](/docs/yaml_configuration.md)
 
 # Default ETL Modules
-see [default_etl_modules.md](/default_etl_modules.md)
+see [default_etl_modules.md](/docs/default_etl_modules.md)
