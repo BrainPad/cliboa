@@ -1,11 +1,11 @@
 # Table of Contents
 * [Introction](#introduction)
-  * [What is Cliboa](#what-is-cliboa)
+  * [What is cliboa](#what-is-cliboa)
   * [Features](#features)
 * [Manual](#manual)
 * [How to Contribute](#how-to-contribute)
 * [Quick Start](#quick-start)
-  * [Install Cliboa](#install-cliboa)
+  * [Install cliboa](#install-cliboa)
   * [Configuration of a Simple ETL Processing](#configuration-of-a-simple-etl-processing)
   * [Directory Tree](#directory-tree)
   * [Install PyPI packages](#install-pypi-packages)
@@ -14,10 +14,11 @@
   * [Execute a scenario of ETL Processing](#execute-a-scenario-of-etl-processing)
 * [YAML Configuration](#yaml-configuration)
 * [Default ETL Modules](#default-etl-modules)
+* [How to Implement Additional ETL Modules](#how-to-implement-additional-etl-modules)
 
 # Introduction
-## What is Cliboa
-Cliboa is an application framework which can implement ETL(ELT) processing. It eases the implementation of ETL(ELT) processing. In this case, ETL(ELT) Processing means the processings like fetch, transform and transfer of data between various databases, storages, and other services.
+## What is cliboa
+cliboa is an application framework which can implement ETL(ELT) processing. It eases the implementation of ETL(ELT) processing. In this case, ETL(ELT) Processing means the processings like fetch, transform and transfer of data between various databases, storages, and other services.
 ![](/cliboa_brief.png)
 
 ## Features
@@ -36,7 +37,7 @@ See [CONTRIBUTING.md](/CONTRIBUTING.md)
 ## Requirements
 Available on any Linux distributions, like Debian, Ubuntu, CentOS, REL, or etc.
 
-## Install Cliboa
+## Install cliboa
 python version 3.5 or later and pipenv are required. In the environemnt which pip can be used, execute as below.
 
 ```
@@ -115,3 +116,6 @@ see [yaml_configuration.md](/docs/yaml_configuration.md)
 
 # Default ETL Modules
 see [default_etl_modules.md](/docs/default_etl_modules.md)
+
+# How to Implement Additional ETL Modules
+see [additional_etl_modules.md](/docs/additional_etl_modules.md)
