@@ -1,28 +1,28 @@
-# Additional Modules
-Can implement additional modules for ETL Processing easily if default modules of cliboa are not enough.
+# Table of Contents
+* [Additional ETL Modules](#additional-etl-modules)
+* [How to Implement Additional ETL Modules](#how-to-implement-additional-etl-modules)
+* [How to Make Additional Modules Activate](#how-to-make-additional-modules-activate)
 
-## How to Implement Additional Modules
-### Step Class
+# Additional ETL Modules
+Can implement additional modules for ETL(ELT) Processing easily if default prepared modules of cliboa are not enough.
+
+# How to Implement Additional ETL Modules
+## Implement an Additional Step Class
 If would like to add NewExtract class, inherit BaseStep class and implement attributes and an execute method.
 
-### Example
+## Example
 ```
 class NewExtract(BaseStep):
  
     def __init__(self):
-        super()__init__()
+        super().__init__()
         """
         Implement attributes to be set in scenario.yml
         """
-        self.__spam = spam
+        self._spam = spam
      
-    @property
-    def spam(self):
-        return self.__spam
- 
-    @spam.setter
     def spam(self, spam):
-        self.__spam = spam
+        self._spam = spam
  
     def execute(self, *args):
         """
@@ -30,24 +30,46 @@ class NewExtract(BaseStep):
         """
 ```
 
-## How to Make Addtional Modules Activate
-### Configuration
-Put additional modules in the following directories.
-- If additional modules are used commonly, put under common directory of an executable environment of cliboa.
-- If additional modules are used only in each projects, put in project directory of an executable environment of cliboa.
-
-See [MANUAL.md](../MANUAL.md#user-content-example), regarding an executable environment of cliboa.
-
-### Add File Paths
-Should add paths of additional modules in common/environment.py
-
 ### Returns
-Method 'execute' might returns a response.
+Method 'execute' should return a response.
+```
 0: Process ends immediately.
 others: Process ends immediately(safely returns but output an error to log).
 None: Process continue (Default)
+```
 
-### Example
+# How to Make Additional Modules Activate
+## Configuration
+Put additional ETL modules in the following directories.
+- If additional modules are used commonly, put them under common/scenario directory of an executable environment of cliboa.
+```
+|-- bin
+|   `-- clibomanager.py
+|-- common
+|   |-- scenario # here
+```
+
+- If additional modules are used only in each projects, put them under project/scenario directory of an executable environment of cliboa.
+```
+|-- bin
+|   `-- clibomanager.py
+`-- project
+    `-- simple-etl
+        |-- scenario # here
+```
+
+See [MANUAL.md](../MANUAL.md#user-content-example), regarding an executable environment of cliboa.
+
+## Add File Paths
+Should add paths of additional ETL modules in common/environment.py
+```
+|-- bin
+|   `-- clibomanager.py
+|-- common
+|   |-- environment.py # here
+```
+
+## Example
 ```
 # path of modules which put in a commnon directory
 COMMON_CUSTOM_CLASSES = [
