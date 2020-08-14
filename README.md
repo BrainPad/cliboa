@@ -18,7 +18,7 @@
 # Introduction
 ## What is Cliboa
 Cliboa is an application framework which can implement ETL processing. It eases the implementation of ETL processing. In this case, ETL Processing means the processings like fetch, transform and transfer of data between various databases, storages, and other services.
-![](/img/cliboa_brief.png)
+![](/cliboa_brief.png)
 
 ## Features
 - Python based framework.
