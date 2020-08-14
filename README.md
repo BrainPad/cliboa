@@ -5,7 +5,7 @@
 * [Manual](#manual)
 * [How to Contribute](#how-to-contribute)
 * [Quick Start](#quick-start)
-  * [Install Cliboa](#install-cliboa)
+  * [Install cliboa](#install-cliboa)
   * [Configuration of a Simple ETL Processing](#configuration-of-a-simple-etl-processing)
   * [Directory Tree](#directory-tree)
   * [Install PyPI packages](#install-pypi-packages)
@@ -16,8 +16,8 @@
 * [Default ETL Modules](#default-etl-modules)
 
 # Introduction
-## What is Cliboa
-Cliboa is an application framework which can implement ETL(ELT) processing. It eases the implementation of ETL(ELT) processing. In this case, ETL(ELT) Processing means the processings like fetch, transform and transfer of data between various databases, storages, and other services.
+## What is cliboa
+cliboa is an application framework which can implement ETL(ELT) processing. It eases the implementation of ETL(ELT) processing. In this case, ETL(ELT) Processing means the processings like fetch, transform and transfer of data between various databases, storages, and other services.
 ![](/cliboa_brief.png)
 
 ## Features
