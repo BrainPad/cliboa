@@ -1,6 +1,6 @@
 # Table of Contents
 * [Introction](#introduction)
-  * [What is Cliboa](#what-is-cliboa)
+  * [What is cliboa](#what-is-cliboa)
   * [Features](#features)
 * [Manual](#manual)
 * [How to Contribute](#how-to-contribute)
@@ -36,7 +36,7 @@ See [CONTRIBUTING.md](/CONTRIBUTING.md)
 ## Requirements
 Available on any Linux distributions, like Debian, Ubuntu, CentOS, REL, or etc.
 
-## Install Cliboa
+## Install cliboa
 python version 3.5 or later and pipenv are required. In the environemnt which pip can be used, execute as below.
 
 ```
