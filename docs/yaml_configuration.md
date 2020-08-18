@@ -30,7 +30,6 @@ syntax of scenario.yml is below.
 |scenario|Defines the contents of scenario.yml as the scenario.|Yes||
 |step|Can write description or specify symbol. Those should be unique.|Yes||
 |class|Specify a step class name to execute.|Yes||
-|io|Specify 'input' or 'output' when a class when extract or load modules are specified. See details of [Default Modules](/docs/default_modules.md) if io is essential.|No|None||
 |arguments|Define values of attrubutes of class by key: value..|No||
 |symbol|Specify symbol defined on '- step: ' key.|No||
 |with_vars|Can write shell script. It can be referred from elements of arguments by using {{}}.|No||
@@ -41,7 +40,7 @@ syntax of scenario.yml is below.
 See [README.md](../README.md#markdown-header-write-a-scenario-of-etl-processing) regarding directory tree.
 
 
-## Example1: Download a gzip file from the local sftp server, decompress it, and upload it to the local sftp server.
+## Example 1: Download a gzip file from the local sftp server, decompress it, and upload it to the local sftp server.
 ```
 scenario:
 - step:
@@ -68,28 +67,8 @@ scenario:
     dest_dir: /usr/local
 ```
 
-## Example2: Download a file via FTP and delete the downloaded file.
-```
-scenario:
-- step: ftp_download
-  class: FtpDownload
-  arguments: # the below arguments are attributes of FtpDownload class.
-    host: localhost
-    user: root
-    password: password
-    src_dir: /root
-    src_pattern: test_{{ today }}_*\.tsv
-    dest_dir: /tmp
-    with_vars: 
-      today: date '+%Y%m%d'
 
-- step: Delete the tsv file downloaded from localhost
-  class: FtpDownloadFileDelete
-  symbol: ftp_download
-```
-
-
-## Example3: Fetch a excel file via http, convert it to a csv file, read a csv file and insert record into Sqlite
+## Example 2: Fetch a excel file via http, convert it to a csv file, read a csv file and insert record into Sqlite
 ```
 scenario:
 - step: Download a file from Kankotyo site
@@ -114,8 +93,7 @@ scenario:
   arguments:
     src_path: data/test.csv
 - step:
-  class: SqliteCreation
-  io: output
+  class: SqliteWrite
   arguments:
     dbname: test.db
     tblname: test_table
