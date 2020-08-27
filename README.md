@@ -52,15 +52,16 @@ Create an executable environment of cliboa by using cliboadmin.
 
 ```
 $ cd /usr/local
-$ cliboadmin init sample
+$ sudo cliboadmin init sample
 $ cd sample
-$ cliboadmin create simple-etl
+$ sudo cliboadmin create simple-etl
 ```
 
 ## Directory Tree
 Directory tree which was created aforementioned commands is as below.
 
 ```
+├── Pipfile
 ├── bin
 │   └── clibomanager.py
 ├── common
@@ -70,7 +71,6 @@ Directory tree which was created aforementioned commands is as below.
 │   └── scenario.yml
 ├── conf
 ├── logs
-├── Pipfile
 └── project
     └── simple-etl
             ├── scenario
