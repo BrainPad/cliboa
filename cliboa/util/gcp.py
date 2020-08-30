@@ -52,7 +52,9 @@ class BigQuery(object):
         """
         credentials_info = ServiceAccount.auth(credentials)
         return (
-            bigquery.Client(credentials=credentials_info, project=credentials_info.project_id)
+            bigquery.Client(
+                credentials=credentials_info, project=credentials_info.project_id
+            )
             if credentials_info
             else bigquery.Client()
         )
@@ -100,7 +102,9 @@ class Gcs(object):
     def get_gcs_client(credentials):
         credentials_info = ServiceAccount.auth(credentials)
         return (
-            storage.Client(credentials=credentials_info, project=credentials_info.project_id)
+            storage.Client(
+                credentials=credentials_info, project=credentials_info.project_id
+            )
             if credentials_info
             else storage.Client()
         )
@@ -115,7 +119,9 @@ class Firestore(object):
     def get_firestore_client(credentials):
         credentials_info = ServiceAccount.auth(credentials)
         return (
-            firestore.Client(credentials=credentials_info, project=credentials_info.project_id)
+            firestore.Client(
+                credentials=credentials_info, project=credentials_info.project_id
+            )
             if credentials_info
             else firestore.Client()
         )
