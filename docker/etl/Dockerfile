@@ -38,4 +38,3 @@ RUN cd /usr/local/Python-3.6.9 && \
     ./configure --prefix=/usr/local/bin/python3.6 && \
     make && \
     make altinstall
-
