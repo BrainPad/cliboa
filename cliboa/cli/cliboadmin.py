@@ -88,13 +88,8 @@ class CliboAdmin(object):
         copyfile(run_cmd_path, os.path.join(self._bin_dir, "clibomanager.py"))
 
         # copy Pipfile
-        pipfile_path, requirements_path = self._get_requirements_and_pipfile_path(
-            cliboa_install_path
-        )
+        pipfile_path = self._get_pipfile_path(cliboa_install_path) 
         copyfile(pipfile_path, os.path.join(ini_dir, "Pipfile"))
-
-        # copy requirements.txt
-        copyfile(requirements_path, os.path.join(ini_dir, "requirements.txt"))
 
         # copy environment.py
         cmn_env_path = os.path.join(
@@ -132,7 +127,7 @@ class CliboAdmin(object):
         with open(os.path.join("project", new_pj_dir, "scenario.yml"), "w") as yaml:
             yaml.write("scenario:" + "\n")
 
-    def _get_requirements_and_pipfile_path(self, cliboa_install_path):
+    def _get_pipfile_path(self, cliboa_install_path):
         """
         Get path of requirements.txt and Pipfile for current python version
         """
@@ -140,27 +135,17 @@ class CliboAdmin(object):
         py_ver_info = py_ver_info.split(" ")
         py_ver = py_ver_info[0].split(".")
         py_major_ver = py_ver[0] + "." + py_ver[1]
-        py_major_ver_and_requirements = {
-            "3.5": "requirements.above35",
-            "3.6": "requirements.above36",
-            "3.7": "requirements.above37",
-        }
         py_major_ver_and_pipfile = {
             "3.5": "Pipfile.above35",
             "3.6": "Pipfile.above36",
             "3.7": "Pipfile.above37",
         }
-        requirements_path = os.path.join(
-            cliboa_install_path,
-            "cliboa/template",
-            py_major_ver_and_requirements[py_major_ver],
-        )
         pipfile_path = os.path.join(
             cliboa_install_path,
             "cliboa/template",
             py_major_ver_and_pipfile[py_major_ver],
         )
-        return requirements_path, pipfile_path
+        return pipfile_path
 
 
 class CommandArgumentParser(object):
