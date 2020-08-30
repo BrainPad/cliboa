@@ -110,7 +110,7 @@ class BigQueryRead(BaseBigQuery):
             table_ref = gbq_client.dataset(self._dataset).table(tmp_tbl)
 
         gcs_client = Gcs.get_gcs_client(self._credentials)
-        gcs_bucket = gcs_client.get_bucket(self._bucket)
+        gcs_bucket = gcs_client.bucket(self._bucket)
 
         # extract job config settings
         ext_job_config = BigQuery.get_extract_job_config()
@@ -243,7 +243,7 @@ class BigQueryFileDownload(BaseBigQuery):
         gbq_ref = gbq_client.dataset(self._dataset).table(self._tblname)
 
         gcs_client = Gcs.get_gcs_client(self._credentials)
-        gcs_bucket = gcs_client.get_bucket(self._bucket)
+        gcs_bucket = gcs_client.bucket(self._bucket)
 
         ymd_hms = datetime.now().strftime("%Y%m%d%H%M%S%f")
         path = "%s-%s" % ("".join(random.choices(string.ascii_letters, k=8)), ymd_hms)
@@ -271,12 +271,12 @@ class BigQueryFileDownload(BaseBigQuery):
         job.result()
 
         # Download from gcs
-        for blob in gcs_bucket.list_blobs(prefix=prefix):
+        for blob in gcs_client.list_blobs(gcs_bucket, prefix=prefix):
             dest = os.path.join(self._dest_dir, os.path.basename(blob.name))
             blob.download_to_filename(dest)
 
         # Cleanup temporary files
-        for blob in gcs_bucket.list_blobs(prefix=prefix):
+        for blob in gcs_client.list_blobs(gcs_bucket, prefix=prefix):
             blob.delete()
 
 
@@ -311,9 +311,11 @@ class GcsDownload(BaseGcs):
         valid()
 
         client = Gcs.get_gcs_client(self._credentials)
-        bucket = client.get_bucket(self._bucket)
+        bucket = client.bucket(self._bucket)
         dl_files = []
-        for blob in bucket.list_blobs(prefix=self._prefix, delimiter=self._delimiter):
+        for blob in client.list_blobs(
+            bucket, prefix=self._prefix, delimiter=self._delimiter
+        ):
             r = re.compile(self._src_pattern)
             if not r.fullmatch(blob.name):
                 continue
@@ -339,8 +341,9 @@ class GcsDownloadFileDelete(BaseGcs):
         if len(dl_files) > 0:
             self._logger.info("Delete files %s" % dl_files)
             client = self._gcs_client()
-            bucket = client.get_bucket(super().get_step_argument("bucket"))
-            for blob in bucket.list_blobs(
+            bucket = client.bucket(super().get_step_argument("bucket"))
+            for blob in client.list_blobs(
+                bucket,
                 prefix=super().get_step_argument("prefix"),
                 delimiter=super().get_step_argument("delimiter"),
             ):
