@@ -67,8 +67,7 @@ Directory tree which was created aforementioned commands is as below.
 ├── common
 │   ├── environment.py
 │   ├── __init__.py
-│   ├── scenario
-│   └── scenario.yml
+│   └── scenario
 ├── conf
 ├── logs
 └── project
