@@ -103,10 +103,6 @@ class CliboAdmin(object):
         conf_path = os.path.join(cliboa_install_path, "cliboa", "conf", "cliboa.ini")
         copyfile(conf_path, os.path.join(ini_dir, "conf", "cliboa.ini"))
 
-        cmn_scenario_path = os.path.join(ini_dir, "common", "scenario.yml")
-        with open(cmn_scenario_path, "w") as yaml:
-            yaml.write("scenario:" + "\n")
-
         cmn_ini_path = os.path.join(ini_dir, "common", "__init__.py")
         open(cmn_ini_path, "w").close()
 
