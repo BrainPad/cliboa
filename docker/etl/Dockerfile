@@ -23,11 +23,14 @@ RUN apt update -y && \
 # Download multiple python versions which cliboa supports
 RUN cd /usr/local/ && \
     wget https://www.python.org/ftp/python/3.5.9/Python-3.5.9.tgz && \
-    tar -xzvf Python-3.5.9.tgz --remove-files && \
+    tar -xzvf Python-3.5.9.tgz && \
+    rm -rf Python-3.5.9.tgz && \
     wget https://www.python.org/ftp/python/3.6.9/Python-3.6.9.tgz && \
-    tar -xzvf Python-3.6.9.tgz --remove-files && \
+    tar -xzvf Python-3.6.9.tgz && \
+    rm -rf Python-3.6.9.tgz && \
     wget https://www.python.org/ftp/python/3.8.5/Python-3.8.5.tgz && \
-    tar -xzvf Python-3.8.5.tgz --remove-files
+    tar -xzvf Python-3.8.5.tgz && \
+    rm -rf Python-3.8.5.tgz
 
 # Build multiple python versions which cliboa supports
 RUN cd /usr/local/Python-3.5.9 && \
