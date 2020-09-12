@@ -20,21 +20,28 @@ RUN apt update -y && \
                    wget \
                    zlib1g-dev
 
-# Download multiple python versions
+# Download multiple python versions which cliboa supports
 RUN cd /usr/local/ && \
-    wget https://www.python.org/ftp/python/3.5.9/Python-3.5.9.tgz  \
-    tar -xzvf Python-3.5.9.tgz \
-    wget https://www.python.org/ftp/python/3.6.9/Python-3.6.9.tgz \
-    tar -xzvf Python-3.6.9.tgz \
-    wget https://www.python.org/ftp/python/3.8.5/Python-3.8.5.tgz \
-    tar -xzvf Python-3.8.5.tgz
+    wget https://www.python.org/ftp/python/3.5.9/Python-3.5.9.tgz && \
+    tar -xzvf Python-3.5.9.tgz && \
+    rm -rf Python-3.5.9.tgz && \
+    wget https://www.python.org/ftp/python/3.6.9/Python-3.6.9.tgz && \
+    tar -xzvf Python-3.6.9.tgz && \
+    rm -rf Python-3.6.9.tgz && \
+    wget https://www.python.org/ftp/python/3.8.5/Python-3.8.5.tgz && \
+    tar -xzvf Python-3.8.5.tgz && \
+    rm -rf Python-3.8.5.tgz
 
-# Build multiple python versions
+# Build multiple python versions which cliboa supports
 RUN cd /usr/local/Python-3.5.9 && \
     ./configure --prefix=/usr/local/bin/python3.5 && \
     make && \
     make altinstall
 RUN cd /usr/local/Python-3.6.9 && \
     ./configure --prefix=/usr/local/bin/python3.6 && \
+    make && \
+    make altinstall
+RUN cd /usr/local/Python-3.8.5 && \
+    ./configure --prefix=/usr/local/bin/python3.8 && \
     make && \
     make altinstall
