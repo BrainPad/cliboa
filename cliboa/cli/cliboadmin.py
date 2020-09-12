@@ -88,7 +88,7 @@ class CliboAdmin(object):
         copyfile(run_cmd_path, os.path.join(self._bin_dir, "clibomanager.py"))
 
         # copy Pipfile
-        pipfile_path = self._get_pipfile_path(cliboa_install_path) 
+        pipfile_path = self._get_pipfile_path(cliboa_install_path)
         copyfile(pipfile_path, os.path.join(ini_dir, "Pipfile"))
 
         # copy environment.py
