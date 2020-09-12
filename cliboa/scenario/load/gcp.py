@@ -290,7 +290,7 @@ class GcsFileUpload(BaseGcs):
         valid()
 
         gcs_client = Gcs.get_gcs_client(self._credentials)
-        bucket = gcs_client.get_bucket(self._bucket)
+        bucket = gcs_client.bucket(self._bucket)
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self._logger.info("Upload files %s" % files)
         for file in files:
@@ -329,7 +329,7 @@ class GcsUpload(BaseGcs):
         valid()
 
         gcs_client = Gcs.get_gcs_client(self._credentials)
-        bucket = gcs_client.get_bucket(self._bucket)
+        bucket = gcs_client.bucket(self._bucket)
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self._logger.info("Upload files %s" % files)
         for file in files:

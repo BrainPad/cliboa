@@ -12,6 +12,7 @@
 # all copies or substantial portions of the Software.
 #
 import os
+import re
 import shutil
 import sys
 
@@ -208,3 +209,33 @@ class TestYamlScenarioManager(object):
             manager.create_scenario_queue()
         shutil.rmtree(self._pj_dir)
         assert "invalid" in str(excinfo.value)
+
+    def test_replace_vars_single(self):
+        manager = YamlScenarioManager(self._cmd_args)
+        manager._dynamic_key_and_val["arg_f"] = "echo FROM"
+        manager._dynamic_key_and_val["arg_t"] = "echo TO"
+
+        yaml_v = "test-{{ arg_f }}"
+
+        pattern = re.compile(r"{{(.*?)}}")
+        matches = pattern.findall(yaml_v)
+        for match in matches:
+            var_name = match.strip()
+            yaml_v = manager._YamlScenarioManager__replace_vars(yaml_v, var_name)
+
+        assert yaml_v == "test-FROM"
+
+    def test_replace_vars_plural(self):
+        manager = YamlScenarioManager(self._cmd_args)
+        manager._dynamic_key_and_val["arg_f"] = "echo FROM"
+        manager._dynamic_key_and_val["arg_t"] = "echo TO"
+
+        yaml_v = "test-{{ arg_f }}-{{ arg_t }}"
+
+        pattern = re.compile(r"{{(.*?)}}")
+        matches = pattern.findall(yaml_v)
+        for match in matches:
+            var_name = match.strip()
+            yaml_v = manager._YamlScenarioManager__replace_vars(yaml_v, var_name)
+
+        assert yaml_v == "test-FROM-TO"
