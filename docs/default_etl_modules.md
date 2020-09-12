@@ -14,7 +14,7 @@ Can use ETL modules as below by default.
 |[S3Download](/docs/modules/s3_download.md)|Download files from S3|
 |[SqliteReadRow](/docs/modules/sqlite_read_row.md)|Execute query and call result handler|
 |[FirestoreDocumentDownload](/docs/modules/firestore_document_download.md)|Download a document from Firestore|
-|[PostgresReadrow](/docs/modules/postgres_read_row.md)|Execute query and call result handler by PostgreSQL|
+|[PostgresReadrow](/docs/modules/postgres_read.md)|Execute query and call result handler by PostgreSQL|
 
 
 ## Transform Modules
