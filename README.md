@@ -84,7 +84,6 @@ $ pipenv install --dev
 or
 ```
 $ cd sample
-$ pipenv lock -r > requirments.txt
 $ sudo pip3 install -r requirements.txt
 ```
 
