@@ -16,7 +16,6 @@ import codecs
 import csv
 import gzip
 import os
-import shutil
 import tarfile
 import zipfile
 
@@ -83,6 +82,10 @@ class FileDecompress(FileBaseTransform):
 
     def __init__(self):
         super().__init__()
+        self._chunk_size = None
+
+    def chunk_size(self, chunk_size):
+        self._chunk_size = chunk_size
 
     def execute(self, *args):
         files = super().get_target_files(self._src_dir, self._src_pattern)
@@ -104,15 +107,17 @@ class FileDecompress(FileBaseTransform):
             elif ext == ".bz2":
                 self._logger.info("Decompress bz2 file %s" % f)
                 dcom_name = os.path.splitext(os.path.basename(f))[0]
-                with open(f, mode="rb") as fb:
-                    rb = fb.read()
                 decom_path = (
                     os.path.join(self._dest_dir, dcom_name)
                     if self._dest_dir is not None
                     else os.path.join(self._src_dir, dcom_name)
                 )
-                with open(decom_path, mode="wb") as fb:
-                    fb.write(bz2.decompress(rb))
+                with bz2.open(f, mode="rb") as i, open(decom_path, mode="wb") as o:
+                    while True:
+                        buf = i.read(self._chunk_size)
+                        if buf == b'':
+                            break
+                        o.write(buf)
             elif ext == ".gz":
                 self._logger.info("Decompress gz file %s" % f)
                 dcom_name = os.path.splitext(os.path.basename(f))[0]
@@ -122,7 +127,11 @@ class FileDecompress(FileBaseTransform):
                     else os.path.join(self._src_dir, dcom_name)
                 )
                 with gzip.open(f, "rb") as i, open(decom_path, "wb") as o:
-                    o.write(i.read())
+                    while True:
+                        buf = i.read(self._chunk_size)
+                        if buf == b'':
+                            break
+                        o.write(buf)
             else:
                 raise CliboaException("Unmatched any available decompress type %s" % f)
 
@@ -135,9 +144,13 @@ class FileCompress(FileBaseTransform):
     def __init__(self):
         super().__init__()
         self._format = None
+        self._chunk_size = None
 
     def format(self, format):
         self._format = format.lower()
+
+    def chunk_size(self, chunk_size):
+        self._chunk_size = chunk_size
 
     def execute(self, *args):
         # essential parameters check
@@ -160,19 +173,23 @@ class FileCompress(FileBaseTransform):
                 ) as o:
                     o.write(f, arcname=os.path.basename(f))
             elif self._format in ("gz", "gzip"):
-                with open(f, "rb") as i:
-                    self._logger.info("Compress file %s to gzip." % f)
-                    with gzip.open(
-                        os.path.join(dir, (os.path.basename(f) + ".gz")), "wb"
-                    ) as o:
-                        shutil.copyfileobj(i, o)
+                self._logger.info("Compress file %s to gzip." % f)
+                com_path = os.path.join(dir, (os.path.basename(f) + ".gz"))
+                with open(f, "rb") as i, gzip.open(com_path, "wb") as o:
+                    while True:
+                        buf = i.read(self._chunk_size)
+                        if buf == b'':
+                            break
+                        o.write(buf)
             elif self._format in ("bz2", "bzip2"):
-                with open(f, "rb") as i:
-                    self._logger.info("Compress file %s to bzip2." % f)
-                    with open(
-                        os.path.join(dir, (os.path.basename(f) + ".bz2")), "wb"
-                    ) as o:
-                        o.write(bz2.compress(i.read()))
+                self._logger.info("Compress file %s to bzip2." % f)
+                com_path = os.path.join(dir, (os.path.basename(f) + ".bz2"))
+                with open(f, "rb") as i, bz2.open(com_path, "wb") as o:
+                    while True:
+                        buf = i.read(self._chunk_size)
+                        if buf == b'':
+                            break
+                        o.write(buf)
 
 
 class CsvColsExtract(FileBaseTransform):
