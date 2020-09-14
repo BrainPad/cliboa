@@ -32,7 +32,6 @@ commands:
             cd hub
             make install prefix=/usr/local
 
-
 jobs:
   test_python37:
     executor: python37_executor

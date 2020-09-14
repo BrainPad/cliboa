@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
+# Copyright BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -39,17 +39,17 @@ class CliboAdmin(object):
             cliboadmin create $project_name
         """
         if self._args.option == "init":
-            self._init_pj(self._args.dir_name)
+            self._init_project(self._args.dir_name)
             print(
                 "Initialization of cliboa project '"
                 + self._args.dir_name
                 + "' was successful."
             )
         elif self._args.option == "create":
-            self._create_new_pj(self._args.dir_name)
+            self._create_new_project(self._args.dir_name)
             print("Adding a new project '" + self._args.dir_name + "' was successfule.")
 
-    def _init_pj(self, ini_dir):
+    def _init_project(self, ini_dir):
         """
         Initialize program configuration
         """
@@ -87,9 +87,14 @@ class CliboAdmin(object):
         )
         copyfile(run_cmd_path, os.path.join(self._bin_dir, "clibomanager.py"))
 
-        pipfile_path = self._get_pipfile_path(cliboa_install_path)
+        # copy Pipfile
+        pipfile_path, requirements_path = self._get_pipfile_and_requirements_path(
+            cliboa_install_path
+        )
         copyfile(pipfile_path, os.path.join(ini_dir, "Pipfile"))
+        copyfile(requirements_path, os.path.join(ini_dir, "requirements.txt"))
 
+        # copy environment.py
         cmn_env_path = os.path.join(
             cliboa_install_path, "cliboa", "conf", "default_environment.py"
         )
@@ -103,14 +108,11 @@ class CliboAdmin(object):
         conf_path = os.path.join(cliboa_install_path, "cliboa", "conf", "cliboa.ini")
         copyfile(conf_path, os.path.join(ini_dir, "conf", "cliboa.ini"))
 
-        cmn_scenario_path = os.path.join(ini_dir, "common", "scenario.yml")
-        with open(cmn_scenario_path, "w") as yaml:
-            yaml.write("scenario:" + "\n")
-
+        # create __init__.py
         cmn_ini_path = os.path.join(ini_dir, "common", "__init__.py")
         open(cmn_ini_path, "w").close()
 
-    def _create_new_pj(self, new_pj_dir):
+    def _create_new_project(self, new_project_dir):
         """
         Create an individual project configuration
         """
@@ -119,30 +121,44 @@ class CliboAdmin(object):
         import_module("common.environment")
 
         # make essential directories and files
-        os.makedirs(os.path.join("project", new_pj_dir), exist_ok=False)
-        os.makedirs(os.path.join("project", new_pj_dir, "scenario"), exist_ok=False)
-        with open(os.path.join("project", new_pj_dir, "scenario.yml"), "w") as yaml:
+        os.makedirs(os.path.join("project", new_project_dir), exist_ok=False)
+        os.makedirs(
+            os.path.join("project", new_project_dir, "scenario"), exist_ok=False
+        )
+        with open(
+            os.path.join("project", new_project_dir, "scenario.yml"), "w"
+        ) as yaml:
             yaml.write("scenario:" + "\n")
 
-    def _get_pipfile_path(self, cliboa_install_path):
+    def _get_pipfile_and_requirements_path(self, cliboa_install_path):
         """
-        Get Pipfile for current python version
+        Get path of requirements.txt and Pipfile for current python version
         """
         py_ver_info = sys.version
         py_ver_info = py_ver_info.split(" ")
         py_ver = py_ver_info[0].split(".")
         py_major_ver = py_ver[0] + "." + py_ver[1]
+        py_major_ver_and_requirements = {
+            "3.5": "requirements.above35.txt",
+            "3.6": "requirements.above36.txt",
+            "3.7": "requirements.above37.txt",
+        }
         py_major_ver_and_pipfile = {
-            "3.4": "Pipfile.above34",
             "3.5": "Pipfile.above35",
             "3.6": "Pipfile.above36",
             "3.7": "Pipfile.above37",
         }
-        return os.path.join(
+        pipfile_path = os.path.join(
             cliboa_install_path,
             "cliboa/template",
             py_major_ver_and_pipfile[py_major_ver],
         )
+        requirements_path = os.path.join(
+            cliboa_install_path,
+            "cliboa/template",
+            py_major_ver_and_requirements[py_major_ver],
+        )
+        return pipfile_path, requirements_path
 
 
 class CommandArgumentParser(object):
