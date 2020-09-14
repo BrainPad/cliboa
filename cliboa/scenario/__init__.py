@@ -40,7 +40,7 @@ from .load.gcp import (
     GcsUpload
 )
 from .load.sftp import SftpFileLoad, SftpUpload
-from .load.sqlite import CsvReadSqliteCreate, SqliteCreation
+from .load.sqlite import CsvReadSqliteCreate, SqliteCreation, SqliteWrite
 from .transform.csv import CsvColumnExtract
 from .transform.file import (
     ColumnLengthAdjust,
