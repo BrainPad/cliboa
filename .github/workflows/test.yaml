@@ -1,9 +1,9 @@
 name: cliboa
 
-on: [push, pull_request]
+on: [pull_request]
  
 jobs:
-  unit_test_by_multiple_python_versions:
+  unittest_by_multiple_python_versions:
     runs-on: ubuntu-latest
     strategy:
       matrix:
