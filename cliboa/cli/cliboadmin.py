@@ -15,8 +15,8 @@
 #
 
 import argparse
+import cliboa
 import os
-import site
 import sys
 from importlib import import_module
 from shutil import copyfile
@@ -75,12 +75,7 @@ class CliboAdmin(object):
         """
         create essential files
         """
-        cliboa_install_paths = site.getsitepackages()
-        cliboa_install_path = (
-            cliboa_install_paths[0]
-            if os.path.exists(os.path.join(cliboa_install_paths[0], "cliboa"))
-            else cliboa_install_paths[1]
-        )
+        cliboa_install_path = os.path.dirname(cliboa.__path__[0])
 
         run_cmd_path = os.path.join(
             cliboa_install_path, "cliboa", "template", "bin", "clibomanager.py"
