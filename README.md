@@ -71,9 +71,10 @@ Directory tree which was created aforementioned commands is as below.
 ├── conf
 ├── logs
 └── project
-    └── simple-etl
-            ├── scenario
-                    └── scenario.yml
+│    └── simple-etl
+│            ├── scenario
+│                    └── scenario.yml
+└── requirements.txt
 ```
 
 ## Install PyPI packages
