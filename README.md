@@ -1,3 +1,5 @@
+![](https://github.com/BrainPad/cliboa/workflows/cliboa/badge.svg)
+
 # Table of Contents
 * [Introction](#introduction)
   * [What is cliboa](#what-is-cliboa)
