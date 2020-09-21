@@ -21,6 +21,7 @@ jobs:
           py_ver=${{ matrix.python_versions }}
           pipfile_ver=${py_ver//./}
           cp cliboa/template/Pipfile.above"$pipfile_ver" Pipfile
+          pipenv install .
           pipenv install --dev --skip-lock
       - name: execute flake8
         run: |
