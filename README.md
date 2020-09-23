@@ -1,4 +1,4 @@
-![](https://github.com/BrainPad/cliboa/workflows/cliboa/badge.svg)
+[![CI](https://github.com/BrainPad/cliboa/workflows/cliboa/badge.svg)](https://github.com/BrainPad/cliboa/actions)
 
 # Table of Contents
 * [Introction](#introduction)
