@@ -170,7 +170,7 @@ def list_file_func(**kwargs):
     files = []
     for src in kwargs["ftp"].nlst(kwargs["dir"]):
         fname = os.path.basename(src)
-        if kwargs["pattern"].match(fname) is None:
+        if kwargs["pattern"].fullmatch(fname) is None:
             continue
 
         os.path.join(kwargs["dir"], src)
@@ -187,7 +187,7 @@ def list_file_func(**kwargs):
 def clear_file_func(**kwargs):
     for src in kwargs["ftp"].nlst(kwargs["dir"]):
         fname = os.path.basename(src)
-        if kwargs["pattern"].match(fname) is None:
+        if kwargs["pattern"].fullmatch(fname) is None:
             continue
         try:
             kwargs["ftp"].delete(src)
