@@ -209,7 +209,7 @@ def list_file_func(**kwargs):
     """
     files = []
     for f in kwargs["sftp"].listdir(kwargs["dir"]):
-        if kwargs["pattern"].match(f) is None:
+        if kwargs["pattern"].fullmatch(f) is None:
             continue
 
         fpath = os.path.join(kwargs["dir"], f)
@@ -225,7 +225,7 @@ def clear_file_func(**kwargs):
     """
     files = []
     for f in kwargs["sftp"].listdir(kwargs["dir"]):
-        if kwargs["pattern"].match(f) is None:
+        if kwargs["pattern"].fullmatch(f) is None:
             continue
 
         fpath = os.path.join(kwargs["dir"], f)
