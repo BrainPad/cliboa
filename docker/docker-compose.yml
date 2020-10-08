@@ -1,9 +1,9 @@
-version: "3.8"
+version: "3.3"
 services:
-  etl_dev:
-    container_name: etl_dev
+  cliboa_debian_dev:
+    container_name: cliboa_debian_dev
     build:
-      context: ./etl
+      context: ./debian
     stdin_open: true
     tty: true
     privileged: true
