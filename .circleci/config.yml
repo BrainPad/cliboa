@@ -32,59 +32,30 @@ commands:
             cd hub
             make install prefix=/usr/local
 
-
 jobs:
-  test_python37:
-    executor: python37_executor
+  unittest_by_multiple_python_versions:
+    parameters:
+      python-version:
+        type: executor
+    executor: << parameters.python-version >>
     steps:
     - checkout
     - run:
         name: install dependencies
         command: |
-          mv cliboa/template/Pipfile.above37 Pipfile
+          python -m pip install --upgrade pip
+          py_ver=`python -c 'import sys;p=sys.version.split(" ")[0].split(".");print(p[0]+"."+p[1])'`
+          pipenv --python $py_ver
+          pipfile_ver=${py_ver//./}
+          cp cliboa/template/Pipfile.above"$pipfile_ver" Pipfile
+          pipenv install .
           pipenv install --dev --skip-lock
     - run:
         name: execute flake8
         command: |
           pipenv run flake8
     - run:
-        name: execute unittest and instrument coverage with python3.7
-        command: |
-          pipenv run coverage
-
-  test_python36:
-    executor: python36_executor
-    steps:
-    - checkout
-    - run:
-        name: install dependencies
-        command: |
-          mv cliboa/template/Pipfile.above36 Pipfile
-          pipenv install --dev --skip-lock
-    - run:
-        name: execute flake8
-        command: |
-          pipenv run flake8
-    - run:
-        name: execute unittest and instrument coverage with python3.6
-        command: |
-          pipenv run coverage
-
-  test_python35:
-    executor: python35_executor
-    steps:
-    - checkout
-    - run:
-        name: install dependencies
-        command: |
-          mv cliboa/template/Pipfile.above35 Pipfile
-          pipenv install --dev --skip-lock
-    - run:
-        name: execute flake8
-        command: |
-          pipenv run flake8
-    - run:
-        name: execute unittest and instrument coverage with python3.5
+        name: execute unittest and instrument coverage with << parameters.python-version >>
         command: |
           pipenv run coverage
 
@@ -114,12 +85,11 @@ rollout_filter: &rollout_filter
 workflows:
   build_and_deploy:
     jobs:
-      - test_python37
-      - test_python36
-      - test_python35
+      - unittest_by_multiple_python_versions:
+          matrix:
+            parameters:
+              python-version: [python37_executor, python36_executor, python35_executor]
       - push_dev_branch:
           <<: *rollout_filter
           requires:
-            - test_python37
-            - test_python36
-            - test_python35
+            - unittest_by_multiple_python_versions

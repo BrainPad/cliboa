@@ -1,9 +1,10 @@
-# Default Modules
-Can use modules as below by default.
+# Default ETL Modules
+Can use ETL modules as below by default.
 
 ## Extract Modules
 |Step Class Name|Role|
 |----------|-----------|
+|[AzureBlobDownload](https://github.com/cocoa-maemae/cliboa/blob/fix-manual/docs/modules/azureblob_download.md)|Download files from Azure Blob Storage|
 |[BigQueryRead](/docs/modules/bigquery_read.md)|Read from bigquery table|
 |[FirestoreDocumentDownload](/docs/modules/firestore_document_download.md)|Download a document from Firestore|
 |[FtpDownload](/docs/modules/ftp_download.md)|Download a file via ftp|
@@ -35,6 +36,7 @@ Can use modules as below by default.
 ## Load Modules
 |Step Class Name|Role|
 |----------|-----------|
+|[AzureBlobUpload](https://github.com/cocoa-maemae/cliboa/blob/fix-manual/docs/modules/azureblob_upload.md)|Upload files to Azure Blob Storage|
 |[CsvWrite](/docs/modules/csv_write.md)|Write contents read by 'io: input' to a csv file|
 |[BigQueryWrite](/docs/modules/bigquery_write.md)|Read content from a file and insert it into a table of bigquery|
 |[CsvReadSqliteCreate](/docs/modules/csv_read_sqlite_create.md)|Read content from a file and insert it into a table of sqlite|

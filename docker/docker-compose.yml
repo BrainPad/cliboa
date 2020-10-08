@@ -1,0 +1,9 @@
+version: "3.8"
+services:
+  etl_dev:
+    container_name: etl_dev
+    build:
+      context: ./etl
+    stdin_open: true
+    tty: true
+    privileged: true
