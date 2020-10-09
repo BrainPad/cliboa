@@ -1,4 +1,6 @@
 [![CI](https://github.com/BrainPad/cliboa/workflows/cliboa/badge.svg)](https://github.com/BrainPad/cliboa/actions)
+[![Downloads](https://img.shields.io/github/downloads/BrainPad/cliboa/total.svg?maxAge=2592001)](https://github.com/BrainPad/cliboa/releases/)
+
 
 # Table of Contents
 * [Introction](#introduction)
