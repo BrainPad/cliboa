@@ -1,5 +1,7 @@
-[![CI](https://github.com/BrainPad/cliboa/workflows/cliboa/badge.svg)](https://github.com/BrainPad/cliboa/actions)
-[![Downloads](https://img.shields.io/github/downloads/BrainPad/cliboa/total.svg?maxAge=2592001)](https://github.com/BrainPad/cliboa/releases/)
+[![Downloads](https://img.shields.io/github/downloads/BrainPad/cliboa/total.svg?maxAge=2592001)](https://github.com/BrainPad/cliboa/releases/) 
+[![GitHub Actions](https://github.com/BrainPad/cliboa/workflows/cliboa/badge.svg)](https://github.com/BrainPad/cliboa/actions)
+[![Code Style:
+black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square)](https://github.com/psf/black)
 
 
 # Table of Contents
