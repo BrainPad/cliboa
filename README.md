@@ -1,3 +1,6 @@
+[![PyPI](https://img.shields.io/pypi/v/cliboa?style=flat-square)](https://pypi.org/project/cliboa)
+[![PyPI - Implementation](https://img.shields.io/pypi/implementation/cliboa?style=flat-square)](https://pypi.org/project/cliboa)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/cliboa?style=flat-square)](https://pypi.org/project/cliboa)
 [![Downloads](https://img.shields.io/github/downloads/BrainPad/cliboa/total.svg?maxAge=2592001)](https://github.com/BrainPad/cliboa/releases/) 
 [![GitHub Actions](https://github.com/BrainPad/cliboa/workflows/cliboa/badge.svg)](https://github.com/BrainPad/cliboa/actions)
 [![Code Style:
