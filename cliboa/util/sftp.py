@@ -81,7 +81,7 @@ class Sftp(object):
         Raises:
             IOError: failed to get data
         """
-        return self.__execute(list_file_func, dir=dir, dest=dest, pattern=pattern)
+        return self._execute(list_file_func, dir=dir, dest=dest, pattern=pattern)
 
     def clear_files(self, dir, pattern):
         """
@@ -97,7 +97,7 @@ class Sftp(object):
         Raises:
             IOError: failed to remove
         """
-        return self.__execute(clear_file_func, dir=dir, pattern=pattern)
+        return self._execute(clear_file_func, dir=dir, pattern=pattern)
 
     def remove_specific_file(self, dir, fname):
         """
@@ -110,7 +110,7 @@ class Sftp(object):
         Raises:
             IOError: failed to remove
         """
-        self.__execute(remove_specific_file_func, dir=dir, fname=fname)
+        self._execute(remove_specific_file_func, dir=dir, fname=fname)
 
     def get_specific_file(self, src, dest):
         """
@@ -123,22 +123,24 @@ class Sftp(object):
         Raises:
             IOError: failed to get data
         """
-        self.__execute(get_specific_file_func, src=src, dest=dest)
+        self._execute(get_specific_file_func, src=src, dest=dest)
 
-    def put_file(self, src, dest):
+    def put_file(self, src, dest, endfile_suffix=None):
         """
         Upload file to sftp server
 
         Args:
             src (str): loacal file to upload
             dest (str): destination sftp path to upload
+            endfile_suffix=None (str): Places file with original file name
+                            + "endfile_suffix" when upload completed
 
         Raises:
             IOError: failed to upload
         """
-        self.__execute(put_file_func, src=src, dest=dest)
+        self._execute(put_file_func, src=src, dest=dest, endfile_suffix=endfile_suffix)
 
-    def __execute(self, func, **kwargs):
+    def _execute(self, func, **kwargs):
         """
         Do processing after connected to sftp server
 
@@ -276,6 +278,13 @@ def put_file_func(**kwargs):
         pass
 
     kwargs["sftp"].rename(tmp_dest, kwargs["dest"])
+
+    endfile_suffix = kwargs["endfile_suffix"]
+    if endfile_suffix is not None:
+        endfile = kwargs['src'] + endfile_suffix
+        open(endfile, mode="w").close()
+        kwargs['sftp'].put(endfile, kwargs['dest'] + endfile_suffix)
+        os.remove(endfile)
 
 
 def _is_file(sftp, path):
