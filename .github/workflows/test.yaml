@@ -1,0 +1,31 @@
+name: cliboa
+
+on: [pull_request]
+ 
+jobs:
+  unittest_by_multiple_python_versions:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python_versions: [3.5, 3.6, 3.7]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python_versions }}
+      - name: install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pipenv
+          py_ver=${{ matrix.python_versions }}
+          pipfile_ver=${py_ver//./}
+          cp cliboa/template/Pipfile.above"$pipfile_ver" Pipfile
+          pipenv install .
+          pipenv install --dev --skip-lock
+      - name: execute flake8
+        run: |
+          pipenv run flake8
+      - name: execute unittest and instrument coverage
+        run: |
+          pipenv run coverage
