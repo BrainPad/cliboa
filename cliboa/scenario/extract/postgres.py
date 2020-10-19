@@ -63,7 +63,7 @@ class PostgresRead(BasePostgres):
 
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor) 
            
-        cur.execute(self.__get_query())
+        cur.execute(self._get_query())
         results = cur.fetchall()
          
         dict_result = []
@@ -74,7 +74,7 @@ class PostgresRead(BasePostgres):
         for r in dict_result:
             self._s.save(r)
    
-    def __get_query(self):
+    def _get_query(self):
         """
         Get sql to read
         """
