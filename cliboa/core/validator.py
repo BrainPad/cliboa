@@ -13,11 +13,9 @@
 #
 import os
 
-from cliboa.core.step_queue import StepQueue
 from cliboa.util.exception import (
     DirStructureInvalid,
     FileNotFound,
-    InvalidCount,
     ScenarioFileInvalid
 )
 
@@ -143,30 +141,22 @@ class EssentialKeys(object):
 
     def __call__(self):
         for scenario_yaml_dict in self.__scenario_yaml_list:
-            multi_proc_cnt = scenario_yaml_dict.get("multi_process_count")
             parallel_steps = scenario_yaml_dict.get("parallel")
-            if multi_proc_cnt:
-                if multi_proc_cnt < StepQueue.DEFAULT_PARALLEL_CNT:
-                    raise InvalidCount(
-                        "Must specify more than %s as multi process count."
-                        % StepQueue.DEFAULT_PARALLEL_CNT
-                    )
-                continue
-            elif parallel_steps:
+            if parallel_steps:
                 for s in parallel_steps:
-                    self.__exists_step(s)
-                    self.__exists_class(s)
+                    self._exists_step(s)
+                    self._exists_class(s)
             else:
-                self.__exists_step(scenario_yaml_dict)
-                self.__exists_class(scenario_yaml_dict)
+                self._exists_step(scenario_yaml_dict)
+                self._exists_class(scenario_yaml_dict)
 
-    def __exists_step(self, dict):
+    def _exists_step(self, dict):
         if "step" not in dict.keys():
             raise ScenarioFileInvalid(
                 "scenario.yml is invalid. 'step:' does not exist."
             )
 
-    def __exists_class(self, dict):
+    def _exists_class(self, dict):
         if not dict.get("class"):
             raise ScenarioFileInvalid(
                 "scenario.yml is invalid. 'class:' key does not exist, or 'class:' value does not exist."  # noqa

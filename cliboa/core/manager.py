@@ -134,6 +134,10 @@ class YamlScenarioManager(ScenarioManager):
                 q.multi_proc_cnt = s_dict.get("multi_process_count")
                 continue
 
+            if "force_continue" in s_dict.keys():
+                q.force_continue = s_dict.get("force_continue")
+                continue
+
             instances = []
             if "parallel" in s_dict.keys():
                 for row in s_dict.get("parallel"):

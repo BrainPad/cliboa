@@ -91,7 +91,10 @@ class MultiProcExecutor(StepExecutor):
             with Pool(processes=ScenarioQueue.step_queue.multi_proc_cnt) as p:
                 for r in p.imap_unordered(self._async_step_execute, packed):
                     if r == "NG":
-                        raise StepExecutionFailed("Multi process response. %s" % r)
+                        if ScenarioQueue.step_queue.force_continue:
+                            self._logger.warning("Multi process response. %s" % r)
+                        else:
+                            raise StepExecutionFailed("Multi process response. %s" % r)
         except Exception as e:
             self._logger.error("Exception occurred during multi process execution.")
             raise e
