@@ -1,6 +1,4 @@
-import psycopg2
-from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT 
-from psycopg2.extras import DictCursor
+
 from cliboa.util.lisboa_log import LisboaLog
 
 class PostgresAdapter(object):
