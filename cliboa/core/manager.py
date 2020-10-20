@@ -314,6 +314,7 @@ class YamlScenarioManager(ScenarioManager):
 
         if args is not None:
             from cliboa.core.factory import CustomInstanceFactory
+
             if type(args) is str:
                 listeners.append(CustomInstanceFactory.create(args))
             elif type(args) is list:

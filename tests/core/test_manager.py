@@ -215,7 +215,7 @@ class TestYamlScenarioManager(object):
         manager._dynamic_key_and_val["arg_f"] = "echo FROM"
         manager._dynamic_key_and_val["arg_t"] = "echo TO"
 
-        yaml_v = 'test-{{ arg_f }}'
+        yaml_v = "test-{{ arg_f }}"
 
         pattern = re.compile(r"{{(.*?)}}")
         matches = pattern.findall(yaml_v)
@@ -230,7 +230,7 @@ class TestYamlScenarioManager(object):
         manager._dynamic_key_and_val["arg_f"] = "echo FROM"
         manager._dynamic_key_and_val["arg_t"] = "echo TO"
 
-        yaml_v = 'test-{{ arg_f }}-{{ arg_t }}'
+        yaml_v = "test-{{ arg_f }}-{{ arg_t }}"
 
         pattern = re.compile(r"{{(.*?)}}")
         matches = pattern.findall(yaml_v)
