@@ -115,7 +115,7 @@ class FileDecompress(FileBaseTransform):
                 with bz2.open(f, mode="rb") as i, open(decom_path, mode="wb") as o:
                     while True:
                         buf = i.read(self._chunk_size)
-                        if buf == b'':
+                        if buf == b"":
                             break
                         o.write(buf)
             elif ext == ".gz":
@@ -129,7 +129,7 @@ class FileDecompress(FileBaseTransform):
                 with gzip.open(f, "rb") as i, open(decom_path, "wb") as o:
                     while True:
                         buf = i.read(self._chunk_size)
-                        if buf == b'':
+                        if buf == b"":
                             break
                         o.write(buf)
             else:
@@ -178,7 +178,7 @@ class FileCompress(FileBaseTransform):
                 with open(f, "rb") as i, gzip.open(com_path, "wb") as o:
                     while True:
                         buf = i.read(self._chunk_size)
-                        if buf == b'':
+                        if buf == b"":
                             break
                         o.write(buf)
             elif self._format in ("bz2", "bzip2"):
@@ -187,7 +187,7 @@ class FileCompress(FileBaseTransform):
                 with open(f, "rb") as i, bz2.open(com_path, "wb") as o:
                     while True:
                         buf = i.read(self._chunk_size)
-                        if buf == b'':
+                        if buf == b"":
                             break
                         o.write(buf)
 

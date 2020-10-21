@@ -15,11 +15,12 @@
 #
 
 import argparse
-import cliboa
 import os
 import sys
 from importlib import import_module
 from shutil import copyfile
+
+import cliboa
 
 
 class CliboAdmin(object):

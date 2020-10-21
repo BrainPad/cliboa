@@ -1,7 +1,8 @@
 import sys
 from contextlib import ExitStack
-from cliboa.util.sftp import Sftp
 from unittest.mock import patch
+
+from cliboa.util.sftp import Sftp
 from tests import BaseCliboaTest
 
 
