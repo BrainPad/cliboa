@@ -14,6 +14,8 @@
 
 import os
 import shutil
+from contextlib import ExitStack
+from unittest.mock import patch
 
 from cliboa.conf import env
 from cliboa.scenario.extract.sftp import SftpDownload
@@ -21,8 +23,6 @@ from cliboa.util.cache import ObjectStore
 from cliboa.util.constant import StepStatus
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
-from contextlib import ExitStack
-from unittest.mock import patch
 
 
 class TestSftpDownload(object):

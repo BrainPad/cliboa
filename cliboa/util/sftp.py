@@ -281,9 +281,9 @@ def put_file_func(**kwargs):
 
     endfile_suffix = kwargs["endfile_suffix"]
     if endfile_suffix is not None:
-        endfile = kwargs['src'] + endfile_suffix
+        endfile = kwargs["src"] + endfile_suffix
         open(endfile, mode="w").close()
-        kwargs['sftp'].put(endfile, kwargs['dest'] + endfile_suffix)
+        kwargs["sftp"].put(endfile, kwargs["dest"] + endfile_suffix)
         os.remove(endfile)
 
 

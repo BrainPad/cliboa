@@ -136,7 +136,7 @@ class SftpUpload(SftpBaseLoad):
                 sftp.put_file(
                     file,
                     os.path.join(self._dest_dir, os.path.basename(file)),
-                    self._endfile_suffix
+                    self._endfile_suffix,
                 )
                 self._logger.info("%s is successfully uploaded." % file)
         else:

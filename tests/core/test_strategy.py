@@ -12,16 +12,16 @@
 # all copies or substantial portions of the Software.
 #
 import sys
-from tests import BaseCliboaTest
 
 from cliboa.client import CommandArgumentParser
 from cliboa.core.scenario_queue import ScenarioQueue
 from cliboa.core.step_queue import StepQueue
 from cliboa.core.strategy import MultiProcExecutor, SingleProcExecutor
 from cliboa.scenario.sample_step import SampleStep
-from cliboa.util.exception import StepExecutionFailed, CliboaException
+from cliboa.util.exception import CliboaException, StepExecutionFailed
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
+from tests import BaseCliboaTest
 
 
 class TestStrategy(BaseCliboaTest):

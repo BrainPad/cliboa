@@ -188,6 +188,7 @@ class CsvReadSqliteCreate(SqliteTransaction):
     """
     @deprecated
     """
+
     COMMIT_COUNT = 100
 
     def __init__(self):
@@ -376,8 +377,10 @@ class SqliteWrite(SqliteTransaction):
                     # Make sure if csv columns and db table names are exactly the same
                     db_columns = self._get_column_names(self._tblname)
                     if escaped_columns != db_columns:
-                        raise Exception('Csv columns %s were not matched to table column %s.'
-                                        % (csv_columns, db_columns))
+                        raise Exception(
+                            "Csv columns %s were not matched to table column %s."
+                            % (csv_columns, db_columns)
+                        )
 
             for file in files:
                 with open(file, mode="r", encoding=self._encoding) as f:
@@ -386,18 +389,22 @@ class SqliteWrite(SqliteTransaction):
                     replace = True if self._primary_key else False
 
                     # Put all csv records into the table.
-                    self._logger.info("Insert all csv records into table[%s]" % self._tblname)
+                    self._logger.info(
+                        "Insert all csv records into table[%s]" % self._tblname
+                    )
                     params = []
                     for row in reader:
                         params.append(row)
                         if len(params) == self.COMMIT_COUNT:
                             self._sqlite_adptr.execute_many_insert(
-                                self._tblname, csv_columns, params, replace)
+                                self._tblname, csv_columns, params, replace
+                            )
                             self._sqlite_adptr.commit()
                             params.clear()
                     if len(params) > 0:
                         self._sqlite_adptr.execute_many_insert(
-                            self._tblname, csv_columns, params, replace)
+                            self._tblname, csv_columns, params, replace
+                        )
                         self._sqlite_adptr.commit()
 
             if self._index and len(self._index) > 0:
@@ -415,11 +422,13 @@ class SqliteWrite(SqliteTransaction):
         if self._primary_key is None:
             sql = "CREATE TABLE IF NOT EXISTS %s (%s)"
             self._sqlite_adptr.execute(
-                sql % (tbname, " TEXT, ".join(columns) + " TEXT"))
+                sql % (tbname, " TEXT, ".join(columns) + " TEXT")
+            )
         else:
             sql = "CREATE TABLE IF NOT EXISTS %s (%s, PRIMARY KEY(%s))"
             self._sqlite_adptr.execute(
-                sql % (tbname, " TEXT, ".join(columns) + " TEXT", self._primary_key))
+                sql % (tbname, " TEXT, ".join(columns) + " TEXT", self._primary_key)
+            )
         self._sqlite_adptr.commit()
 
     def _alter_table(self, tbname, csv_columns):
@@ -428,7 +437,9 @@ class SqliteWrite(SqliteTransaction):
         result = list(set(csv_columns) - set(db_columns))
         if len(result) > 0:
             for column in result:
-                self._sqlite_adptr.execute('ALTER TABLE %s ADD COLUMN %s text' % (tbname, column))
+                self._sqlite_adptr.execute(
+                    "ALTER TABLE %s ADD COLUMN %s text" % (tbname, column)
+                )
 
         self._sqlite_adptr.commit()
 
