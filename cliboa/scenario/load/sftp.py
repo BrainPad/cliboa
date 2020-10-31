@@ -30,6 +30,7 @@ class SftpBaseLoad(BaseStep):
         self._user = None
         self._password = None
         self._key = None
+        self._endfile_suffix = None
         self._timeout = 30
         self._retry_count = 3
 
@@ -56,6 +57,9 @@ class SftpBaseLoad(BaseStep):
 
     def key(self, key):
         self._key = key
+
+    def endfile_suffix(self, endfile_suffix):
+        self._endfile_suffix = endfile_suffix
 
     def timeout(self, timeout):
         self._timeout = timeout
@@ -130,7 +134,9 @@ class SftpUpload(SftpBaseLoad):
         if len(files) > 0:
             for file in files:
                 sftp.put_file(
-                    file, os.path.join(self._dest_dir, os.path.basename(file))
+                    file,
+                    os.path.join(self._dest_dir, os.path.basename(file)),
+                    self._endfile_suffix,
                 )
                 self._logger.info("%s is successfully uploaded." % file)
         else:

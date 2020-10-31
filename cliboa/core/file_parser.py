@@ -82,23 +82,30 @@ class YamlScenarioParser(ScenarioParser):
         """
         for pj_yaml_dict in pj_yaml_list:
             # If same class exists, merge arguments
-            cmn_yaml_dict_in_list = [
-                d for d in cmn_yaml_list if d.get("class") == pj_yaml_dict.get("class")
-            ]
-            if not cmn_yaml_dict_in_list:
-                continue
-
-            pj_cls_attrs = pj_yaml_dict.get("arguments", "")
-            cmn_cls_attrs = cmn_yaml_dict_in_list[0].get("arguments")
-
-            # Merge arguments
-            if pj_cls_attrs and cmn_cls_attrs:
-                pj_cls_attrs = dict(cmn_cls_attrs, **pj_cls_attrs)
-            elif not pj_cls_attrs and cmn_cls_attrs:
-                pj_cls_attrs = cmn_cls_attrs
-            pj_yaml_dict["arguments"] = pj_cls_attrs
+            if pj_yaml_dict.get("parallel"):
+                for row in pj_yaml_dict.get("parallel"):
+                    self._merge(row, cmn_yaml_list)
+            else:
+                self._merge(pj_yaml_dict, cmn_yaml_list)
 
         return pj_yaml_list
+
+    def _merge(self, pj_yaml_dict, cmn_yaml_list):
+        cmn_yaml_dict_in_list = [
+            d for d in cmn_yaml_list if d.get("class") == pj_yaml_dict.get("class")
+        ]
+        if not cmn_yaml_dict_in_list:
+            return
+
+        pj_cls_attrs = pj_yaml_dict.get("arguments", "")
+        cmn_cls_attrs = cmn_yaml_dict_in_list[0].get("arguments")
+
+        # Merge arguments
+        if pj_cls_attrs and cmn_cls_attrs:
+            pj_cls_attrs = dict(cmn_cls_attrs, **pj_cls_attrs)
+        elif not pj_cls_attrs and cmn_cls_attrs:
+            pj_cls_attrs = cmn_cls_attrs
+        pj_yaml_dict["arguments"] = pj_cls_attrs
 
     def __exists_ess_keys(self, scenario_yaml_list):
         """

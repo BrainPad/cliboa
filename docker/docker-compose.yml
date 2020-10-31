@@ -1,0 +1,9 @@
+version: "3.3"
+services:
+  cliboa_debian_dev:
+    container_name: cliboa_debian_dev
+    build:
+      context: ./debian
+    stdin_open: true
+    tty: true
+    privileged: true
