@@ -28,3 +28,7 @@ jobs:
       - name: execute unittest and instrument coverage
         run: |
           pipenv run coverage
+      - name: Uupload coverage to codecov
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
