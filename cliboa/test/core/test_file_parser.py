@@ -345,7 +345,7 @@ class TestYamlScenarioParser(object):
                             "arguments": {"retry_count": 10},
                             "class": "SftpDownload",
                             "step": "sftp_download",
-                        }
+                        },
                     ]
                 }
             ]

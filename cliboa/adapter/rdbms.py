@@ -1,9 +1,10 @@
 from abc import abstractmethod
+
 from cliboa.util.exception import DatabaseException
 from cliboa.util.lisboa_log import LisboaLog
 
 
-class RdbmsSupport():
+class RdbmsSupport:
     """
     This class allows you to access a database and
     provides database transaction by context manager.
@@ -54,8 +55,10 @@ class RdbmsSupport():
 
     def _begin(self):
         self._con = self.get_connection()
-        self._logger.info('Connected to database(host=%s, user=%s, db=%s)' %
-                          (self._host, self._user, self._dbname))
+        self._logger.info(
+            "Connected to database(host=%s, user=%s, db=%s)"
+            % (self._host, self._user, self._dbname)
+        )
 
     def _commit(self):
         if self._con:
@@ -116,4 +119,3 @@ class RdbmsSupport():
         """
         Returns a database connection you want to access to
         """
-        pass

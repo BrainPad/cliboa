@@ -43,6 +43,6 @@ python_version = "3.5"
 
 [scripts]
 test = "pytest -v"
-coverage = "pytest --cov cliboa --cov-report term-missing ./tests"
+coverage = "pytest --cov cliboa --cov-report term-missing --cov-report=xml"
 flake8 = "flake8 ."
 lintfix = "bash -c 'autoflake -ri --ignore-init-module-imports --remove-unused-variables . && isort -rc . && flake8 .'"

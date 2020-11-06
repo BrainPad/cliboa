@@ -18,10 +18,10 @@ from cliboa.core.scenario_queue import ScenarioQueue
 from cliboa.core.step_queue import StepQueue
 from cliboa.core.strategy import MultiProcExecutor, SingleProcExecutor
 from cliboa.scenario.sample_step import SampleStep
+from cliboa.test import BaseCliboaTest
 from cliboa.util.exception import CliboaException, StepExecutionFailed
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
-from tests import BaseCliboaTest
 
 
 class TestStrategy(BaseCliboaTest):

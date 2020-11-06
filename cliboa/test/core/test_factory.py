@@ -20,7 +20,7 @@ from cliboa.client import CommandArgumentParser
 from cliboa.core.factory import CustomInstanceFactory, ScenarioManagerFactory, StepExecutorFactory
 from cliboa.core.manager import YamlScenarioManager
 from cliboa.core.strategy import MultiProcExecutor, SingleProcExecutor
-from tests import BaseCliboaTest
+from cliboa.test import BaseCliboaTest
 
 
 class TestFactory(BaseCliboaTest):

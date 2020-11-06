@@ -2,8 +2,8 @@ import sys
 from contextlib import ExitStack
 from unittest.mock import patch
 
+from cliboa.test import BaseCliboaTest
 from cliboa.util.sftp import Sftp
-from tests import BaseCliboaTest
 
 
 class TestSftp(BaseCliboaTest):
@@ -13,10 +13,10 @@ class TestSftp(BaseCliboaTest):
             return
 
         with ExitStack() as stack:
-            mock_func = stack.enter_context(patch('cliboa.util.sftp.list_file_func'))
+            mock_func = stack.enter_context(patch("cliboa.util.sftp.list_file_func"))
             mock_func.return_value = ["test.txt"]
-            stack.enter_context(patch('paramiko.SSHClient.connect'))
-            stack.enter_context(patch('paramiko.SSHClient.open_sftp'))
+            stack.enter_context(patch("paramiko.SSHClient.connect"))
+            stack.enter_context(patch("paramiko.SSHClient.open_sftp"))
             sftp = Sftp(host="test", user="admin", password="pass")
             sftp.list_files(None, None, None)
             mock_func.assert_called_once()
@@ -27,9 +27,9 @@ class TestSftp(BaseCliboaTest):
             return
 
         with ExitStack() as stack:
-            mock_func = stack.enter_context(patch('cliboa.util.sftp.clear_file_func'))
-            stack.enter_context(patch('paramiko.SSHClient.connect'))
-            stack.enter_context(patch('paramiko.SSHClient.open_sftp'))
+            mock_func = stack.enter_context(patch("cliboa.util.sftp.clear_file_func"))
+            stack.enter_context(patch("paramiko.SSHClient.connect"))
+            stack.enter_context(patch("paramiko.SSHClient.open_sftp"))
             sftp = Sftp(host="test", user="admin", password="pass")
             sftp.clear_files(None, None)
             mock_func.assert_called_once()
@@ -40,9 +40,11 @@ class TestSftp(BaseCliboaTest):
             return
 
         with ExitStack() as stack:
-            mock_func = stack.enter_context(patch('cliboa.util.sftp.remove_specific_file_func'))
-            stack.enter_context(patch('paramiko.SSHClient.connect'))
-            stack.enter_context(patch('paramiko.SSHClient.open_sftp'))
+            mock_func = stack.enter_context(
+                patch("cliboa.util.sftp.remove_specific_file_func")
+            )
+            stack.enter_context(patch("paramiko.SSHClient.connect"))
+            stack.enter_context(patch("paramiko.SSHClient.open_sftp"))
             sftp = Sftp(host="test", user="admin", password="pass")
             sftp.remove_specific_file(None, None)
             mock_func.assert_called_once()
@@ -53,9 +55,11 @@ class TestSftp(BaseCliboaTest):
             return
 
         with ExitStack() as stack:
-            mock_func = stack.enter_context(patch('cliboa.util.sftp.get_specific_file_func'))
-            stack.enter_context(patch('paramiko.SSHClient.connect'))
-            stack.enter_context(patch('paramiko.SSHClient.open_sftp'))
+            mock_func = stack.enter_context(
+                patch("cliboa.util.sftp.get_specific_file_func")
+            )
+            stack.enter_context(patch("paramiko.SSHClient.connect"))
+            stack.enter_context(patch("paramiko.SSHClient.open_sftp"))
             sftp = Sftp(host="test", user="admin", password="pass")
             sftp.get_specific_file(None, None)
             mock_func.assert_called_once()
@@ -66,9 +70,9 @@ class TestSftp(BaseCliboaTest):
             return
 
         with ExitStack() as stack:
-            mock_func = stack.enter_context(patch('cliboa.util.sftp.put_file_func'))
-            stack.enter_context(patch('paramiko.SSHClient.connect'))
-            stack.enter_context(patch('paramiko.SSHClient.open_sftp'))
+            mock_func = stack.enter_context(patch("cliboa.util.sftp.put_file_func"))
+            stack.enter_context(patch("paramiko.SSHClient.connect"))
+            stack.enter_context(patch("paramiko.SSHClient.open_sftp"))
             sftp = Sftp(host="test", user="admin", password="pass")
             sftp.put_file(None, None)
             mock_func.assert_called_once()
