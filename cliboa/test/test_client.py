@@ -20,9 +20,8 @@ import yaml
 
 from cliboa.client import CommandArgumentParser, ScenarioRunner
 from cliboa.conf import env
+from cliboa.test import BaseCliboaTest
 from cliboa.util.exception import FileNotFound
-
-from . import BaseCliboaTest
 
 
 class TestCommandArgumentParser(BaseCliboaTest):

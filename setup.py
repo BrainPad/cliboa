@@ -26,7 +26,7 @@ def read(filename):
 
 setup(
     name="cliboa",
-    version="1.3.3beta",
+    version="1.3.5beta",
     description="application framework for ETL(ELT) processing",
     # long_description=read("README.md"),
     # long_description_content_type='text/markdown',
@@ -67,6 +67,9 @@ setup(
             "Pipfile.above35",
             "Pipfile.above36",
             "Pipfile.above37",
+            "requirements.above35.txt",
+            "requirements.above36.txt",
+            "requirements.above37.txt",
         ],
     },
     python_requires=">=3.5",

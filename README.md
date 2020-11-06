@@ -1,3 +1,12 @@
+[![PyPI](https://img.shields.io/pypi/v/cliboa?style=flat-square)](https://pypi.org/project/cliboa)
+[![PyPI - Implementation](https://img.shields.io/pypi/implementation/cliboa?style=flat-square)](https://pypi.org/project/cliboa)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/cliboa?style=flat-square)](https://pypi.org/project/cliboa)
+[![Downloads](https://img.shields.io/github/downloads/BrainPad/cliboa/total.svg?maxAge=2592001)](https://github.com/BrainPad/cliboa/releases/) 
+[![GitHub Actions](https://github.com/BrainPad/cliboa/workflows/cliboa/badge.svg)](https://github.com/BrainPad/cliboa/actions)
+[![Code Style:
+black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square)](https://github.com/psf/black)
+
+
 # Table of Contents
 * [Introction](#introduction)
   * [What is cliboa](#what-is-cliboa)
@@ -71,9 +80,10 @@ Directory tree which was created aforementioned commands is as below.
 ├── conf
 ├── logs
 └── project
-    └── simple-etl
-            ├── scenario
-                    └── scenario.yml
+│    └── simple-etl
+│            ├── scenario
+│                    └── scenario.yml
+└── requirements.txt
 ```
 
 ## Install PyPI packages
@@ -84,7 +94,6 @@ $ pipenv install --dev
 or
 ```
 $ cd sample
-$ pipenv lock -r > requirments.txt
 $ sudo pip3 install -r requirements.txt
 ```
 

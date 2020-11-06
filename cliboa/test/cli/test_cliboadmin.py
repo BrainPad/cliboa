@@ -16,7 +16,7 @@ import sys
 import pytest
 
 from cliboa.cli.cliboadmin import CliboAdmin, CommandArgumentParser
-from tests import BaseCliboaTest
+from cliboa.test import BaseCliboaTest
 
 
 class TestCommandArgumentParser(BaseCliboaTest):

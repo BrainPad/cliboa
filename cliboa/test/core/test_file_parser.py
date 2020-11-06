@@ -325,3 +325,53 @@ class TestYamlScenarioParser(object):
         shutil.rmtree(self._pj_dir)
         shutil.rmtree(self._cmn_dir)
         assert "invalid" in str(excinfo.value)
+
+    def test_parse_with_pj_and_cmn_yaml_parallel(self):
+        """
+        Test for parallel operation
+        """
+        os.makedirs(self._pj_dir)
+        os.makedirs(self._cmn_scenario_dir)
+        pj_yaml_dict = {
+            "scenario": [
+                {
+                    "parallel": [
+                        {
+                            "arguments": {"retry_count": 10},
+                            "class": "SftpDownload",
+                            "step": "sftp_download",
+                        },
+                        {
+                            "arguments": {"retry_count": 10},
+                            "class": "SftpDownload",
+                            "step": "sftp_download",
+                        },
+                    ]
+                }
+            ]
+        }
+        with open(self._pj_scenario_file, "w") as f:
+            f.write(yaml.dump(pj_yaml_dict, default_flow_style=False))
+
+        cmn_yaml_dict = {
+            "scenario": [
+                {
+                    "arguments": {"host": "dummy_host"},
+                    "class": "SftpDownload",
+                    "step": "sftp_download",
+                }
+            ]
+        }
+        with open(self._cmn_scenario_file, "w") as f:
+            f.write(yaml.dump(cmn_yaml_dict, default_flow_style=False))
+
+        try:
+            parser = YamlScenarioParser(self._pj_scenario_file, self._cmn_scenario_file)
+            yaml_scenario_list = parser.parse()
+
+            for scenario in yaml_scenario_list:
+                for dict in scenario.get("parallel"):
+                    assert "dummy_host" == dict.get("arguments")["host"]
+        finally:
+            shutil.rmtree(self._pj_dir)
+            shutil.rmtree(self._cmn_dir)

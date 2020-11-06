@@ -185,6 +185,9 @@ class SqliteCreation(SqliteTransaction):
 
 
 class CsvReadSqliteCreate(SqliteTransaction):
+    """
+    @deprecated
+    """
 
     COMMIT_COUNT = 100
 
@@ -293,3 +296,153 @@ class CsvReadSqliteCreate(SqliteTransaction):
                 self._sqlite_adptr.commit()
 
         super().execute(func)
+
+
+class SqliteWrite(SqliteTransaction):
+
+    COMMIT_COUNT = 100
+
+    def __init__(self):
+        super().__init__()
+        self._src_dir = None
+        self._src_pattern = None
+        self._tblname = None
+        self._primary_key = None
+        self._index = []
+        self._refresh = True
+        self._force_insert = False
+        self._encoding = "utf-8"
+
+    def src_dir(self, src_dir):
+        self._src_dir = src_dir
+
+    def src_pattern(self, src_pattern):
+        self._src_pattern = src_pattern
+
+    def tblname(self, tblname):
+        self._tblname = tblname
+
+    def primary_key(self, primary_key):
+        self._primary_key = primary_key
+
+    def index(self, index):
+        self._index = index
+
+    def refresh(self, refresh):
+        self._refresh = refresh
+
+    def force_insert(self, force_insert):
+        self._force_insert = force_insert
+
+    def encoding(self, encoding):
+        self._encoding = encoding
+
+    def execute(self, *args):
+        # essential parameters check
+        valid = EssentialParameters(
+            self.__class__.__name__, [self._src_dir, self._src_pattern, self._tblname]
+        )
+        valid()
+
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+        self._logger.info("Files found %s" % files)
+
+        if len(files) == 0:
+            raise FileNotFound("No csv file was found.")
+
+        files.sort()
+
+        def func():
+            # Find csv columns from all csv files
+            csv_columns = []
+            for file in files:
+                with open(file, "r", encoding=self._encoding) as f:
+                    reader = csv.DictReader(f)
+                    for col in reader.fieldnames:
+                        csv_columns.append(col)
+            csv_columns = sorted(set(csv_columns), key=csv_columns.index)
+            escaped_columns = ['"%s"' % fn for fn in csv_columns]
+
+            if self._refresh is True:
+                # Drop table in advance, If refresh is True
+                self._sqlite_adptr.execute("DROP TABLE IF EXISTS %s" % self._tblname)
+                self._sqlite_adptr.commit()
+                self._create_table(self._tblname, escaped_columns)
+            else:
+                self._create_table(self._tblname, escaped_columns)
+
+                if self._force_insert is True:
+                    self._alter_table(self._tblname, escaped_columns)
+                else:
+                    # Make sure if csv columns and db table names are exactly the same
+                    db_columns = self._get_column_names(self._tblname)
+                    if escaped_columns != db_columns:
+                        raise Exception(
+                            "Csv columns %s were not matched to table column %s."
+                            % (csv_columns, db_columns)
+                        )
+
+            for file in files:
+                with open(file, mode="r", encoding=self._encoding) as f:
+                    reader = csv.DictReader(f)
+
+                    replace = True if self._primary_key else False
+
+                    # Put all csv records into the table.
+                    self._logger.info(
+                        "Insert all csv records into table[%s]" % self._tblname
+                    )
+                    params = []
+                    for row in reader:
+                        params.append(row)
+                        if len(params) == self.COMMIT_COUNT:
+                            self._sqlite_adptr.execute_many_insert(
+                                self._tblname, csv_columns, params, replace
+                            )
+                            self._sqlite_adptr.commit()
+                            params.clear()
+                    if len(params) > 0:
+                        self._sqlite_adptr.execute_many_insert(
+                            self._tblname, csv_columns, params, replace
+                        )
+                        self._sqlite_adptr.commit()
+
+            if self._index and len(self._index) > 0:
+                """
+                Create index (Add the index at the end for
+                better performance when insert data is large)
+                """
+                self._logger.info("Add index")
+                self._sqlite_adptr.add_index(self._tblname, self._index)
+                self._sqlite_adptr.commit()
+
+        super().execute(func)
+
+    def _create_table(self, tbname, columns):
+        if self._primary_key is None:
+            sql = "CREATE TABLE IF NOT EXISTS %s (%s)"
+            self._sqlite_adptr.execute(
+                sql % (tbname, " TEXT, ".join(columns) + " TEXT")
+            )
+        else:
+            sql = "CREATE TABLE IF NOT EXISTS %s (%s, PRIMARY KEY(%s))"
+            self._sqlite_adptr.execute(
+                sql % (tbname, " TEXT, ".join(columns) + " TEXT", self._primary_key)
+            )
+        self._sqlite_adptr.commit()
+
+    def _alter_table(self, tbname, csv_columns):
+        db_columns = self._get_column_names(tbname)
+
+        result = list(set(csv_columns) - set(db_columns))
+        if len(result) > 0:
+            for column in result:
+                self._sqlite_adptr.execute(
+                    "ALTER TABLE %s ADD COLUMN %s text" % (tbname, column)
+                )
+
+        self._sqlite_adptr.commit()
+
+    def _get_column_names(self, tbname):
+        cur = self._sqlite_adptr.fetch("PRAGMA TABLE_INFO(%s)" % tbname)
+        return ['"%s"' % x[1] for x in cur]

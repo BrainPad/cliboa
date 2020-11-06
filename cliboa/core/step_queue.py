@@ -25,15 +25,24 @@ class StepQueue(Queue):
 
     def __init__(self):
         super().__init__()
-        self.__multi_proc_cnt = self._DEFAULT_PARALLEL_CNT
+        self._multi_proc_cnt = self._DEFAULT_PARALLEL_CNT
+        self._force_continue = False
 
     @property
     def multi_proc_cnt(self):
-        return self.__multi_proc_cnt
+        return self._multi_proc_cnt
 
     @multi_proc_cnt.setter
     def multi_proc_cnt(self, multi_proc_cnt):
-        self.__multi_proc_cnt = multi_proc_cnt
+        self._multi_proc_cnt = multi_proc_cnt
+
+    @property
+    def force_continue(self):
+        return self._force_continue
+
+    @force_continue.setter
+    def force_continue(self, force_continue):
+        self._force_continue = force_continue
 
     def push(self, instance):
         self.put(instance)
