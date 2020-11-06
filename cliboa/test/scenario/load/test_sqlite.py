@@ -45,7 +45,9 @@ class TestSqliteWrite(object):
 
             adapter = SqliteAdapter()
             adapter.connect(self.DB_NAME)
-            cur = adapter.fetch("SELECT * FROM %s" % self.TBL_NAME, row_factory=self._dict_factory)
+            cur = adapter.fetch(
+                "SELECT * FROM %s" % self.TBL_NAME, row_factory=self._dict_factory
+            )
 
             count = 0
             for row in cur:
@@ -78,7 +80,9 @@ class TestSqliteWrite(object):
 
             adapter = SqliteAdapter()
             adapter.connect(self.DB_NAME)
-            cur = adapter.fetch("SELECT * FROM %s" % self.TBL_NAME, row_factory=self._dict_factory)
+            cur = adapter.fetch(
+                "SELECT * FROM %s" % self.TBL_NAME, row_factory=self._dict_factory
+            )
 
             count = 0
             for row in cur:
@@ -116,7 +120,9 @@ class TestSqliteWrite(object):
 
             adapter = SqliteAdapter()
             adapter.connect(self.DB_NAME)
-            cur = adapter.fetch("SELECT * FROM %s" % self.TBL_NAME, row_factory=self._dict_factory)
+            cur = adapter.fetch(
+                "SELECT * FROM %s" % self.TBL_NAME, row_factory=self._dict_factory
+            )
 
             count = 0
             for row in cur:
@@ -158,7 +164,9 @@ class TestSqliteWrite(object):
 
             adapter = SqliteAdapter()
             adapter.connect(self.DB_NAME)
-            cur = adapter.fetch("SELECT * FROM %s" % self.TBL_NAME, row_factory=self._dict_factory)
+            cur = adapter.fetch(
+                "SELECT * FROM %s" % self.TBL_NAME, row_factory=self._dict_factory
+            )
 
             count = 0
             for row in cur:
@@ -201,7 +209,9 @@ class TestSqliteWrite(object):
 
             adapter = SqliteAdapter()
             adapter.connect(self.DB_NAME)
-            cur = adapter.fetch("SELECT * FROM %s" % self.TBL_NAME, row_factory=self._dict_factory)
+            cur = adapter.fetch(
+                "SELECT * FROM %s" % self.TBL_NAME, row_factory=self._dict_factory
+            )
 
             count = 0
             for row in cur:
@@ -242,7 +252,9 @@ class TestSqliteWrite(object):
 
             adapter = SqliteAdapter()
             adapter.connect(self.DB_NAME)
-            cur = adapter.fetch("SELECT * FROM %s" % self.TBL_NAME, row_factory=self._dict_factory)
+            cur = adapter.fetch(
+                "SELECT * FROM %s" % self.TBL_NAME, row_factory=self._dict_factory
+            )
 
             count = 0
             for row in cur:

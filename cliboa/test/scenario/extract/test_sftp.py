@@ -41,7 +41,7 @@ class TestSftpDownload(object):
         Helper.set_property(instance, "step", "sftp_class")
 
         with ExitStack() as stack:
-            mock_sftp = stack.enter_context(patch('cliboa.util.sftp.Sftp.list_files'))
+            mock_sftp = stack.enter_context(patch("cliboa.util.sftp.Sftp.list_files"))
             mock_sftp.return_value = ["test.txt"]
 
             instance.execute()
@@ -62,7 +62,7 @@ class TestSftpDownload(object):
         Helper.set_property(instance, "quit", True)
 
         with ExitStack() as stack:
-            mock_sftp = stack.enter_context(patch('cliboa.util.sftp.Sftp.list_files'))
+            mock_sftp = stack.enter_context(patch("cliboa.util.sftp.Sftp.list_files"))
             mock_sftp.return_value = []
 
             ret = instance.execute()
@@ -83,7 +83,7 @@ class TestSftpDownload(object):
         Helper.set_property(instance, "quit", False)
 
         with ExitStack() as stack:
-            mock_sftp = stack.enter_context(patch('cliboa.util.sftp.Sftp.list_files'))
+            mock_sftp = stack.enter_context(patch("cliboa.util.sftp.Sftp.list_files"))
             mock_sftp.return_value = []
 
             ret = instance.execute()

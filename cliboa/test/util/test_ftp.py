@@ -18,8 +18,8 @@ import shutil
 
 import pytest
 
+from cliboa.test import BaseCliboaTest
 from cliboa.util.ftp_util import FtpUtil
-from tests import BaseCliboaTest
 
 
 class TestFtpUtil(BaseCliboaTest):
