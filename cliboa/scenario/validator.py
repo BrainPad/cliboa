@@ -1,9 +1,22 @@
+#
+# Copyright 2019 BrainPad Inc. All Rights Reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
 
-
-from cliboa.util.exception import InvalidParameter, ScenarioFileInvalid, PostgresInvalid,SqliteInvalid
+from cliboa.util.exception import InvalidParameter, ScenarioFileInvalid, SqliteInvalid
 from cliboa.util.lisboa_log import LisboaLog
 from cliboa.util.sqlite import SqliteAdapter
-from cliboa.util.postgres import PostgresAdapter
+
+
 class EssentialParameters(object):
     """
     Validation for the essential parameters of step class
@@ -31,7 +44,7 @@ class SqliteTableExistence(object):
     Validation for the table of sqlite
     """
 
-    def __init__(self,  tblname, returns_bool=False):
+    def __init__(self, dbname, tblname, returns_bool=False):
         """
         Args:
             dbname: database name
@@ -39,7 +52,7 @@ class SqliteTableExistence(object):
             returns_bool: return bool or not
         """
         self.__sqlite_adptr = SqliteAdapter()
-       
+        self.__dbname = dbname
         self.__tblname = tblname
         self.__returns_bool = returns_bool
         self._logger = LisboaLog.get_logger(__name__)
@@ -51,7 +64,6 @@ class SqliteTableExistence(object):
                 'SELECT name FROM sqlite_master WHERE type="table" AND name="%s"'
                 % self.__tblname
             )
-            
             result = cur.fetchall()
             if self.__returns_bool is True:
                 return True if result else False
@@ -62,44 +74,6 @@ class SqliteTableExistence(object):
         finally:
             self.__sqlite_adptr.close()
 
-class PostgresTableExistence(object):
-    """
-    Validation for the table of postgres
-    """
-
-    def __init__(self,host,user,dbname,tblname,password,returns_bool=False):
-        """
-        Args:
-            dbname: database name
-            tblname: table name
-            returns_bool: return bool or not
-        """
-        self.__postgres_adptr = PostgresAdapter()
-        self.__host = host
-        self.__dbname = dbname
-        self.__tblname = tblname
-        self.__user = user
-        self.__password = password
-        self.__returns_bool = returns_bool
-        self._logger = LisboaLog.get_logger(__name__)
-
-    def __call__(self):
-        try:
-           
-            conn = self.__postgres_adptr.connect(self.__host,self.__user,self.__dbname,self.__password)
-            cur = conn.cursor()
-            cur.execute("select exists(select relname from pg_class where relname='" + self.__tblname + "')")
-            result = cur.fetchone()[0]
-            
-            if self.__returns_bool is True:
-                return True if result else False
-
-            if not result and self.__returns_bool is False:
-                raise PostgresInvalid("Postgres table %s not found" % self.__tblname)
-
-        finally:
-            
-            self.__postgres_adptr.close()
 
 class IOInput(object):
     """

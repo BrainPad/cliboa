@@ -46,9 +46,9 @@ scenario:
 - step:
   class: SftpDownload
   arguments:
-    host: localhost
-    user: root
-    password: pass
+    host: $hostname
+    user: $username
+    password: $password
     src_dir: /usr/local
     src_pattern: test.csv.gz
     dest_dir: /tmp
@@ -59,9 +59,9 @@ scenario:
 - step:
   class: SftpUpload
   arguments:
-    host: localhost
-    user: root
-    password: pass
+    host: $hostname
+    user: $username
+    password: $password
     src_dir: /tmp
     src_pattern: test.*\.csv
     dest_dir: /usr/local

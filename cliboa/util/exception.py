@@ -65,6 +65,7 @@ class SqliteInvalid(CliboaException):
     # Exception when specified file not found
     pass
 
-class PostgresInvalid(CliboaException):
-    # Exception when specified file not found
+
+class DatabaseException(CliboaException):
+    # Database error
     pass

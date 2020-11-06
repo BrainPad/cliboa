@@ -16,16 +16,12 @@ import os
 import re
 from abc import abstractmethod
 
-from google.oauth2 import service_account
-
 from cliboa.conf import env
-from cliboa.scenario.validator import (EssentialParameters, IOOutput,
-                                       SqliteTableExistence,PostgresTableExistence)
+from cliboa.scenario.validator import EssentialParameters, IOOutput, SqliteTableExistence  # noqa
 from cliboa.util.cache import StepArgument, StorageIO
 from cliboa.util.exception import FileNotFound
 from cliboa.util.file import File
 from cliboa.util.sqlite import SqliteAdapter
-from cliboa.util.postgres import PostgresAdapter
 
 
 class BaseStep(object):
@@ -40,6 +36,7 @@ class BaseStep(object):
         self._parallel = None
         self._io = None
         self._logger = None
+        self._listeners = []
 
     def step(self, step):
         self._step = step
@@ -55,6 +52,9 @@ class BaseStep(object):
 
     def logger(self, logger):
         self._logger = logger
+
+    def listeners(self, listeners):
+        self._listeners = listeners
 
     def trigger(self, *args):
         mask = None
@@ -74,9 +74,24 @@ class BaseStep(object):
             else:
                 self._logger.info("%s : %s" % (k, v))
         try:
-            return self.execute(args)
+            for listener in self._listeners:
+                listener.before_step(self)
+
+            ret = self.execute(args)
+
+            for listener in self._listeners:
+                listener.after_step(self)
+
+            return ret
+
         except Exception as e:
+            for listener in self._listeners:
+                listener.error_step(self, e)
+
             return self._exception_dispatcher(e)
+        finally:
+            for listener in self._listeners:
+                listener.after_completion(self)
 
     @abstractmethod
     def execute(self, *args):
@@ -98,7 +113,8 @@ class BaseStep(object):
 
     def _property_path_reader(self, src, encoding="utf-8"):
         """
-        Returns an resource contents from the path if src starts with "path:", returns src if not
+        Returns an resource contents from the path if src starts with "path:",
+        returns src if not
         """
         if src[:5].upper() == "PATH:":
             fpath = src[5:]
@@ -139,7 +155,6 @@ class BaseSqlite(BaseStep):
 
     def execute(self, *args):
         # essential parameters check
-       
         param_valid = EssentialParameters(self.__class__.__name__, [self._dbname])
         param_valid()
 
@@ -172,126 +187,19 @@ class SqliteQueryExecute(BaseSqlite):
         super().__init__()
         self._tblname = None
         self._raw_query = None
-    
+
     def tblname(self, tblname):
         self._tblname = tblname
 
     def raw_query(self, raw_query):
         self._raw_query = raw_query
 
-    def user(self, user):
-        self._user = user
-    
-    def password(self, password):
-        self._password = password
-
     def execute(self, *args):
         super().execute()
-        
         self._sqlite_adptr.connect(self._dbname)
         self._sqlite_adptr.execute(self._raw_query)
         self._sqlite_adptr.commit()
 
-
-
-class BasePostgres(BaseStep):
-    """
-    Base class of all the sqlite classes
-    """
-
-    def __init__(self):
-        super().__init__()
-        self._postgres_adptr = PostgresAdapter()
-        self._host = None
-        self._user = None
-        self._dbname = None
-        self._tblname = None
-        self._password = None
-        self._columns = []
-        self._vacuum = False
-
-    def host(self, host):
-        self._host = host
-
-    def user(self, user):
-        self._user = user
-
-    def dbname(self, dbname):
-        self._dbname = dbname
-    
-    def password(self, password):
-        self._password = password
-
-    def tblname(self, tblname):
-        self._tblname = tblname
-        
-    def columns(self, columns):
-        self._columns = columns
-
-    def vacuum(self, vacuum):
-        self._vacuum = vacuum
-
-
-    def execute(self, *args):
-    
-        #essential parameters check
-        #param_valid = EssentialParameters(self.__class__.__name__)
-        param_valid = EssentialParameters(self.__class__.__name__,[self._dbname])
-        param_valid()
-
-    def _dict_factory(self, cursor, row):
-        d = {}
-        for i, col in enumerate(cursor.description):
-            d[col[0]] = row[i]
-        return d
-
-    def _close_database(self):
-        """
-        Disconnect sqlite database (execute vacuume if necessary)
-        """
-        
-        self._postgres_adptr.close()
-        if self._vacuum is True:
-            try:
-
-                self._postgres_adptr.connect(self._host,self._user,self._dbname,self._password)   
-                self._postgres_adptr.execute("VACUUM")
-            finally:
-                self._postgres_adptr.close()
-
-
-class PostgresQueryExecute(BasePostgres):
-    """
-    Execute only row query of insert, update or delete
-    If would like to execute read query, use SqliteRead class
-    """
-
-    def __init__(self):
-        super().__init__()
-        self._tblname = None
-        self._raw_query = None
-    def host(self, host):
-        self._host = host
-
-    def user(self, user):
-        self._user = user
-
-    def password(self, password):
-        self._password = password
-    
-    #self tblname(self, tblname):
-
-    def tblname(self, dbname):
-        self._dbname = dbname
-
-    def raw_query(self, raw_query):
-        self._raw_query = raw_query
-
-    def execute(self, *args):
-        super().execute()
-        self._postgres_adptr.connect(self._host,self._user,self._dbname,self._password)
-        self._postgres_adptr.execute(self._raw_query)
-        self._postgres_adptr.commit()
 
 class Stdout(BaseStep):
     """
@@ -305,7 +213,6 @@ class Stdout(BaseStep):
         output_valid = IOOutput(self._io)
         output_valid()
 
-        print(output_valid())
         with open(self._s.cache_file, "r", encoding="utf-8") as f:
             for l in f:
                 print(l)
