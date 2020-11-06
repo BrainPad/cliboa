@@ -64,3 +64,7 @@ class StepExecutionFailed(CliboaException):
 class SqliteInvalid(CliboaException):
     # Exception when specified file not found
     pass
+
+class PostgresInvalid(CliboaException):
+    # Exception when specified file not found
+    pass
