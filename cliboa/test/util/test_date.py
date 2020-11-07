@@ -1,5 +1,5 @@
 #
-# Copyright BrainPad Inc. All Rights Reserved.
+# Copyright 2019 BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -12,14 +12,17 @@
 # all copies or substantial portions of the Software.
 #
 
-from cliboa.adapter.mysql import MysqlAdaptor
-from cliboa.scenario.rdbms import BaseRdbmsRead
+from cliboa.util.date import DateUtil
 
 
+class TestDateUtil(object):
+    def test_get_logger(self):
 
-class MysqlRead(BaseRdbmsRead):
-    def __init__(self):
-        super().__init__()
+        res = DateUtil().convert_date_format("2019/1/01 00:00:00", "%Y-%m-%d %H:%M:%S")
+        assert res == "2019-01-01 00:00:00"
 
-    def get_adaptor(self):
-        return MysqlAdaptor(self._host, self._user, self._password, self._dbname)
+        res = DateUtil().convert_date_format("2019/1/01 00:00:00", "%Y-%m-%d %H:00")
+        assert res == "2019-01-01 00:00"
+
+        res = DateUtil().convert_date_format("2019-01-01 00:00:00", "%Y%m%d%H%M%S")
+        assert res == "20190101000000"

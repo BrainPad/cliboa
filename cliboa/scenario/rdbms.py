@@ -12,6 +12,7 @@
 # all copies or substantial portions of the Software.
 #
 import csv
+
 from cliboa.core.validator import EssentialParameters
 from cliboa.scenario.base import BaseStep
 
@@ -44,7 +45,9 @@ class BaseRdbms(BaseStep):
     def execute(self, *args):
         valid = EssentialParameters(
             self.__class__.__name__,
-            [self._host, self._dbname, self._user, self._password]
+
+            [self._host, self._dbname, self._user, self._password],
+
         )
         valid()
 
@@ -78,7 +81,11 @@ class BaseRdbmsRead(BaseRdbms):
         valid()
 
         with self.get_adaptor() as ps:
-            with open(self._dest_path, mode="w", encoding=self._encoding, newline="") as f:
+
+            with open(
+                self._dest_path, mode="w", encoding=self._encoding, newline=""
+            ) as f:
+
                 cur = ps.select(super()._property_path_reader(self._query))
                 writer = None
                 for i, row in enumerate(cur):
@@ -88,7 +95,11 @@ class BaseRdbmsRead(BaseRdbms):
                             columns = [i[0] for i in cur.description]
                             writer.writerow(columns)
                         elif type(row) is dict:
-                            writer = csv.DictWriter(f, list(row.keys()), quoting=csv.QUOTE_ALL)
+
+                            writer = csv.DictWriter(
+                                f, list(row.keys()), quoting=csv.QUOTE_ALL
+                            )
+
                             writer.writeheader()
                     if writer:
                         writer.writerow(self.callback_handler(row))

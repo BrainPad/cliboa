@@ -1,6 +1,4 @@
 #
-# Copyright BrainPad Inc. All Rights Reserved.
-#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -12,14 +10,12 @@
 # all copies or substantial portions of the Software.
 #
 
-from cliboa.adapter.mysql import MysqlAdaptor
-from cliboa.scenario.rdbms import BaseRdbmsRead
+from cliboa.core.scenario_queue import ScenarioQueue
+from cliboa.core.step_queue import StepQueue
+from cliboa.test import BaseCliboaTest
 
 
-
-class MysqlRead(BaseRdbmsRead):
-    def __init__(self):
-        super().__init__()
-
-    def get_adaptor(self):
-        return MysqlAdaptor(self._host, self._user, self._password, self._dbname)
+class TestScenarioQueue(BaseCliboaTest):
+    def test_step_queue(self):
+        setattr(ScenarioQueue, "step_queue", StepQueue())
+        assert isinstance(ScenarioQueue.step_queue, StepQueue)

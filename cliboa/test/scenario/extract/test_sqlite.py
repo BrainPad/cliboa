@@ -1,5 +1,5 @@
 #
-# Copyright BrainPad Inc. All Rights Reserved.
+# Copyright 2019 BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -11,15 +11,11 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+import os
 
-from cliboa.adapter.mysql import MysqlAdaptor
-from cliboa.scenario.rdbms import BaseRdbmsRead
+from cliboa.conf import env
 
 
-
-class MysqlRead(BaseRdbmsRead):
-    def __init__(self):
-        super().__init__()
-
-    def get_adaptor(self):
-        return MysqlAdaptor(self._host, self._user, self._password, self._dbname)
+class TestSqliteRead(object):
+    def setup_method(self, method):
+        self._db_dir = os.path.join(env.BASE_DIR, "db")

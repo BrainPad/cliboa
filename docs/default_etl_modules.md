@@ -23,6 +23,7 @@ Can use ETL modules as below by default.
 |[CsvColumnExtract](/docs/modules/csv_column_extract.md)|Extract specific columns from csv files.|
 |[CsvConvert](/docs/modules/csv_convert.md)|Create new csv(tsv) file with given parameters|
 |[CsvMerge](/docs/modules/csv_merge.md)|Merge two csv files to a csv file|
+|[CsvConcat](/docs/modules/csv_concat.md)|Concat csv files|
 |[CsvHeaderConvert](/docs/modules/csv_header_convert.md)|Convert headers of a csv file|
 |[DateFormatConvert](/docs/modules/date_format_convert.md)|Convert date format of columns of a csv file to another date format|
 |[ExcelConvert](/docs/modules/excel_convert.md)|Convert a excel file to a csv file|
