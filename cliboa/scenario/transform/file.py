@@ -192,6 +192,62 @@ class FileCompress(FileBaseTransform):
                         o.write(buf)
 
 
+class CsvColsExtract(FileBaseTransform):
+    """
+    Remove columns from csv file.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self._columns = None
+
+    def columns(self, columns):
+        self._columns = columns
+
+    def execute(self, *args):
+        file = super().execute()
+        valid = EssentialParameters(self.__class__.__name__, [self._columns])
+        valid()
+
+        File().remove_columns(file, self._dest_path, self._columns)
+
+
+class ColumnLengthAdjust(FileBaseTransform):
+    """
+    Adjust csv (tsv) column to maximum length
+    """
+
+    def __init__(self):
+        super().__init__()
+        self._adjust = {}
+
+    def adjust(self, adjust):
+        self._adjust = adjust
+
+    def execute(self, *args):
+        file = super().execute()
+        if self._adjust is None:
+            raise Exception(
+                "The essential parameter are not specified in %s."
+                % self.__class__.__name__
+            )
+
+        with codecs.open(file, mode="r", encoding=self._encoding) as fi, codecs.open(
+            self._dest_path, mode="w", encoding=self._encoding
+        ) as fo:
+            reader = csv.DictReader(fi)
+            writer = csv.DictWriter(fo, reader.fieldnames)
+            writer.writeheader()
+
+            for row in reader:
+                for k, v in self._adjust.items():
+                    f1 = row.get(k)
+                    if len(f1) > v:
+                        row[k] = f1[:v]
+                writer.writerow(row)
+            fo.flush()
+
+
 class DateFormatConvert(FileBaseTransform):
     """
     Convert csv (tsv) date field columns to another date field format columns

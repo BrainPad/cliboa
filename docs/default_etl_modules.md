@@ -46,7 +46,6 @@ Can use ETL modules as below by default.
 |[SftpUpload](/docs/modules/sftp_upload.md)|Upload a file via sftp|
 |[S3Upload](/docs/modules/s3_upload.md)|Upload files to S3|
 
-
 ## Other Modules
 |Step Class Name|Role|
 |----------|-----------|
