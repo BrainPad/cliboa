@@ -1,5 +1,8 @@
 FROM debian:stable-slim
 
+# Create dirs
+RUN mkdir -p /usr/local/cliboa
+
 # Install essential packages
 RUN apt update -y && \
     apt install -y git \
