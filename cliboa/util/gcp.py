@@ -30,10 +30,7 @@ class ServiceAccount(object):
     def auth(credentials):
         if not credentials:
             return None
-        if isinstance(credentials, dict):
-            return service_account.Credentials.from_service_account_info(credentials)
-        else:
-            return service_account.Credentials.from_service_account_file(credentials)
+        return service_account.Credentials.from_service_account_file(credentials)
 
 
 class BigQuery(object):

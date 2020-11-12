@@ -1,5 +1,5 @@
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
+# Copyright BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -14,12 +14,13 @@
 import configparser
 import os
 import re
+import tempfile
 from abc import abstractmethod
 
 from cliboa.conf import env
 from cliboa.scenario.validator import EssentialParameters, IOOutput, SqliteTableExistence  # noqa
 from cliboa.util.cache import StepArgument, StorageIO
-from cliboa.util.exception import FileNotFound
+from cliboa.util.exception import FileNotFound, InvalidParameter
 from cliboa.util.file import File
 from cliboa.util.sqlite import SqliteAdapter
 
@@ -116,6 +117,7 @@ class BaseStep(object):
         Returns an resource contents from the path if src starts with "path:",
         returns src if not
         """
+        self._logger.warning("DeprecationWarning: Will be removed in the near future")
         if src[:5].upper() == "PATH:":
             fpath = src[5:]
             if os.path.exists(fpath) is False:
@@ -123,6 +125,26 @@ class BaseStep(object):
             with open(fpath, mode="r", encoding=encoding) as f:
                 return f.read()
         return src
+
+    def _source_path_reader(self, src, encoding="utf-8"):
+        """
+        Returns an path to temporary file contains content specify in src if src is dict,
+        returns src if not
+        """
+        if src is None:
+            return src
+        if isinstance(src, dict) and "content" in src:
+            with tempfile.NamedTemporaryFile(
+                mode="w", encoding=encoding, delete=False
+            ) as fp:
+                fp.write(src["content"])
+                return fp.name
+        elif isinstance(src, dict) and "file" in src:
+            if os.path.exists(src["file"]) is False:
+                raise FileNotFound(src)
+            return src["file"]
+        else:
+            raise InvalidParameter("The parameter is invalid.")
 
     def _exception_dispatcher(self, e):
         """

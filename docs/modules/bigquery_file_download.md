@@ -6,7 +6,8 @@ Execute select query and download result as a csv file. When extract data from G
 |----------|-----------|--------|-------|-------|
 |project_id|GCP project id|Yes|None||
 |location|GCP location|Yes|None||
-|credentials|A service account .json file path or a dictionary containing service account info in Google format|Yes|None||
+|credentials.file|A service account .json file path|No|None||
+|credentials.content|A dictionary containing service account info in Google format|No|None||
 |dataset|BigQuery dataset|Yes|None||
 |tblname|BigQuery table name to insert|Yes|None||
 |bucket|Bucket of GCS to save a temporal data|Yes|None||
@@ -22,7 +23,26 @@ Execute select query and download result as a csv file. When extract data from G
   arguments:
     project_id: test_gcp
     location: asia-northeast1
-    credentials: /root/gcp_credential.json
+    credentials:
+      file: /root/gcp_credential.json
+    dataset: test_dataset
+    tblname: test_tbl
+    bucket: test
+    dest_dir: /tmp
+    filename: test.txt
+
+- step: Embed contents of credentials at scenario.yml
+  class: BigQueryFileDownload
+  io: output
+  arguments:
+    project_id: test_gcp
+    location: asia-northeast1
+    credentials:
+      content: |
+        {
+          "type": "service_account",
+          ...
+        }
     dataset: test_dataset
     tblname: test_tbl
     bucket: test

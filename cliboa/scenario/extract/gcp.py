@@ -78,6 +78,19 @@ class BigQueryRead(BaseBigQuery):
 
     def _save_to_cache(self):
         self._logger.info("Save data to on memory")
+        if isinstance(self._credentials, str):
+            self._logger.warning(
+                (
+                    "DeprecationWarning: "
+                    "In the near future, "
+                    "the `credentials` will be changed to accept only dictionary types. "
+                    "Please see more information "
+                    "https://github.com/BrainPad/cliboa/blob/master/docs/modules/bigquery_read.md"
+                )
+            )
+            key_filepath = self._credentials
+        else:
+            key_filepath = self._source_path_reader(self._credentials)
         df = pandas.read_gbq(
             query="SELECT * FROM %s.%s" % (self._dataset, self._tblname)
             if self._query is None
@@ -85,7 +98,7 @@ class BigQueryRead(BaseBigQuery):
             dialect="standard",
             location=self._location,
             project_id=self._project_id,
-            credentials=ServiceAccount.auth(self._credentials),
+            credentials=ServiceAccount.auth(key_filepath),
         )
         ObjectStore.put(self._key, df)
 
@@ -97,7 +110,20 @@ class BigQueryRead(BaseBigQuery):
         path = "%s-%s" % (StringUtil().random_str(self._RANDOM_STR_LENGTH), ymd_hms,)
         prefix = "%s/%s/%s" % (self._dataset, self._tblname, path)
 
-        gbq_client = BigQuery.get_bigquery_client(self._credentials)
+        if isinstance(self._credentials, str):
+            self._logger.warning(
+                (
+                    "DeprecationWarning: "
+                    "In the near future, "
+                    "the `credentials` will be changed to accept only dictionary types. "
+                    "Please see more information "
+                    "https://github.com/BrainPad/cliboa/blob/master/docs/modules/bigquery_read.md"
+                )
+            )
+            key_filepath = self._credentials
+        else:
+            key_filepath = self._source_path_reader(self._credentials)
+        gbq_client = BigQuery.get_bigquery_client(key_filepath)
         if self._dataset and self._tblname:
             table_ref = gbq_client.dataset(self._dataset).table(self._tblname)
         elif self._dataset and not self._tblname:
@@ -108,8 +134,7 @@ class BigQueryRead(BaseBigQuery):
                 + ymd_hms
             )
             table_ref = gbq_client.dataset(self._dataset).table(tmp_tbl)
-
-        gcs_client = Gcs.get_gcs_client(self._credentials)
+        gcs_client = Gcs.get_gcs_client(key_filepath)
         gcs_bucket = gcs_client.bucket(self._bucket)
 
         # extract job config settings
@@ -195,12 +220,23 @@ class BigQueryReadCache(BaseBigQuery):
         valid = EssentialParameters(self.__class__.__name__, [self._key])
         valid()
 
+        if isinstance(self._credentials, str):
+            self._logger.warning(
+                (
+                    "DeprecationWarning: "
+                    "In the near future, "
+                    "the `credentials` will be changed to accept only dictionary types. "
+                )
+            )
+            key_filepath = self._credentials
+        else:
+            key_filepath = self._source_path_reader(self._credentials)
         df = pandas.read_gbq(
             query=self._get_query(),
             dialect="standard",
             location=self._location,
             project_id=self._project_id,
-            credentials=ServiceAccount.auth(self._credentials),
+            credentials=ServiceAccount.auth(key_filepath),
         )
         ObjectStore.put(self._key, df)
 
@@ -239,10 +275,21 @@ class BigQueryFileDownload(BaseBigQuery):
 
         os.makedirs(self._dest_dir, exist_ok=True)
 
-        gbq_client = BigQuery.get_bigquery_client(self._credentials)
+        if isinstance(self._credentials, str):
+            self._logger.warning(
+                (
+                    "DeprecationWarning: "
+                    "In the near future, "
+                    "the `credentials` will be changed to accept only dictionary types. "
+                )
+            )
+            key_filepath = self._credentials
+        else:
+            key_filepath = self._source_path_reader(self._credentials)
+        gbq_client = BigQuery.get_bigquery_client(key_filepath)
         gbq_ref = gbq_client.dataset(self._dataset).table(self._tblname)
 
-        gcs_client = Gcs.get_gcs_client(self._credentials)
+        gcs_client = Gcs.get_gcs_client(key_filepath)
         gcs_bucket = gcs_client.bucket(self._bucket)
 
         ymd_hms = datetime.now().strftime("%Y%m%d%H%M%S%f")
@@ -310,7 +357,20 @@ class GcsDownload(BaseGcs):
         valid = EssentialParameters(self.__class__.__name__, [self._src_pattern])
         valid()
 
-        client = Gcs.get_gcs_client(self._credentials)
+        if isinstance(self._credentials, str):
+            self._logger.warning(
+                (
+                    "DeprecationWarning: "
+                    "In the near future, "
+                    "the `credentials` will be changed to accept only dictionary types. "
+                    "Please see more information "
+                    "https://github.com/BrainPad/cliboa/blob/master/docs/modules/gcs_download.md"
+                )
+            )
+            key_filepath = self._credentials
+        else:
+            key_filepath = self._source_path_reader(self._credentials)
+        client = Gcs.get_gcs_client(key_filepath)
         bucket = client.bucket(self._bucket)
         dl_files = []
         for blob in client.list_blobs(
@@ -375,7 +435,20 @@ class FirestoreDocumentDownload(BaseFirestore):
         )
         valid()
 
-        firestore_client = Firestore.get_firestore_client(self._credentials)
+        if isinstance(self._credentials, str):
+            self._logger.warning(
+                (
+                    "DeprecationWarning: "
+                    "In the near future, "
+                    "the `credentials` will be changed to accept only dictionary types. "
+                    "Please see more information "
+                    "https://github.com/BrainPad/cliboa/blob/master/docs/modules/firestore_document_download.md"  # noqa
+                )
+            )
+            key_filepath = self._credentials
+        else:
+            key_filepath = self._source_path_reader(self._credentials)
+        firestore_client = Firestore.get_firestore_client(key_filepath)
         ref = firestore_client.document(self._collection, self._document)
         doc = ref.get()
 
