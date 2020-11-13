@@ -125,7 +125,7 @@ class FtpUtil(object):
         Connect to ftp server and execute defined function.
 
         Args:
-            func (fucntion): Callback function after connected to the ftp server.
+            func (function): Callback function after connected to the ftp server.
             kwargs (dict): arguments
                            key name 'ftp' is a reserved word. do NOT use it.
 
@@ -192,7 +192,7 @@ def clear_file_func(**kwargs):
         try:
             kwargs["ftp"].delete(src)
         except Exception:
-            # ignore erros. Directory cannot be deleted by ftp#delete.
+            # ignore errors. Directory cannot be deleted by ftp#delete.
             pass
 
 

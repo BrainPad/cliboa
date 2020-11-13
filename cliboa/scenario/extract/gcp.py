@@ -262,7 +262,7 @@ class BigQueryFileDownload(BaseBigQuery):
         # job config settings
         job_config = bigquery.ExtractJobConfig()
         job_config.compression = bigquery.Compression.GZIP
-        job_config.desctination_format = bigquery.DestinationFormat.CSV
+        job_config.destination_format = bigquery.DestinationFormat.CSV
 
         # Execute query.
         job = gbq_client.extract_table(
@@ -355,7 +355,7 @@ class GcsDownloadFileDelete(BaseGcs):
             self._logger.info("No files to delete.")
 
 
-class FirestoreDownloadDocument(BaseFirestore):
+class FirestoreDocumentDownload(BaseFirestore):
     """
     Download a document from Firestore
     """

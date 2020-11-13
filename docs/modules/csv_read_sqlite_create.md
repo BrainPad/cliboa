@@ -1,5 +1,5 @@
 # SqliteCreation
-Read content from a file and insert insert it into a table of sqlite.
+Read content from a file and insert it into a table of sqlite.
 
 # Parameters
 |Parameters|Explanation|Required|Default|Remarks|

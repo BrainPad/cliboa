@@ -166,7 +166,7 @@ class BaseSqlite(BaseStep):
 
     def _close_database(self):
         """
-        Disconnect sqlite database (execute vacuume if necessary)
+        Disconnect sqlite database (execute vacuum if necessary)
         """
         self._sqlite_adptr.close()
         if self._vacuum is True:

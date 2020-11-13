@@ -433,10 +433,10 @@ class TestCsvConcat(TestFileTransform):
 
             with open(os.path.join(self._data_dir, "test.csv")) as t:
                 reader = csv.reader(t)
-                concated_list = [row for row in reader]
+                concatenated_list = [row for row in reader]
         finally:
             shutil.rmtree(self._data_dir)
-        assert concated_list == [
+        assert concatenated_list == [
             ["key", "data"],
             ["c1", "001"],
             ["c2", "0.01"],
@@ -475,10 +475,10 @@ class TestCsvConcat(TestFileTransform):
 
             with open(os.path.join(self._data_dir, "test.csv")) as t:
                 reader = csv.reader(t)
-                concated_list = [row for row in reader]
+                concatenated_list = [row for row in reader]
         finally:
             shutil.rmtree(self._data_dir)
-        assert concated_list == [
+        assert concatenated_list == [
             ["key", "data"],
             ["c1", "spam"],
             ["c2", "spam"],

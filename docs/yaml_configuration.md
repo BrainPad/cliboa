@@ -18,7 +18,7 @@ It exists in project directory of an executable environment of cliboa. Can defin
 ## scenario.yml in common directory.
 It exists under common directory of an executable environment of cliboa. Can define only one.
 
-# Basic Principls 
+# Basic Principals 
 Basic principals to create scenario.yml is below.
 - Must write all as English one byte characters except for comments.
 - Must define 'scenario: ' key on top of scenario.yml

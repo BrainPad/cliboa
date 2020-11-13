@@ -19,7 +19,7 @@ scenario:
   arguments:
     dbname: test_db
     tblname: test_tbl
-    colmns:
+    columns:
       - column1
       - column2
 - step:

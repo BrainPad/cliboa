@@ -1,6 +1,5 @@
 # Change csv format
 Create new csv(tsv) file with given parameters.
-Warning: Versionβ
 
 # Parameters
 |Parameters|Explanation|Required|Default|Remarks|
@@ -19,8 +18,8 @@ Warning: Versionβ
 # Examples
 ```
 scenario:
-- step: csv convert
-  class: CsvConvert
+- step: format change
+  class: CsvFormatChange
   arguments:
     src_dir: /root
     src_pattern: foo\.csv

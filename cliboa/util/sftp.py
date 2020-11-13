@@ -130,7 +130,7 @@ class Sftp(object):
         Upload file to sftp server
 
         Args:
-            src (str): loacal file to upload
+            src (str): local file to upload
             dest (str): destination sftp path to upload
             endfile_suffix=None (str): Places file with original file name
                             + "endfile_suffix" when upload completed
@@ -145,11 +145,11 @@ class Sftp(object):
         Do processing after connected to sftp server
 
         Args:
-            func (fucntion): function which processing is written.
+            func (function): function which processing is written.
             kwargs (dict): arguments when function is executed
 
         Raises:
-            ValueError: argumets are empty
+            ValueError: arguments are empty
             IOError: failed to get data
         """
 
@@ -223,7 +223,7 @@ def list_file_func(**kwargs):
 
 def clear_file_func(**kwargs):
     """
-    All the files which match to pattenr.
+    All the files which match to pattern.
     """
     files = []
     for f in kwargs["sftp"].listdir(kwargs["dir"]):
