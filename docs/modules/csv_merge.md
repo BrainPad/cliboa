@@ -4,11 +4,11 @@ Merge two csv files to one.
 # Parameters
 |Parameters|Explanation|Required|Default|Remarks|
 |----------|-----------|--------|-------|-------|
-|src_dir|Directory of source to convert|Yes|None||
+|src_dir|Directory of source to merge|Yes|None||
 |src1_pattern|File pattern of source to merge. Regexp is available.|Yes|None||
 |src2_pattern|File pattern of source to merge. Regexp is available.|Yes|None||
-|dest_dir|Destination directory to convert|Yes|None|
-|dest_pattern|Destination of file pattern to convert|Yes|None||
+|dest_dir|Destination directory to merge|Yes|None|
+|dest_pattern|Destination of file pattern to merge|Yes|None||
 |encoding|Character encoding when read and write|No|utf-8||
 
 # Examples
@@ -18,8 +18,8 @@ scenario:
   class: CsvMerge
   arguments:
     src_dir: /root
-    src_pattern1: test1.csv
-    src_pattern2: test2.csv
+    src1_pattern: test1.csv
+    src2_pattern: test2.csv
     dest_dir: /tmp
     dest_pattern: test_merge.csv
 ```

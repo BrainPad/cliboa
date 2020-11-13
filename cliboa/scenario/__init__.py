@@ -21,7 +21,7 @@ from .extract.gcp import (
     BigQueryFileDownload,
     BigQueryRead,
     BigQueryReadCache,
-    FirestoreDownloadDocument,
+    FirestoreDocumentDownload,
     GcsDownload,
     GcsDownloadFileDelete,
 )
@@ -49,6 +49,7 @@ from .transform.csv import (
     CsvHeaderConvert,
     CsvMerge,
     CsvConcat,
+    CsvFormatChange,
 )
 from .transform.file import (
     DateFormatConvert,

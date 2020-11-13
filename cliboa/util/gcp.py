@@ -81,7 +81,7 @@ class BigQuery(object):
     @classmethod
     def get_destination_format(cls, ext):
         """
-        Ouptut file format
+        Output file format
         Args:
             ext: destination file extention
         """

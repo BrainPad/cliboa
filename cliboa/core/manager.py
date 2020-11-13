@@ -113,7 +113,7 @@ class YamlScenarioManager(ScenarioManager):
 
     def __valid_essential_files(self):
         """
-        Scenairo file validation
+        Scenario file validation
         """
         valid_instance = ScenarioFileExistence()
         valid_instance(self._pj_scenario_file)
@@ -280,7 +280,7 @@ class YamlScenarioManager(ScenarioManager):
         Create an instance to be injected
         Args:
             step class attributes
-        Retrurn:
+        Return:
             DI attribute names, DI instances
         """
         di_keys = []

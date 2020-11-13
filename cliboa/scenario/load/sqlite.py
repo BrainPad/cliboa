@@ -22,7 +22,7 @@ from cliboa.util.exception import FileNotFound, SqliteInvalid
 
 class SqliteTransaction(BaseSqlite):
     """
-    Base class of sqlite transacdtion
+    Base class of sqlite transaction
     """
 
     def __init__(self):
@@ -134,7 +134,7 @@ class SqliteCreation(SqliteTransaction):
 
     def __get_column_def(self):
         """
-        Get table column defenition
+        Get table column definition
         """
         if self._columns:
             return self._columns

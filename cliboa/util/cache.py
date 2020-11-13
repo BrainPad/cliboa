@@ -114,7 +114,7 @@ class StorageIO(object):
 
     def save(self, v):
         """
-        Save one column of input data to storage as a tmporal file.
+        Save one column of input data to storage as a temporal file.
         """
         with open(self.__cache_file, "a", encoding="utf-8") as f:
             f.write(str(v) + "\n")

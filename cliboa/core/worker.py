@@ -42,21 +42,21 @@ class ScenarioWorker(object):
 
     def _before_scenario(self):
         """
-        Notify to registerd listener
+        Notify to registered listener
         """
         for l in self._listeners:
             l.before_scenario(self)
 
     def _after_scenario(self):
         """
-        Notify to registerd listener
+        Notify to registered listener
         """
         for l in self._listeners:
             l.after_scenario(self)
 
-    def regist_listeners(self, listener):
+    def register_listeners(self, listener):
         """
-        Regist multiple listeners to activate
+        Register multiple listeners to activate
         """
         self._listeners.append(listener)
 

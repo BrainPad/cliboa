@@ -20,14 +20,14 @@ from cliboa.util.gcp import BigQuery, Gcs, ServiceAccount
 
 
 class TestServiceAccount(TestCase):
-    @pytest.mark.skip(reason="service account connection is neccesary")
+    @pytest.mark.skip(reason="service account connection is necessary")
     def test_auth_no_credentials(self):
         assert ServiceAccount.auth(None) is None
 
 
 class TestBigQuery(TestCase):
-    @pytest.mark.skip(reason="bigquery connection is neccesary")
-    def test_get_bigquery_client_no_credentialas(self):
+    @pytest.mark.skip(reason="bigquery connection is necessary")
+    def test_get_bigquery_client_no_credentials(self):
         assert BigQuery.get_bigquery_client(None) == bigquery.Client()
 
     def test_get_extract_job_config_with_header(self):
@@ -61,6 +61,6 @@ class TestBigQuery(TestCase):
 
 
 class TestGcs(object):
-    @pytest.mark.skip(reason="gcs connection is neccesary")
+    @pytest.mark.skip(reason="gcs connection is necessary")
     def test_get_gcs_client_no_credentials(self):
         assert Gcs.get_gcs_client(None) == storage.Client()

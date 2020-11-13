@@ -23,7 +23,7 @@ from cliboa.util.lisboa_log import LisboaLog
 
 class FormAuth(object):
     """
-    form authenticadtion
+    form authentication
     """
 
     def __init__(self):

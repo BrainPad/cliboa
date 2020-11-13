@@ -25,7 +25,7 @@ from cliboa.util.lisboa_log import LisboaLog
 
 class ScenarioRunner(object):
     """
-    Senario Runner
+    Scenario Runner
     """
 
     def __init__(self, cmd_args):
@@ -63,7 +63,7 @@ class ScenarioRunner(object):
         Execute scenario
         """
         worker = ScenarioWorker(self._cmd_args)
-        worker.regist_listeners(ScenarioStatusListener())
+        worker.register_listeners(ScenarioStatusListener())
         return worker.execute_scenario()
 
 

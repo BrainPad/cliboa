@@ -110,7 +110,7 @@ class DIScenarioFormat(object):
     def __call__(self):
         if not (self.__di_params):
             raise ScenarioFileInvalid(
-                "Dependeny Injection parameters are essential after %s" % self.__di_key
+                "Dependency Injection parameters are essential after %s" % self.__di_key
             )
         if not (self.__di_params.get("class")):
             raise ScenarioFileInvalid(
