@@ -5,7 +5,7 @@ Upload a file via SFTP.
 |Parameters|Explanation|Required|Default|Remarks|
 |----------|-----------|--------|-------|-------|
 |host|Host name or IP address of a sftp server.|Yes|None||
-|user|User name for authenticatation|Yes|None||
+|user|User name for authentication|Yes|None||
 |password|Password for authentication|No|None|Either password or key is required|
 |key|Path to key for authentication|No|None||
 |port|Port number of a sftp server|No|22||

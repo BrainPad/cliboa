@@ -58,7 +58,7 @@ class TestSqliteTableExistence(object):
 
     def test_table_existence_ng_with_bool(self):
         """
-        SqliteTableExistende invalid case
+        SqliteTableExistence invalid case
         """
         # create test db and insert dummy data
         os.makedirs(self.__db_dir)
@@ -76,7 +76,7 @@ class TestSqliteTableExistence(object):
 
     def test_table_existence_ok_with_bool(self):
         """
-        SqliteTableExistende invalid case
+        SqliteTableExistence invalid case
         """
         # create test db and insert dummy data
         os.makedirs(self.__db_dir)

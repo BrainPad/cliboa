@@ -23,5 +23,5 @@ scenario:
       - file2.csv
       - file3.csv
     dest_dir: /tmp
-    dest_pattern: concated_file.csv
+    dest_pattern: concatenated_file.csv
 ```

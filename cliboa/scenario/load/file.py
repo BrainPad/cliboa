@@ -49,7 +49,7 @@ class FileWrite(BaseStep):
 
 class CsvWrite(FileWrite):
     """
-    Write data fetched by io: inptu to csv file
+    Write data fetched by io: input to csv file
     """
 
     def __init__(self):

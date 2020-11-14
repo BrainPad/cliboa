@@ -15,7 +15,7 @@ Document names will be the same with the file names.
 # Examples
 ```
 - step:
-  class: FirestoreDocumentsCreate
+  class: FirestoreDocumentCreate
   arguments:
     project_id: test_gcp
     location: asia-northeast1

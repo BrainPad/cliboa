@@ -15,7 +15,7 @@
 
 class ScenarioQueue(object):
     """
-    Composition of extract, transform, load queus
+    Composition of extract, transform, load queues
     """
 
     step_queue = None

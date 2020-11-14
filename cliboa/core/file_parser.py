@@ -22,7 +22,7 @@ from cliboa.util.lisboa_log import LisboaLog
 
 class ScenarioParser(object):
     """
-    Base class of scnario file parser
+    Base class of scenario file parser
     """
 
     def __init__(self, pj_scenario_file, cmn_scenario_file):
@@ -76,7 +76,7 @@ class YamlScenarioParser(ScenarioParser):
 
     def __merge_scenario_yaml(self, pj_yaml_list, cmn_yaml_list):
         """
-        Merge project scenrio.yml and common scenairo.yml.
+        Merge project scenario.yml and common scenario.yml.
         If the same class specification exists,
         scenario.yml of projet is taken priority.
         """

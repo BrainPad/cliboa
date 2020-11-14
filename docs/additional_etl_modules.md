@@ -71,7 +71,7 @@ Should add paths of additional ETL modules in common/environment.py
 
 ## Example
 ```
-# path of modules which put in a commnon directory
+# path of modules which put in a common directory
 COMMON_CUSTOM_CLASSES = [
     '$module_name.$class_name'
 ]

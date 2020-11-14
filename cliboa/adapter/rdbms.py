@@ -45,8 +45,8 @@ class RdbmsSupport:
         e_type, e_val, _ = exc
         try:
             if e_type:
-                self._logger.error("Exeception object: %s" % e_type)
-                self._logger.error("Exeception detail: %s" % e_val)
+                self._logger.error("Exception object: %s" % e_type)
+                self._logger.error("Exception detail: %s" % e_val)
                 self._rollback()
             else:
                 self._commit()

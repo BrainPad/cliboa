@@ -254,7 +254,7 @@ class CsvConcat(FileBaseTransform):
 
 class CsvHeaderConvert(FileBaseTransform):
     """
-    Conver csv headers
+    Convert csv headers
     """
 
     def __init__(self):
