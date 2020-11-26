@@ -1,5 +1,5 @@
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
+# Copyright BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -32,6 +32,7 @@ class SftpExtract(BaseStep):
         self._user = None
         self._password = None
         self._key = None
+        self._passphrase = None
         self._timeout = 30
         self._retry_count = 3
 
@@ -58,6 +59,9 @@ class SftpExtract(BaseStep):
 
     def key(self, key):
         self._key = key
+
+    def passphrase(self, passphrase):
+        self._passphrase = passphrase
 
     def timeout(self, timeout):
         self._timeout = timeout
@@ -88,12 +92,27 @@ class SftpDownload(SftpExtract):
 
         os.makedirs(self._dest_dir, exist_ok=True)
 
+        if isinstance(self._key, str):
+            self._logger.warning(
+                (
+                    "DeprecationWarning: "
+                    "In the near future, "
+                    "the `key` will be changed to accept only dictionary types. "
+                    "Please see more information "
+                    "https://github.com/BrainPad/cliboa/blob/master/docs/modules/sftp_download.md"
+                )
+            )
+            key_filepath = self._key
+        else:
+            key_filepath = self._source_path_reader(self._key)
+
         # fetch src
         sftp = Sftp(
             self._host,
             self._user,
             self._password,
-            self._key,
+            key_filepath,
+            self._passphrase,
             self._timeout,
             self._retry_count,
             self._port,
@@ -128,12 +147,27 @@ class SftpDelete(SftpExtract):
         )
         valid()
 
+        if isinstance(self._key, str):
+            self._logger.warning(
+                (
+                    "DeprecationWarning: "
+                    "In the near future, "
+                    "the `key` will be changed to accept only dictionary types. "
+                    "Please see more information "
+                    "https://github.com/BrainPad/cliboa/blob/master/docs/modules/sftp_delete.md"
+                )
+            )
+            key_filepath = self._key
+        else:
+            key_filepath = self._source_path_reader(self._key)
+
         # remove src
         sftp = Sftp(
             self._host,
             self._user,
             self._password,
-            self._key,
+            key_filepath,
+            self._passphrase,
             self._timeout,
             self._retry_count,
             self._port,
@@ -154,11 +188,28 @@ class SftpDownloadFileDelete(SftpExtract):
 
         if files is not None and len(files) > 0:
             self._logger.info("Delete files %s" % files)
+
+            if isinstance(super().get_step_argument("key"), str):
+                self._logger.warning(
+                    (
+                        "DeprecationWarning: "
+                        "In the near future, "
+                        "the `key` will be changed to accept only dictionary types. "
+                        "Please see more information "
+                        "https://github.com/BrainPad/cliboa/blob/master/docs/modules/sftp_download_file_delete.md"  # noqa
+                    )
+                )
+                key_filepath = super().get_step_argument("key")
+            else:
+                key_filepath = self._source_path_reader(
+                    super().get_step_argument("key")
+                )
+
             sftp = Sftp(
                 super().get_step_argument("host"),
                 super().get_step_argument("user"),
                 super().get_step_argument("password"),
-                super().get_step_argument("key"),
+                key_filepath,
                 super().get_step_argument("timeout"),
                 super().get_step_argument("retry_count"),
                 super().get_step_argument("port"),

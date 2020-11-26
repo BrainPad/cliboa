@@ -1,5 +1,5 @@
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
+# Copyright BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,7 @@ class SftpBaseLoad(BaseStep):
         self._user = None
         self._password = None
         self._key = None
+        self._passphrase = None
         self._endfile_suffix = None
         self._timeout = 30
         self._retry_count = 3
@@ -58,6 +59,9 @@ class SftpBaseLoad(BaseStep):
     def key(self, key):
         self._key = key
 
+    def passphrase(self, passphrase):
+        self._passphrase = passphrase
+
     def endfile_suffix(self, endfile_suffix):
         self._endfile_suffix = endfile_suffix
 
@@ -85,11 +89,24 @@ class SftpFileLoad(SftpBaseLoad):
         )
         valid()
 
+        if isinstance(self._key, str):
+            self._logger.warning(
+                (
+                    "DeprecationWarning: "
+                    "In the near future, "
+                    "the `key` will be changed to accept only dictionary types."
+                )
+            )
+            key_filepath = self._key
+        else:
+            key_filepath = self._source_path_reader(self._key)
+
         sftp = Sftp(
             self._host,
             self._user,
             self._password,
-            self._key,
+            key_filepath,
+            self._passphrase,
             self._timeout,
             self._retry_count,
             self._port,
@@ -120,11 +137,26 @@ class SftpUpload(SftpBaseLoad):
         )
         valid()
 
+        if isinstance(self._key, str):
+            self._logger.warning(
+                (
+                    "DeprecationWarning: "
+                    "In the near future, "
+                    "the `key` will be changed to accept only dictionary types. "
+                    "Please see more information "
+                    "https://github.com/BrainPad/cliboa/blob/master/docs/modules/sftp_upload.md"
+                )
+            )
+            key_filepath = self._key
+        else:
+            key_filepath = self._source_path_reader(self._key)
+
         sftp = Sftp(
             self._host,
             self._user,
             self._password,
-            self._key,
+            key_filepath,
+            self._passphrase,
             self._timeout,
             self._retry_count,
             self._port,

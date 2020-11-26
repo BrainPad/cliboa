@@ -33,6 +33,7 @@ class Sftp(object):
         user,
         password=None,
         key=None,
+        passphrase=None,
         timeout=TIMEOUT_SEC,
         retryTimes=3,
         port=22,
@@ -45,6 +46,7 @@ class Sftp(object):
             user (str): username
             password (str): password
             key (path): private key path
+            passphrase (str): passphrase
             timeout=30 (int): timeout seconds
             retryTimes=3 (int): retry count
             port=22 (int): port number
@@ -61,6 +63,7 @@ class Sftp(object):
         self._user = user
         self._password = password
         self._key = key
+        self._passphrase = passphrase
         self._timeout = timeout
         self._retryTimes = retryTimes
         self._port = 22 if port is None else port
@@ -176,6 +179,7 @@ class Sftp(object):
                         hostname=self._host,
                         username=self._user,
                         key_filename=self._key,
+                        passphrase=self._passphrase,
                         port=self._port,
                         timeout=self._timeout,
                     )

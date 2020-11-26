@@ -1,5 +1,5 @@
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
+# Copyright BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -126,13 +126,27 @@ class BigQueryWrite(BaseBigQuery, FileWrite):
             if_exists = self._APPEND
         dest_tbl = self._dataset + "." + self._tblname
         self._logger.info("Start insert %s rows to %s" % (len(insert_rows), dest_tbl))
+
+        if isinstance(self._credentials, str):
+            self._logger.warning(
+                (
+                    "DeprecationWarning: "
+                    "In the near future, "
+                    "the `credentials` will be changed to accept only dictionary types. "
+                    "Please see more information "
+                    "https://github.com/BrainPad/cliboa/blob/master/docs/modules/bigquery_write.md"
+                )
+            )
+            key_filepath = self._credentials
+        else:
+            key_filepath = self._source_path_reader(self._credentials)
         df.to_gbq(
             dest_tbl,
             project_id=self._project_id,
             if_exists=if_exists,
             table_schema=self._table_schema,
             location=self._location,
-            credentials=ServiceAccount.auth(self._credentials),
+            credentials=ServiceAccount.auth(key_filepath),
         )
 
     def _format_insert_data(self, insert_rows):
@@ -193,6 +207,19 @@ class BigQueryCreate(BaseBigQuery):
         inserts = False
         # initial if_exists
         if_exists = self.REPLACE if self._replace is True else self.APPEND
+
+        if isinstance(self._credentials, str):
+            self._logger.warning(
+                (
+                    "DeprecationWarning: "
+                    "In the near future, "
+                    "the `credentials` will be changed to accept only dictionary types. "
+                )
+            )
+            key_filepath = self._credentials
+        else:
+            key_filepath = self._source_path_reader(self._credentials)
+
         with open(self._s.cache_file, "r", encoding="utf-8") as f:
             for i, l_str in enumerate(f):
                 l_dict = ast.literal_eval(l_str)
@@ -212,7 +239,7 @@ class BigQueryCreate(BaseBigQuery):
                         if_exists=if_exists,
                         table_schema=self._table_schema,
                         location=self._location,
-                        credentials=ServiceAccount.auth(self._credentials),
+                        credentials=ServiceAccount.auth(key_filepath),
                     )
                     cache_list.clear()
                     inserts = True
@@ -231,7 +258,7 @@ class BigQueryCreate(BaseBigQuery):
                     if_exists=if_exists,
                     table_schema=self._table_schema,
                     location=self._location,
-                    credentials=ServiceAccount.auth(self._credentials),
+                    credentials=ServiceAccount.auth(key_filepath),
                 )
         self._s.remove()
 
@@ -289,7 +316,18 @@ class GcsFileUpload(BaseGcs):
         )
         valid()
 
-        gcs_client = Gcs.get_gcs_client(self._credentials)
+        if isinstance(self._credentials, str):
+            self._logger.warning(
+                (
+                    "DeprecationWarning: "
+                    "In the near future, "
+                    "the `credentials` will be changed to accept only dictionary types. "
+                )
+            )
+            key_filepath = self._credentials
+        else:
+            key_filepath = self._source_path_reader(self._credentials)
+        gcs_client = Gcs.get_gcs_client(key_filepath)
         bucket = gcs_client.bucket(self._bucket)
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self._logger.info("Upload files %s" % files)
@@ -328,7 +366,20 @@ class GcsUpload(BaseGcs):
         )
         valid()
 
-        gcs_client = Gcs.get_gcs_client(self._credentials)
+        if isinstance(self._credentials, str):
+            self._logger.warning(
+                (
+                    "DeprecationWarning: "
+                    "In the near future, "
+                    "the `credentials` will be changed to accept only dictionary types. "
+                    "Please see more information "
+                    "https://github.com/BrainPad/cliboa/blob/master/docs/modules/gcs_upload.md"
+                )
+            )
+            key_filepath = self._credentials
+        else:
+            key_filepath = self._source_path_reader(self._credentials)
+        gcs_client = Gcs.get_gcs_client(key_filepath)
         bucket = gcs_client.bucket(self._bucket)
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self._logger.info("Upload files %s" % files)
@@ -412,13 +463,25 @@ class CsvReadBigQueryCreate(BaseBigQuery, FileWrite):
             if_exists = self.APPEND
         dest_tbl = self._dataset + "." + self._tblname
         self._logger.info("Start insert %s rows to %s" % (len(insert_rows), dest_tbl))
+        if isinstance(self._credentials, str):
+            self._logger.warning(
+                (
+                    "DeprecationWarning: "
+                    "In the near future, "
+                    "the `credentials` will be changed to accept only dictionary types. "
+                )
+            )
+            key_filepath = self._credentials
+        else:
+            key_filepath = self._source_path_reader(self._credentials)
+
         df.to_gbq(
             dest_tbl,
             project_id=self._project_id,
             if_exists=if_exists,
             table_schema=self._table_schema,
             location=self._location,
-            credentials=ServiceAccount.auth(self._credentials),
+            credentials=ServiceAccount.auth(key_filepath),
         )
 
     def __format_insert_data(self, insert_rows):
@@ -474,7 +537,20 @@ class FirestoreDocumentCreate(BaseFirestore):
         if len(files) == 0:
             raise FileNotFound("No files are found.")
 
-        firestore_client = Firestore.get_firestore_client(self._credentials)
+        if isinstance(self._credentials, str):
+            self._logger.warning(
+                (
+                    "DeprecationWarning: "
+                    "In the near future, "
+                    "the `credentials` will be changed to accept only dictionary types. "
+                    "Please see more information "
+                    "https://github.com/BrainPad/cliboa/blob/master/docs/modules/firestore_document_create.md"  # noqa
+                )
+            )
+            key_filepath = self._credentials
+        else:
+            key_filepath = self._source_path_reader(self._credentials)
+        firestore_client = Firestore.get_firestore_client(key_filepath)
 
         for file in files:
             with open(file) as f:

@@ -1,5 +1,5 @@
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
+# Copyright BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -12,6 +12,7 @@
 # all copies or substantial portions of the Software.
 #
 import os
+import shutil
 import sys
 from unittest import TestCase
 
@@ -31,6 +32,7 @@ class TestBase(TestCase):
         cmd_parser = CommandArgumentParser()
         self._cmd_args = cmd_parser.parse()
         self._log_file = os.path.join(env.BASE_DIR, "logs", "app.log")
+        self._data_dir = os.path.join(env.BASE_DIR, "data")
         runner = ScenarioRunner(self._cmd_args)
         runner.add_system_path()
 
@@ -74,6 +76,45 @@ class TestBase(TestCase):
                     masked_secret_key = True
         self.assertTrue(masked_access_key)
         self.assertTrue(masked_secret_key)
+
+    def test_source_path_reader_with_none(self):
+        instance = SampleCustomStep()
+        Helper.set_property(
+            instance, "logger", LisboaLog.get_logger(instance.__class__.__name__)
+        )
+        ret = instance._source_path_reader(None)
+
+        assert ret is None
+
+    def test_source_path_reader_with_path(self):
+        try:
+            os.makedirs(self._data_dir)
+            dummy_pass = os.path.join(self._data_dir, "id_rsa")
+            with open(dummy_pass, "w") as f:
+                f.write("test")
+
+            instance = SampleCustomStep()
+            Helper.set_property(
+                instance, "logger", LisboaLog.get_logger(instance.__class__.__name__)
+            )
+
+            ret = instance._source_path_reader({"file": dummy_pass})
+            assert ret == dummy_pass
+            with open(ret, "r") as fp:
+                actual = fp.read()
+                assert "test" == actual
+        finally:
+            shutil.rmtree(self._data_dir)
+
+    def test_source_path_reader_with_content(self):
+        instance = SampleCustomStep()
+        Helper.set_property(
+            instance, "logger", LisboaLog.get_logger(instance.__class__.__name__)
+        )
+        ret = instance._source_path_reader({"content": "test"})
+        with open(ret, "r") as fp:
+            actual = fp.read()
+            assert "test" == actual
 
 
 class TestBaseSqlite(object):

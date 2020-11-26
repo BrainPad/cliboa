@@ -81,7 +81,20 @@ class BaseRdbmsRead(BaseRdbms):
             with open(
                 self._dest_path, mode="w", encoding=self._encoding, newline=""
             ) as f:
-                cur = ps.select(super()._property_path_reader(self._query))
+                if isinstance(self._query, str):
+                    self._logger.warning(
+                        (
+                            "DeprecationWarning: "
+                            "In the near future, "
+                            "the `query` will be changed to accept only dictionary types. "
+                        )
+                    )
+                    query = super()._property_path_reader(self._query)
+                else:
+                    query_filepath = self._source_path_reader(self._query)
+                    with open(query_filepath, "r") as qf:
+                        query = qf.read()
+                cur = ps.select(query)
                 writer = None
                 for i, row in enumerate(cur):
                     if i == 0:
