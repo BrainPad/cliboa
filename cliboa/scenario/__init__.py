@@ -49,7 +49,8 @@ from .transform.csv import (
     CsvConcat,
     CsvFormatChange,
     CsvHeaderConvert,
-    CsvMerge
+    CsvMerge,
+    CsvConvert
 )
 from .transform.file import (
     DateFormatConvert,
