@@ -33,6 +33,7 @@ class SftpExtract(BaseStep):
         self._password = None
         self._key = None
         self._passphrase = None
+        self._endfile_suffix = None
         self._timeout = 30
         self._retry_count = 3
 
@@ -62,6 +63,9 @@ class SftpExtract(BaseStep):
 
     def passphrase(self, passphrase):
         self._passphrase = passphrase
+
+    def endfile_suffix(self, endfile_suffix):
+        self._endfile_suffix = endfile_suffix
 
     def timeout(self, timeout):
         self._timeout = timeout
@@ -118,7 +122,9 @@ class SftpDownload(SftpExtract):
             self._port,
         )
         files = sftp.list_files(
-            self._src_dir, self._dest_dir, re.compile(self._src_pattern)
+            self._src_dir, self._dest_dir,
+            re.compile(self._src_pattern),
+            self._endfile_suffix,
         )
 
         if self._quit is True and len(files) == 0:

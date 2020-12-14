@@ -12,6 +12,7 @@ Download files from S3.
 |delimiter|Delimiter, used with prefix to emulate hierarchy|No|/||
 |src_pattern|File pattern of source to download. Regexp is available|Yes|None||
 |dest_dir|Destination directory to download|No|None||
+|endfile_suffix|Download a file only if "filename + endfile_suffix" is exists|No|None||
 
 # Examples
 ```
