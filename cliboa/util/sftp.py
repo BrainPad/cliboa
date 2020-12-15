@@ -69,7 +69,7 @@ class Sftp(object):
         self._port = 22 if port is None else port
         self._logger = logging.getLogger(__name__)
 
-    def list_files(self, dir, dest, pattern):
+    def list_files(self, dir, dest, pattern, endfile_suffix=None):
         """
         Fetch all the files in specified directory
 
@@ -77,14 +77,15 @@ class Sftp(object):
             dir (str): fetch target directory
             dest (str): local directory to save files
             pattern (object): fetch file pattern
-
+            endfile_suffix=None (str): Download a file only if "filename + endfile_suffix" is exists
         Returns:
             list: downloaded file names
 
         Raises:
             IOError: failed to get data
         """
-        return self._execute(list_file_func, dir=dir, dest=dest, pattern=pattern)
+        return self._execute(
+            list_file_func, dir=dir, dest=dest, pattern=pattern, endfile_suffix=endfile_suffix)
 
     def clear_files(self, dir, pattern):
         """
@@ -213,9 +214,13 @@ def list_file_func(**kwargs):
     """
     Get all the files which matches to pattern
     """
+    endfile_suffix = kwargs["endfile_suffix"]
+    targets = kwargs["sftp"].listdir(kwargs["dir"])
     files = []
-    for f in kwargs["sftp"].listdir(kwargs["dir"]):
+    for f in targets:
         if kwargs["pattern"].fullmatch(f) is None:
+            continue
+        if endfile_suffix and not f + endfile_suffix in targets:
             continue
 
         fpath = os.path.join(kwargs["dir"], f)
