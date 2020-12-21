@@ -220,8 +220,15 @@ class SftpDownloadFileDelete(SftpExtract):
                 super().get_step_argument("retry_count"),
                 super().get_step_argument("port"),
             )
+
+            endfile_suffix = super().get_step_argument("endfile_suffix")
             for file in files:
                 sftp.remove_specific_file(super().get_step_argument("src_dir"), file)
                 self._logger.info("%s is successfully deleted." % file)
+
+                if endfile_suffix:
+                    sftp.remove_specific_file(
+                        super().get_step_argument("src_dir"), file + endfile_suffix)
+                    self._logger.info("%s is successfully deleted." % (file + endfile_suffix))
         else:
             self._logger.info("No files to delete.")
