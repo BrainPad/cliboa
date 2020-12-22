@@ -276,7 +276,25 @@ def put_file_func(**kwargs):
         kwargs["sftp"].mkdir(dirname)
 
     tmp_dest = os.path.join(dirname, "." + os.path.basename(kwargs["dest"]))
-    kwargs["sftp"].put(kwargs["src"], tmp_dest)
+
+    _logger = logging.getLogger(__name__)
+
+    if _logger.isEnabledFor(logging.DEBUG):
+        def cb(sent, size):
+            _logger.debug('Transfer %s / %s' % (sent, size))
+
+        file_size = os.stat(kwargs['src']).st_size
+        with open(kwargs['src'], "rb") as fl:
+            _logger.debug('Open src file')
+            with kwargs['sftp'].file(tmp_dest, "wb") as fr:
+                _logger.debug('Open dest file')
+                fr.set_pipelined(True)
+                _transfer_with_callback(
+                    reader=fl, writer=fr, file_size=file_size, callback=cb
+                )
+            _logger.debug('End')
+    else:
+        kwargs["sftp"].put(kwargs["src"], tmp_dest)
 
     # Same file name is removed in advance, if exists
     try:
@@ -294,6 +312,26 @@ def put_file_func(**kwargs):
         open(endfile, mode="w").close()
         kwargs["sftp"].put(endfile, kwargs["dest"] + endfile_suffix)
         os.remove(endfile)
+
+
+def _transfer_with_callback(reader, writer, file_size, callback):
+    """
+    For Debug
+    """
+    size = 0
+    _logger = logging.getLogger(__name__)
+    _logger.debug('Call back method')
+    while True:
+        data = reader.read(32768)
+        writer.write(data)
+        size += len(data)
+        if len(data) == 0:
+            _logger.debug('No data')
+            break
+        if callback is not None:
+            callback(size, file_size)
+    _logger.debug('Size %s' % size)
+    return size
 
 
 def _is_file(sftp, path):
