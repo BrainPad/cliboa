@@ -33,6 +33,7 @@ class Sftp(object):
         user,
         password=None,
         key=None,
+        passphrase=None,
         timeout=TIMEOUT_SEC,
         retryTimes=3,
         port=22,
@@ -45,6 +46,7 @@ class Sftp(object):
             user (str): username
             password (str): password
             key (path): private key path
+            passphrase (str): passphrase
             timeout=30 (int): timeout seconds
             retryTimes=3 (int): retry count
             port=22 (int): port number
@@ -61,12 +63,13 @@ class Sftp(object):
         self._user = user
         self._password = password
         self._key = key
+        self._passphrase = passphrase
         self._timeout = timeout
         self._retryTimes = retryTimes
         self._port = 22 if port is None else port
         self._logger = logging.getLogger(__name__)
 
-    def list_files(self, dir, dest, pattern):
+    def list_files(self, dir, dest, pattern, endfile_suffix=None):
         """
         Fetch all the files in specified directory
 
@@ -74,14 +77,15 @@ class Sftp(object):
             dir (str): fetch target directory
             dest (str): local directory to save files
             pattern (object): fetch file pattern
-
+            endfile_suffix=None (str): Download a file only if "filename + endfile_suffix" is exists
         Returns:
             list: downloaded file names
 
         Raises:
             IOError: failed to get data
         """
-        return self._execute(list_file_func, dir=dir, dest=dest, pattern=pattern)
+        return self._execute(
+            list_file_func, dir=dir, dest=dest, pattern=pattern, endfile_suffix=endfile_suffix)
 
     def clear_files(self, dir, pattern):
         """
@@ -176,6 +180,7 @@ class Sftp(object):
                         hostname=self._host,
                         username=self._user,
                         key_filename=self._key,
+                        passphrase=self._passphrase,
                         port=self._port,
                         timeout=self._timeout,
                     )
@@ -209,9 +214,13 @@ def list_file_func(**kwargs):
     """
     Get all the files which matches to pattern
     """
+    endfile_suffix = kwargs["endfile_suffix"]
+    targets = kwargs["sftp"].listdir(kwargs["dir"])
     files = []
-    for f in kwargs["sftp"].listdir(kwargs["dir"]):
+    for f in targets:
         if kwargs["pattern"].fullmatch(f) is None:
+            continue
+        if endfile_suffix and not f + endfile_suffix in targets:
             continue
 
         fpath = os.path.join(kwargs["dir"], f)
@@ -267,7 +276,25 @@ def put_file_func(**kwargs):
         kwargs["sftp"].mkdir(dirname)
 
     tmp_dest = os.path.join(dirname, "." + os.path.basename(kwargs["dest"]))
-    kwargs["sftp"].put(kwargs["src"], tmp_dest)
+
+    _logger = logging.getLogger(__name__)
+
+    if _logger.isEnabledFor(logging.DEBUG):
+        def cb(sent, size):
+            _logger.debug('Transfer %s / %s' % (sent, size))
+
+        file_size = os.stat(kwargs['src']).st_size
+        with open(kwargs['src'], "rb") as fl:
+            _logger.debug('Open src file')
+            with kwargs['sftp'].file(tmp_dest, "wb") as fr:
+                _logger.debug('Open dest file')
+                fr.set_pipelined(True)
+                _transfer_with_callback(
+                    reader=fl, writer=fr, file_size=file_size, callback=cb
+                )
+            _logger.debug('End')
+    else:
+        kwargs["sftp"].put(kwargs["src"], tmp_dest)
 
     # Same file name is removed in advance, if exists
     try:
@@ -285,6 +312,26 @@ def put_file_func(**kwargs):
         open(endfile, mode="w").close()
         kwargs["sftp"].put(endfile, kwargs["dest"] + endfile_suffix)
         os.remove(endfile)
+
+
+def _transfer_with_callback(reader, writer, file_size, callback):
+    """
+    For Debug
+    """
+    size = 0
+    _logger = logging.getLogger(__name__)
+    _logger.debug('Call back method')
+    while True:
+        data = reader.read(32768)
+        writer.write(data)
+        size += len(data)
+        if len(data) == 0:
+            _logger.debug('No data')
+            break
+        if callback is not None:
+            callback(size, file_size)
+    _logger.debug('Size %s' % size)
+    return size
 
 
 def _is_file(sftp, path):
