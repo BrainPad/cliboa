@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
+# Copyright BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -26,18 +26,16 @@ def read(filename):
 
 setup(
     name="cliboa",
-    version="1.3.6beta-stable",
+    version="1.3.6rc",
     description="application framework for ETL(ELT) processing",
-    # long_description=read("README.md"),
-    # long_description_content_type='text/markdown',
+    long_description=read("README.md"),
+    long_description_content_type='text/markdown',
     url="https://github.com/BrainPad/cliboa",  # Optional
     author="BrainPad",
     # author_email='brainpad.co.jp',
     classifiers=[
         # How mature is this project? Common values are
-        #   3 - Alpha
         #   4 - Beta
-        #   5 - Production/Stable
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "Topic :: Software Development :: Build Tools",
