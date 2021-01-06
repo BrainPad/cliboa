@@ -19,7 +19,13 @@ from glob import glob
 import pytest
 
 from cliboa.conf import env
-from cliboa.scenario.transform.csv import CsvColumnExtract, CsvConcat, CsvHeaderConvert, CsvMerge
+from cliboa.scenario.transform.csv import (
+    CsvColumnExtract,
+    CsvConcat,
+    CsvConvert,
+    CsvHeaderConvert,
+    CsvMerge
+)
 from cliboa.util.exception import InvalidCount, InvalidParameter
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
@@ -507,3 +513,62 @@ class TestCsvConcat(TestFileTransform):
         assert "Cannot specify both 'src_pattern' and 'src_filenames'." in str(
             execinfo.value
         )
+
+
+class TestCsvConvert(TestFileTransform):
+    def test_convert_header(self):
+        try:
+            # create test file
+            csv_list = [["key", "data"], ["1", "spam"], ["2", "spam"], ["3", "spam"]]
+            os.makedirs(self._data_dir, exist_ok=True)
+            test_csv = os.path.join(self._data_dir, "test.csv")
+            with open(test_csv, "w") as t:
+                writer = csv.writer(t)
+                writer.writerows(csv_list)
+
+            # set the essential attributes
+            instance = CsvConvert()
+            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "src_dir", self._data_dir)
+            Helper.set_property(instance, "src_pattern", r"test\.csv")
+            Helper.set_property(
+                instance, "headers", [{"key": "new_key"}, {"data": "new_data"}]
+            )
+            instance.execute()
+
+            with open(test_csv, "r") as t:
+                reader = csv.reader(t)
+                line = next(reader)
+        finally:
+            shutil.rmtree(self._data_dir)
+        assert line == ["new_key", "new_data"]
+
+    def test_convert_entire(self):
+        try:
+            # create test file
+            csv_list = [["key", "data"], ["1", "spam"], ["2", "spam"], ["3", "spam"]]
+            os.makedirs(self._data_dir, exist_ok=True)
+            test_csv = os.path.join(self._data_dir, "test.csv")
+            with open(test_csv, "w") as t:
+                writer = csv.writer(t)
+                writer.writerows(csv_list)
+
+            # set the essential attributes
+            instance = CsvConvert()
+            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "src_dir", self._data_dir)
+            Helper.set_property(instance, "src_pattern", r"test\.csv")
+            Helper.set_property(instance, "headers", [{"key": "new_key"}])
+            Helper.set_property(instance, "quote", "QUOTE_ALL")
+            Helper.set_property(instance, "after_format", "tsv")
+            instance.execute()
+
+            with open(os.path.join(self._data_dir, "test.tsv"), "r") as t:
+                for i in range(len(csv_list)):
+                    line = t.readline()
+                    if i == 0:
+                        assert line == '"new_key"\t"data"\n'
+                    else:
+                        assert line == '"%s"\t"%s"\n' % (csv_list[i][0], csv_list[i][1])
+        finally:
+            shutil.rmtree(self._data_dir)
