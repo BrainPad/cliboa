@@ -63,7 +63,7 @@ class File(object):
             for file in files:
                 if r.fullmatch(file):
                     target_files.append(os.path.join(dir, file))
-        return target_files
+        return sorted(target_files)
 
     def convert_encoding(self, src, dest, encoding_from, encoding_to):
         """
