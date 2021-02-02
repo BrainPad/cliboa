@@ -19,7 +19,10 @@ import os
 class Csv(object):
     @staticmethod
     def extract_columns_with_names(
-        input_file, output_file, remain_column_names, enc="utf-8",
+        input_file,
+        output_file,
+        remain_column_names,
+        enc="utf-8",
     ):
         """
         Extract only the necessary columns from a CSV file and output a new CSV
@@ -28,7 +31,7 @@ class Csv(object):
             input_file: Input csv file name
             output_file: Output csv file name
             remain_column_names: Columns which remain
-            enc: Encording
+            enc: Encoding
         """
         with codecs.open(input_file, mode="r", encoding=enc) as in_f, codecs.open(
             output_file + ".tmp", mode="w", encoding=enc
@@ -56,7 +59,7 @@ class Csv(object):
             input_file: Input csv file name
             output_file: Output csv file name
             remain_column_numbers: Column numbers which remain
-            enc: Encording
+            enc: Encoding
         """
         with codecs.open(input_file, mode="r", encoding=enc) as in_f, codecs.open(
             output_file + ".tmp", mode="w", encoding=enc
@@ -73,3 +76,14 @@ class Csv(object):
             out_f.flush()
         os.remove(input_file)
         os.rename(output_file + ".tmp", input_file)
+
+    @staticmethod
+    def get_column_names(src, enc="utf-8"):
+        """
+        Returns csv column names
+        """
+        columns = []
+        with open(src, "r", encoding=enc) as f:
+            reader = csv.DictReader(f)
+            columns = reader.fieldnames
+        return columns

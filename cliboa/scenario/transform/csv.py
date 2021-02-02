@@ -452,3 +452,137 @@ class CsvFormatChange(FileBaseTransform):
             raise CliboaException(
                 "Unknown quote. One of the followings are allowd [QUOTE_ALL, QUOTE_MINIMAL, QUOTE_NONNUMERIC, QUOTE_NONE]"  # noqa
             )
+
+
+class CsvConvert(FileBaseTransform):
+    """
+    Change csv format
+    """
+    def __init__(self):
+        super().__init__()
+        self._headers = []
+        self._before_format = "csv"
+        self._before_enc = self._encoding
+        self._after_format = None
+        self._after_enc = None
+        self._after_nl = "LF"
+        self._quote = "QUOTE_MINIMAL"
+
+    def headers(self, headers):
+        self._headers = headers
+
+    def before_format(self, before_format):
+        self._before_format = before_format
+
+    def before_enc(self, before_enc):
+        self._before_enc = before_enc
+
+    def after_format(self, after_format):
+        self._after_format = after_format
+
+    def after_enc(self, after_enc):
+        self._after_enc = after_enc
+
+    def after_nl(self, after_nl):
+        self._after_nl = after_nl
+
+    def quote(self, quote):
+        self._quote = quote
+
+    def execute(self, *args):
+        # essential parameters check
+        valid = EssentialParameters(
+            self.__class__.__name__,
+            [
+                self._before_format,
+                self._before_enc,
+            ],
+        )
+        valid()
+
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+
+        if self._after_format is None:
+            self._after_format = self._before_format
+        if self._after_enc is None:
+            self._after_enc = self._before_enc
+
+        for file in files:
+            new_file = self._new_file(file)
+            with open(file, mode="rt", encoding=self._before_enc) as i:
+                reader = csv.reader(i, delimiter=self._csv_delimiter(self._before_format))
+                with open(new_file, mode="wt", newline="", encoding=self._after_enc) as o:
+                    writer = csv.writer(
+                        o,
+                        delimiter=self._csv_delimiter(self._after_format),
+                        quoting=self._csv_quote(),
+                        lineterminator=self._csv_newline(),
+                    )
+
+                    for i, line in enumerate(reader):
+                        if i == 0:
+                            writer.writerow(self._replace_headers(line))
+                        else:
+                            writer.writerow(line)
+
+            os.remove(file)
+            os.rename(new_file, new_file[:-5])
+
+    def _replace_headers(self, old_headers):
+        """
+        Replace old headers to new headers
+        """
+        if not self._headers:
+            return old_headers
+
+        converter = {}
+        for headers in self._headers:
+            for k, v in headers.items():
+                converter[k] = v
+
+        new_headers = []
+        for oh in old_headers:
+            r = converter.get(oh)
+            new_headers.append(r if r is not None else oh)
+
+        return new_headers
+
+    def _new_file(self, file):
+        root, _ = os.path.splitext(file)
+        return("%s.%s.temp" % (root, self._after_format.lower()))
+
+    def _csv_newline(self):
+        if self._after_nl.upper() == "LF":
+            return "\n"
+        elif self._after_nl.upper() == "CR":
+            return "\r"
+        elif self._after_nl.upper() == "CRLF":
+            return "\r\n"
+        else:
+            raise CliboaException(
+                "Unknown New LIne. One of the followings are allowed [LF, CR, CRLF]"
+            )
+
+    def _csv_delimiter(self, ext):
+        if ext.upper() == "CSV":
+            return ","
+        elif ext.upper() == "TSV":
+            return "\t"
+        else:
+            raise CliboaException(
+                "Unknown ext. One of the followings are allowed [CSV, TSV]"
+            )
+
+    def _csv_quote(self):
+        if "QUOTE_ALL" == self._quote:
+            return csv.QUOTE_ALL
+        elif "QUOTE_MINIMAL" == self._quote:
+            return csv.QUOTE_MINIMAL
+        elif "QUOTE_NONNUMERIC" == self._quote:
+            return csv.QUOTE_NONNUMERIC
+        elif "QUOTE_NONE" == self._quote:
+            return csv.QUOTE_NONE
+        else:
+            raise CliboaException(
+                "Unknown quote. One of the followings are allowed [QUOTE_ALL, QUOTE_MINIMAL, QUOTE_NONNUMERIC, QUOTE_NONE]"  # noqa
+            )

@@ -1,5 +1,5 @@
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
+# Copyright BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -14,20 +14,16 @@
 import csv
 import os
 
-from cliboa.conf import env
-from cliboa.scenario.load.sqlite import SqliteWrite
+from cliboa.scenario.load.sqlite import SqliteImport
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
 from cliboa.util.sqlite import SqliteAdapter
 
 
-class TestSqliteWrite(object):
+class TestSqliteImport(object):
 
     DB_NAME = "test.db"
     TBL_NAME = "foo"
-
-    def setup_method(self, method):
-        self._db_dir = os.path.join(env.BASE_DIR, "db")
 
     def test_ok_1(self):
         """
@@ -310,7 +306,7 @@ class TestSqliteWrite(object):
         return d
 
     def _create_instance(self, pattern, refresh):
-        instance = SqliteWrite()
+        instance = SqliteImport()
         Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
         Helper.set_property(instance, "dbname", self.DB_NAME)
         Helper.set_property(instance, "src_dir", ".")

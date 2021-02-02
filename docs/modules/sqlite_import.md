@@ -1,4 +1,4 @@
-# SqliteWrite
+# SqliteImport
 Read content from csv files and insert them into sqlite table.
 
 # Parameters
@@ -18,7 +18,7 @@ Read content from csv files and insert them into sqlite table.
 # Read content from csv files and insert them into sqlite table
 scenario:
 - step:
-  class: SqliteWrite
+  class: SqliteImport
   arguments:
     src_dir: /tmp
     src_pattern: (.*)\.csv
