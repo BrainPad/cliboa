@@ -44,7 +44,7 @@ See [CONTRIBUTING.md](/CONTRIBUTING.md)
 
 # Quick Start
 ## Requirements
-Available on any Linux distributions, like Debian, Ubuntu, CentOS, REL, or etc.
+Available on macOS and any Linux distributions, like Debian, Ubuntu, CentOS, REL, or etc.
 
 ## Install cliboa
 python version 3.5 or later and pipenv are required. In the environemnt which pip can be used, execute as below.
