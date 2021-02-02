@@ -93,7 +93,7 @@ scenario:
   arguments:
     src_path: data/test.csv
 - step:
-  class: SqliteWrite
+  class: SqliteImport
   arguments:
     dbname: test.db
     tblname: test_table

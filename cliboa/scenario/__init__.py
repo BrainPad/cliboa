@@ -1,6 +1,6 @@
 # flake8: noqa
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
+# Copyright BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -12,7 +12,7 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-from .base import SqliteQueryExecute, Stdout
+from .base import Stdout
 from .extract.aws import S3Download
 from .extract.azure import AzureBlobDownload
 from .extract.file import CsvRead
@@ -41,7 +41,8 @@ from .load.gcp import (
     GcsUpload
 )
 from .load.sftp import SftpFileLoad, SftpUpload
-from .load.sqlite import CsvReadSqliteCreate, SqliteCreation, SqliteWrite
+from .load.sqlite import CsvReadSqliteCreate, SqliteCreation, SqliteImport
+from .sqlite import SqliteQueryExecute
 from .transform.csv import (
     ColumnLengthAdjust,
     CsvColsExtract,
