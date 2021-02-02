@@ -574,6 +574,7 @@ class TestCsvConvert(TestFileTransform):
                         assert line == '"%s"\t"%s"\n' % (csv_list[i][0], csv_list[i][1])
         finally:
             shutil.rmtree(self._data_dir)
+<<<<<<< HEAD
 
 
 class TestCsvSort(TestFileTransform):
@@ -658,3 +659,5 @@ class TestCsvToJsonl(TestFileTransform):
                             assert "3" == row.get("key")
         finally:
             shutil.rmtree(self._data_dir)
+=======
+>>>>>>> development->master (#171)

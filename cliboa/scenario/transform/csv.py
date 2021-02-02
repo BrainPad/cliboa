@@ -635,3 +635,4 @@ class CsvToJsonl(FileBaseTransform):
                 reader = csv.DictReader(i)
                 for row in reader:
                     writer.write(row)
+s
