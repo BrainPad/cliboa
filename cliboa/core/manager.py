@@ -1,5 +1,5 @@
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
+# Copyright BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -179,13 +179,6 @@ class YamlScenarioManager(ScenarioManager):
             cls = globals()[cls_name]
             instance = cls()
 
-        base_args = ["step", "symbol", "parallel", "io", "listeners"]
-        for arg in base_args:
-            if arg == "listeners":
-                self._append_listeners(instance, s_dict.get(arg))
-            else:
-                Helper.set_property(instance, arg, s_dict.get(arg))
-
         cls_attrs_dict = {}
         if isinstance(yaml_scenario_list, list) and "arguments" in s_dict.keys():
             cls_attrs_dict = s_dict["arguments"]
@@ -193,6 +186,7 @@ class YamlScenarioManager(ScenarioManager):
         # loop and set class attribute
         di_key = None
         di_instance = None
+        values = {}
         if cls_attrs_dict:
             cls_attrs_dict = self.__extract_with_vars(cls_attrs_dict)
 
@@ -218,6 +212,14 @@ class YamlScenarioManager(ScenarioManager):
                         yaml_v = self.__replace_vars(yaml_v, var_name)
 
                 Helper.set_property(instance, yaml_k, yaml_v)
+                values[yaml_k] = yaml_v
+
+        base_args = ["step", "symbol", "parallel", "io", "listeners"]
+        for arg in base_args:
+            if arg == "listeners":
+                self._append_listeners(instance, s_dict.get(arg), values)
+            else:
+                Helper.set_property(instance, arg, s_dict.get(arg))
 
         return instance
 
@@ -309,17 +311,21 @@ class YamlScenarioManager(ScenarioManager):
                 di_instances.append(di_instance)
         return di_keys, di_instances
 
-    def _append_listeners(self, instance, args):
+    def _append_listeners(self, instance, args, values):
         listeners = [StepStatusListener()]
 
         if args is not None:
             from cliboa.core.factory import CustomInstanceFactory
 
             if type(args) is str:
-                listeners.append(CustomInstanceFactory.create(args))
+                clz = CustomInstanceFactory.create(args)
+                clz.__dict__.update(values)
+                listeners.append(clz)
             elif type(args) is list:
                 for arg in args:
-                    listeners.append(CustomInstanceFactory.create(arg))
+                    clz = CustomInstanceFactory.create(arg)
+                    clz.__dict__.update(values)
+                    listeners.append(CustomInstanceFactory.create(clz))
         Helper.set_property(instance, "listeners", listeners)
 
 
