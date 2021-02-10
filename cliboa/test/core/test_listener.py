@@ -19,7 +19,7 @@ from unittest.mock import patch
 
 from cliboa.client import CommandArgumentParser
 from cliboa.conf import env
-from cliboa.core.listener import ScenarioStatusListener, StepStatusListener
+from cliboa.core.listener import ScenarioStatusListener, StepStatusListener, StepListener
 from cliboa.core.strategy import SingleProcExecutor, StepExecutor
 from cliboa.core.worker import ScenarioWorker
 from cliboa.scenario.sample_step import SampleCustomStep
@@ -150,9 +150,37 @@ class TestAppropriateListnerCall(unittest.TestCase):
             mock_post_step.assert_called_once()
 
 
+class TestListenerArguments(unittest.TestCase):
+    def test_ok(self):
+        if sys.version_info.minor < 6:
+            # ignore test if python version is less 3.6(assert_called is not supported)
+            return
+
+        step = SampleCustomStep()
+        Helper.set_property(
+            step, "logger", LisboaLog.get_logger(step.__class__.__name__)
+        )
+        clz = CustomStepListener()
+        values = {"test_key": "test_value"}
+        clz.__dict__.update(values)
+        Helper.set_property(step, "listeners", [clz])
+        executor = SingleProcExecutor([step])
+        executor.execute_steps(None)
+
+
 class ErrorSampleCustomStep(SampleCustomStep):
     def __init__(self):
         super().__init__()
 
     def execute(self, *args):
         raise CliboaException("Something wrong")
+
+
+class CustomStepListener(StepListener):
+    def before_step(self, *args, **kwargs):
+        dict = self.__dict__
+        assert "test_value" == dict.get("test_key")
+
+    def error_step(self, *args, **kwargs):
+        dict = self.__dict__
+        assert "test_value" == dict.get("test_key")
