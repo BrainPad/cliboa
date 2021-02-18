@@ -14,9 +14,57 @@
 import codecs
 import csv
 import os
+from cliboa.util.exception import CliboaException
 
 
 class Csv(object):
+
+    @staticmethod
+    def quote_convert(string):
+        """
+        Convert string to csv quoting type.
+        """
+        convert_type = {
+            "QUOTE_ALL": csv.QUOTE_ALL,
+            "QUOTE_MINIMAL": csv.QUOTE_MINIMAL,
+            "QUOTE_NONNUMERIC": csv.QUOTE_NONNUMERIC,
+            "QUOTE_NONE": csv.QUOTE_NONE,
+        }
+
+        if string.upper() not in convert_type:
+            raise CliboaException(
+                "Unknown string. One of the followings are allowed [QUOTE_ALL, QUOTE_MINIMAL, QUOTE_NONNUMERIC, QUOTE_NONE]"  # noqa
+            )
+        return convert_type.get(string.upper())
+
+    @staticmethod
+    def delimiter_convert(string):
+        """
+        Convert string to csv delimiter.
+        """
+        if string.upper() == "CSV":
+            return ","
+        elif string.upper() == "TSV":
+            return "\t"
+        else:
+            raise CliboaException(
+                "Unknown string. One of the followings are allowed [CSV, TSV]"
+            )
+
+    @staticmethod
+    def newline_convert(string):
+        convert_type = {
+            "LF": "\n",
+            "CR": "\r",
+            "CRLF": "\r\n",
+        }
+
+        if string.upper() not in convert_type:
+            raise CliboaException(
+                "Unknown string. One of the followings are allowed [LF, CR, CRLF]"
+            )
+        return convert_type.get(string.upper())
+
     @staticmethod
     def extract_columns_with_names(
         input_file,

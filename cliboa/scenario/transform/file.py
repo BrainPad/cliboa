@@ -69,6 +69,9 @@ class FileBaseTransform(BaseStep):
         )
         valid()
 
+        # TODO This implementation will be removed in the near future.
+        # Parent class will not returns any values.
+        # Only Check required parameters.
         files = super().get_target_files(self._src_dir, self._src_pattern)
         if len(files) != 1:
             raise Exception("Input file must be only one.")
