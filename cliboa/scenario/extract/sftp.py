@@ -82,9 +82,13 @@ class SftpDownload(SftpExtract):
     def __init__(self):
         super().__init__()
         self._quit = False
+        self._ignore_empty_file = False
 
     def quit(self, quit):
         self._quit = quit
+
+    def ignore_empty_file(self, ignore_empty_file):
+        self._ignore_empty_file = ignore_empty_file
 
     def execute(self, *args):
         # essential parameters check
@@ -125,8 +129,8 @@ class SftpDownload(SftpExtract):
             self._src_dir, self._dest_dir,
             re.compile(self._src_pattern),
             self._endfile_suffix,
+            self._ignore_empty_file,
         )
-
         if self._quit is True and len(files) == 0:
             self._logger.info("No file was found. After process will not be processed")
             return StepStatus.SUCCESSFUL_TERMINATION

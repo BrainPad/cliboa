@@ -69,7 +69,7 @@ class Sftp(object):
         self._port = 22 if port is None else port
         self._logger = logging.getLogger(__name__)
 
-    def list_files(self, dir, dest, pattern, endfile_suffix=None):
+    def list_files(self, dir, dest, pattern, endfile_suffix=None, ignore_empty_file=False):
         """
         Fetch all the files in specified directory
 
@@ -78,6 +78,7 @@ class Sftp(object):
             dest (str): local directory to save files
             pattern (object): fetch file pattern
             endfile_suffix=None (str): Download a file only if "filename + endfile_suffix" is exists
+            ignore_empty_file=False (bool): If True, size zero files are not be downloaded
         Returns:
             list: downloaded file names
 
@@ -85,7 +86,12 @@ class Sftp(object):
             IOError: failed to get data
         """
         return self._execute(
-            list_file_func, dir=dir, dest=dest, pattern=pattern, endfile_suffix=endfile_suffix)
+            list_file_func,
+            dir=dir,
+            dest=dest,
+            pattern=pattern,
+            endfile_suffix=endfile_suffix,
+            ignore_empty_file=ignore_empty_file)
 
     def clear_files(self, dir, pattern):
         """
@@ -225,6 +231,10 @@ def list_file_func(**kwargs):
 
         fpath = os.path.join(kwargs["dir"], f)
         if _is_file(kwargs["sftp"], fpath):
+            if kwargs["ignore_empty_file"] is True:
+                size = _get_file_size(kwargs["sftp"], fpath)
+                if size == 0:
+                    continue
             kwargs["sftp"].get(fpath, os.path.join(kwargs["dest"], f))
             files.append(f)
     return files
@@ -343,3 +353,11 @@ def _is_file(sftp, path):
         return True
     else:
         return False
+
+
+def _get_file_size(sftp, path):
+    """
+    Returns a file size
+    """
+    info = sftp.stat(path)
+    return info.st_size
