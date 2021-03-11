@@ -423,12 +423,16 @@ class FileConvert(FileBaseTransform):
         super().__init__()
         self._encoding_from = None
         self._encoding_to = None
+        self._errors = None
 
     def encoding_from(self, encoding_from):
         self._encoding_from = encoding_from
 
     def encoding_to(self, encoding_to):
         self._encoding_to = encoding_to
+
+    def errors(self, errors):
+        self._errors = errors
 
     def execute(self, *args):
         # essential parameters check
@@ -452,6 +456,7 @@ class FileConvert(FileBaseTransform):
                     os.path.join(self._dest_dir, basename),
                     self._encoding_from,
                     self._encoding_to,
+                    self._errors,
                 )
             else:
                 tmpfile = os.path.join(
@@ -459,7 +464,7 @@ class FileConvert(FileBaseTransform):
                     "." + StringUtil().random_str(10) + "." + basename,
                 )
                 File().convert_encoding(
-                    file, tmpfile, self._encoding_from, self._encoding_to
+                    file, tmpfile, self._encoding_from, self._encoding_to, self._errors
                 )
                 os.remove(file)
                 os.rename(tmpfile, file)

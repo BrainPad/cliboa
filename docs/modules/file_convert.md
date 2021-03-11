@@ -9,6 +9,7 @@ Convert file encoding.
 |dest_dir|Directory to output converted files|No|None|Overwrite with converted files, if this parameter is not set.|
 |encoding_from|Encoding before convert|No|utf-8||
 |encoding_to|Encoding after converted|No|utf-8||
+|errors|How encoding and decoding errors are to be handled|No|None|One of the followings are allowed [“strict“, “replace“, “backslashreplace“, “ignore“]|
 
 # Examples
 ```
@@ -21,4 +22,5 @@ scenario:
     dest_dir: /tmp
     encoding_from: utf-16
     encoding_to: utf-8
+    errors: ignore
 ```
