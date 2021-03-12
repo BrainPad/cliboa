@@ -139,3 +139,55 @@ class TestFileConvert(TestFileTransform):
 
         finally:
             shutil.rmtree(self._data_dir)
+
+    def test_execute_encode_error_ignore(self):
+        STR_UTF8 = "いろはにほへと☺"
+        try:
+            # create test file
+            os.makedirs(self._data_dir, exist_ok=True)
+            test_file = os.path.join(self._data_dir, "test.txt")
+
+            with open(test_file, "w") as t:
+                t.write(STR_UTF8)
+
+            # set the essential attributes
+            instance = FileConvert()
+            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "src_dir", self._data_dir)
+            Helper.set_property(instance, "src_pattern", r"test\.txt")
+            Helper.set_property(instance, "encoding_from", "utf-8")
+            Helper.set_property(instance, "encoding_to", "shift_jis")
+            Helper.set_property(instance, "errors", "ignore")
+            instance.execute()
+
+            with open(test_file, encoding="shift_jis", errors="ignore") as t:
+                str_output = t.read()
+
+            assert str_output == "いろはにほへと"
+
+        finally:
+            shutil.rmtree(self._data_dir)
+
+    def test_execute_encode_error_strict(self):
+        STR_UTF8 = "いろはにほへと☺"
+        try:
+            # create test file
+            os.makedirs(self._data_dir, exist_ok=True)
+            test_file = os.path.join(self._data_dir, "test.txt")
+
+            with open(test_file, "w") as t:
+                t.write(STR_UTF8)
+
+            # set the essential attributes
+            instance = FileConvert()
+            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "src_dir", self._data_dir)
+            Helper.set_property(instance, "src_pattern", r"test\.txt")
+            Helper.set_property(instance, "encoding_from", "utf-8")
+            Helper.set_property(instance, "encoding_to", "shift_jis")
+            Helper.set_property(instance, "errors", "strict")
+            with pytest.raises(UnicodeEncodeError):
+                instance.execute()
+
+        finally:
+            shutil.rmtree(self._data_dir)
