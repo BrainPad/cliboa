@@ -1,5 +1,5 @@
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
+# Copyright BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -13,7 +13,11 @@
 #
 import os
 
-from cliboa.util.exception import DirStructureInvalid, FileNotFound, ScenarioFileInvalid
+from cliboa.util.exception import (
+    DirStructureInvalid,
+    FileNotFound,
+    ScenarioFileInvalid,
+)
 
 
 class ValidatorChain(object):
@@ -119,9 +123,7 @@ class DIScenarioFormat(object):
 
 
 class MultiProcessCount(object):
-    """
-
-    """
+    """"""
 
     def __init__(self, scenario_yaml_list):
         self.__scenario_yaml_list = scenario_yaml_list
@@ -137,8 +139,11 @@ class EssentialKeys(object):
 
     def __call__(self):
         for scenario_yaml_dict in self.__scenario_yaml_list:
+            multi_proc_cnt = scenario_yaml_dict.get("multi_process_count")
             parallel_steps = scenario_yaml_dict.get("parallel")
-            if parallel_steps:
+            if multi_proc_cnt:
+                continue
+            elif parallel_steps:
                 for s in parallel_steps:
                     self._exists_step(s)
                     self._exists_class(s)
