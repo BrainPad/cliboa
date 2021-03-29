@@ -1,5 +1,5 @@
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
+# Copyright BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -15,6 +15,7 @@ from cliboa.conf import env
 from cliboa.core.manager import JsonScenarioManager, YamlScenarioManager  # noqa
 from cliboa.core.step_queue import StepQueue  # noqa
 from cliboa.core.strategy import MultiProcExecutor, SingleProcExecutor
+from importlib import import_module
 
 
 class ScenarioManagerFactory(object):
@@ -59,16 +60,27 @@ class StepExecutorFactory(object):
 class CustomInstanceFactory(object):
     """
     Import python module and create instance dynamically
+
+    Return:
+        Created instance.
+        None: If cls_name was not found in the defined class list.
     """
 
     @staticmethod
     def create(cls_name):
         custom_cls_candidates = env.COMMON_CUSTOM_CLASSES + env.PROJECT_CUSTOM_CLASSES
-        custom_cls_list = [c for c in custom_cls_candidates if cls_name in c]
-        if not custom_cls_list:
+        module = None
+        for c in custom_cls_candidates:
+            s = c.split(".")
+            if s[-1:][0] == cls_name:
+                module = s
+                break
+
+        if module is None:
             return None
-        custom_cls = " ".join(str(c) for c in custom_cls_list)
-        components = custom_cls.split(".")
-        mod = __import__(components[0])
-        instance = getattr(mod, components[1])
+
+        root = ".".join(module[:-1])
+        mod_name = module[-1:][0]
+        instance = getattr(import_module(root), mod_name)
+
         return instance()

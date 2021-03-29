@@ -35,7 +35,7 @@ COMMON_SCENARIO_DIR = os.path.join(COMMON_DIR, "scenario")
 SYSTEM_APPEND_PATHS = [COMMON_SCENARIO_DIR]
 
 # common custom classes to make available
-COMMON_CUSTOM_CLASSES = ["sample_step.SampleStep"]
+COMMON_CUSTOM_CLASSES = ["sample_step.SampleStep", "sample_step.SampleStepSub"]
 
 # project congenital classes to make available
 PROJECT_CUSTOM_CLASSES = []
