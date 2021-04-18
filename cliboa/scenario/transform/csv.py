@@ -14,15 +14,21 @@
 
 import codecs
 import csv
+import jsonlines
 import os
-
 import pandas
-
 from cliboa.core.validator import EssentialParameters
 from cliboa.scenario.transform.file import FileBaseTransform
 from cliboa.util.csv import Csv
-from cliboa.util.exception import CliboaException, FileNotFound, InvalidCount, InvalidParameter
+from cliboa.util.exception import (
+    FileNotFound,
+    InvalidCount,
+    InvalidParameter,
+)
 from cliboa.util.file import File
+from cliboa.util.sqlite import SqliteAdapter
+from cliboa.util.string import StringUtil
+from datetime import datetime
 
 
 class CsvColumnExtract(FileBaseTransform):
@@ -43,7 +49,8 @@ class CsvColumnExtract(FileBaseTransform):
 
     def execute(self, *args):
         valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir, self._src_pattern, self._dest_dir],
+            self.__class__.__name__,
+            [self._src_dir, self._src_pattern, self._dest_dir],
         )
         valid()
 
@@ -106,16 +113,18 @@ class ColumnLengthAdjust(FileBaseTransform):
         self._adjust = adjust
 
     def execute(self, *args):
-        file = super().execute()
-        if self._adjust is None:
-            raise Exception(
-                "The essential parameter are not specified in %s."
-                % self.__class__.__name__
-            )
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+        if len(files) != 1:
+            raise Exception("Input file must be only one.")
+        self._logger.info("Files found %s" % files)
 
-        with codecs.open(file, mode="r", encoding=self._encoding) as fi, codecs.open(
-            self._dest_path, mode="w", encoding=self._encoding
-        ) as fo:
+        # essential parameters check
+        valid = EssentialParameters(self.__class__.__name__, [self._adjust])
+        valid()
+
+        with codecs.open(
+            files[0], mode="r", encoding=self._encoding
+        ) as fi, codecs.open(self._dest_path, mode="w", encoding=self._encoding) as fo:
             reader = csv.DictReader(fi)
             writer = csv.DictWriter(fo, reader.fieldnames)
             writer.writeheader()
@@ -239,10 +248,18 @@ class CsvConcat(FileBaseTransform):
             raise InvalidCount("Two or more input files are required.")
 
         file = files.pop(0)
-        df1 = pandas.read_csv(file, dtype=str, encoding=self._encoding,)
+        df1 = pandas.read_csv(
+            file,
+            dtype=str,
+            encoding=self._encoding,
+        )
 
         for file in files:
-            df2 = pandas.read_csv(file, dtype=str, encoding=self._encoding,)
+            df2 = pandas.read_csv(
+                file,
+                dtype=str,
+                encoding=self._encoding,
+            )
             df1 = pandas.concat([df1, df2])
 
         df1.to_csv(
@@ -385,7 +402,11 @@ class CsvFormatChange(FileBaseTransform):
         self._quote = quote
 
     def execute(self, *args):
-        file = super().execute()
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+        if len(files) != 1:
+            raise Exception("Input file must be only one.")
+        self._logger.info("Files found %s" % files)
+
         # essential parameters check
         valid = EssentialParameters(
             self.__class__.__name__,
@@ -400,8 +421,8 @@ class CsvFormatChange(FileBaseTransform):
         )
         valid()
 
-        with open(file, mode="rt", encoding=self._before_enc) as i:
-            reader = csv.reader(i, delimiter=self._csv_delimiter(self._before_format))
+        with open(files[0], mode="rt", encoding=self._before_enc) as i:
+            reader = csv.reader(i, delimiter=Csv.delimiter_convert(self._before_format))
             with open(
                 os.path.join(self._dest_dir, self._dest_pattern),
                 mode="wt",
@@ -410,54 +431,19 @@ class CsvFormatChange(FileBaseTransform):
             ) as o:
                 writer = csv.writer(
                     o,
-                    delimiter=self._csv_delimiter(self._after_format),
-                    quoting=self._csv_quote(),
-                    lineterminator=self._csv_newline(),
+                    delimiter=Csv.delimiter_convert(self._after_format),
+                    quoting=Csv.quote_convert(self._quote),
+                    lineterminator=Csv.newline_convert(self._after_nl),
                 )
                 for line in reader:
                     writer.writerow(line)
-
-    def _csv_newline(self):
-        if self._after_nl.upper() == "LF":
-            return "\n"
-        elif self._after_nl.upper() == "CR":
-            return "\r"
-        elif self._after_nl.upper() == "CRLF":
-            return "\r\n"
-        else:
-            raise CliboaException(
-                "Unknown New LIne. One of the followings are allowd [LF, CR, CRLF]"
-            )
-
-    def _csv_delimiter(self, ext):
-        if ext.upper() == "CSV":
-            return ","
-        elif ext.upper() == "TSV":
-            return "\t"
-        else:
-            raise CliboaException(
-                "Unknown ext. One of the followings are allowd [CSV, TSV]"
-            )
-
-    def _csv_quote(self):
-        if "QUOTE_ALL" == self._quote:
-            return csv.QUOTE_ALL
-        elif "QUOTE_MINIMAL" == self._quote:
-            return csv.QUOTE_MINIMAL
-        elif "QUOTE_NONNUMERIC" == self._quote:
-            return csv.QUOTE_NONNUMERIC
-        elif "QUOTE_NONE" == self._quote:
-            return csv.QUOTE_NONE
-        else:
-            raise CliboaException(
-                "Unknown quote. One of the followings are allowd [QUOTE_ALL, QUOTE_MINIMAL, QUOTE_NONNUMERIC, QUOTE_NONE]"  # noqa
-            )
 
 
 class CsvConvert(FileBaseTransform):
     """
     Change csv format
     """
+
     def __init__(self):
         super().__init__()
         self._headers = []
@@ -510,13 +496,17 @@ class CsvConvert(FileBaseTransform):
         for file in files:
             new_file = self._new_file(file)
             with open(file, mode="rt", encoding=self._before_enc) as i:
-                reader = csv.reader(i, delimiter=self._csv_delimiter(self._before_format))
-                with open(new_file, mode="wt", newline="", encoding=self._after_enc) as o:
+                reader = csv.reader(
+                    i, delimiter=Csv.delimiter_convert(self._before_format)
+                )
+                with open(
+                    new_file, mode="wt", newline="", encoding=self._after_enc
+                ) as o:
                     writer = csv.writer(
                         o,
-                        delimiter=self._csv_delimiter(self._after_format),
-                        quoting=self._csv_quote(),
-                        lineterminator=self._csv_newline(),
+                        delimiter=Csv.delimiter_convert(self._after_format),
+                        quoting=Csv.quote_convert(self._quote),
+                        lineterminator=Csv.newline_convert(self._after_nl),
                     )
 
                     for i, line in enumerate(reader):
@@ -549,40 +539,99 @@ class CsvConvert(FileBaseTransform):
 
     def _new_file(self, file):
         root, _ = os.path.splitext(file)
-        return("%s.%s.temp" % (root, self._after_format.lower()))
+        return "%s.%s.temp" % (root, self._after_format.lower())
 
-    def _csv_newline(self):
-        if self._after_nl.upper() == "LF":
-            return "\n"
-        elif self._after_nl.upper() == "CR":
-            return "\r"
-        elif self._after_nl.upper() == "CRLF":
-            return "\r\n"
-        else:
-            raise CliboaException(
-                "Unknown New LIne. One of the followings are allowed [LF, CR, CRLF]"
-            )
 
-    def _csv_delimiter(self, ext):
-        if ext.upper() == "CSV":
-            return ","
-        elif ext.upper() == "TSV":
-            return "\t"
-        else:
-            raise CliboaException(
-                "Unknown ext. One of the followings are allowed [CSV, TSV]"
-            )
+class CsvSort(FileBaseTransform):
+    """
+    Sort csv.
+    """
 
-    def _csv_quote(self):
-        if "QUOTE_ALL" == self._quote:
-            return csv.QUOTE_ALL
-        elif "QUOTE_MINIMAL" == self._quote:
-            return csv.QUOTE_MINIMAL
-        elif "QUOTE_NONNUMERIC" == self._quote:
-            return csv.QUOTE_NONNUMERIC
-        elif "QUOTE_NONE" == self._quote:
-            return csv.QUOTE_NONE
-        else:
-            raise CliboaException(
-                "Unknown quote. One of the followings are allowed [QUOTE_ALL, QUOTE_MINIMAL, QUOTE_NONNUMERIC, QUOTE_NONE]"  # noqa
-            )
+    def __init__(self):
+        super().__init__()
+        self._order = []
+        self._quote = "QUOTE_MINIMAL"
+        self._no_duplicate = False
+
+    def order(self, order):
+        self._order = order
+
+    def quote(self, quote):
+        self._quote = None
+
+    def no_duplicate(self, no_duplicate):
+        self._no_duplicate = no_duplicate
+
+    def execute(self, *args):
+        # essential parameters check
+        valid = EssentialParameters(
+            self.__class__.__name__,
+            [
+                self._order,
+                self._src_dir,
+                self._src_pattern,
+                self._dest_dir,
+            ],
+        )
+        valid()
+
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+        self._logger.info("Files found %s" % files)
+
+        ymd_hms = datetime.now().strftime("%Y%m%d%H%M%S%f")
+        dbname = ".%s_%s.db" % (ymd_hms, StringUtil().random_str(8))
+        tblname = "temp_table"
+
+        sqlite = SqliteAdapter()
+        sqlite.connect(dbname)
+        try:
+            for file in files:
+                _, filename = os.path.split(file)
+                dest_file = os.path.join(self._dest_dir, filename)
+
+                sqlite.import_table(file, tblname, encoding=self._encoding)
+                sqlite.export_table(
+                    tblname,
+                    dest_file,
+                    encoding=self._encoding,
+                    order=self._order,
+                    no_duplicate=self._no_duplicate,
+                )
+            sqlite.close()
+        finally:
+            os.remove(dbname)
+
+
+class CsvToJsonl(FileBaseTransform):
+    """
+    Transform csv to jsonlines.
+    """
+
+    def __init__(self):
+        super().__init__()
+
+    def execute(self, *args):
+        # essential parameters check
+        valid = EssentialParameters(
+            self.__class__.__name__,
+            [
+                self._src_dir,
+                self._src_pattern,
+                self._dest_dir,
+            ],
+        )
+        valid()
+
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+        self._logger.info("Files found %s" % files)
+
+        for file in files:
+            root, _ = os.path.splitext(os.path.split(file)[1])
+            dest_file = os.path.join(self._dest_dir, (root + ".jsonl"))
+
+            with open(
+                file, mode="r", encoding=self._encoding, newline=""
+            ) as i, jsonlines.open(dest_file, mode="w") as writer:
+                reader = csv.DictReader(i)
+                for row in reader:
+                    writer.write(row)

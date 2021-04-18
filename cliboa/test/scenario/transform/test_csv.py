@@ -12,19 +12,21 @@
 # all copies or substantial portions of the Software.
 #
 import csv
+import jsonlines
 import os
 import shutil
-from glob import glob
-
 import pytest
 
+from glob import glob
 from cliboa.conf import env
 from cliboa.scenario.transform.csv import (
     CsvColumnExtract,
     CsvConcat,
     CsvConvert,
     CsvHeaderConvert,
-    CsvMerge
+    CsvMerge,
+    CsvSort,
+    CsvToJsonl,
 )
 from cliboa.util.exception import InvalidCount, InvalidParameter
 from cliboa.util.helper import Helper
@@ -570,5 +572,89 @@ class TestCsvConvert(TestFileTransform):
                         assert line == '"new_key"\t"data"\n'
                     else:
                         assert line == '"%s"\t"%s"\n' % (csv_list[i][0], csv_list[i][1])
+        finally:
+            shutil.rmtree(self._data_dir)
+
+
+class TestCsvSort(TestFileTransform):
+    def test_sort(self):
+        try:
+            # create test file
+            csv_list = [["key", "data"], ["1", "A"], ["3", "C"], ["2", "B"]]
+            result_dir = os.path.join(self._data_dir, "result")
+            os.makedirs(result_dir, exist_ok=True)
+
+            test_csv1 = os.path.join(self._data_dir, "test1.csv")
+            with open(test_csv1, "w") as t:
+                writer = csv.writer(t)
+                writer.writerows(csv_list)
+
+            test_csv2 = os.path.join(self._data_dir, "test2.csv")
+            with open(test_csv2, "w") as t:
+                writer = csv.writer(t)
+                writer.writerows(csv_list)
+
+            # set the essential attributes
+            instance = CsvSort()
+            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "src_dir", self._data_dir)
+            Helper.set_property(instance, "src_pattern", r"test.*\.csv")
+            Helper.set_property(instance, "dest_dir", result_dir)
+            Helper.set_property(instance, "order", ["key"])
+            instance.execute()
+
+            files = glob(os.path.join(result_dir, "test*.csv"))
+            assert 2 == len(files)
+            for file in files:
+                with open(file, mode='r', encoding="utf-8") as f:
+                    reader = csv.DictReader(f)
+                    for i, row in enumerate(reader):
+                        if i == 0:
+                            assert "1" == row.get("key")
+                        elif i == 1:
+                            assert "2" == row.get("key")
+                        elif i == 2:
+                            assert "3" == row.get("key")
+        finally:
+            shutil.rmtree(self._data_dir)
+
+
+class TestCsvToJsonl(TestFileTransform):
+    def test_convert(self):
+        try:
+            # create test file
+            csv_list = [["key", "data"], ["1", "A"], ["2", "B"], ["3", "C"]]
+            result_dir = os.path.join(self._data_dir, "result")
+            os.makedirs(result_dir, exist_ok=True)
+
+            test_csv1 = os.path.join(self._data_dir, "test1.csv")
+            with open(test_csv1, "w") as t:
+                writer = csv.writer(t)
+                writer.writerows(csv_list)
+
+            test_csv2 = os.path.join(self._data_dir, "test2.csv")
+            with open(test_csv2, "w") as t:
+                writer = csv.writer(t)
+                writer.writerows(csv_list)
+
+            # set the essential attributes
+            instance = CsvToJsonl()
+            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "src_dir", self._data_dir)
+            Helper.set_property(instance, "src_pattern", r"test.*\.csv")
+            Helper.set_property(instance, "dest_dir", result_dir)
+            instance.execute()
+
+            files = glob(os.path.join(result_dir, "test*.jsonl"))
+            assert 2 == len(files)
+            for file in files:
+                with jsonlines.open(file) as reader:
+                    for i, row in enumerate(reader):
+                        if i == 0:
+                            assert "1" == row.get("key")
+                        elif i == 1:
+                            assert "2" == row.get("key")
+                        elif i == 2:
+                            assert "3" == row.get("key")
         finally:
             shutil.rmtree(self._data_dir)

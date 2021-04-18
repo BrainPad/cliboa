@@ -125,9 +125,13 @@ class SftpUpload(SftpBaseLoad):
     def __init__(self):
         super().__init__()
         self._quit = False
+        self._ignore_empty_file = False
 
     def quit(self, quit):
         self._quit = quit
+
+    def ignore_empty_file(self, ignore_empty_file):
+        self._ignore_empty_file = ignore_empty_file
 
     def execute(self, *args):
         # essential parameters check
@@ -165,6 +169,9 @@ class SftpUpload(SftpBaseLoad):
 
         if len(files) > 0:
             for file in files:
+                if self._ignore_empty_file and os.path.getsize(file) == 0:
+                    self._logger.info("0 byte file will no be uploaded %s." % file)
+                    continue
                 sftp.put_file(
                     file,
                     os.path.join(self._dest_dir, os.path.basename(file)),

@@ -17,6 +17,7 @@ Download a file via SFTP.
 |retry_count|Retry count of sftp connection.|No|3||
 |quit|True or False flag for quitting cliboa process when source files do not exist.|No|False||
 |endfile_suffix|Download a file only if "filename + endfile_suffix" exists|No|None||
+|ignore_empty_file|If True, size zero files are not be downloaded|No|False||
 
 # Examples
 ```
