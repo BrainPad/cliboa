@@ -13,6 +13,7 @@
 #
 import os
 
+from cliboa.adapter.aws import S3Adapter
 from cliboa.scenario.aws import BaseS3
 from cliboa.scenario.validator import EssentialParameters
 from cliboa.util.constant import StepStatus
@@ -50,7 +51,12 @@ class S3Upload(BaseS3):
         )
         valid()
 
-        resource = self._s3_resource()
+        adapter = (
+            S3Adapter(self._access_key, self._secret_key)
+            if self._access_key and self._secret_key
+            else S3Adapter()
+        )
+        resource = adapter.get_resource()
         bucket = resource.Bucket(self._bucket)
         files = super().get_target_files(self._src_dir, self._src_pattern)
 
