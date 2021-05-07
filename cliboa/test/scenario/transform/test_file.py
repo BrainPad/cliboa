@@ -19,7 +19,7 @@ import pytest
 import xlsxwriter
 
 from cliboa.conf import env
-from cliboa.scenario.transform.file import ExcelConvert, FileConvert
+from cliboa.scenario.transform.file import ExcelConvert, FileConvert, FileArchive
 from cliboa.util.exception import InvalidCount, InvalidFormat
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
@@ -188,6 +188,86 @@ class TestFileConvert(TestFileTransform):
             Helper.set_property(instance, "errors", "strict")
             with pytest.raises(UnicodeEncodeError):
                 instance.execute()
+
+        finally:
+            shutil.rmtree(self._data_dir)
+
+
+class TestFileArchive(TestFileTransform):
+    def test_compress_tar(self):
+        try:
+            # create test file
+            os.makedirs(self._data_dir, exist_ok=True)
+            test_file = os.path.join(self._data_dir, "test.txt")
+
+            with open(test_file, "w") as t:
+                t.write("ABCDEF")
+
+            # set the essential attributes
+            instance = FileArchive()
+            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "src_dir", self._data_dir)
+            Helper.set_property(instance, "src_pattern", r"test\.txt")
+            Helper.set_property(instance, "format", "tar")
+            Helper.set_property(instance, "dest_pattern", "foo")
+            instance.execute()
+
+            files = glob(os.path.join(self._data_dir, "*.tar"))
+            assert 1 == len(files)
+            assert "foo.tar" == os.path.basename(files[0])
+
+        finally:
+            shutil.rmtree(self._data_dir)
+
+    def test_compress_zip(self):
+        try:
+            # create test file
+            os.makedirs(self._data_dir, exist_ok=True)
+            test_file = os.path.join(self._data_dir, "test.txt")
+
+            with open(test_file, "w") as t:
+                t.write("ABCDEF")
+
+            # set the essential attributes
+            instance = FileArchive()
+            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "src_dir", self._data_dir)
+            Helper.set_property(instance, "src_pattern", r"test\.txt")
+            Helper.set_property(instance, "format", "zip")
+            Helper.set_property(instance, "dest_pattern", "foo")
+            instance.execute()
+
+            files = glob(os.path.join(self._data_dir, "*.zip"))
+            assert 1 == len(files)
+            assert "foo.zip" == os.path.basename(files[0])
+
+        finally:
+            shutil.rmtree(self._data_dir)
+
+    def test_compress_with_path(self):
+        try:
+            # create test file
+            result_dir = os.path.join(self._data_dir, "out")
+            os.makedirs(self._data_dir, exist_ok=True)
+            os.makedirs(result_dir, exist_ok=True)
+            test_file = os.path.join(self._data_dir, "test.txt")
+
+            with open(test_file, "w") as t:
+                t.write("ABCDEF")
+
+            # set the essential attributes
+            instance = FileArchive()
+            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "src_dir", self._data_dir)
+            Helper.set_property(instance, "src_pattern", r"test\.txt")
+            Helper.set_property(instance, "format", "zip")
+            Helper.set_property(instance, "dest_dir", result_dir)
+            Helper.set_property(instance, "dest_pattern", "foo")
+            instance.execute()
+
+            files = glob(os.path.join(result_dir, "foo.zip"))
+            assert 1 == len(files)
+            assert "foo.zip" == os.path.basename(files[0])
 
         finally:
             shutil.rmtree(self._data_dir)
