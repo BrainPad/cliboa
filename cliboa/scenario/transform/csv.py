@@ -168,6 +168,12 @@ class CsvMerge(FileBaseTransform):
         )
         valid()
 
+        if self._dest_pattern:
+            self._logger.warning(
+                "'dest_pattern' will be unavailable in the near future."
+                + "'dest_pattern' will change to 'dest_name'."
+            )
+
         target1_files = File().get_target_files(self._src_dir, self._src1_pattern)
         target2_files = File().get_target_files(self._src_dir, self._src2_pattern)
         if len(target1_files) == 0:
@@ -227,6 +233,12 @@ class CsvConcat(FileBaseTransform):
             [self._src_dir, self._dest_dir, self._dest_pattern],
         )
         valid()
+
+        if self._dest_pattern:
+            self._logger.warning(
+                "'dest_pattern' will be unavailable in the near future."
+                + "'dest_pattern' will change to 'dest_name'."
+            )
 
         if not self._src_pattern and not self._src_filenames:
             raise InvalidParameter(
@@ -294,6 +306,16 @@ class CsvHeaderConvert(FileBaseTransform):
             ],
         )
         valid()
+
+        if self._dest_pattern:
+            self._logger.warning(
+                "'dest_pattern' will be unavailable in the near future."
+                + "Basically every classes which extends FileBaseTransform will be allowed"
+                + " plural input files, and output files will be the same name with input"
+                + " file names.\n"
+                "At that time, if 'dest_dir' is given, transformed files will be created in the given directory.\n" # noqa
+                + "If not, original files will be updated by transformed files."
+            )
 
         target_files = super().get_target_files(self._src_dir, self._src_pattern)
         if len(target_files) == 0:
@@ -420,6 +442,16 @@ class CsvFormatChange(FileBaseTransform):
             ],
         )
         valid()
+
+        if self._dest_pattern:
+            self._logger.warning(
+                "'dest_pattern' will be unavailable in the near future."
+                + "Basically every classes which extends FileBaseTransform will be allowed"
+                + " plural input files, and output files will be the same name with input"
+                + " file names.\n"
+                "At that time, if 'dest_dir' is given, transformed files will be created in the given directory.\n" # noqa
+                + "If not, original files will be updated by transformed files."
+            )
 
         with open(files[0], mode="rt", encoding=self._before_enc) as i:
             reader = csv.reader(i, delimiter=Csv.delimiter_convert(self._before_format))
