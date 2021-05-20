@@ -38,6 +38,7 @@ grpcio = ">=1.29.0"
 pandas-gbq = "==0.13.0"
 PyYaml = "==5.3.1"
 azure-storage-blob = "==12.3.2"
+python-gnupg = "==0.4.7"
 
 [requires]
 python_version = "3.5"

@@ -65,3 +65,4 @@ from .transform.file import (
     FileRename,
     FileArchive
 )
+from .transform.gpg import GpgGenerateKey, GpgEncrypt, GpgDecrypt
