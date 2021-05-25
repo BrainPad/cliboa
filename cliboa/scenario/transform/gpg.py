@@ -48,17 +48,15 @@ class GpgBase(BaseStep):
         valid = EssentialParameters(self.__class__.__name__, [self._gnupghome])
         valid()
 
-        self._gpg = Gpg(self._gnupghome)
-
-    def key_import(self, key_files, trust_level=None):
+    def key_import(self, gpg, key_files, trust_level=None):
         """
         Import key.
         Also set trust level, if parameter "trust_level" is given.
         """
         for file in key_files:
-            self._gpg.import_key(file)
+            gpg.import_key(file)
             if trust_level:
-                self._gpg.trust_key(file, trust_level)
+                gpg.trust_key(file, trust_level)
 
 
 class GpgGenerateKey(GpgBase):
@@ -85,7 +83,7 @@ class GpgGenerateKey(GpgBase):
             self.__class__.__name__, [self._dest_dir, self._name_email])
         valid()
 
-        self._gpg.generate_key(
+        Gpg(self._gnupghome).generate_key(
             self._dest_dir,
             name_real=self._name_real,
             name_email=self._name_email,
@@ -116,10 +114,12 @@ class GpgEncrypt(GpgBase):
             self._logger.info("No files are found. Nothing to do.")
             return
 
+        gpg = Gpg(self._gnupghome)
+
         if self._key_dir and self._key_pattern:
             key_files = super().get_target_files(self._key_dir, self._key_pattern)
             self._logger.info("Keys found %s" % key_files)
-            self.key_import(key_files, self._trust_level)
+            self.key_import(gpg, key_files, self._trust_level)
 
         for file in files:
             dest_path = (
@@ -127,7 +127,7 @@ class GpgEncrypt(GpgBase):
                 if self._dest_dir is not None
                 else os.path.join(self._src_dir, os.path.basename(file))
             )
-            self._gpg.encrypt(
+            gpg.encrypt(
                 file,
                 dest_path,
                 recipients=self._recipients,
@@ -157,6 +157,7 @@ class GpgDecrypt(GpgBase):
             self._logger.info("Keys found %s" % key_files)
             self.key_import(key_files, self._trust_level)
 
+        gpg = Gpg(self._gnupghome)
         for file in files:
             root, ext = os.path.splitext(file)
             if ext == ".gpg":
@@ -165,7 +166,7 @@ class GpgDecrypt(GpgBase):
                     if self._dest_dir is not None
                     else os.path.join(self._src_dir, os.path.basename(root))
                 )
-                self._gpg.decrypt(
+                gpg.decrypt(
                     file,
                     dest_path,
                     passphrase=self._passphrase,

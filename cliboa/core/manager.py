@@ -26,7 +26,7 @@ from cliboa.scenario import *  # noqa
 from cliboa.util.cache import StepArgument
 from cliboa.util.exception import ScenarioFileInvalid
 from cliboa.util.helper import Helper
-from cliboa.util.http import BasicAuth, FormAuth  # noqa
+from cliboa.util.http import FormAuth  # noqa
 from cliboa.util.lisboa_log import LisboaLog
 
 __all__ = ["YamlScenarioManager", "JsonScenarioManager"]
