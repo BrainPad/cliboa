@@ -263,6 +263,16 @@ class ExcelConvert(FileBaseTransform):
         )
         valid()
 
+        if self._dest_pattern:
+            self._logger.warning(
+                "'dest_pattern' will be unavailable in the near future."
+                + "Basically every classes which extends FileBaseTransform will be allowed"
+                + " plural input files, and output files will be the same name with input"
+                + " file names.\n"
+                "At that time, if 'dest_dir' is given, transformed files will be created in the given directory.\n" # noqa
+                + "If not, original files will be updated by transformed files."
+            )
+
         # get a target file
         target_files = super().get_target_files(self._src_dir, self._src_pattern)
         if len(target_files) == 0:
@@ -320,6 +330,16 @@ class FileDivide(FileBaseTransform):
             ],
         )
         valid()
+
+        if self._dest_pattern:
+            self._logger.warning(
+                "'dest_pattern' will be unavailable in the near future."
+                + "Basically every classes which extends FileBaseTransform will be allowed"
+                + " plural input files, and output files will be the same name with input"
+                + " file names.\n"
+                "At that time, if 'dest_dir' is given, transformed files will be created in the given directory.\n" # noqa
+                + "If not, original files will be updated by transformed files."
+            )
 
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self._logger.info("Files found %s" % files)
@@ -499,6 +519,16 @@ class FileArchive(FileBaseTransform):
             [self._src_dir, self._src_pattern, self._dest_pattern],
         )
         valid()
+
+        if self._dest_pattern:
+            self._logger.warning(
+                "'dest_pattern' will be unavailable in the near future."
+                + "Basically every classes which extends FileBaseTransform will be allowed"
+                + " plural input files, and output files will be the same name with input"
+                + " file names.\n"
+                "At that time, if 'dest_dir' is given, transformed files will be created in the given directory.\n" # noqa
+                + "If not, original files will be updated by transformed files."
+            )
 
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self._logger.info("Files found %s" % files)
