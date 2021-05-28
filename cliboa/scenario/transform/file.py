@@ -24,7 +24,12 @@ import pandas
 from cliboa.core.validator import EssentialParameters
 from cliboa.scenario.base import BaseStep
 from cliboa.util.date import DateUtil
-from cliboa.util.exception import CliboaException, InvalidCount, InvalidFormat
+from cliboa.util.exception import (
+    CliboaException,
+    InvalidCount,
+    InvalidFormat,
+    InvalidParameter,
+)
 from cliboa.util.file import File
 from cliboa.util.string import StringUtil
 
@@ -258,6 +263,16 @@ class ExcelConvert(FileBaseTransform):
         )
         valid()
 
+        if self._dest_pattern:
+            self._logger.warning(
+                "'dest_pattern' will be unavailable in the near future."
+                + "Basically every classes which extends FileBaseTransform will be allowed"
+                + " plural input files, and output files will be the same name with input"
+                + " file names.\n"
+                "At that time, if 'dest_dir' is given, transformed files will be created in the given directory.\n" # noqa
+                + "If not, original files will be updated by transformed files."
+            )
+
         # get a target file
         target_files = super().get_target_files(self._src_dir, self._src_pattern)
         if len(target_files) == 0:
@@ -315,6 +330,16 @@ class FileDivide(FileBaseTransform):
             ],
         )
         valid()
+
+        if self._dest_pattern:
+            self._logger.warning(
+                "'dest_pattern' will be unavailable in the near future."
+                + "Basically every classes which extends FileBaseTransform will be allowed"
+                + " plural input files, and output files will be the same name with input"
+                + " file names.\n"
+                "At that time, if 'dest_dir' is given, transformed files will be created in the given directory.\n" # noqa
+                + "If not, original files will be updated by transformed files."
+            )
 
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self._logger.info("Files found %s" % files)
@@ -470,3 +495,66 @@ class FileConvert(FileBaseTransform):
                 os.rename(tmpfile, file)
 
             self._logger.info("Encoded file %s" % basename)
+
+
+class FileArchive(FileBaseTransform):
+    """
+    Create archeve object.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self._format = None
+        self._create_dir = False
+
+    def format(self, format):
+        self._format = format.lower()
+
+    def create_dir(self, create_dir):
+        self._create_dir = create_dir
+
+    def execute(self, *args):
+        valid = EssentialParameters(
+            self.__class__.__name__,
+            [self._src_dir, self._src_pattern, self._dest_pattern],
+        )
+        valid()
+
+        if self._dest_pattern:
+            self._logger.warning(
+                "'dest_pattern' will be unavailable in the near future."
+                + "Basically every classes which extends FileBaseTransform will be allowed"
+                + " plural input files, and output files will be the same name with input"
+                + " file names.\n"
+                "At that time, if 'dest_dir' is given, transformed files will be created in the given directory.\n" # noqa
+                + "If not, original files will be updated by transformed files."
+            )
+
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+        self._logger.info("Files found %s" % files)
+        if len(files) == 0:
+            raise InvalidCount("No files are found.")
+
+        dir = self._dest_dir if self._dest_dir is not None else self._src_dir
+        dest_path = os.path.join(dir, (self._dest_pattern + ".%s" % self._format))
+
+        if self._format == "tar":
+            with tarfile.open(dest_path, "w") as tar:
+                for file in files:
+                    arcname = (
+                        os.path.join(self._dest_pattern, os.path.basename(file))
+                        if self._create_dir
+                        else os.path.basename(file)
+                    )
+                    tar.add(file, arcname=arcname)
+        elif self._format == "zip":
+            with zipfile.ZipFile(dest_path, "w") as zp:
+                for file in files:
+                    arcname = (
+                        os.path.join(self._dest_pattern, os.path.basename(file))
+                        if self._create_dir
+                        else os.path.basename(file)
+                    )
+                    zp.write(file, arcname=arcname)
+        else:
+            raise InvalidParameter("'format' must set one of the followings [tar, zip]")

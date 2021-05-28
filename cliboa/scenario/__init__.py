@@ -25,7 +25,7 @@ from .extract.gcp import (
     GcsDownload,
     GcsDownloadFileDelete
 )
-from .extract.http import HttpDownload
+from .extract.http import HttpDownload, HttpDownloadViaBasicAuth
 from .extract.mysql import MysqlRead
 from .extract.sftp import SftpDelete, SftpDownload, SftpDownloadFileDelete
 from .extract.sqlite import SqliteRead, SqliteReadRow
@@ -62,5 +62,7 @@ from .transform.file import (
     FileConvert,
     FileDecompress,
     FileDivide,
-    FileRename
+    FileRename,
+    FileArchive
 )
+from .transform.gpg import GpgGenerateKey, GpgEncrypt, GpgDecrypt

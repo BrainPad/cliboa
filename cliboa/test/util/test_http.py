@@ -3,7 +3,7 @@ import os
 import pytest
 from requests.exceptions import HTTPError
 
-from cliboa.util.http import Download, DownloadViaBasicAuth, FormAuth
+from cliboa.util.http import Download, FormAuth
 
 
 class TestHttp(object):
@@ -52,9 +52,3 @@ class TestDownload(object):
         with pytest.raises(HTTPError) as execinfo:
             d.execute()
         assert "Http request failed." in str(execinfo.value)
-
-
-class TestDownloadViaBasicAuth(TestHttp):
-    def test_execute(self):
-        a = DownloadViaBasicAuth(self._DUMMY_ID, self._DUMMY_PASSWORD)
-        a.execute()
