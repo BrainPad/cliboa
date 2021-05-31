@@ -489,17 +489,35 @@ class TestCsvConcat(TestFileTransform):
             ["c2", "spam"],
         ]
 
-    def test_excute_ng_input_files(self):
-        with pytest.raises(InvalidCount) as execinfo:
+    def test_execute_ok3(self):
+        try:
+            os.makedirs(self._data_dir, exist_ok=True)
+
+            # create test file
+            csv_list1 = [["key", "data"], ["c1", "spam"], ["c2", "spam"]]
+            with open(os.path.join(self._data_dir, "test1.csv"), "w") as t1:
+                writer = csv.writer(t1)
+                writer.writerows(csv_list1)
+
             # set the essential attributes
             instance = CsvConcat()
             Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
             Helper.set_property(instance, "src_dir", self._data_dir)
-            Helper.set_property(instance, "src_filenames", ["test1.csv"])
+            Helper.set_property(instance, "src_pattern", r"test.*\.csv")
             Helper.set_property(instance, "dest_dir", self._data_dir)
             Helper.set_property(instance, "dest_pattern", "test.csv")
             instance.execute()
-        assert "Two or more input files are required." in str(execinfo.value)
+
+            with open(os.path.join(self._data_dir, "test.csv")) as t:
+                reader = csv.reader(t)
+                concatenated_list = [row for row in reader]
+        finally:
+            shutil.rmtree(self._data_dir)
+        assert concatenated_list == [
+            ["key", "data"],
+            ["c1", "spam"],
+            ["c2", "spam"],
+        ]
 
     def test_excute_ng_multiple_target(self):
         with pytest.raises(InvalidParameter) as execinfo:
