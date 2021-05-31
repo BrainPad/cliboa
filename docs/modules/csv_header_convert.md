@@ -4,12 +4,13 @@ Convert headers of a csv file.
 # Parameters
 |Parameters|Explanation|Required|Default|Remarks|
 |----------|-----------|--------|-------|-------|
-|src_dir|Directory of source to convert|Yes|None||
-|src_pattern|File pattern of source to convert. Regexp is available.|Yes|None||
-|dest_dir|Destination directory to convert|Yes|None|
-|dest_pattern|Destination of file pattern to convert|Yes|None||
+|src_dir|Path of the directory which target files are placed.|Yes|None||
+|src_pattern|Regex which is to find target files.|Yes|None||
+|dest_dir|Path of the directory which is for output files.|No|None||
+|dest_pattern|Destination of file pattern to convert|No|None|Deprecated.|
 |encoding|Character encoding when read and write|No|utf-8||
-|headers|Specify header to convert by format like 'header before convert: header after convert'||||
+|headers|Specify header to convert by format like 'header before convert: header after convert'|Yes|[]||
+|nonfile_error|Whether an error is thrown when files are not found in src_dir.|No|False||
 
 # Examples
 ```
@@ -17,11 +18,19 @@ scenario:
 - step: Convert headers of a csv file
   class: CsvHeaderConvert
   arguments:
-    src_dir: /tmp
-    src_pattern: test.csv
-    dest_dir: /tmp
-    dest_pattern: converted_test.csv
+    src_dir: /in
+    src_pattern: test\.csv
+    dest_dir: /out
     headers:
-        - header1: converted_header1
-        - header2: converted_header2
+      - id: key
+
+Input: /in/test.csv
+id, name
+1, one
+2, two
+
+Output: /out/test.csv
+key, name
+1, one
+2, two
 ```

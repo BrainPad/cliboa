@@ -17,6 +17,7 @@ import csv
 import gzip
 import os
 import tarfile
+import tempfile
 import zipfile
 
 import pandas
@@ -26,27 +27,42 @@ from cliboa.scenario.base import BaseStep
 from cliboa.util.date import DateUtil
 from cliboa.util.exception import (
     CliboaException,
+    FileNotFound,
     InvalidCount,
     InvalidFormat,
     InvalidParameter,
 )
 from cliboa.util.file import File
-from cliboa.util.string import StringUtil
 
 
 class FileBaseTransform(BaseStep):
     """
-    Base class of file extract classes
+    Base class of file transform classes
+
+    Basically transform class of Cliboa is that find files,
+    do something, and output transformed files.
+    When output files are created, name of the files will be the same name with the input files
+    (original input files will be changed to the transformed files).
+    If you would not like to remove the original files,
+    give a path to the "dest_dir" for output directory.
+
+    Note:
+    Output files are not always be the same name with the input file names.
+    See documentation for individual classes for details.
     """
 
     def __init__(self):
         super().__init__()
         self._src_dir = ""
         self._src_pattern = ""
+        # 'dest_path' will be unavailable in the near future."
         self._dest_path = ""
         self._dest_dir = None
+        # 'dest_pattern' will be unavailable in the near future."
         self._dest_pattern = None
+        self._dest_name = None
         self._encoding = "utf-8"
+        self._nonfile_error = False
 
     def src_dir(self, src_dir):
         self._src_dir = src_dir
@@ -64,23 +80,112 @@ class FileBaseTransform(BaseStep):
     def dest_pattern(self, dest_pattern):
         self._dest_pattern = dest_pattern
 
+    def dest_name(self, dest_name):
+        self._dest_name = dest_name
+
     def encoding(self, encoding):
         self._encoding = encoding
 
-    def execute(self, *args):
-        # essential parameters check
-        valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir, self._src_pattern]
-        )
-        valid()
+    def nonfile_error(self, nonfile_error):
+        self._nonfile_error = nonfile_error
 
-        # TODO This implementation will be removed in the near future.
-        # Parent class will not returns any values.
-        # Only Check required parameters.
-        files = super().get_target_files(self._src_dir, self._src_pattern)
-        if len(files) != 1:
-            raise Exception("Input file must be only one.")
-        return files[0]
+    def execute(self, *args):
+        pass
+
+    def check_file_existence(self, files):
+        """
+        Check whether files exist.
+        If no files, the scenario will continue or an error is raised,
+        depends on parameter[nonfile_error].
+        """
+        if len(files) == 0:
+            if self._nonfile_error is True:
+                raise FileNotFound("No files are found.")
+            else:
+                self._logger.info("No files are found. Nothing to do.")
+                return
+        self._logger.info("Files found %s" % files)
+
+    def io_files(self, iterable, ext=None):
+        """
+        Iteration which returns input and output path.
+        If the parameter "dest_dir" was given, the output file will be created under
+        the given directory and returns input and output path.
+        If not, the output file will be created to the same directory to the input file.
+
+        Arguments:
+            iterable (list): Input file list
+            ext=None (str): Set an extension for output file,
+                            if input and output extension would like to be changed.
+                            "." is not necessary.
+
+        yield (tuple):
+            - input file path
+            - output file path
+        """
+        for input_path in iterable:
+            root, name = os.path.split(input_path)
+
+            if ext:
+                if ext.startswith("."):
+                    output_name = os.path.splitext(name)[0] + ext
+                else:
+                    output_name = os.path.splitext(name)[0] + "." + ext
+            else:
+                output_name = name
+
+            if self._dest_dir:
+                output_dir = self._dest_dir
+            else:
+                output_dir = root
+
+            output_path = os.path.join(output_dir, output_name)
+
+            fd, temp_file = tempfile.mkstemp()
+            os.close(fd)
+
+            yield input_path, temp_file
+
+            if input_path == output_path:
+                os.remove(input_path)
+            os.rename(temp_file, output_path)
+
+    def io_writers(self, iterable, mode="t", encoding="utf-8", ext=None):
+        """
+        Iteration which returns input and output writer.
+        If the parameter "dest_dir" was given, the output file will be created under
+        the given directory and returns input and output writer.
+        If not, the output file will be created to the same directory to the input file.
+
+        Arguments:
+            iterable (list): Input file list
+            mode="t" (str): Mode to open input files, opening file with text mode by default.
+            encoding="utf-8" (str): File encoding. It will be ignored when mode is "b"
+            ext=None (str): Set an extension for output file,
+                            if input and output extension would like to be changed.
+                            "." is not necessary.
+
+        yield (tuple):
+            - input writer
+            - output writer
+        """
+        if not "t" == mode and not "b" == mode:
+            raise InvalidParameter(
+                "Unknown mode. One of the following is allowed [t, b]"
+            )
+
+        if "b" in mode:
+            encoding = None
+
+        for fi, fo in self.io_files(iterable, ext=ext):
+            if mode == "t":
+                with open(fi, mode="r", encoding=encoding, newline="") as i, open(
+                    fo, mode="w", encoding=encoding, newline=""
+                ) as o:
+                    yield i, o
+            elif mode == "b":
+                with open(fi, mode="rb") as i, open(fo, mode="wb") as o:
+                    yield i, o
 
 
 class FileDecompress(FileBaseTransform):
@@ -96,8 +201,15 @@ class FileDecompress(FileBaseTransform):
         self._chunk_size = chunk_size
 
     def execute(self, *args):
+        # essential parameters check
+        valid = EssentialParameters(
+            self.__class__.__name__, [self._src_dir, self._src_pattern]
+        )
+        valid()
+
         files = super().get_target_files(self._src_dir, self._src_pattern)
-        self._logger.info("Files found %s" % files)
+        self.check_file_existence(files)
+
         for f in files:
             _, ext = os.path.splitext(f)
             if ext == ".zip":
@@ -168,7 +280,7 @@ class FileCompress(FileBaseTransform):
         valid()
 
         files = super().get_target_files(self._src_dir, self._src_pattern)
-        self._logger.info("Files found %s" % files)
+        self.check_file_existence(files)
 
         dir = self._dest_dir if self._dest_dir is not None else self._src_dir
         for f in files:
@@ -217,34 +329,56 @@ class DateFormatConvert(FileBaseTransform):
         self._formatter = formatter
 
     def execute(self, *args):
-        file = super().execute()
         valid = EssentialParameters(
-            self.__class__.__name__, [self._columns, self._formatter]
+            self.__class__.__name__,
+            [self._src_dir, self._src_pattern, self._columns, self._formatter],
         )
         valid()
 
-        _, ext = os.path.splitext(file)
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+        self.check_file_existence(files)
+
+        _, ext = os.path.splitext(files[0])
         if ext == ".csv":
             delimiter = ","
         elif ext == ".tsv":
             delimiter = "\t"
 
-        with codecs.open(file, mode="r", encoding=self._encoding) as fi, codecs.open(
-            self._dest_path, mode="w", encoding=self._encoding
-        ) as fo:
-            reader = csv.DictReader(fi, delimiter=delimiter)
-            writer = csv.DictWriter(fo, reader.fieldnames)
-            writer.writeheader()
-            date_util = DateUtil()
-            for row in reader:
-                for column in self._columns:
-                    r = row.get(column)
-                    if not r:
-                        continue
-                    row[column] = date_util.convert_date_format(r, self._formatter)
-                writer.writerow(row)
-            fo.flush()
-        self._logger.info("Finish %s" % self.__class__.__name__)
+        # TODO All the statements inside 'if' block will be deleted in the near future.
+        if self._dest_path:
+            self._logger.warning("'dest_path' will be unavailable in the near future.")
+
+            file = files[0]
+            with codecs.open(
+                file, mode="r", encoding=self._encoding
+            ) as fi, codecs.open(
+                self._dest_path, mode="w", encoding=self._encoding
+            ) as fo:
+                reader = csv.DictReader(fi, delimiter=delimiter)
+                writer = csv.DictWriter(fo, reader.fieldnames)
+                writer.writeheader()
+                date_util = DateUtil()
+                for row in reader:
+                    for column in self._columns:
+                        r = row.get(column)
+                        if not r:
+                            continue
+                        row[column] = date_util.convert_date_format(r, self._formatter)
+                    writer.writerow(row)
+                fo.flush()
+        else:
+            for ins, ous in super().io_writers(files, encoding=self._encoding):
+                reader = csv.DictReader(ins, delimiter=delimiter)
+                writer = csv.DictWriter(ous, reader.fieldnames)
+                writer.writeheader()
+                date_util = DateUtil()
+                for row in reader:
+                    for column in self._columns:
+                        r = row.get(column)
+                        if not r:
+                            continue
+                        row[column] = date_util.convert_date_format(r, self._formatter)
+                    writer.writerow(row)
 
 
 class ExcelConvert(FileBaseTransform):
@@ -256,49 +390,72 @@ class ExcelConvert(FileBaseTransform):
         super().__init__()
 
     def execute(self, *args):
-        # essential parameters check
-        valid = EssentialParameters(
-            self.__class__.__name__,
-            [self._src_dir, self._src_pattern, self._dest_dir, self._dest_pattern],
-        )
-        valid()
-
+        # TODO All the statements inside 'if' block will be deleted in the near future.
         if self._dest_pattern:
             self._logger.warning(
                 "'dest_pattern' will be unavailable in the near future."
                 + "Basically every classes which extends FileBaseTransform will be allowed"
                 + " plural input files, and output files will be the same name with input"
                 + " file names.\n"
-                "At that time, if 'dest_dir' is given, transformed files will be created in the given directory.\n" # noqa
+                "At that time, if 'dest_dir' is given, transformed files will be created in the given directory.\n"  # noqa
                 + "If not, original files will be updated by transformed files."
             )
 
-        # get a target file
-        target_files = super().get_target_files(self._src_dir, self._src_pattern)
-        if len(target_files) == 0:
-            raise InvalidCount(
-                "An input file %s does not exist."
-                % os.path.join(self._src_dir, self._src_pattern)
+            valid = EssentialParameters(
+                self.__class__.__name__,
+                [self._src_dir, self._src_pattern, self._dest_dir, self._dest_pattern],
             )
-        elif len(target_files) > 1:
-            self._logger.error("Hit target files %s" % target_files)
-            raise InvalidCount("Input files must be only one.")
-        self._logger.info(
-            "A target file to be converted: %s" % os.path.join(target_files[0])
-        )
+            valid()
 
-        # convert
-        _, dest_ext = os.path.splitext(self._dest_pattern)
-        if dest_ext != ".csv":
-            raise InvalidFormat(
-                "%s is not supported format in %s. The supported format is .csv"
-                % (dest_ext, self._dest_pattern)
+            # get a target file
+            target_files = super().get_target_files(self._src_dir, self._src_pattern)
+            if len(target_files) == 0:
+                raise InvalidCount(
+                    "An input file %s does not exist."
+                    % os.path.join(self._src_dir, self._src_pattern)
+                )
+
+            # get a target file
+            target_files = super().get_target_files(self._src_dir, self._src_pattern)
+            if len(target_files) == 0:
+                raise InvalidCount(
+                    "An input file %s does not exist."
+                    % os.path.join(self._src_dir, self._src_pattern)
+                )
+            elif len(target_files) > 1:
+                self._logger.error("Hit target files %s" % target_files)
+                raise InvalidCount("Input files must be only one.")
+            self._logger.info(
+                "A target file to be converted: %s" % os.path.join(target_files[0])
             )
 
-        df = pandas.read_excel(target_files[0], encoding=self._encoding)
-        dest_path = os.path.join(self._dest_dir, self._dest_pattern)
-        self._logger.info("Convert %s to %s" % (target_files[0], dest_path))
-        df.to_csv(dest_path, encoding=self._encoding)
+            # convert
+            _, dest_ext = os.path.splitext(self._dest_pattern)
+            if dest_ext != ".csv":
+                raise InvalidFormat(
+                    "%s is not supported format in %s. The supported format is .csv"
+                    % (dest_ext, self._dest_pattern)
+                )
+
+            df = pandas.read_excel(target_files[0], encoding=self._encoding)
+            dest_path = os.path.join(self._dest_dir, self._dest_pattern)
+            self._logger.info("Convert %s to %s" % (target_files[0], dest_path))
+            df.to_csv(dest_path, encoding=self._encoding)
+
+        else:
+            valid = EssentialParameters(
+                self.__class__.__name__, [self._src_dir, self._src_pattern]
+            )
+            valid()
+
+            files = super().get_target_files(self._src_dir, self._src_pattern)
+            self.check_file_existence(files)
+
+            # TODO Currently only excel to csv is supported.
+            for fi, fo in super().io_files(files, ext="csv"):
+                self._logger.info("Convert %s to %s" % (fi, fo))
+                df = pandas.read_excel(fi, encoding=self._encoding)
+                df.to_csv(fo, encoding=self._encoding)
 
 
 class FileDivide(FileBaseTransform):
@@ -318,57 +475,97 @@ class FileDivide(FileBaseTransform):
         self._header = header
 
     def execute(self, *args):
-        # essential parameters check
-        valid = EssentialParameters(
-            self.__class__.__name__,
-            [
-                self._src_dir,
-                self._src_pattern,
-                self._dest_dir,
-                self._dest_pattern,
-                self._divide_rows,
-            ],
-        )
-        valid()
-
         if self._dest_pattern:
             self._logger.warning(
-                "'dest_pattern' will be unavailable in the near future."
+                "'dest_pattern' will be unavailable in the near future. Please use dest_name instead."  # noqa
                 + "Basically every classes which extends FileBaseTransform will be allowed"
                 + " plural input files, and output files will be the same name with input"
                 + " file names.\n"
-                "At that time, if 'dest_dir' is given, transformed files will be created in the given directory.\n" # noqa
+                "At that time, if 'dest_dir' is given, transformed files will be created in the given directory.\n"  # noqa
                 + "If not, original files will be updated by transformed files."
             )
 
-        files = super().get_target_files(self._src_dir, self._src_pattern)
-        self._logger.info("Files found %s" % files)
+            valid = EssentialParameters(
+                self.__class__.__name__,
+                [
+                    self._src_dir,
+                    self._src_pattern,
+                    self._dest_dir,
+                    self._dest_pattern,
+                    self._divide_rows,
+                ],
+            )
+            valid()
 
-        file = files[0]
-        if self._dest_pattern is None:
-            fname = os.path.basename(file)
+            files = super().get_target_files(self._src_dir, self._src_pattern)
+            self._logger.info("Files found %s" % files)
+
+            files = super().get_target_files(self._src_dir, self._src_pattern)
+            self._logger.info("Files found %s" % files)
+
+            file = files[0]
+            if self._dest_pattern is None:
+                fname = os.path.basename(file)
+            else:
+                fname = self._dest_pattern
+
+            if "." in fname:
+                nameonly, ext = fname.split(".", 1)
+                ext = "." + ext
+            else:
+                nameonly = fname
+                ext = ""
+
+            if self._header:
+                with open(file, encoding=self._encoding) as i:
+                    self._header_row = i.readline()
+
+            row = self._ifile_reader(file)
+            newfilename = nameonly + ".%s" + ext
+            has_left = True
+            index = 1
+            while has_left:
+                ofile_path = os.path.join(self._dest_dir, newfilename % str(index))
+                has_left = self._ofile_generator(ofile_path, row)
+                index = index + 1
         else:
-            fname = self._dest_pattern
+            valid = EssentialParameters(
+                self.__class__.__name__,
+                [self._src_dir, self._src_pattern, self._divide_rows],
+            )
+            valid()
 
-        if "." in fname:
-            nameonly, ext = fname.split(".", 1)
-            ext = "." + ext
-        else:
-            nameonly = fname
-            ext = ""
+            files = super().get_target_files(self._src_dir, self._src_pattern)
+            self.check_file_existence(files)
 
-        if self._header:
-            with open(file, encoding=self._encoding) as i:
-                self._header_row = i.readline()
+            for file in files:
+                fname = os.path.basename(file)
 
-        row = self._ifile_reader(file)
-        newfilename = nameonly + ".%s" + ext
-        has_left = True
-        index = 1
-        while has_left:
-            ofile_path = os.path.join(self._dest_dir, newfilename % str(index))
-            has_left = self._ofile_generator(ofile_path, row)
-            index = index + 1
+                px = ""
+                if fname.startswith("."):
+                    fname = fname[1:]
+                    px = "."
+
+                if "." in fname:
+                    nameonly, ext = fname.split(".", 1)
+                    ext = "." + ext
+                else:
+                    nameonly = fname
+                    ext = ""
+
+                if self._header:
+                    with open(file, encoding=self._encoding) as i:
+                        self._header_row = i.readline()
+
+                row = self._ifile_reader(file)
+                newfilename = px + nameonly + ".%s" + ext
+
+                has_left = True
+                index = 1
+                while has_left:
+                    ofile_path = os.path.join(self._dest_dir, newfilename % str(index))
+                    has_left = self._ofile_generator(ofile_path, row)
+                    index = index + 1
 
     def _ifile_reader(self, filepath):
         with open(filepath, encoding=self._encoding) as i:
@@ -418,13 +615,16 @@ class FileRename(FileBaseTransform):
         valid()
 
         files = super().get_target_files(self._src_dir, self._src_pattern)
-        if len(files) == 0:
-            self._logger.info("No files are found. Nothing to do.")
-            return
+        self.check_file_existence(files)
 
         for file in files:
             dirname = os.path.dirname(file)
             basename = os.path.basename(file)
+
+            px = ""
+            if basename.startswith("."):
+                basename = basename[1:]
+                px = "."
 
             if "." in basename:
                 nameonly, ext = basename.split(".", 1)
@@ -433,7 +633,7 @@ class FileRename(FileBaseTransform):
                 nameonly = basename
                 ext = ""
 
-            newfilename = self._prefix + nameonly + self._suffix + ext
+            newfilename = self._prefix + px + nameonly + self._suffix + ext
             newfilepath = os.path.join(dirname, newfilename)
             os.rename(file, newfilepath)
             self._logger.info("File name changed %s -> %s" % (file, newfilepath))
@@ -468,33 +668,18 @@ class FileConvert(FileBaseTransform):
         valid()
 
         files = super().get_target_files(self._src_dir, self._src_pattern)
-        if len(files) == 0:
-            self._logger.info("No files are found. Nothing to do.")
-            return
+        self.check_file_existence(files)
 
-        for file in files:
-            basename = os.path.basename(file)
+        for fi, fo in super().io_files(files):
+            File().convert_encoding(
+                fi,
+                fo,
+                self._encoding_from,
+                self._encoding_to,
+                self._errors,
+            )
 
-            if self._dest_dir:
-                File().convert_encoding(
-                    file,
-                    os.path.join(self._dest_dir, basename),
-                    self._encoding_from,
-                    self._encoding_to,
-                    self._errors,
-                )
-            else:
-                tmpfile = os.path.join(
-                    os.path.dirname(file),
-                    "." + StringUtil().random_str(10) + "." + basename,
-                )
-                File().convert_encoding(
-                    file, tmpfile, self._encoding_from, self._encoding_to, self._errors
-                )
-                os.remove(file)
-                os.rename(tmpfile, file)
-
-            self._logger.info("Encoded file %s" % basename)
+            self._logger.info("Encoded file %s" % fi)
 
 
 class FileArchive(FileBaseTransform):
@@ -516,45 +701,74 @@ class FileArchive(FileBaseTransform):
     def execute(self, *args):
         valid = EssentialParameters(
             self.__class__.__name__,
-            [self._src_dir, self._src_pattern, self._dest_pattern],
+            [self._src_dir, self._src_pattern, self._format],
         )
         valid()
 
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+        self.check_file_existence(files)
+
+        dir = self._dest_dir if self._dest_dir is not None else self._src_dir
+
+        # TODO All the statements inside 'if' block will be deleted in the near future.
         if self._dest_pattern:
             self._logger.warning(
-                "'dest_pattern' will be unavailable in the near future."
+                "'dest_pattern' will be unavailable in the near future. Please use dest_name instead."  # noqa
                 + "Basically every classes which extends FileBaseTransform will be allowed"
                 + " plural input files, and output files will be the same name with input"
                 + " file names.\n"
-                "At that time, if 'dest_dir' is given, transformed files will be created in the given directory.\n" # noqa
+                "At that time, if 'dest_dir' is given, transformed files will be created in the given directory.\n"  # noqa
                 + "If not, original files will be updated by transformed files."
             )
 
-        files = super().get_target_files(self._src_dir, self._src_pattern)
-        self._logger.info("Files found %s" % files)
-        if len(files) == 0:
-            raise InvalidCount("No files are found.")
+            dest_path = os.path.join(dir, (self._dest_pattern + ".%s" % self._format))
 
-        dir = self._dest_dir if self._dest_dir is not None else self._src_dir
-        dest_path = os.path.join(dir, (self._dest_pattern + ".%s" % self._format))
-
-        if self._format == "tar":
-            with tarfile.open(dest_path, "w") as tar:
-                for file in files:
-                    arcname = (
-                        os.path.join(self._dest_pattern, os.path.basename(file))
-                        if self._create_dir
-                        else os.path.basename(file)
-                    )
-                    tar.add(file, arcname=arcname)
-        elif self._format == "zip":
-            with zipfile.ZipFile(dest_path, "w") as zp:
-                for file in files:
-                    arcname = (
-                        os.path.join(self._dest_pattern, os.path.basename(file))
-                        if self._create_dir
-                        else os.path.basename(file)
-                    )
-                    zp.write(file, arcname=arcname)
+            if self._format == "tar":
+                with tarfile.open(dest_path, "w") as tar:
+                    for file in files:
+                        arcname = (
+                            os.path.join(self._dest_pattern, os.path.basename(file))
+                            if self._create_dir
+                            else os.path.basename(file)
+                        )
+                        tar.add(file, arcname=arcname)
+            elif self._format == "zip":
+                with zipfile.ZipFile(dest_path, "w") as zp:
+                    for file in files:
+                        arcname = (
+                            os.path.join(self._dest_pattern, os.path.basename(file))
+                            if self._create_dir
+                            else os.path.basename(file)
+                        )
+                        zp.write(file, arcname=arcname)
+            else:
+                raise InvalidParameter(
+                    "'format' must set one of the followings [tar, zip]"
+                )
         else:
-            raise InvalidParameter("'format' must set one of the followings [tar, zip]")
+            valid = EssentialParameters(self.__class__.__name__, [self._dest_name])
+            valid()
+            dest_path = os.path.join(dir, (self._dest_name + ".%s" % self._format))
+
+            if self._format == "tar":
+                with tarfile.open(dest_path, "w") as tar:
+                    for file in files:
+                        arcname = (
+                            os.path.join(self._dest_name, os.path.basename(file))
+                            if self._create_dir
+                            else os.path.basename(file)
+                        )
+                        tar.add(file, arcname=arcname)
+            elif self._format == "zip":
+                with zipfile.ZipFile(dest_path, "w") as zp:
+                    for file in files:
+                        arcname = (
+                            os.path.join(self._dest_name, os.path.basename(file))
+                            if self._create_dir
+                            else os.path.basename(file)
+                        )
+                        zp.write(file, arcname=arcname)
+            else:
+                raise InvalidParameter(
+                    "'format' must set one of the followings [tar, zip]"
+                )

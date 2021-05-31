@@ -45,7 +45,6 @@ from .load.sqlite import CsvReadSqliteCreate, SqliteCreation, SqliteImport
 from .sqlite import SqliteQueryExecute
 from .transform.csv import (
     ColumnLengthAdjust,
-    CsvColsExtract,
     CsvColumnExtract,
     CsvConcat,
     CsvFormatChange,
