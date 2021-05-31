@@ -256,8 +256,10 @@ class CsvConcat(FileBaseTransform):
             for file in self._src_filenames:
                 files.append(os.path.join(self._src_dir, file))
 
-        if len(files) < 2:
-            raise InvalidCount("Two or more input files are required.")
+        if len(files) == 0:
+            raise FileNotFound("No files are found.")
+        elif len(files) == 1:
+            self._logger.warning("Two or more input files are required.")
 
         file = files.pop(0)
         df1 = pandas.read_csv(
