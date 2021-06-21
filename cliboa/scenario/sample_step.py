@@ -23,10 +23,14 @@ class SampleStep(BaseStep):
     def __init__(self):
         super().__init__()
         self._retry_count = 3
+        self._memo = None
         self._logger = LisboaLog.get_logger(__name__)
 
     def retry_count(self, retry_count):
         self._retry_count = retry_count
+
+    def memo(self, memo):
+        self._memo = memo
 
     def execute(self, *args):
         self._logger.info("Start %s" % self.__class__.__name__)

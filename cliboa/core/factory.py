@@ -11,10 +11,9 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-from cliboa.conf import env
 from cliboa.core.manager import JsonScenarioManager, YamlScenarioManager  # noqa
-from cliboa.core.step_queue import StepQueue  # noqa
 from cliboa.core.strategy import MultiProcExecutor, SingleProcExecutor
+from cliboa.util.class_util import ClassUtil
 from importlib import import_module
 
 
@@ -68,19 +67,9 @@ class CustomInstanceFactory(object):
 
     @staticmethod
     def create(cls_name):
-        custom_cls_candidates = env.COMMON_CUSTOM_CLASSES + env.PROJECT_CUSTOM_CLASSES
-        module = None
-        for c in custom_cls_candidates:
-            s = c.split(".")
-            if s[-1:][0] == cls_name:
-                module = s
-                break
-
-        if module is None:
+        ret = ClassUtil().describe_class(cls_name)
+        if ret is None:
             return None
-
-        root = ".".join(module[:-1])
-        mod_name = module[-1:][0]
+        (root, mod_name) = ret
         instance = getattr(import_module(root), mod_name)
-
         return instance()
