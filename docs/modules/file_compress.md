@@ -11,6 +11,7 @@ Compress files by any of the following compression type
 |format|Any of the following. [gz(gzip), bz2(bzip2), zip]|Yes|None||
 |encoding|Character encoding|No|utf-8||
 |chunk_size|The chunk size bytes, to be used for decompressing data streams that won’t fit into memory at once.|No|None||
+|nonfile_error|Whether an error is thrown when files are not found in src_dir.|No|False||
 
 # Examples
 ```

@@ -9,6 +9,7 @@ Decompress a file.
 |dest_dir|Destination directory to convert|Yes|None|
 |encoding|Character encoding when read and write|No|utf-8||
 |chunk_size|The chunk size bytes, to be used for decompressing data streams that won’t fit into memory at once.|No|None||
+|nonfile_error|Whether an error is thrown when files are not found in src_dir.|No|False||
 
 # Examples
 ```
