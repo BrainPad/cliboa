@@ -7,6 +7,7 @@ Upload a file to S3.
 |region|AWS available zone|No|asia-northeast1||
 |access_key|AWS access key|No|None||
 |access_key|AWS secret key|No|None||
+|profile|Profile name|No|None|Section name of ~/.aws/config|
 |bucket|S3 bucket name|Yes|None||
 |key|The name of the key to upload to|No|None||
 |src_dir|Directory of source to upload|Yes|None||

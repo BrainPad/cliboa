@@ -12,6 +12,7 @@
 #
 import boto3
 from boto3.session import Session
+from cliboa.util.exception import InvalidParameter
 
 
 class S3Adapter(object):
@@ -19,29 +20,41 @@ class S3Adapter(object):
     Adapter of AWS S3
     """
 
-    def __init__(self, access_key: str = None, secret_key: str = None):
+    def __init__(
+        self, access_key: str = None, secret_key: str = None, profile: str = None
+    ):
+
+        if (access_key and secret_key) and profile:
+            raise InvalidParameter(
+                "Either access_key and secret_key or profile path can be specified."
+            )
+
         self._access_key = access_key
         self._secret_key = secret_key
+        self._profile = profile
 
     def get_client(self):
         """
         Get s3 client
         """
-        return (
-            boto3.client(
+        if self._profile:
+            return Session(profile_name=self._profile).client("s3")
+        elif self._access_key and self._secret_key:
+            return boto3.client(
                 "s3",
                 aws_access_key_id=self._access_key,
                 aws_secret_access_key=self._secret_key,
             )
-            if self._access_key and self._secret_key
-            else boto3.client("s3")
-        )
+        else:
+            return boto3.client("s3")
 
     def get_resource(self):
         """
         Get s3 resource
         """
-        if self._access_key and self._secret_key:
+        if self._profile:
+            return Session(profile_name=self._profile).resource("s3")
+        elif self._access_key and self._secret_key:
             session = Session(
                 aws_access_key_id=self._access_key,
                 aws_secret_access_key=self._secret_key,

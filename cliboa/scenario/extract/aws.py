@@ -49,11 +49,7 @@ class S3Download(BaseS3):
         valid = EssentialParameters(self.__class__.__name__, [self._src_pattern])
         valid()
 
-        adapter = (
-            S3Adapter(self._access_key, self._secret_key)
-            if self._access_key and self._secret_key
-            else S3Adapter()
-        )
+        adapter = S3Adapter(self._access_key, self._secret_key, self._profile)
         client = adapter.get_client()
 
         p = client.get_paginator("list_objects")
