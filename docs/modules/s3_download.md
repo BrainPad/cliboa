@@ -7,6 +7,7 @@ Download files from S3.
 |region|AWS available zone|No|asia-northeast1||
 |access_key|AWS access key|No|None||
 |access_key|AWS secret key|No|None||
+|profile|Profile name|No|None|Section name of ~/.aws/config|
 |bucket|S3 bucket name|Yes|None||
 |prefix|Folder prefix used to filter blobs|No|None||
 |delimiter|Delimiter, used with prefix to emulate hierarchy|No|/||

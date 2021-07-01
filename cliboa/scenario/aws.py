@@ -25,6 +25,7 @@ class BaseAws(BaseStep):
         self._region = None
         self._access_key = None
         self._secret_key = None
+        self._profile = None
 
     def region(self, region):
         self._region = region
@@ -34,6 +35,9 @@ class BaseAws(BaseStep):
 
     def secret_key(self, secret_key):
         self._secret_key = secret_key
+
+    def profile(self, profile):
+        self._profile = profile
 
     def execute(self, *args):
         valid = EssentialParameters(self.__class__.__name__, [self._region])
