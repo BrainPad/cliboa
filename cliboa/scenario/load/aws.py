@@ -51,11 +51,7 @@ class S3Upload(BaseS3):
         )
         valid()
 
-        adapter = (
-            S3Adapter(self._access_key, self._secret_key)
-            if self._access_key and self._secret_key
-            else S3Adapter()
-        )
+        adapter = S3Adapter(self._access_key, self._secret_key, self._profile)
         resource = adapter.get_resource()
         bucket = resource.Bucket(self._bucket)
         files = super().get_target_files(self._src_dir, self._src_pattern)
