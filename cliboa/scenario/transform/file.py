@@ -16,6 +16,7 @@ import codecs
 import csv
 import gzip
 import os
+import shutil
 import tarfile
 import tempfile
 import zipfile
@@ -148,7 +149,7 @@ class FileBaseTransform(BaseStep):
 
             if input_path == output_path:
                 os.remove(input_path)
-            os.rename(temp_file, output_path)
+            shutil.move(temp_file, output_path)
 
     def io_writers(self, iterable, mode="t", encoding="utf-8", ext=None):
         """
