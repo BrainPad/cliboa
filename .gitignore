@@ -3,6 +3,9 @@
 .classpath
 .settings
 
+# IntelliJ IDEA
+.idea/
+
 # OS
 Thumbs.db
 .DS_Store
@@ -21,6 +24,7 @@ __pycache__
 .eggs
 build
 cliboa.egg-info
+coverage.xml
 common/
 conf/
 logs/

@@ -6,6 +6,7 @@ RUN mkdir -p /usr/local/cliboa
 # Install essential packages
 RUN apt update -y && \
     apt install -y git \
+                   gnupg-agent \
                    libc6-dev \
                    libbz2-dev \
                    libffi-dev \
@@ -14,6 +15,7 @@ RUN apt update -y && \
                    libsqlite3-dev \
                    openssl \
                    tk-dev \
+                   pinentry-curses \
                    python \
                    python-pip \
                    python3 \
@@ -48,3 +50,6 @@ RUN cd /usr/local/Python-3.8.5 && \
     ./configure --prefix=/usr/local/bin/python3.8 && \
     make && \
     make altinstall
+
+# Install essential module
+RUN pip3 install pipenv

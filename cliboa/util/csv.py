@@ -14,6 +14,7 @@
 import codecs
 import csv
 import os
+import shutil
 from cliboa.util.exception import CliboaException
 
 
@@ -94,7 +95,7 @@ class Csv(object):
                 writer.writerow(contents)
             out_f.flush()
         os.remove(input_file)
-        os.rename(output_file + ".tmp", input_file)
+        shutil.move(output_file + ".tmp", input_file)
 
     @staticmethod
     def extract_columns_with_numbers(
@@ -123,7 +124,7 @@ class Csv(object):
                 writer.writerow(contents)
             out_f.flush()
         os.remove(input_file)
-        os.rename(output_file + ".tmp", input_file)
+        shutil.move(output_file + ".tmp", input_file)
 
     @staticmethod
     def get_column_names(src, enc="utf-8"):
