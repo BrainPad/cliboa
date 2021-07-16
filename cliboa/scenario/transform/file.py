@@ -438,7 +438,7 @@ class ExcelConvert(FileBaseTransform):
                     % (dest_ext, self._dest_pattern)
                 )
 
-            df = pandas.read_excel(target_files[0], encoding=self._encoding)
+            df = pandas.read_excel(target_files[0])
             dest_path = os.path.join(self._dest_dir, self._dest_pattern)
             self._logger.info("Convert %s to %s" % (target_files[0], dest_path))
             df.to_csv(dest_path, encoding=self._encoding)
@@ -455,7 +455,7 @@ class ExcelConvert(FileBaseTransform):
             # TODO Currently only excel to csv is supported.
             for fi, fo in super().io_files(files, ext="csv"):
                 self._logger.info("Convert %s to %s" % (fi, fo))
-                df = pandas.read_excel(fi, encoding=self._encoding)
+                df = pandas.read_excel(fi)
                 df.to_csv(fo, encoding=self._encoding)
 
 
