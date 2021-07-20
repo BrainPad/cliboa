@@ -12,6 +12,8 @@ py_major_ver_and_pipfile = {
     "3.5": "Pipfile.above35",
     "3.6": "Pipfile.above36",
     "3.7": "Pipfile.above37",
+    "3.8": "Pipfile.above38",
+    "3.9": "Pipfile.above39",
 }
 pipfile_path = os.path.join(
     "cliboa/template",
