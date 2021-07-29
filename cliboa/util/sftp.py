@@ -1,5 +1,5 @@
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
+# Copyright BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -11,7 +11,6 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import errno
 import logging
 import os
 import stat
@@ -166,6 +165,7 @@ class Sftp(object):
         if not func:
             raise ValueError("Function must not be empty.")
 
+        err = None
         for _ in range(self._retryTimes):
             ssh = None
             sftp = None
@@ -201,6 +201,7 @@ class Sftp(object):
             except Exception as e:
                 self._logger.warning(e)
                 self._logger.warning(kwargs)
+                err = e
 
             finally:
                 if sftp is not None:
@@ -213,7 +214,7 @@ class Sftp(object):
             )
             sleep(10)
 
-        raise IOError(errno.ENOENT, "SFTP failed.")
+        raise IOError(err, "SFTP failed.")
 
 
 def list_file_func(**kwargs):

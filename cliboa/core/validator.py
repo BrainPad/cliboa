@@ -122,26 +122,26 @@ class DIScenarioFormat(object):
             )
 
 
-class MultiProcessCount(object):
-    """"""
-
-    def __init__(self, scenario_yaml_list):
-        self.__scenario_yaml_list = scenario_yaml_list
-
-
 class EssentialKeys(object):
     """
     Check if 'step: ' and 'class: $class_name' exist in scenario.yml
     """
 
     def __init__(self, scenario_yaml_list):
-        self.__scenario_yaml_list = scenario_yaml_list
+        self._scenario_yaml_list = scenario_yaml_list
 
     def __call__(self):
-        for scenario_yaml_dict in self.__scenario_yaml_list:
+        if type(self._scenario_yaml_list) is not list:
+            raise ScenarioFileInvalid(
+                "scenario.yml is invalid. it wad not a list"
+            )
+        for scenario_yaml_dict in self._scenario_yaml_list:
             multi_proc_cnt = scenario_yaml_dict.get("multi_process_count")
+            force_continue = scenario_yaml_dict.get("force_continue")
             parallel_steps = scenario_yaml_dict.get("parallel")
             if multi_proc_cnt:
+                continue
+            elif force_continue is not None:
                 continue
             elif parallel_steps:
                 for s in parallel_steps:
