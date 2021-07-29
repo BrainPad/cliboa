@@ -50,6 +50,19 @@ class SampleStepSub(SampleStep):
         self._logger.info("Finish %s" % self.__class__.__name__)
 
 
+class SampleStepSub(SampleStep):
+    """
+    For unit test
+    """
+
+    def __init__(self):
+        super().__init__()
+
+    def execute(self, *args):
+        self._logger.info("Start %s" % self.__class__.__name__)
+        self._logger.info("Finish %s" % self.__class__.__name__)
+
+
 class SampleCustomStep(BaseStep):
     """
     For unit test
