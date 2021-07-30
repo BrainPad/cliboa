@@ -27,7 +27,7 @@ black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-squ
 # Introduction
 ## What is cliboa
 cliboa is an application framework which can implement ETL(ELT) processing. It eases the implementation of ETL(ELT) processing. In this case, ETL(ELT) Processing means the processings like fetch, transform and transfer of data between various databases, storages, and other services.
-![](/cliboa_brief.png)
+![](/img/cliboa_brief.png)
 
 ## Features
 - Python based framework.
