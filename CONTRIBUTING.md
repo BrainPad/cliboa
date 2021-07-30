@@ -29,6 +29,8 @@ $ git push origin new-feature
 ### Development at usual work
 Use <a href="https://guides.github.com/introduction/flow/">github flow</a>
 
+![](/img/cliboa_githhub_flow.png)
+
 1. Create development branch from master
 2. Commit your changes
 3. Push to the branch
@@ -37,5 +39,10 @@ Use <a href="https://guides.github.com/introduction/flow/">github flow</a>
 
 
 ## Workflow for all developers according to a roadmap
+Prepare the branch by each versions before development
 
-
+![](/img/cliboa_githhub_flow.png)
+1. Create development branch from version branch
+2. Commit your changes
+3. Push to the branch
+4. Create new pull request to version branch
