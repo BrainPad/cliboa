@@ -138,11 +138,15 @@ class CliboAdmin(object):
             "3.5": "requirements.above35.txt",
             "3.6": "requirements.above36.txt",
             "3.7": "requirements.above37.txt",
+            "3.8": "requirements.above38.txt",
+            "3.9": "requirements.above39.txt",
         }
         py_major_ver_and_pipfile = {
             "3.5": "Pipfile.above35",
             "3.6": "Pipfile.above36",
             "3.7": "Pipfile.above37",
+            "3.8": "Pipfile.above38",
+            "3.9": "Pipfile.above39",
         }
         pipfile_path = os.path.join(
             cliboa_install_path,

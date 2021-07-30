@@ -1,5 +1,5 @@
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
+# Copyright BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -13,7 +13,11 @@
 #
 import os
 
-from cliboa.util.exception import DirStructureInvalid, FileNotFound, ScenarioFileInvalid
+from cliboa.util.exception import (
+    DirStructureInvalid,
+    FileNotFound,
+    ScenarioFileInvalid,
+)
 
 
 class ValidatorChain(object):
@@ -110,21 +114,12 @@ class DIScenarioFormat(object):
     def __call__(self):
         if not (self.__di_params):
             raise ScenarioFileInvalid(
-                "Dependeny Injection parameters are essential after %s" % self.__di_key
+                "Dependency Injection parameters are essential after %s" % self.__di_key
             )
         if not (self.__di_params.get("class")):
             raise ScenarioFileInvalid(
                 "class: is not specified after %s" % self.__di_key
             )
-
-
-class MultiProcessCount(object):
-    """
-
-    """
-
-    def __init__(self, scenario_yaml_list):
-        self.__scenario_yaml_list = scenario_yaml_list
 
 
 class EssentialKeys(object):
@@ -133,12 +128,22 @@ class EssentialKeys(object):
     """
 
     def __init__(self, scenario_yaml_list):
-        self.__scenario_yaml_list = scenario_yaml_list
+        self._scenario_yaml_list = scenario_yaml_list
 
     def __call__(self):
-        for scenario_yaml_dict in self.__scenario_yaml_list:
+        if type(self._scenario_yaml_list) is not list:
+            raise ScenarioFileInvalid(
+                "scenario.yml is invalid. it wad not a list"
+            )
+        for scenario_yaml_dict in self._scenario_yaml_list:
+            multi_proc_cnt = scenario_yaml_dict.get("multi_process_count")
+            force_continue = scenario_yaml_dict.get("force_continue")
             parallel_steps = scenario_yaml_dict.get("parallel")
-            if parallel_steps:
+            if multi_proc_cnt:
+                continue
+            elif force_continue is not None:
+                continue
+            elif parallel_steps:
                 for s in parallel_steps:
                     self._exists_step(s)
                     self._exists_class(s)

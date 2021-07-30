@@ -1,5 +1,5 @@
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
+# Copyright BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -14,14 +14,14 @@
 import configparser
 import os
 import re
+import tempfile
 from abc import abstractmethod
 
 from cliboa.conf import env
-from cliboa.scenario.validator import EssentialParameters, IOOutput, SqliteTableExistence  # noqa
+from cliboa.scenario.validator import IOOutput
 from cliboa.util.cache import StepArgument, StorageIO
-from cliboa.util.exception import FileNotFound
+from cliboa.util.exception import FileNotFound, InvalidParameter
 from cliboa.util.file import File
-from cliboa.util.sqlite import SqliteAdapter
 
 
 class BaseStep(object):
@@ -116,6 +116,7 @@ class BaseStep(object):
         Returns an resource contents from the path if src starts with "path:",
         returns src if not
         """
+        self._logger.warning("DeprecationWarning: Will be removed in the near future")
         if src[:5].upper() == "PATH:":
             fpath = src[5:]
             if os.path.exists(fpath) is False:
@@ -123,6 +124,26 @@ class BaseStep(object):
             with open(fpath, mode="r", encoding=encoding) as f:
                 return f.read()
         return src
+
+    def _source_path_reader(self, src, encoding="utf-8"):
+        """
+        Returns an path to temporary file contains content specify in src if src is dict,
+        returns src if not
+        """
+        if src is None:
+            return src
+        if isinstance(src, dict) and "content" in src:
+            with tempfile.NamedTemporaryFile(
+                mode="w", encoding=encoding, delete=False
+            ) as fp:
+                fp.write(src["content"])
+                return fp.name
+        elif isinstance(src, dict) and "file" in src:
+            if os.path.exists(src["file"]) is False:
+                raise FileNotFound(src)
+            return src["file"]
+        else:
+            raise InvalidParameter("The parameter is invalid.")
 
     def _exception_dispatcher(self, e):
         """
@@ -132,77 +153,9 @@ class BaseStep(object):
         raise e
 
 
-class BaseSqlite(BaseStep):
-    """
-    Base class of all the sqlite classes
-    """
-
-    def __init__(self):
-        super().__init__()
-        self._sqlite_adptr = SqliteAdapter()
-        self._dbname = None
-        self._columns = []
-        self._vacuum = False
-
-    def dbname(self, dbname):
-        self._dbname = dbname
-
-    def columns(self, columns):
-        self._columns = columns
-
-    def vacuum(self, vacuum):
-        self._vacuum = vacuum
-
-    def execute(self, *args):
-        # essential parameters check
-        param_valid = EssentialParameters(self.__class__.__name__, [self._dbname])
-        param_valid()
-
-    def _dict_factory(self, cursor, row):
-        d = {}
-        for i, col in enumerate(cursor.description):
-            d[col[0]] = row[i]
-        return d
-
-    def _close_database(self):
-        """
-        Disconnect sqlite database (execute vacuume if necessary)
-        """
-        self._sqlite_adptr.close()
-        if self._vacuum is True:
-            try:
-                self._sqlite_adptr.connect(self._dbname)
-                self._sqlite_adptr.execute("VACUUM")
-            finally:
-                self._sqlite_adptr.close()
-
-
-class SqliteQueryExecute(BaseSqlite):
-    """
-    Execute only row query of insert, update or delete
-    If would like to execute read query, use SqliteRead class
-    """
-
-    def __init__(self):
-        super().__init__()
-        self._tblname = None
-        self._raw_query = None
-
-    def tblname(self, tblname):
-        self._tblname = tblname
-
-    def raw_query(self, raw_query):
-        self._raw_query = raw_query
-
-    def execute(self, *args):
-        super().execute()
-        self._sqlite_adptr.connect(self._dbname)
-        self._sqlite_adptr.execute(self._raw_query)
-        self._sqlite_adptr.commit()
-
-
 class Stdout(BaseStep):
     """
+    @deprecated
     Standard output for io: input
     """
 

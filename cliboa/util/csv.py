@@ -14,12 +14,64 @@
 import codecs
 import csv
 import os
+import shutil
+from cliboa.util.exception import CliboaException
 
 
 class Csv(object):
+
+    @staticmethod
+    def quote_convert(string):
+        """
+        Convert string to csv quoting type.
+        """
+        convert_type = {
+            "QUOTE_ALL": csv.QUOTE_ALL,
+            "QUOTE_MINIMAL": csv.QUOTE_MINIMAL,
+            "QUOTE_NONNUMERIC": csv.QUOTE_NONNUMERIC,
+            "QUOTE_NONE": csv.QUOTE_NONE,
+        }
+
+        if string.upper() not in convert_type:
+            raise CliboaException(
+                "Unknown string. One of the followings are allowed [QUOTE_ALL, QUOTE_MINIMAL, QUOTE_NONNUMERIC, QUOTE_NONE]"  # noqa
+            )
+        return convert_type.get(string.upper())
+
+    @staticmethod
+    def delimiter_convert(string):
+        """
+        Convert string to csv delimiter.
+        """
+        if string.upper() == "CSV":
+            return ","
+        elif string.upper() == "TSV":
+            return "\t"
+        else:
+            raise CliboaException(
+                "Unknown string. One of the followings are allowed [CSV, TSV]"
+            )
+
+    @staticmethod
+    def newline_convert(string):
+        convert_type = {
+            "LF": "\n",
+            "CR": "\r",
+            "CRLF": "\r\n",
+        }
+
+        if string.upper() not in convert_type:
+            raise CliboaException(
+                "Unknown string. One of the followings are allowed [LF, CR, CRLF]"
+            )
+        return convert_type.get(string.upper())
+
     @staticmethod
     def extract_columns_with_names(
-        input_file, output_file, remain_column_names, enc="utf-8",
+        input_file,
+        output_file,
+        remain_column_names,
+        enc="utf-8",
     ):
         """
         Extract only the necessary columns from a CSV file and output a new CSV
@@ -28,7 +80,7 @@ class Csv(object):
             input_file: Input csv file name
             output_file: Output csv file name
             remain_column_names: Columns which remain
-            enc: Encording
+            enc: Encoding
         """
         with codecs.open(input_file, mode="r", encoding=enc) as in_f, codecs.open(
             output_file + ".tmp", mode="w", encoding=enc
@@ -43,7 +95,7 @@ class Csv(object):
                 writer.writerow(contents)
             out_f.flush()
         os.remove(input_file)
-        os.rename(output_file + ".tmp", input_file)
+        shutil.move(output_file + ".tmp", input_file)
 
     @staticmethod
     def extract_columns_with_numbers(
@@ -56,7 +108,7 @@ class Csv(object):
             input_file: Input csv file name
             output_file: Output csv file name
             remain_column_numbers: Column numbers which remain
-            enc: Encording
+            enc: Encoding
         """
         with codecs.open(input_file, mode="r", encoding=enc) as in_f, codecs.open(
             output_file + ".tmp", mode="w", encoding=enc
@@ -72,4 +124,15 @@ class Csv(object):
                 writer.writerow(contents)
             out_f.flush()
         os.remove(input_file)
-        os.rename(output_file + ".tmp", input_file)
+        shutil.move(output_file + ".tmp", input_file)
+
+    @staticmethod
+    def get_column_names(src, enc="utf-8"):
+        """
+        Returns csv column names
+        """
+        columns = []
+        with open(src, "r", encoding=enc) as f:
+            reader = csv.DictReader(f)
+            columns = reader.fieldnames
+        return columns

@@ -1,5 +1,5 @@
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
+# Copyright BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -12,12 +12,12 @@
 # all copies or substantial portions of the Software.
 #
 import os
+import shutil
 import sys
 from unittest import TestCase
 
 from cliboa.client import CommandArgumentParser, ScenarioRunner
 from cliboa.conf import env
-from cliboa.scenario.base import BaseSqlite
 from cliboa.scenario.sample_step import SampleCustomStep
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
@@ -31,6 +31,7 @@ class TestBase(TestCase):
         cmd_parser = CommandArgumentParser()
         self._cmd_args = cmd_parser.parse()
         self._log_file = os.path.join(env.BASE_DIR, "logs", "app.log")
+        self._data_dir = os.path.join(env.BASE_DIR, "data")
         runner = ScenarioRunner(self._cmd_args)
         runner.add_system_path()
 
@@ -75,21 +76,41 @@ class TestBase(TestCase):
         self.assertTrue(masked_access_key)
         self.assertTrue(masked_secret_key)
 
+    def test_source_path_reader_with_none(self):
+        instance = SampleCustomStep()
+        Helper.set_property(
+            instance, "logger", LisboaLog.get_logger(instance.__class__.__name__)
+        )
+        ret = instance._source_path_reader(None)
 
-class TestBaseSqlite(object):
-    def setup_method(self, method):
-        self._db_dir = os.path.join(env.BASE_DIR, "db")
+        assert ret is None
 
-    def test_execute_ng_invalid_dbname(self):
-        """
-        sqlite db does not exist.
-        """
+    def test_source_path_reader_with_path(self):
         try:
-            instance = BaseSqlite()
-            db_file = os.path.join(self._db_dir, "spam.db")
-            Helper.set_property(instance, "dbname", db_file)
-            Helper.set_property(instance, "tblname", "spam_table")
-            instance.execute()
-        except Exception as e:
-            tb = sys.exc_info()[2]
-            assert "not found" in "{0}".format(e.with_traceback(tb))
+            os.makedirs(self._data_dir)
+            dummy_pass = os.path.join(self._data_dir, "id_rsa")
+            with open(dummy_pass, "w") as f:
+                f.write("test")
+
+            instance = SampleCustomStep()
+            Helper.set_property(
+                instance, "logger", LisboaLog.get_logger(instance.__class__.__name__)
+            )
+
+            ret = instance._source_path_reader({"file": dummy_pass})
+            assert ret == dummy_pass
+            with open(ret, "r") as fp:
+                actual = fp.read()
+                assert "test" == actual
+        finally:
+            shutil.rmtree(self._data_dir)
+
+    def test_source_path_reader_with_content(self):
+        instance = SampleCustomStep()
+        Helper.set_property(
+            instance, "logger", LisboaLog.get_logger(instance.__class__.__name__)
+        )
+        ret = instance._source_path_reader({"content": "test"})
+        with open(ret, "r") as fp:
+            actual = fp.read()
+            assert "test" == actual

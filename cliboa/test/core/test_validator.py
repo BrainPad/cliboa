@@ -1,5 +1,5 @@
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
+# Copyright BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -14,9 +14,7 @@
 import os
 import shutil
 import sys
-
 import pytest
-import yaml
 
 from cliboa.client import CommandArgumentParser
 from cliboa.conf import env
@@ -24,9 +22,10 @@ from cliboa.core.validator import (
     ProjectDirectoryExistence,
     ScenarioFileExistence,
     ScenarioYamlKey,
-    ScenarioYamlType
+    ScenarioYamlType,
+    EssentialKeys,
 )
-from cliboa.util.exception import FileNotFound, ScenarioFileInvalid
+from cliboa.util.exception import FileNotFound, ScenarioFileInvalid, DirStructureInvalid
 
 
 class TestValidators(object):
@@ -39,12 +38,16 @@ class TestValidators(object):
         self._scenario_file = os.path.join(
             env.BASE_DIR, "project", "spam", "scenario.yml"
         )
+        os.makedirs(self._pj_dir, exist_ok=True)
+
+    def teardown_method(self, method):
+        if os.path.exists(self._pj_dir):
+            shutil.rmtree(self._pj_dir)
 
     def test_scenario_yaml_type_ok(self):
         """
         scenario.yml type is valid
         """
-        os.makedirs(self._pj_dir)
         test_data = {
             "scenario": [
                 {
@@ -54,26 +57,14 @@ class TestValidators(object):
                 }
             ]
         }
-        with open(self._scenario_file, "w") as f:
-            f.write(yaml.dump(test_data, default_flow_style=False))
-        pj_f = open(self._scenario_file, "r")
-        pj_yaml_dict = yaml.safe_load(pj_f)
-        is_dict = True
-        try:
-            valid_instance = ScenarioYamlType(pj_yaml_dict)
-            valid_instance()
-        except Exception:
-            is_dict = False
-        else:
-            pj_f.close()
-            shutil.rmtree(self._pj_dir)
-        assert is_dict is True
+        valid_instance = ScenarioYamlType(test_data)
+        ret = valid_instance()
+        assert ret is None
 
     def test_scenario_yaml_type_ng(self):
         """
         scenario.yml type is invalid
         """
-        os.makedirs(self._pj_dir)
         test_data = [
             {
                 "scenario": {
@@ -83,26 +74,17 @@ class TestValidators(object):
                 }
             }
         ]
-        with open(self._scenario_file, "w") as f:
-            f.write(yaml.dump(test_data, default_flow_style=False))
-        pj_f = open(self._scenario_file, "r")
-        pj_yaml_dict = yaml.safe_load(pj_f)
-        is_dict = True
-        try:
-            valid_instance = ScenarioYamlType(pj_yaml_dict)
+        with pytest.raises(ScenarioFileInvalid) as excinfo:
+            valid_instance = ScenarioYamlType(test_data)
             valid_instance()
-        except Exception:
-            is_dict = False
-        finally:
-            pj_f.close()
-            shutil.rmtree(self._pj_dir)
-        assert is_dict is False
+        assert "scenario.yml is invalid. Check scenario.yml format." in str(
+            excinfo.value
+        )
 
     def test_scenario_yaml_key_ok(self):
         """
         scenario.yml essential key is valid
         """
-        os.makedirs(self._pj_dir)
         test_data = {
             "scenario": [
                 {
@@ -112,96 +94,65 @@ class TestValidators(object):
                 }
             ]
         }
-        with open(self._scenario_file, "w") as f:
-            f.write(yaml.dump(test_data, default_flow_style=False))
-        pj_f = open(self._scenario_file, "r")
-        pj_yaml_dict = yaml.safe_load(pj_f)
-        is_valid_yml = True
-        try:
-            valid_instance = ScenarioYamlKey(pj_yaml_dict)
-            valid_instance()
-        except Exception:
-            is_valid_yml = False
-        else:
-            pj_f.close()
-            shutil.rmtree(self._pj_dir)
-        assert is_valid_yml is True
+        valid_instance = ScenarioYamlKey(test_data)
+        ret = valid_instance()
+        assert ret is None
 
     def test_scenario_yaml_key_ng_with_no_content(self):
         """
         scenario.yml essential key exists, but content does not exist.
         """
-        os.makedirs(self._pj_dir)
         test_data = {"scenario": ""}
-        with open(self._scenario_file, "w") as f:
-            f.write(yaml.dump(test_data, default_flow_style=False))
-        pj_f = open(self._scenario_file, "r")
-        pj_yaml_dict = yaml.safe_load(pj_f)
         with pytest.raises(ScenarioFileInvalid) as excinfo:
-            valid_instance = ScenarioYamlKey(pj_yaml_dict)
+            valid_instance = ScenarioYamlKey(test_data)
             valid_instance()
-        shutil.rmtree(self._pj_dir)
-        assert "invalid" in str(excinfo.value)
+        assert (
+            "scenario.yml is invalid. 'scenario:' key does not exist, or 'scenario:' key exists but content under 'scenario:' key does not exist."  # noqa
+            in str(excinfo.value)
+        )
 
     def test_scenario_yaml_key_ng_with_no_scenario_key(self):
         """
         scenario.yml essential key does not exist.
         """
-        os.makedirs(self._pj_dir)
         test_data = {"spam": ""}
-        with open(self._scenario_file, "w") as f:
-            f.write(yaml.dump(test_data, default_flow_style=False))
-        pj_f = open(self._scenario_file, "r")
-        pj_yaml_dict = yaml.safe_load(pj_f)
         with pytest.raises(ScenarioFileInvalid) as excinfo:
-            valid_instance = ScenarioYamlKey(pj_yaml_dict)
+            valid_instance = ScenarioYamlKey(test_data)
             valid_instance()
-        shutil.rmtree(self._pj_dir)
-        assert "scenario" in str(excinfo.value)
+        assert (
+            "scenario.yml is invalid. 'scenario:' key does not exist, or 'scenario:' key exists but content under 'scenario:' key does not exist."  # noqa
+            in str(excinfo.value)
+        )
 
     def test_project_directory_existence_ok(self):
         """
         Specified directory exists
         """
-        os.makedirs(self._pj_dir)
         valid_instance = ProjectDirectoryExistence()
-        exists_pj_dir = True
-        try:
-            valid_instance(self._pj_dir)
-        except Exception:
-            exists_pj_dir = False
-        finally:
-            shutil.rmtree(self._pj_dir)
-        assert exists_pj_dir is True
+        ret = valid_instance(self._pj_dir)
+        assert ret is None
 
     def test_project_directory_existence_ng(self):
         """
         Specified directory does not exist
         """
-        valid_instance = ProjectDirectoryExistence()
-        exists_pj_dir = True
-        try:
+        shutil.rmtree(self._pj_dir)
+        with pytest.raises(DirStructureInvalid) as excinfo:
+            valid_instance = ProjectDirectoryExistence()
             valid_instance(self._pj_dir)
-        except Exception:
-            exists_pj_dir = False
-        assert exists_pj_dir is False
+        assert "Project directory %s does not exist" % self._pj_dir in str(
+            excinfo.value
+        )
 
     def test_scenario_file_existence_ok(self):
         """
         Specified file exists
         """
-        os.makedirs(self._pj_dir)
         scenario_file = os.path.join(self._pj_dir, "scenario.yml")
         open(scenario_file, "w").close
         valid_instance = ScenarioFileExistence()
-        exists_scenario_file = True
-        try:
-            valid_instance(scenario_file)
-        except Exception:
-            exists_scenario_file = False
-        finally:
-            shutil.rmtree(self._pj_dir)
-        assert exists_scenario_file is True
+        ret = valid_instance(scenario_file)
+        assert ret is None
 
     def test_scenario_file_existence_ng(self):
         """
@@ -211,4 +162,81 @@ class TestValidators(object):
         valid_instance = ScenarioFileExistence()
         with pytest.raises(FileNotFound) as excinfo:
             valid_instance(scenario_file)
-        assert "not exist" in str(excinfo.value)
+        assert "scenario.yml %s does not exist" % scenario_file in str(excinfo.value)
+
+    def test_essential_keys_ok_1(self):
+        """
+        Block requires both "step" and "class"
+        """
+        test_yaml = [
+            {
+                "step": "test step",
+                "class": "SampleClass",
+            }
+        ]
+        valid_instance = EssentialKeys(test_yaml)
+        valid_instance()
+
+    def test_essential_keys_ok_2(self):
+        """
+        If block starts with "parallel"
+        all steps under the "parallel" requires both "step" and "class"
+        """
+        test_yaml = [
+            {
+                "parallel": [
+                    {
+                        "step": "test step 1",
+                        "class": "SampleClass",
+                    },
+                    {
+                        "step": "test step 2",
+                        "class": "SampleClass",
+                    },
+                ]
+            }
+        ]
+        valid_instance = EssentialKeys(test_yaml)
+        valid_instance()
+
+    def test_essential_keys_ok_3(self):
+        """
+        If block starts with "multi_process_count"
+        does not require "step" or "class"
+        """
+        test_yaml = [{"multi_process_count": 1}]
+        valid_instance = EssentialKeys(test_yaml)
+        valid_instance()
+
+    def test_essential_keys_ng1(self):
+        """
+        Block requires both "step" and "class"
+        """
+        test_yaml = [{"class": "SampleClass"}]
+        with pytest.raises(ScenarioFileInvalid) as excinfo:
+            valid_instance = EssentialKeys(test_yaml)
+            valid_instance()
+        assert "scenario.yml is invalid. 'step:' does not exist." in str(excinfo.value)
+
+    def test_essential_keys_ng_2(self):
+        """
+        If block starts with "parallel"
+        all steps under the "parallel" requires both "step" and "class"
+        """
+        test_yaml = [
+            {
+                "parallel": [
+                    {
+                        "step": "test step 1",
+                        "class": "SampleClass",
+                    },
+                    {
+                        "class": "SampleClass",
+                    },
+                ]
+            }
+        ]
+        with pytest.raises(ScenarioFileInvalid) as excinfo:
+            valid_instance = EssentialKeys(test_yaml)
+            valid_instance()
+        assert "scenario.yml is invalid. 'step:' does not exist." in str(excinfo.value)

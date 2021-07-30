@@ -1,5 +1,5 @@
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
+# Copyright BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -12,17 +12,16 @@
 # all copies or substantial portions of the Software.
 #
 import os
-from abc import abstractmethod
-
 import yaml
 
-from cliboa.core.validator import EssentialKeys, ScenarioYamlKey, ScenarioYamlType  # noqa
+from abc import abstractmethod
+from cliboa.core.validator import EssentialKeys, ScenarioYamlKey, ScenarioYamlType
 from cliboa.util.lisboa_log import LisboaLog
 
 
 class ScenarioParser(object):
     """
-    Base class of scnario file parser
+    Base class of scenario file parser
     """
 
     def __init__(self, pj_scenario_file, cmn_scenario_file):
@@ -44,39 +43,42 @@ class YamlScenarioParser(ScenarioParser):
 
     def parse(self):
         self._logger.info("Start to parse scenario.yml")
-        pj_f = open(self._pj_scenario_file, "r")
-        pj_yaml_dict = yaml.safe_load(pj_f)
 
-        self.__valid_scenario_yaml(pj_yaml_dict)
-        exists_cmn_scenario_file = os.path.isfile(self._cmn_scenario_file)
-        if exists_cmn_scenario_file:
-            cmn_f = open(self._cmn_scenario_file, "r")
-            cmn_yaml_dict = yaml.safe_load(cmn_f)
-            self.__valid_scenario_yaml(cmn_yaml_dict)
-            self.__exists_ess_keys(pj_yaml_dict["scenario"])
-            self.__exists_ess_keys(cmn_yaml_dict["scenario"])
-            yaml_list = self.__merge_scenario_yaml(
+        # Load projet scenario file
+        with open(self._pj_scenario_file, "r") as pj_f:
+            pj_yaml_dict = yaml.safe_load(pj_f)
+            self._valid_scenario_yaml(pj_yaml_dict)
+            self._exists_ess_keys(pj_yaml_dict["scenario"])
+
+        # Load common scenario file (if exist)
+        cmn_yaml_dict = None
+        if os.path.isfile(self._cmn_scenario_file):
+            with open(self._cmn_scenario_file, "r") as cmn_f:
+                cmn_yaml_dict = yaml.safe_load(cmn_f)
+                self._valid_scenario_yaml(cmn_yaml_dict)
+                self._exists_ess_keys(cmn_yaml_dict["scenario"])
+
+        if cmn_yaml_dict:
+            yaml_list = self._merge_scenario_yaml(
                 pj_yaml_dict["scenario"], cmn_yaml_dict["scenario"]
             )
-            cmn_f.close()
         else:
             yaml_list = pj_yaml_dict.get("scenario")
 
         self._logger.info("Finish to parse scenario.yml")
-        pj_f.close()
         return yaml_list
 
-    def __valid_scenario_yaml(self, yaml_dict):
+    def _valid_scenario_yaml(self, yaml_dict):
         """
         validate instance type and essential key in scenario.yml
         """
-        for scenario_yaml_valid in ["ScenarioYamlType", "ScenarioYamlKey"]:
-            cls_name = globals()[scenario_yaml_valid](yaml_dict)
-            cls_name()
+        valids = [ScenarioYamlKey, ScenarioYamlType]
+        for valid in valids:
+            valid(yaml_dict)()
 
-    def __merge_scenario_yaml(self, pj_yaml_list, cmn_yaml_list):
+    def _merge_scenario_yaml(self, pj_yaml_list, cmn_yaml_list):
         """
-        Merge project scenrio.yml and common scenairo.yml.
+        Merge project scenario.yml and common scenario.yml.
         If the same class specification exists,
         scenario.yml of projet is taken priority.
         """
@@ -107,7 +109,7 @@ class YamlScenarioParser(ScenarioParser):
             pj_cls_attrs = cmn_cls_attrs
         pj_yaml_dict["arguments"] = pj_cls_attrs
 
-    def __exists_ess_keys(self, scenario_yaml_list):
+    def _exists_ess_keys(self, scenario_yaml_list):
         """
         Check if the essential keys exist in scenario.yml
         """

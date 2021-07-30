@@ -1,5 +1,5 @@
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
+# Copyright BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -14,6 +14,7 @@
 import os
 import re
 
+from cliboa.adapter.aws import S3Adapter
 from cliboa.scenario.aws import BaseS3
 from cliboa.scenario.validator import EssentialParameters
 
@@ -48,15 +49,18 @@ class S3Download(BaseS3):
         valid = EssentialParameters(self.__class__.__name__, [self._src_pattern])
         valid()
 
-        client = self._s3_client()
+        adapter = S3Adapter(self._access_key, self._secret_key, self._profile)
+        client = adapter.get_client()
+
         p = client.get_paginator("list_objects")
         for page in p.paginate(
             Bucket=self._bucket, Delimiter=self._delimiter, Prefix=self._prefix
         ):
             for c in page.get("Contents", []):
-                filename = c.get("Key")
+                path = c.get("Key")
+                filename = os.path.basename(path)
                 rec = re.compile(self._src_pattern)
                 if not rec.fullmatch(filename):
                     continue
-                dest_path = os.path.join(self._dest_dir, os.path.basename(filename))
-                client.download_file(self._bucket, filename, dest_path)
+                dest_path = os.path.join(self._dest_dir, filename)
+                client.download_file(self._bucket, path, dest_path)

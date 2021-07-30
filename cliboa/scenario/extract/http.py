@@ -1,5 +1,5 @@
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
+# Copyright BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -16,6 +16,7 @@ import os
 from cliboa.scenario.base import BaseStep
 from cliboa.scenario.validator import EssentialParameters
 from cliboa.util.http import Download
+from requests.auth import HTTPBasicAuth
 
 
 class HttpExtract(BaseStep):
@@ -70,5 +71,34 @@ class HttpDownload(HttpExtract):
             else os.path.join(self._dest_dir, self._src_pattern)
         )
 
-        d = Download(url, dest_path, self._timeout, self._retry_count)
+        d = Download(url, dest_path, self._timeout, self._retry_count, **self.get_params())
         d.execute()
+
+    def get_params(self):
+        # This parameter will be passed to **kwargs when calling the request.
+        # Please implement in subclasses if necessary.
+        return {}
+
+
+class HttpDownloadViaBasicAuth(HttpDownload):
+    def __init__(self):
+        super().__init__()
+        self._user = None
+        self._password = None
+
+    def user(self, user):
+        self._user = user
+
+    def password(self, password):
+        self._password = password
+
+    def execute(self, *args):
+        valid = EssentialParameters(
+            self.__class__.__name__, [self._user, self._password]
+        )
+        valid()
+
+        super().execute()
+
+    def get_params(self):
+        return {"auth": HTTPBasicAuth(self._user, self._password)}

@@ -1,5 +1,5 @@
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
+# Copyright BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -11,6 +11,7 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+import json
 import os
 import re
 import subprocess
@@ -21,12 +22,17 @@ from cliboa.core.file_parser import YamlScenarioParser
 from cliboa.core.listener import StepStatusListener
 from cliboa.core.scenario_queue import ScenarioQueue
 from cliboa.core.step_queue import StepQueue
-from cliboa.core.validator import DIScenarioFormat, ProjectDirectoryExistence, ScenarioFileExistence
+from cliboa.core.validator import (
+    DIScenarioFormat,
+    ProjectDirectoryExistence,
+    ScenarioFileExistence,
+)
 from cliboa.scenario import *  # noqa
 from cliboa.util.cache import StepArgument
-from cliboa.util.exception import ScenarioFileInvalid
+from cliboa.util.class_util import ClassUtil
+from cliboa.util.exception import CliboaException, InvalidParameter, ScenarioFileInvalid
 from cliboa.util.helper import Helper
-from cliboa.util.http import BasicAuth, FormAuth  # noqa
+from cliboa.util.http import FormAuth  # noqa
 from cliboa.util.lisboa_log import LisboaLog
 
 __all__ = ["YamlScenarioManager", "JsonScenarioManager"]
@@ -34,7 +40,10 @@ __all__ = ["YamlScenarioManager", "JsonScenarioManager"]
 
 class ScenarioManager(object):
     """
-    Management of scenario defined in files
+    Base class which is to create individual instances from scenario files,
+    and push them to the executable queue.
+
+    Note : Currently only yaml format scenario file is implemented.
     """
 
     # dependency injection keys in scenario.yml
@@ -71,107 +80,90 @@ class ScenarioManager(object):
                 + cmd_args.format
             )
 
-        # key and var of dinamic variables
-        self._dynamic_key_and_val = {}
+    def create_scenario_queue(self):
+        # validation
+        self._valid_essential_dir()
+        self._valid_essential_files()
+
+        scenario_list = self.parse_file()
+        if not scenario_list or isinstance(scenario_list, list) is False:
+            raise ScenarioFileInvalid("scenario file is invalid.")
+
+        self._logger.info("Start to create scenario queue")
+        queue = StepQueue()
+        self._add_queue(queue, scenario_list)
+
+        # save queue to static area
+        setattr(ScenarioQueue, "step_queue", queue)
+        self._logger.info("Finish to invoke scenario")
 
     @abstractmethod
-    def create_scenario_queue(self):
+    def parse_file(self, file):
         """
-        Create Scenario Queue
+        Parse file contents to the list object
         """
 
-
-class YamlScenarioManager(ScenarioManager):
-    """
-    Manage scenario with yml format
-    """
-
-    def create_scenario_queue(self):
-        self._logger.info("Start to create scenario queue")
-
-        # validation
-        self.__valid_essential_dir()
-        self.__valid_essential_files()
-
-        # parse scenario.yml
-        parser = YamlScenarioParser(self._pj_scenario_file, self._cmn_scenario_file)
-        yaml_scenario_list = parser.parse()
-
-        if yaml_scenario_list and isinstance(yaml_scenario_list, list):
-            self.__invoke_steps(yaml_scenario_list)
-        else:
-            raise ScenarioFileInvalid("scenario.yml is invalid.")
-
-        self._logger.info("Finish to create scenario queue")
-
-    def __valid_essential_dir(self):
+    def _valid_essential_dir(self):
         """
         Project directory validation
         """
         valid_instance = ProjectDirectoryExistence()
         valid_instance(self._pj_dir)
 
-    def __valid_essential_files(self):
+    def _valid_essential_files(self):
         """
-        Scenairo file validation
+        Scenario file validation
         """
         valid_instance = ScenarioFileExistence()
         valid_instance(self._pj_scenario_file)
 
-    def __invoke_steps(self, yaml_scenario_list):
+    def _add_queue(self, queue, scenario_list):
         """
-        Create executable instance and push them to queue
-        Args:
-            yaml_scenario_list: parsed yaml list
+        Add executable instance to the queue
         """
-        self._logger.info("Start to invoke scenario")
-
-        # Create queue to save step instances
-        q = StepQueue()
-
-        for s_dict in yaml_scenario_list:
-            if "multi_process_count" in s_dict.keys():
-                q.multi_proc_cnt = s_dict.get("multi_process_count")
-                continue
-
-            if "force_continue" in s_dict.keys():
-                q.force_continue = s_dict.get("force_continue")
-                continue
-
-            instances = []
-            if "parallel" in s_dict.keys():
-                for row in s_dict.get("parallel"):
-                    instance = self.__create_instance(row, yaml_scenario_list)
-                    Helper.set_property(
-                        instance,
-                        "logger",
-                        LisboaLog.get_logger(instance.__class__.__name__),
-                    )
-
-                    instances.append(instance)
-                    StepArgument._put(row["step"], instance)
-            else:
-                instance = self.__create_instance(s_dict, yaml_scenario_list)
+        for block in scenario_list:
+            if "multi_process_count" in block.keys():
                 Helper.set_property(
-                    instance,
-                    "logger",
-                    LisboaLog.get_logger(instance.__class__.__name__),
+                    queue, "multi_proc_cnt", block.get("multi_process_count")
                 )
+            elif "force_continue" in block.keys():
+                Helper.set_property(
+                    queue, "force_continue", block.get("force_continue")
+                )
+            else:
+                instance = self._create_executable_instances(block)
+                queue.push(instance)
+
+        self._logger.info("Finish to create scenario queue")
+
+    def _create_executable_instances(self, s_dict):
+        """
+        Create executable instances
+
+        Returns:
+            list: Executable instances
+        """
+        instances = []
+        if "parallel" in s_dict.keys():
+            for row in s_dict.get("parallel"):
+                instance = self._create_instance(row)
                 instances.append(instance)
-                StepArgument._put(s_dict["step"], instance)
+                StepArgument._put(row["step"], instance)
+        else:
+            instance = self._create_instance(s_dict)
+            instances.append(instance)
+            StepArgument._put(s_dict["step"], instance)
 
-            # Put instance to queue
-            q.push(instances)
+        return instances
 
-        # save queue to static area
-        setattr(ScenarioQueue, "step_queue", q)
-        self._logger.info("Finish to invoke scenario")
-
-    def __create_instance(self, s_dict, yaml_scenario_list):
+    def _create_instance(self, s_dict):
+        """
+        Create instance
+        """
         cls_name = s_dict["class"]
         self._logger.debug("Create %s instance" % cls_name)
 
-        if self.__is_custom_cls(cls_name) is True:
+        if ClassUtil().is_custom_cls(cls_name) is True:
             from cliboa.core.factory import CustomInstanceFactory
 
             instance = CustomInstanceFactory.create(cls_name)
@@ -179,22 +171,16 @@ class YamlScenarioManager(ScenarioManager):
             cls = globals()[cls_name]
             instance = cls()
 
-        base_args = ["step", "symbol", "parallel", "io", "listeners"]
-        for arg in base_args:
-            if arg == "listeners":
-                self._append_listeners(instance, s_dict.get(arg))
-            else:
-                Helper.set_property(instance, arg, s_dict.get(arg))
-
         cls_attrs_dict = {}
-        if isinstance(yaml_scenario_list, list) and "arguments" in s_dict.keys():
+        if "arguments" in s_dict.keys():
             cls_attrs_dict = s_dict["arguments"]
 
         # loop and set class attribute
         di_key = None
         di_instance = None
+        values = {}
         if cls_attrs_dict:
-            cls_attrs_dict = self.__extract_with_vars(cls_attrs_dict)
+            cls_attrs_dict, with_vars = self._split_class_vars(cls_attrs_dict)
 
             # check if the keys of dependency injection
             di_keys, di_instances = self.__create_di_instance(cls_attrs_dict)
@@ -208,63 +194,98 @@ class YamlScenarioManager(ScenarioManager):
                     setattr(instance, di_key, di_instance)
                     del cls_attrs_dict[di_key]
 
-            pattern = re.compile(r"{{(.*?)}}")
-            for yaml_k, yaml_v in cls_attrs_dict.items():
-                # if value includes {{ var }}, replace value specified by with_vars
-                if isinstance(yaml_v, str):
-                    matches = pattern.findall(yaml_v)
-                    for match in matches:
-                        var_name = match.strip()
-                        yaml_v = self.__replace_vars(yaml_v, var_name)
+            ret = self._set_values(instance, cls_attrs_dict, with_vars)
+            values.update(ret)
 
-                Helper.set_property(instance, yaml_k, yaml_v)
+        base_args = ["step", "symbol", "parallel", "io", "listeners"]
+        for arg in base_args:
+            if arg == "listeners":
+                self._append_listeners(instance, s_dict.get(arg), values)
+            else:
+                Helper.set_property(instance, arg, s_dict.get(arg))
+
+        Helper.set_property(
+            instance,
+            "logger",
+            LisboaLog.get_logger(instance.__class__.__name__),
+        )
 
         return instance
 
-    def __is_custom_cls(self, cls_name):
+    def _split_class_vars(self, arguments):
         """
-        The specified class in scenario.yml is a custom step class or not
-        Args:
-            cls_name: the specified step class in scenario.yml
-        Return:
-            True: custom step class
-            False: default step class
-        """
-        custom_classes = env.COMMON_CUSTOM_CLASSES + env.PROJECT_CUSTOM_CLASSES
-        for cc in custom_classes:
-            split_cc = cc.split(".")
-            custom_cls_name = split_cc[1]
-            if cls_name == custom_cls_name:
-                return True
-        return False
+        If "with_vars" exist in arguments of individual steps,
+        split into two(arguments except with_vars and with_vars)
 
-    def __extract_with_vars(self, cls_attrs_dict):
+        Args:
+            arguments (dict): Arguments of steps
+
+        Returns:
+            tuple: (step attribute, with_vars parameter)
         """
-        If 'with_vars' exist in scenario.yml, extract and save to dictionary.
-        After that, remove from list
-        """
-        # Extract with_vars if exists
-        exists_with_vars = "with_vars" in cls_attrs_dict.keys()
+        exists_with_vars = "with_vars" in arguments.keys()
+        with_vars = {}
         if exists_with_vars:
-            variables = cls_attrs_dict["with_vars"]
+            variables = arguments["with_vars"]
             for yaml_k, yaml_v in variables.items():
-                self._dynamic_key_and_val[yaml_k] = yaml_v
-            del cls_attrs_dict["with_vars"]
-        return cls_attrs_dict
+                with_vars[yaml_k] = yaml_v
+            del arguments["with_vars"]
+        return arguments, with_vars
 
-    def __replace_vars(self, yaml_v, var_name):
+    def _set_values(self, instance, arguments, with_vars):
         """
-        Replace {{ var }} in string
+        Set parameters to the instance.
+
         Args:
-            yaml_v: replace target value
-            var_name: means {{ var }} itself
+            instance (class): instance
+            arguments (dict): Arguments of steps
+            with_vars (dict): with_vars parameter
+
+        Returns:
+            dict: Dictionary of arguments which was set
         """
-        cmd = self._dynamic_key_and_val[var_name]
-        if not cmd:
-            raise ScenarioFileInvalid(
-                "scenario.yml is invalid. 'with_vars' definition against %s does not exist."  # noqa
-                % var_name
-            )
+        pattern = re.compile(r"{{(.*?)}}")
+        values = {}
+        for yaml_k, yaml_v in arguments.items():
+            js = json.dumps(yaml_v)
+            matches = pattern.findall(js)
+            for match in matches:
+                var_name = match.strip()
+                if not var_name:
+                    raise InvalidParameter("Alternative argument was empty.")
+                cmd = with_vars[var_name]
+                if not cmd:
+                    raise ScenarioFileInvalid(
+                        "scenario file is invalid. 'with_vars' definition against %s does not exist."  # noqa
+                        % var_name
+                    )
+                js = self._replace_vars(js, var_name, cmd)
+                yaml_v = json.loads(js)
+            Helper.set_property(instance, yaml_k, yaml_v)
+            values[yaml_k] = yaml_v
+        return values
+
+    def _replace_vars(self, yaml_v, var_name, cmd):
+        """
+        This method replaces the value of {{ xxx }} based on the result of the shell script.
+
+        Ex.
+          -- IN --
+          yaml_v: /resources/{{ yyyyMMdd }}
+          var_name: yyyyMMdd
+          cmd: date '+%Y%m%d'
+
+          -- OUT --
+          /resources/20210101
+
+        Args:
+            yaml_v: Yaml value. Must contain {{ xxx }}
+            var_name: Name of xxx
+            cmd: Shell script
+
+        Returns:
+            str: replaced value
+        """
         shell_output = subprocess.Popen(
             cmd, stdout=subprocess.PIPE, shell=True
         ).communicate()[0]
@@ -273,14 +294,15 @@ class YamlScenarioManager(ScenarioManager):
         shell_output = re.sub("^b", "", str(shell_output))
         # remove '
         shell_output = re.sub("'", "", str(shell_output))
-        return re.sub(r"{{(.*?)%s(.*?)}}" % var_name, shell_output, yaml_v)
+
+        return re.sub(r"{{(\s?)%s(\s?)}}" % var_name, shell_output, yaml_v)
 
     def __create_di_instance(self, cls_attrs):
         """
         Create an instance to be injected
         Args:
             step class attributes
-        Retrurn:
+        Return:
             DI attribute names, DI instances
         """
         di_keys = []
@@ -309,26 +331,41 @@ class YamlScenarioManager(ScenarioManager):
                 di_instances.append(di_instance)
         return di_keys, di_instances
 
-    def _append_listeners(self, instance, args):
+    def _append_listeners(self, instance, args, values):
         listeners = [StepStatusListener()]
 
         if args is not None:
             from cliboa.core.factory import CustomInstanceFactory
 
             if type(args) is str:
-                listeners.append(CustomInstanceFactory.create(args))
+                clz = CustomInstanceFactory.create(args)
+                clz.__dict__.update(values)
+                listeners.append(clz)
             elif type(args) is list:
                 for arg in args:
-                    listeners.append(CustomInstanceFactory.create(arg))
+                    clz = CustomInstanceFactory.create(arg)
+                    clz.__dict__.update(values)
+                    listeners.append(CustomInstanceFactory.create(clz))
         Helper.set_property(instance, "listeners", listeners)
+
+
+class YamlScenarioManager(ScenarioManager):
+    """
+    Create instances from yaml format scenario file.
+    """
+
+    def parse_file(self):
+        """
+        Parse yaml format file to list object
+        """
+        parser = YamlScenarioParser(self._pj_scenario_file, self._cmn_scenario_file)
+        return parser.parse()
 
 
 class JsonScenarioManager(ScenarioManager):
     """
-    Manage scenario with json format
+    Create instances from json format scenario file.
     """
 
-    def create_scenario_queue(self):
-        """
-        TODO: implement in the future
-        """
+    def parse_file(self):
+        raise CliboaException("Not implemented yet")

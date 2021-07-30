@@ -1,5 +1,15 @@
 version: 2.1
 executors:
+  python39_executor:
+    environment:
+      TZ: "Asia/Tokyo"
+    docker:
+      - image: circleci/python:3.9
+  python38_executor:
+    environment:
+      TZ: "Asia/Tokyo"
+    docker:
+      - image: circleci/python:3.8
   python37_executor:
     environment:
       TZ: "Asia/Tokyo"
@@ -88,7 +98,7 @@ workflows:
       - unittest_by_multiple_python_versions:
           matrix:
             parameters:
-              python-version: [python37_executor, python36_executor, python35_executor]
+              python-version: [python39_executor, python38_executor, python37_executor, python36_executor, python35_executor]
       - push_dev_branch:
           <<: *rollout_filter
           requires:

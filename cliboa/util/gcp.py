@@ -30,10 +30,7 @@ class ServiceAccount(object):
     def auth(credentials):
         if not credentials:
             return None
-        if isinstance(credentials, dict):
-            return service_account.Credentials.from_service_account_info(credentials)
-        else:
-            return service_account.Credentials.from_service_account_file(credentials)
+        return service_account.Credentials.from_service_account_file(credentials)
 
 
 class BigQuery(object):
@@ -81,7 +78,7 @@ class BigQuery(object):
     @classmethod
     def get_destination_format(cls, ext):
         """
-        Ouptut file format
+        Output file format
         Args:
             ext: destination file extention
         """

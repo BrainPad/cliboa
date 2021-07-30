@@ -7,3 +7,7 @@ services:
     stdin_open: true
     tty: true
     privileged: true
+    volumes:
+      - type: bind
+        source: ../../../cliboa
+        target: /usr/local/cliboa

@@ -1,5 +1,5 @@
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
+# Copyright BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -15,53 +15,27 @@ import ast
 import codecs
 import csv
 
-from cliboa.scenario.base import BaseSqlite
-from cliboa.scenario.validator import EssentialParameters, IOOutput, SqliteTableExistence
-from cliboa.util.exception import FileNotFound, SqliteInvalid
-
-
-class SqliteTransaction(BaseSqlite):
-    """
-    Base class of sqlite transacdtion
-    """
-
-    def __init__(self):
-        super().__init__()
-
-    def execute(self, *args):
-        """
-        Execute db connection, commit, close, vacuum
-
-        Args:
-            args[0]: db operation function to execute as transaction
-        """
-
-        # When args is not specified, just call validation of base class
-        if not args:
-            super().execute()
-            return 1
-        func = args[0]
-
-        # TODO
-        # Add to handle to select DB transaction seperation level
-        self._logger.info("Start DB Transaction")
-        self._sqlite_adptr.connect(self._dbname)
-        try:
-            func()
-            self._sqlite_adptr.commit()
-        finally:
-            super()._close_database()
-        self._logger.info("Finish DB Transaction")
+from cliboa.scenario.sqlite import SqliteTransaction
+from cliboa.scenario.validator import (
+    EssentialParameters,
+    IOOutput,
+    SqliteTableExistence,
+)
+from cliboa.util.csv import Csv
+from cliboa.util.exception import CliboaException, FileNotFound, SqliteInvalid
 
 
 class SqliteCreation(SqliteTransaction):
     """
+    @deprecated
+
     Insert all the input data specified as 'io: input' in yaml to the specified table.
     """
 
     def __init__(self):
         super().__init__()
         self._tblname = None
+        self._columns = []
         self._replace_into = True
         self._insert_cnt = 10
         self._primary_key = None
@@ -69,6 +43,9 @@ class SqliteCreation(SqliteTransaction):
 
     def tblname(self, tblname):
         self._tblname = tblname
+
+    def columns(self, columns):
+        self._columns = columns
 
     def replace_into(self, replace_into):
         self._replace_into = replace_into
@@ -134,7 +111,7 @@ class SqliteCreation(SqliteTransaction):
 
     def __get_column_def(self):
         """
-        Get table column defenition
+        Get table column definition
         """
         if self._columns:
             return self._columns
@@ -298,10 +275,7 @@ class CsvReadSqliteCreate(SqliteTransaction):
         super().execute(func)
 
 
-class SqliteWrite(SqliteTransaction):
-
-    COMMIT_COUNT = 100
-
+class SqliteImport(SqliteTransaction):
     def __init__(self):
         super().__init__()
         self._src_dir = None
@@ -356,93 +330,45 @@ class SqliteWrite(SqliteTransaction):
             # Find csv columns from all csv files
             csv_columns = []
             for file in files:
-                with open(file, "r", encoding=self._encoding) as f:
-                    reader = csv.DictReader(f)
-                    for col in reader.fieldnames:
-                        csv_columns.append(col)
+                csv_columns.extend(Csv.get_column_names(file))
             csv_columns = sorted(set(csv_columns), key=csv_columns.index)
-            escaped_columns = ['"%s"' % fn for fn in csv_columns]
 
             if self._refresh is True:
                 # Drop table in advance, If refresh is True
-                self._sqlite_adptr.execute("DROP TABLE IF EXISTS %s" % self._tblname)
-                self._sqlite_adptr.commit()
-                self._create_table(self._tblname, escaped_columns)
+                self._sqlite_adptr.drop_table(self._tblname)
+                self._sqlite_adptr.create_table(
+                    self._tblname, csv_columns, self._primary_key
+                )
             else:
-                self._create_table(self._tblname, escaped_columns)
+                self._sqlite_adptr.create_table(
+                    self._tblname, csv_columns, self._primary_key
+                )
 
                 if self._force_insert is True:
-                    self._alter_table(self._tblname, escaped_columns)
+                    db_columns = self._sqlite_adptr.get_column_names(self._tblname)
+                    result = list(set(csv_columns) - set(db_columns))
+                    self._sqlite_adptr.add_columns(self._tblname, result)
                 else:
                     # Make sure if csv columns and db table names are exactly the same
-                    db_columns = self._get_column_names(self._tblname)
-                    if escaped_columns != db_columns:
-                        raise Exception(
+                    db_columns = self._sqlite_adptr.get_column_names(self._tblname)
+                    if self._sqlite_adptr.escape_columns(
+                        csv_columns
+                    ) != self._sqlite_adptr.escape_columns(db_columns):
+                        raise CliboaException(
                             "Csv columns %s were not matched to table column %s."
                             % (csv_columns, db_columns)
                         )
 
             for file in files:
-                with open(file, mode="r", encoding=self._encoding) as f:
-                    reader = csv.DictReader(f)
-
-                    replace = True if self._primary_key else False
-
-                    # Put all csv records into the table.
-                    self._logger.info(
-                        "Insert all csv records into table[%s]" % self._tblname
-                    )
-                    params = []
-                    for row in reader:
-                        params.append(row)
-                        if len(params) == self.COMMIT_COUNT:
-                            self._sqlite_adptr.execute_many_insert(
-                                self._tblname, csv_columns, params, replace
-                            )
-                            self._sqlite_adptr.commit()
-                            params.clear()
-                    if len(params) > 0:
-                        self._sqlite_adptr.execute_many_insert(
-                            self._tblname, csv_columns, params, replace
-                        )
-                        self._sqlite_adptr.commit()
+                self._sqlite_adptr.import_table(
+                    file, self._tblname, refresh=False, encoding=self._encoding
+                )
 
             if self._index and len(self._index) > 0:
                 """
                 Create index (Add the index at the end for
                 better performance when insert data is large)
                 """
-                self._logger.info("Add index")
                 self._sqlite_adptr.add_index(self._tblname, self._index)
-                self._sqlite_adptr.commit()
 
         super().execute(func)
-
-    def _create_table(self, tbname, columns):
-        if self._primary_key is None:
-            sql = "CREATE TABLE IF NOT EXISTS %s (%s)"
-            self._sqlite_adptr.execute(
-                sql % (tbname, " TEXT, ".join(columns) + " TEXT")
-            )
-        else:
-            sql = "CREATE TABLE IF NOT EXISTS %s (%s, PRIMARY KEY(%s))"
-            self._sqlite_adptr.execute(
-                sql % (tbname, " TEXT, ".join(columns) + " TEXT", self._primary_key)
-            )
-        self._sqlite_adptr.commit()
-
-    def _alter_table(self, tbname, csv_columns):
-        db_columns = self._get_column_names(tbname)
-
-        result = list(set(csv_columns) - set(db_columns))
-        if len(result) > 0:
-            for column in result:
-                self._sqlite_adptr.execute(
-                    "ALTER TABLE %s ADD COLUMN %s text" % (tbname, column)
-                )
-
-        self._sqlite_adptr.commit()
-
-    def _get_column_names(self, tbname):
-        cur = self._sqlite_adptr.fetch("PRAGMA TABLE_INFO(%s)" % tbname)
-        return ['"%s"' % x[1] for x in cur]

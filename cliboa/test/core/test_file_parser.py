@@ -1,5 +1,5 @@
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
+# Copyright BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -21,11 +21,12 @@ import yaml
 from cliboa.client import CommandArgumentParser
 from cliboa.conf import env
 from cliboa.core.file_parser import YamlScenarioParser
+from cliboa.test import BaseCliboaTest
 from cliboa.util.exception import ScenarioFileInvalid
 
 
-class TestYamlScenarioParser(object):
-    def setup_method(self, method):
+class TestYamlScenarioParser(BaseCliboaTest):
+    def setUp(self):
         cmd_parser = CommandArgumentParser()
         sys.argv.clear()
         sys.argv.append("spam")
@@ -39,12 +40,16 @@ class TestYamlScenarioParser(object):
         self._cmn_scenario_dir = env.COMMON_SCENARIO_DIR
         self._cmn_scenario_file = os.path.join(env.COMMON_DIR, "scenario.yml")
 
+        os.makedirs(self._pj_dir, exist_ok=True)
+        os.makedirs(self._cmn_scenario_dir, exist_ok=True)
+
+    def tearDown(self):
+        shutil.rmtree(self._pj_dir, ignore_errors=True)
+
     def test_parse_with_pj_and_cmn_yaml_ok(self):
         """
         Valid project scenario.yml and common scenario.yml
         """
-        os.makedirs(self._pj_dir)
-        os.makedirs(self._cmn_scenario_dir)
         pj_yaml_dict = {
             "scenario": [
                 {
@@ -76,9 +81,6 @@ class TestYamlScenarioParser(object):
             exists_step = any("step" in y for y in yaml_scenario)
         except Exception:
             exists_step = False
-        else:
-            shutil.rmtree(self._pj_dir)
-            shutil.rmtree(self._cmn_dir)
         assert exists_step is True
 
     def test_parse_with_pj_and_cmn_yaml_with_no_pj_args_ok(self):
@@ -86,8 +88,6 @@ class TestYamlScenarioParser(object):
         Valid project scenario.yml and common scenario.yml.
         There is no arguments in project scenario.yml
         """
-        os.makedirs(self._pj_dir)
-        os.makedirs(self._cmn_scenario_dir)
         pj_yaml_dict = {
             "scenario": [{"class": "SftpDownload", "step": "sftp_download"}]
         }
@@ -113,9 +113,6 @@ class TestYamlScenarioParser(object):
             exists_step = any("step" in y for y in yaml_scenario)
         except Exception:
             exists_step = False
-        else:
-            shutil.rmtree(self._pj_dir)
-            shutil.rmtree(self._cmn_dir)
         assert exists_step is True
 
     def test_parse_with_pj_and_cmn_yaml_with_no_args_ok(self):
@@ -123,8 +120,6 @@ class TestYamlScenarioParser(object):
         Valid project scenario.yml and common scenario.yml.
         In common scenario.yml, there is no arguments.
         """
-        os.makedirs(self._pj_dir)
-        os.makedirs(self._cmn_scenario_dir)
         pj_yaml_dict = {
             "scenario": [
                 {
@@ -150,9 +145,6 @@ class TestYamlScenarioParser(object):
             exists_step = any("step" in y for y in yaml_scenario)
         except Exception:
             exists_step = False
-        else:
-            shutil.rmtree(self._pj_dir)
-            shutil.rmtree(self._cmn_dir)
         assert exists_step is True
 
     def test_parse_with_pj_and_cmn_yaml_with_diff_cls_ok(self):
@@ -160,8 +152,6 @@ class TestYamlScenarioParser(object):
         Valid project scenario.yml and common scenario.yml.
         In common scenario.yml, There are not same classes.
         """
-        os.makedirs(self._pj_dir)
-        os.makedirs(self._cmn_scenario_dir)
         pj_yaml_dict = {
             "scenario": [
                 {
@@ -187,16 +177,12 @@ class TestYamlScenarioParser(object):
             exists_step = any("step" in y for y in yaml_scenario)
         except Exception:
             exists_step = False
-        else:
-            shutil.rmtree(self._pj_dir)
-            shutil.rmtree(self._cmn_dir)
         assert exists_step is True
 
     def test_parse_with_no_cmn_yaml_ok(self):
         """
         Valid project scenario.yml, there is not common scenario.yml
         """
-        os.makedirs(self._pj_dir)
         pj_yaml_dict = {
             "scenario": [
                 {
@@ -216,23 +202,21 @@ class TestYamlScenarioParser(object):
             exists_step = any("step" in y for y in yaml_scenario)
         except Exception:
             exists_step = False
-        else:
-            shutil.rmtree(self._pj_dir)
         assert exists_step is True
 
     def test_parse_no_scenario_key_pj_yaml_ng(self):
         """
         Invalid project scenario.yml
         """
-        os.makedirs(self._pj_dir)
-        os.makedirs(self._cmn_scenario_dir)
-        pj_yaml_dict = [
-            {
-                "arguments": {"retry_count": 10},
-                "class": "SftpDownload",
-                "step": "sftp_download",
-            }
-        ]
+        pj_yaml_dict = {
+            "test": [
+                {
+                    "arguments": {"retry_count": 10},
+                    "class": "SftpDownload",
+                    "step": "sftp_download",
+                }
+            ]
+        }
         with open(self._pj_scenario_file, "w") as f:
             f.write(yaml.dump(pj_yaml_dict, default_flow_style=False))
 
@@ -252,8 +236,6 @@ class TestYamlScenarioParser(object):
             parser = YamlScenarioParser(self._pj_scenario_file, self._cmn_scenario_file)
             yaml_scenario = parser.parse()
             any("step" in y for y in yaml_scenario)
-        shutil.rmtree(self._pj_dir)
-        shutil.rmtree(self._cmn_dir)
         assert "invalid" in str(excinfo.value)
 
     def test_parse_with_pj_and_cmn_yaml_no_class_ng(self):
@@ -261,8 +243,6 @@ class TestYamlScenarioParser(object):
         project scenario.yml and common scenario.yml.
         There is no class: in project scenario.yml
         """
-        os.makedirs(self._pj_dir)
-        os.makedirs(self._cmn_scenario_dir)
         pj_yaml_dict = {
             "scenario": [{"arguments": {"retry_count": 10}, "step": "sftp_download"}]
         }
@@ -286,8 +266,6 @@ class TestYamlScenarioParser(object):
             yaml_scenario = parser.parse()
             any("step" in y for y in yaml_scenario)
 
-        shutil.rmtree(self._pj_dir)
-        shutil.rmtree(self._cmn_dir)
         assert "invalid" in str(excinfo.value)
 
     def test_parse_with_pj_and_cmn_yaml_no_class_val_ng(self):
@@ -295,8 +273,6 @@ class TestYamlScenarioParser(object):
         project scenario.yml and common scenario.yml.
         There is no class value: in common scenario.yml
         """
-        os.makedirs(self._pj_dir)
-        os.makedirs(self._cmn_scenario_dir)
         pj_yaml_dict = {
             "scenario": [
                 {
@@ -322,16 +298,12 @@ class TestYamlScenarioParser(object):
             yaml_scenario = parser.parse()
             any("step" in y for y in yaml_scenario)
 
-        shutil.rmtree(self._pj_dir)
-        shutil.rmtree(self._cmn_dir)
         assert "invalid" in str(excinfo.value)
 
     def test_parse_with_pj_and_cmn_yaml_parallel(self):
         """
         Test for parallel operation
         """
-        os.makedirs(self._pj_dir)
-        os.makedirs(self._cmn_scenario_dir)
         pj_yaml_dict = {
             "scenario": [
                 {
@@ -365,13 +337,9 @@ class TestYamlScenarioParser(object):
         with open(self._cmn_scenario_file, "w") as f:
             f.write(yaml.dump(cmn_yaml_dict, default_flow_style=False))
 
-        try:
-            parser = YamlScenarioParser(self._pj_scenario_file, self._cmn_scenario_file)
-            yaml_scenario_list = parser.parse()
+        parser = YamlScenarioParser(self._pj_scenario_file, self._cmn_scenario_file)
+        yaml_scenario_list = parser.parse()
 
-            for scenario in yaml_scenario_list:
-                for dict in scenario.get("parallel"):
-                    assert "dummy_host" == dict.get("arguments")["host"]
-        finally:
-            shutil.rmtree(self._pj_dir)
-            shutil.rmtree(self._cmn_dir)
+        for scenario in yaml_scenario_list:
+            for dict in scenario.get("parallel"):
+                assert "dummy_host" == dict.get("arguments")["host"]

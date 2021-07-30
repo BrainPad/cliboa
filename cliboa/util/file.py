@@ -63,9 +63,9 @@ class File(object):
             for file in files:
                 if r.fullmatch(file):
                     target_files.append(os.path.join(dir, file))
-        return target_files
+        return sorted(target_files)
 
-    def convert_encoding(self, src, dest, encoding_from, encoding_to):
+    def convert_encoding(self, src, dest, encoding_from, encoding_to, errors=None):
         """
         Copy file with specified encoding
 
@@ -75,7 +75,7 @@ class File(object):
             enc_from (str): Encoding of source file
             enc_to (str): Encoding of destination file
         """
-        with open(src, "r", encoding=encoding_from) as input:
-            with open(dest, "w", encoding=encoding_to) as output:
+        with open(src, "r", encoding=encoding_from, errors=errors) as input:
+            with open(dest, "w", encoding=encoding_to, errors=errors) as output:
                 for i in input:
                     output.write(i)
