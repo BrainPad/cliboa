@@ -37,7 +37,6 @@ Use <a href="https://guides.github.com/introduction/flow/">github flow</a>
 4. Create new pull request to master branch
 
 
-
 ## Workflow for All Developers According to Roadmap
 Prepare the branch by each versions before development
 
