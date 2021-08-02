@@ -1,5 +1,8 @@
 # CsvHeaderConvert
-Convert headers of a csv file.
+Convert headers of a csv file
+
+Deprecated.
+Please Use CsvConvert instead.
 
 # Parameters
 |Parameters|Explanation|Required|Default|Remarks|

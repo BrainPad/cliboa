@@ -50,12 +50,16 @@ class FileWrite(BaseStep):
 class CsvWrite(FileWrite):
     """
     Write data fetched by io: input to csv file
+
+    Deprecated.
     """
 
     def __init__(self):
         super().__init__()
 
     def execute(self, *args):
+        self._logger.warning("Deprecated. Please do not use this class.")
+
         super().execute()
         input_valid = IOOutput(self._io)
         input_valid()

@@ -306,6 +306,9 @@ class CsvConcat(FileBaseTransform):
 class CsvHeaderConvert(FileBaseTransform):
     """
     Convert csv headers
+
+    Deprecated.
+    Please Use CsvConvert instead.
     """
 
     def __init__(self):
@@ -316,6 +319,8 @@ class CsvHeaderConvert(FileBaseTransform):
         self._headers = headers
 
     def execute(self, *args):
+        self._logger.warning("Deprecated. Please Use CsvConvert instead.")
+
         if self._dest_pattern:
             self._logger.warning(
                 "'dest_pattern' will be unavailable in the near future."
@@ -411,6 +416,9 @@ class CsvHeaderConvert(FileBaseTransform):
 class CsvFormatChange(FileBaseTransform):
     """
     Change csv format
+
+    Deprecated.
+    Please Use CsvConvert instead.
     """
 
     def __init__(self):
@@ -441,6 +449,8 @@ class CsvFormatChange(FileBaseTransform):
         self._quote = quote
 
     def execute(self, *args):
+        self._logger.warning("Deprecated. Please Use CsvConvert instead.")
+
         # TODO All the statements inside 'if' block will be deleted in the near future.
         if self._dest_pattern:
             self._logger.warning(

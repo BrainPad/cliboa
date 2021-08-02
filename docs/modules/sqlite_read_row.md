@@ -1,4 +1,7 @@
 # SqliteReadRow
+deprecated
+Please do not use this class.
+
 Execute query and call result handler.
 
 Create a sub-class and inherit from this class.

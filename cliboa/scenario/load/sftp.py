@@ -75,6 +75,9 @@ class SftpBaseLoad(BaseStep):
 # deprecated
 class SftpFileLoad(SftpBaseLoad):
     """
+    deprecated
+    Please Use SftpUpload instead.
+
     Upload file to sftp server
     """
 
@@ -82,6 +85,8 @@ class SftpFileLoad(SftpBaseLoad):
         SftpBaseLoad.__init__(self)
 
     def execute(self, *args):
+        self._logger.warning("Deprecated. Please Use SftpUpload instead.")
+
         # essential parameters check
         valid = EssentialParameters(
             self.__class__.__name__,
