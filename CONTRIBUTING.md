@@ -1,4 +1,4 @@
-# How to Contribute to Cliboa
+# How to Contribute to cliboa
 
 ## Contribution Policy
 
@@ -7,7 +7,7 @@
 * If you would like to discuss or have doubts before implement it, would like you to make issues.
 
 
-## Workflow for external developers
+## Workflow for External Developers
 ### Bugfix or hotfix or New feature
 1. Fork from https://github.com/BrainPad/cliboa
 2. Create your branch for bugfix or hotfix or feature 
@@ -37,8 +37,7 @@ Use <a href="https://guides.github.com/introduction/flow/">github flow</a>
 4. Create new pull request to master branch
 
 
-
-## Workflow for all developers according to a roadmap
+## Workflow for All Developers According to Roadmap
 Prepare the branch by each versions before development
 
 ![](/img/cliboa_roadmap_flow.png)
