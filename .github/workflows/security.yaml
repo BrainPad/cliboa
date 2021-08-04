@@ -21,4 +21,4 @@ jobs:
           git secrets --add "password\s*=\s*\".+\""
           git secrets --add --allowed --literal "password=\"dymmy|dummypass\""
       - name: check secrets
-        run: git secrets -r .
+        run: git secrets --scan -r .
