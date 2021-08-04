@@ -137,69 +137,6 @@ class TestYamlScenarioManager(BaseCliboaTest):
         assert instance._step == "sample_step"
         assert instance._retry_count == 3
 
-    def test_create_scenario_queue_ok_with_di_and_diargs(self):
-        """
-        Valid scenario.yml with dependency injection
-        """
-        os.makedirs(self._pj_dir, exist_ok=True)
-        pj_yaml = {
-            "scenario": [
-                {
-                    "step": "spam",
-                    "class": "HttpDownload",
-                    "arguments": {
-                        "src_url": "https://spam/",
-                        "auth": {
-                            "class": "FormAuth",
-                            "form_id": "spam",
-                            "form_password": "spam",
-                            "form_url": "http://spam/",
-                        },
-                    },
-                }
-            ]
-        }
-
-        with open(self._pj_scenario_file, "w") as f:
-            f.write(yaml.dump(pj_yaml, default_flow_style=False))
-
-        is_completed_queue_creation = True
-        try:
-            manager = YamlScenarioManager(self._cmd_args)
-            manager.create_scenario_queue()
-            ScenarioQueue.step_queue.pop()
-        except Exception:
-            is_completed_queue_creation = False
-        else:
-            shutil.rmtree(self._pj_dir)
-        assert is_completed_queue_creation is True
-
-    def test_create_scenario_queue_ng_with_di_and_invalid_diargs(self):
-        """
-        scenario.yml with dependency injection with invalid arguments
-        """
-        os.makedirs(self._pj_dir, exist_ok=True)
-        pj_yaml = {
-            "scenario": [
-                {
-                    "step": "spam",
-                    "class": "HttpDownload",
-                    "arguments": {
-                        "auth": {"form_id": "spam"},
-                        "src_url": "https://spam/",
-                    },
-                }
-            ]
-        }
-        with open(self._pj_scenario_file, "w") as f:
-            f.write(yaml.dump(pj_yaml, default_flow_style=False))
-
-        with pytest.raises(ScenarioFileInvalid) as excinfo:
-            manager = YamlScenarioManager(self._cmd_args)
-            manager.create_scenario_queue()
-        shutil.rmtree(self._pj_dir)
-        assert "class: is not specified" in str(excinfo.value)
-
     def test_create_scenario_queue_ok_with_vars(self):
         """
         Valid scenario.yml with {{ vars }}
