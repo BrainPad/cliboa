@@ -9,11 +9,9 @@ jobs:
       - uses: actions/checkout@v2
       - name: install git-secrets
         run: |
-          cd ~/
-          mkdir git-secrets
           git clone https://github.com/awslabs/git-secrets.git git-secrets
           cd git-secrets
-          make install
+          sudo make install
       - name: setup git-secrets
         run: |
           git secrets --install
