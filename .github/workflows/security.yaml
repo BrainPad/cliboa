@@ -20,8 +20,6 @@ jobs:
           git secrets --register-aws
 
           # add other secrets
-          git secrets --add "user\s*=\s*\".+\""
-          git secrets --add --allowed "user\s*=\"dummy.*\""
           git secrets --add "password\s*=\s*\".+\""
           git secrets --add --allowed "password\s*=\"dummy.*\""
       - name: check secrets
