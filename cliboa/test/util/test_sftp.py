@@ -17,7 +17,7 @@ class TestSftp(BaseCliboaTest):
             mock_func.return_value = ["test.txt"]
             stack.enter_context(patch("paramiko.SSHClient.connect"))
             stack.enter_context(patch("paramiko.SSHClient.open_sftp"))
-            sftp = Sftp(host="test", user="admin", password="pass")
+            sftp = Sftp(host="test", user="admin", password="dummypass")
             sftp.list_files(None, None, None)
             mock_func.assert_called_once()
 
@@ -30,7 +30,7 @@ class TestSftp(BaseCliboaTest):
             mock_func = stack.enter_context(patch("cliboa.util.sftp.clear_file_func"))
             stack.enter_context(patch("paramiko.SSHClient.connect"))
             stack.enter_context(patch("paramiko.SSHClient.open_sftp"))
-            sftp = Sftp(host="test", user="admin", password="pass")
+            sftp = Sftp(host="test", user="admin", password="dummypass")
             sftp.clear_files(None, None)
             mock_func.assert_called_once()
 

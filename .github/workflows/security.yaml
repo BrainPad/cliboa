@@ -1,0 +1,24 @@
+name: cliboa-security
+
+on: [push]
+
+jobs:
+  git_secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: install git-secrets
+        run: |
+          git clone https://github.com/awslabs/git-secrets.git
+          cd git-secrets
+          make install
+      - name: setup git-secrets
+        run: |
+          git secrets --install
+          # add aws secrets
+          git secrets --register-aws
+          # add other secrets
+          git secrets --add "password\s*=\s*\".+\""
+          git secrets --add --allowed --literal "password=\"dymmy|dummypass\""
+      - name: check secrets
+        run: git secrets -r .
