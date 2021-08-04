@@ -15,10 +15,12 @@ from cliboa.scenario.sqlite import BaseSqlite
 from cliboa.scenario.validator import EssentialParameters, IOInput, SqliteTableExistence
 
 
-# deprecated
 class SqliteRead(BaseSqlite):
     """
     Select * from the specifed table
+
+    deprecated
+    Please do not use this class.
     """
 
     def __init__(self):
@@ -37,6 +39,8 @@ class SqliteRead(BaseSqlite):
         self._raw_query = raw_query
 
     def execute(self, *args):
+        self._logger.warning("Deprecated. Please do not use this class.")
+
         super().execute()
 
         input_valid = IOInput(self._io)
@@ -78,12 +82,17 @@ class SqliteRead(BaseSqlite):
 class SqliteReadRow(BaseSqlite):
     """
     Execute query.
+
+    deprecated
+    Please dp not use this class.
     """
 
     def __init__(self):
         super().__init__()
 
     def execute(self, *args):
+        self._logger.warning("Deprecated. Please do not use this class.")
+
         super().execute()
 
         self._sqlite_adptr.connect(self._dbname)
