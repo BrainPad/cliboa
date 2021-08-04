@@ -14,7 +14,7 @@ class TestRdbms(BaseCliboaTest):
         with ExitStack() as stack:
             stack.enter_context(patch("cliboa.adapter.mysql.pymysql"))
             with MysqlAdaptor(
-                host="dummy", user="test", password="password", dbname="test"
+                host="dummy", user="test", password="dummypassword", dbname="test"
             ):
                 pass
 
@@ -26,7 +26,7 @@ class TestRdbms(BaseCliboaTest):
             stack.enter_context(patch("cliboa.adapter.mysql.pymysql"))
             try:
                 with MysqlAdaptor(
-                    host="dummy", user="test", password="password", dbname="test"
+                    host="dummy", user="test", password="dummypassword", dbname="test"
                 ):
                     raise Exception("Error occurred")
             except Exception:
