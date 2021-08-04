@@ -10,7 +10,7 @@ jobs:
       - name: install git-secrets
         run: |
           mkdir git-secrets
-          git clone https://github.com/awslabs/git-secrets.git
+          git clone https://github.com/awslabs/git-secrets.git git-secrets
           cd git-secrets
           make install
       - name: setup git-secrets
