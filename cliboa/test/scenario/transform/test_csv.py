@@ -20,6 +20,7 @@ import pytest
 from glob import glob
 from cliboa.conf import env
 from cliboa.scenario.transform.csv import (
+    CsvColumnConcat,
     CsvColumnExtract,
     ColumnLengthAdjust,
     CsvConcat,
@@ -155,6 +156,122 @@ class TestCsvColumnExtract(TestCsvTransform):
                     test_csv_data[1][2],
                     test_csv_data[2][2],
                 ]
+
+
+class TestCsvColumnConcat(TestCsvTransform):
+    def test_execute_ok(self):
+        # create test csv
+        test_csv_data = [["key", "data"], ["1", "spam"]]
+        concat_data = ["key_data", "1spam"]
+        self._create_csv(test_csv_data)
+
+        # set the essential attributes
+        instance = CsvColumnConcat()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        concat_columns = ["key", "data"]
+        Helper.set_property(instance, "columns", concat_columns)
+        Helper.set_property(instance, "dest_column_name", "key_data")
+
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.DictReader(o)
+            for r in reader:
+                assert r["key_data"] == concat_data[1]
+
+    def test_execute_ok_with_separator(self):
+        # create test csv
+        test_csv_data = [["key", "data"], ["1", "spam"]]
+        concat_data = ["key_data", "1 spam"]
+        self._create_csv(test_csv_data)
+
+        # set the essential attributes
+        instance = CsvColumnConcat()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        concat_columns = ["key", "data"]
+        Helper.set_property(instance, "columns", concat_columns)
+        Helper.set_property(instance, "dest_column_name", "key_data")
+        Helper.set_property(instance, "sep", " ")
+
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.DictReader(o)
+            for r in reader:
+                assert r["key_data"] == concat_data[1]
+
+    def test_execute_three_or_more_column_concat_ok(self):
+        # create test csv
+        test_csv_data = [["key", "data", "data1"], ["1", "spam", "spam1"]]
+        concat_data = ["key_data_data1", "1 spam spam1"]
+        self._create_csv(test_csv_data)
+
+        # set the essential attributes
+        instance = CsvColumnConcat()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        concat_columns = ["key", "data", "data1"]
+        Helper.set_property(instance, "columns", concat_columns)
+        Helper.set_property(instance, "dest_column_name", "key_data_data1")
+        Helper.set_property(instance, "sep", " ")
+
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.DictReader(o)
+            for r in reader:
+                assert r["key_data_data1"] == concat_data[1]
+
+    def test_execute_ok_with_non_target_column_remain(self):
+        # create test csv
+        test_csv_data = [["key", "data", "data1"], ["1", "spam", "spam1"]]
+        concat_data = [["key_data", "data1"], ["1spam", "spam1"]]
+        self._create_csv(test_csv_data)
+
+        # set the essential attributes
+        instance = CsvColumnConcat()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        concat_columns = ["key", "data"]
+        Helper.set_property(instance, "columns", concat_columns)
+        Helper.set_property(instance, "dest_column_name", "key_data")
+
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.DictReader(o)
+            for r in reader:
+                assert r["key_data"] == concat_data[1][0]
+                assert r["data1"] == concat_data[1][1]
+
+    def test_execute_ng_with_specify_not_exist_column(self):
+        # create test csv
+        test_csv_data = [["key", "data"], ["1", "spam"]]
+        self._create_csv(test_csv_data)
+
+        # set the essential attributes
+        instance = CsvColumnConcat()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        concat_columns = ["key", "test"]
+        Helper.set_property(instance, "columns", concat_columns)
+        Helper.set_property(instance, "dest_column_name", "key_data")
+
+        with pytest.raises(KeyError) as e:
+            instance.execute()
+        assert "'test'" == str(e.value)
 
 
 class TestColumnLengthAdjust(TestCsvTransform):
