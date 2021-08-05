@@ -52,7 +52,8 @@ scenario:
     src_dir: /usr/local
     src_pattern: test.csv.gz
     dest_dir: /tmp
-- step: FileDecompress
+- step: 
+  class: FileDecompress
   arguments:
     src_dir: /tmp
     src_pattern: test.*\.csv.*\.gz
