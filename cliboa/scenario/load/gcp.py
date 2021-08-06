@@ -176,6 +176,8 @@ class BigQueryWrite(BaseBigQuery, FileWrite):
 class BigQueryCreate(BaseBigQuery):
     """
     @deprecated
+    Please Use BigQueryWrite instead.
+
     Insert data into BigQuery table
     """
 
@@ -198,6 +200,8 @@ class BigQueryCreate(BaseBigQuery):
         self._replace = replace
 
     def execute(self, *args):
+        self._logger.warning("Deprecated. Please Use BigQueryWrite instead.")
+
         super().execute()
 
         param_valid = EssentialParameters(self.__class__.__name__, [self._table_schema])
@@ -290,6 +294,8 @@ class BigQueryCreate(BaseBigQuery):
 class GcsFileUpload(BaseGcs):
     """
     @deprecated
+    Please Use GcsUpload instead.
+
     Upload local files to GCS
     """
 
@@ -309,6 +315,8 @@ class GcsFileUpload(BaseGcs):
         self._dest_dir = dest_dir
 
     def execute(self, *args):
+        self._logger.warning("Deprecated. Please Use GcsUpload instead.")
+
         super().execute()
 
         valid = EssentialParameters(
@@ -392,6 +400,9 @@ class GcsUpload(BaseGcs):
 
 class CsvReadBigQueryCreate(BaseBigQuery, FileWrite):
     """
+    deprecated
+    Please Use GcsUpload instead.
+
     Read csv and Insert data into BigQuery table
     """
 
@@ -415,6 +426,8 @@ class CsvReadBigQueryCreate(BaseBigQuery, FileWrite):
         self._replace = replace
 
     def execute(self, *args):
+        self._logger.warning("Deprecated. Please Use BigQueryWrite instead.")
+
         BaseBigQuery.execute(self)
 
         param_valid = EssentialParameters(self.__class__.__name__, [self._table_schema])

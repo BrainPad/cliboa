@@ -1,4 +1,7 @@
 # SqliteRead
+deprecated
+Please do not use this class.
+
 Read record from sqlite table. Basically use together with an load module.
 
 # Parameters

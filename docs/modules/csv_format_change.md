@@ -1,6 +1,9 @@
 # Change csv format
 Create new csv(tsv) file with given parameters.
 
+Deprecated.
+Please Use CsvConvert instead.
+
 # Parameters
 |Parameters|Explanation|Required|Default|Remarks|
 |----------|-----------|--------|-------|-------|

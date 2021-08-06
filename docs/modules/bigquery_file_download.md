@@ -1,6 +1,9 @@
 # BigQueryFileDownload
 Execute select query and download result as a csv file. When extract data from GCS, it's based on the specification of (google.client.extract_table)[https://google-cloud.readthedocs.io/en/latest/bigquery/generated/google.cloud.bigquery.client.Client.extract_table.html].
 
+Deprecated.
+Please Use BigQueryRead instead.
+
 # Parameters
 |Parameters|Explanation|Required|Default|Remarks|
 |----------|-----------|--------|-------|-------|
