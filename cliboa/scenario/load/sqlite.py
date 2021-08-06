@@ -28,6 +28,7 @@ from cliboa.util.exception import CliboaException, FileNotFound, SqliteInvalid
 class SqliteCreation(SqliteTransaction):
     """
     @deprecated
+    Please do not use this class.
 
     Insert all the input data specified as 'io: input' in yaml to the specified table.
     """
@@ -60,6 +61,8 @@ class SqliteCreation(SqliteTransaction):
         self._refresh = refresh
 
     def execute(self, *args):
+        self._logger.warning("Deprecated. Please do not use this class.")
+
         super().execute()
 
         param_valid = EssentialParameters(self.__class__.__name__, [self._tblname])
@@ -200,6 +203,8 @@ class CsvReadSqliteCreate(SqliteTransaction):
         self._encoding = encoding
 
     def execute(self, *args):
+        self._logger.warning("Deprecated. Please do not use this class.")
+
         # essential parameters check
         valid = EssentialParameters(
             self.__class__.__name__, [self._src_dir, self._src_pattern, self._tblname]

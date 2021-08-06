@@ -55,6 +55,8 @@ class FileRead(BaseStep):
 class CsvRead(FileRead):
     """
     Read the specified csv file
+
+    Deprecated.
     """
 
     LOAD_CHUNK_SIZE = 10000
@@ -67,6 +69,8 @@ class CsvRead(FileRead):
         self._columns = columns
 
     def execute(self, *args):
+        self._logger.warning("Deprecated. Please do not use this class.")
+
         input_valid = IOInput(self._io)
         input_valid()
 

@@ -193,6 +193,8 @@ class BigQueryRead(BaseBigQuery):
 class BigQueryReadCache(BaseBigQuery):
     """
     @deprecated
+    Please Use BigQueryRead instead.
+
     Get data from BigQuery and cache them as pandas.dataframe format.
 
     Use {BigQueryFileDownload} if the result query is estimated to be large.
@@ -216,6 +218,8 @@ class BigQueryReadCache(BaseBigQuery):
             return self._query
 
     def execute(self, *args):
+        self._logger.warning("Deprecated. Please Use BigQueryRead instead.")
+
         super().execute()
         valid = EssentialParameters(self.__class__.__name__, [self._key])
         valid()
@@ -244,6 +248,8 @@ class BigQueryReadCache(BaseBigQuery):
 class BigQueryFileDownload(BaseBigQuery):
     """
     @deprecated
+    Please Use BigQueryRead instead.
+
     Download query result as a csv file.
 
     This class saves BigQuery result as a temporary file in GCS, and then download.
@@ -266,6 +272,8 @@ class BigQueryFileDownload(BaseBigQuery):
         self._filename = filename
 
     def execute(self, *args):
+        self._logger.warning("Deprecated. Please Use BigQueryRead instead.")
+
         super().execute()
 
         valid = EssentialParameters(
