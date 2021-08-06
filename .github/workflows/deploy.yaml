@@ -1,6 +1,9 @@
 name: cliboa-deploy
 
-on: 
+on:
+  push:
+    branches:
+      - "223"
   workflow_dispatch:
     inputs:
       id:
