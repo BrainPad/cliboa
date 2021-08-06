@@ -1,6 +1,16 @@
 name: cliboa-deploy
 
-on: [ workflow_dispatch ]
+on: 
+  workflow_dispatch:
+    inputs:
+      id:
+        description: PyPI id
+        required: true
+        default: ""
+      password:
+        description: PyPI password
+        required: true
+        default: ""
 
 jobs:
   deploy_to_pypi:
@@ -18,4 +28,6 @@ jobs:
       - name: upload to testpypi and production pypi
         run: |
           twine upload --repository testpypi dist/*
+          echo "Hello ${{ github.event.inputs.id }}!"
+          echo "- in ${{ github.event.inputs.password }}!"
           twine upload --repository pypi dist/*
