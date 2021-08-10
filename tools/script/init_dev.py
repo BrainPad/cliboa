@@ -15,8 +15,5 @@ py_major_ver_and_pipfile = {
     "3.8": "Pipfile.above38",
     "3.9": "Pipfile.above39",
 }
-pipfile_path = os.path.join(
-    "cliboa/template",
-    py_major_ver_and_pipfile[py_major_ver]
-)
+pipfile_path = os.path.join("cliboa/template", py_major_ver_and_pipfile[py_major_ver])
 copyfile(pipfile_path, os.path.join("./", "Pipfile"))

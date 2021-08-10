@@ -27,6 +27,7 @@ cliboa.egg-info
 coverage.xml
 common/
 conf/
+dist/
 logs/
 Pipfile
 Pipfile.lock
