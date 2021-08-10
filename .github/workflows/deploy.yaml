@@ -35,10 +35,6 @@ jobs:
         run: |
           # create package
           sudo python3 setup.py sdist bdist_wheel
-
-          # debug
-          echo "${{ github.event.inputs.username }}"
-          echo "${{ github.event.inputs.password }}"
           
           # upload to pypi
           sudo python3 tools/script/deploy_to_pypi.py "${{ github.event.inputs.username }}" "${{ github.event.inputs.password }}" "${{ github.event.inputs.is_test }}"
