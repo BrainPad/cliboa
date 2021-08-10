@@ -3,7 +3,7 @@ name: cliboa-deploy
 on:
   push:
     branches:
-      - "223"
+      - "223" # debug
   workflow_dispatch:
     inputs:
       username:
