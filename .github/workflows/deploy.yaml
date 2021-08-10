@@ -30,11 +30,11 @@ jobs:
           python-version: 3.9
       - name: install dependencies
         run: |
-          sudo pip install twine wheel pexpect
+          sudo pip3 install twine wheel pexpect
       - name: upload to testpypi and production pypi
         run: |
           # create package
-          sudo python setup.py sdist bdist_wheel
+          sudo python3 setup.py sdist bdist_wheel
 
           # debug
           echo "${{ github.event.inputs.username }}"
