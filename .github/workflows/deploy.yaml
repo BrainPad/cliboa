@@ -6,13 +6,17 @@ on:
       - "223"
   workflow_dispatch:
     inputs:
-      id:
-        description: PyPI id
+      username:
+        description: PyPI username
         required: true
-        default: ""
+        default: "spam"
       password:
         description: PyPI password
         required: true
+        default: "spam"
+      is_test:
+        description: if upload pypi test repository
+        required: false
         default: ""
 
 jobs:
@@ -27,10 +31,14 @@ jobs:
       - name: install dependencies
         run: |
           sudo pip install twine wheel
-          sudo python setup.py sdist bdist_wheel
       - name: upload to testpypi and production pypi
         run: |
-          twine upload --repository testpypi dist/*
-          echo "Hello ${{ github.event.inputs.id }}!"
-          echo "- in ${{ github.event.inputs.password }}!"
-          twine upload --repository pypi dist/*
+          # create package
+          sudo python setup.py sdist bdist_wheel
+
+          # debug
+          echo "${{ github.event.inputs.username }}"
+          echo "${{ github.event.inputs.password }}"
+          
+          # upload
+          python3 tools/script/deploy_to_pypi.py "${{ github.event.inputs.username }}" "${{ github.event.inputs.password }}" 
