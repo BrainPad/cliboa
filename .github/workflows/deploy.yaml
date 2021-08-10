@@ -30,7 +30,7 @@ jobs:
           python-version: 3.9
       - name: install dependencies
         run: |
-          sudo pip3 install twine wheel pexpect
+          sudo python3 -m install twine wheel pexpect
       - name: upload to testpypi and production pypi
         run: |
           # create package
@@ -40,5 +40,5 @@ jobs:
           echo "${{ github.event.inputs.username }}"
           echo "${{ github.event.inputs.password }}"
           
-          # upload
+          # upload to pypi
           python3 tools/script/deploy_to_pypi.py "${{ github.event.inputs.username }}" "${{ github.event.inputs.password }}" 
