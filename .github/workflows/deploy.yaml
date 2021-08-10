@@ -30,7 +30,7 @@ jobs:
           python-version: 3.9
       - name: install dependencies
         run: |
-          sudo python3 -m pip install twine wheel pexpect
+          sudo python3 -m pip install twine
       - name: upload to pypi
         run: |
           # create package
