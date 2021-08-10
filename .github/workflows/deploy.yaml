@@ -41,4 +41,4 @@ jobs:
           echo "${{ github.event.inputs.password }}"
           
           # upload to pypi
-          python3 tools/script/deploy_to_pypi.py "${{ github.event.inputs.username }}" "${{ github.event.inputs.password }}" 
+          sudo python3 tools/script/deploy_to_pypi.py "${{ github.event.inputs.username }}" "${{ github.event.inputs.password }}" 
