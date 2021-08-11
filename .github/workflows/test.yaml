@@ -1,4 +1,4 @@
-name: cliboa
+name: cliboa-test
 
 on: [pull_request]
  
