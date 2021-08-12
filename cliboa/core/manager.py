@@ -23,7 +23,6 @@ from cliboa.core.listener import StepStatusListener
 from cliboa.core.scenario_queue import ScenarioQueue
 from cliboa.core.step_queue import StepQueue
 from cliboa.core.validator import (
-    DIScenarioFormat,
     ProjectDirectoryExistence,
     ScenarioFileExistence,
 )
@@ -32,7 +31,6 @@ from cliboa.util.cache import StepArgument
 from cliboa.util.class_util import ClassUtil
 from cliboa.util.exception import CliboaException, InvalidParameter, ScenarioFileInvalid
 from cliboa.util.helper import Helper
-from cliboa.util.http import FormAuth  # noqa
 from cliboa.util.lisboa_log import LisboaLog
 
 __all__ = ["YamlScenarioManager", "JsonScenarioManager"]
@@ -45,9 +43,6 @@ class ScenarioManager(object):
 
     Note : Currently only yaml format scenario file is implemented.
     """
-
-    # dependency injection keys in scenario.yml
-    DI_KEYS = ["auth", "base_auth"]
 
     def __init__(self, cmd_args):
         self._logger = LisboaLog.get_logger(__name__)
@@ -175,25 +170,9 @@ class ScenarioManager(object):
         if "arguments" in s_dict.keys():
             cls_attrs_dict = s_dict["arguments"]
 
-        # loop and set class attribute
-        di_key = None
-        di_instance = None
         values = {}
         if cls_attrs_dict:
             cls_attrs_dict, with_vars = self._split_class_vars(cls_attrs_dict)
-
-            # check if the keys of dependency injection
-            di_keys, di_instances = self.__create_di_instance(cls_attrs_dict)
-            if di_keys and di_instances:
-                di_keys_and_instances = zip(di_keys, di_instances)
-                for di_key, di_instance in di_keys_and_instances:
-                    self._logger.debug(
-                        "Inject %s to %s object." % (di_instance, instance)
-                    )
-                    # Injection
-                    setattr(instance, di_key, di_instance)
-                    del cls_attrs_dict[di_key]
-
             ret = self._set_values(instance, cls_attrs_dict, with_vars)
             values.update(ret)
 
@@ -296,40 +275,6 @@ class ScenarioManager(object):
         shell_output = re.sub("'", "", str(shell_output))
 
         return re.sub(r"{{(\s?)%s(\s?)}}" % var_name, shell_output, yaml_v)
-
-    def __create_di_instance(self, cls_attrs):
-        """
-        Create an instance to be injected
-        Args:
-            step class attributes
-        Return:
-            DI attribute names, DI instances
-        """
-        di_keys = []
-        di_instance = None
-        di_instances = []
-        di_params = None
-        for k in cls_attrs.keys():
-            if k in self.DI_KEYS:
-                di_keys.append(k)
-                di_params = cls_attrs.get(k)
-                valid = DIScenarioFormat(k, di_params)
-                valid()
-                di_cls = di_params["class"]
-                di_cls = globals()[di_cls]
-                di_instance = di_cls()
-                if di_instance:
-                    self._logger.debug(
-                        "An instance %s to be injected exists." % di_instance
-                    )
-                    del di_params["class"]
-
-                # set attributes to instance
-                if di_params:
-                    for k, v in di_params.items():
-                        Helper.set_property(di_instance, k, v)
-                di_instances.append(di_instance)
-        return di_keys, di_instances
 
     def _append_listeners(self, instance, args, values):
         listeners = [StepStatusListener()]

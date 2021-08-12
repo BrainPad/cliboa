@@ -102,26 +102,6 @@ class EssentialParameters(object):
                 )
 
 
-class DIScenarioFormat(object):
-    """
-    Validation for dependency injection format in scenario.yml
-    """
-
-    def __init__(self, di_key, di_params):
-        self.__di_key = di_key
-        self.__di_params = di_params
-
-    def __call__(self):
-        if not (self.__di_params):
-            raise ScenarioFileInvalid(
-                "Dependency Injection parameters are essential after %s" % self.__di_key
-            )
-        if not (self.__di_params.get("class")):
-            raise ScenarioFileInvalid(
-                "class: is not specified after %s" % self.__di_key
-            )
-
-
 class EssentialKeys(object):
     """
     Check if 'step: ' and 'class: $class_name' exist in scenario.yml
