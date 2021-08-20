@@ -82,8 +82,8 @@ class Csv(object):
             remain_column_names: Columns which remain
             enc: Encoding
         """
-        with codecs.open(input_file, mode="r", encoding=enc) as in_f, codecs.open(
-            output_file + ".tmp", mode="w", encoding=enc
+        with open(input_file, mode="r", encoding=enc) as in_f, open(
+            output_file, mode="w", encoding=enc
         ) as out_f:
             reader = csv.DictReader(in_f)
             writer = csv.writer(out_f)
@@ -94,8 +94,6 @@ class Csv(object):
                     contents.append(row[c])
                 writer.writerow(contents)
             out_f.flush()
-        os.remove(input_file)
-        shutil.move(output_file + ".tmp", input_file)
 
     @staticmethod
     def extract_columns_with_numbers(
@@ -110,8 +108,8 @@ class Csv(object):
             remain_column_numbers: Column numbers which remain
             enc: Encoding
         """
-        with codecs.open(input_file, mode="r", encoding=enc) as in_f, codecs.open(
-            output_file + ".tmp", mode="w", encoding=enc
+        with open(input_file, mode="r", encoding=enc) as in_f, open(
+            output_file, mode="w", encoding=enc
         ) as out_f:
             reader = csv.reader(in_f)
             writer = csv.writer(out_f)
@@ -123,8 +121,6 @@ class Csv(object):
                     contents.append(r)
                 writer.writerow(contents)
             out_f.flush()
-        os.remove(input_file)
-        shutil.move(output_file + ".tmp", input_file)
 
     @staticmethod
     def get_column_names(src, enc="utf-8"):

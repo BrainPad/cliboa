@@ -36,10 +36,13 @@ class TestCsv(object):
         try:
             remain_columns = ["key"]
             Csv.extract_columns_with_names(test_csv, output_file, remain_columns)
-            with open(test_csv, "r") as o:
-                reader = csv.DictReader(o)
-                for r in reader:
-                    assert r["key"] == test_csv_data[1][0]
+            rows = 0
+            with open(output_file, "r") as o:
+                reader = csv.reader(o)
+                for i, row in enumerate(reader):
+                    rows += 1
+                    assert row == [test_csv_data[i][0]]
+            assert rows == len(test_csv_data)
         finally:
             shutil.rmtree(self._data_dir)
 
@@ -63,14 +66,13 @@ class TestCsv(object):
             Csv.extract_columns_with_numbers(
                 test_csv, output_file, remain_column_numbers
             )
-            with open(test_csv, "r") as o:
-                reader = csv.DictReader(o)
-                for r in reader:
-                    assert r[test_csv_data[0][0]] in [
-                        test_csv_data[1][0],
-                        test_csv_data[2][0],
-                        test_csv_data[3][0],
-                    ]
+            rows = 0
+            with open(output_file, "r") as o:
+                reader = csv.reader(o)
+                for i, row in enumerate(reader):
+                    rows += 1
+                    assert row == [test_csv_data[i][0]]
+            assert rows == len(test_csv_data)
         finally:
             shutil.rmtree(self._data_dir)
 
@@ -93,18 +95,12 @@ class TestCsv(object):
             Csv.extract_columns_with_numbers(
                 test_csv, output_file, remain_column_numbers
             )
-            with open(test_csv, "r") as o:
+            rows = 0
+            with open(output_file, "r") as o:
                 reader = csv.reader(o)
-                for r in reader:
-                    assert r[0] in [
-                        test_csv_data[0][0],
-                        test_csv_data[1][0],
-                        test_csv_data[2][0],
-                    ]
-                    assert r[1] in [
-                        test_csv_data[0][2],
-                        test_csv_data[1][2],
-                        test_csv_data[2][2],
-                    ]
+                for i, row in enumerate(reader):
+                    rows += 1
+                    assert row == [test_csv_data[i][0], test_csv_data[i][2]]
+            assert rows == len(test_csv_data)
         finally:
             shutil.rmtree(self._data_dir)
