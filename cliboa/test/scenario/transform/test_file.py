@@ -475,11 +475,13 @@ class TestDateFormatConvert(TestFileTransform):
         dest_path = os.path.join(self._out_dir, "test.csv")
         Helper.set_property(instance, "dest_path", dest_path)
         instance.execute()
-
+        rows = 0
         with open(dest_path, mode="r", encoding="utf-8") as f:
             reader = csv.DictReader(f)
             for row in reader:
+                rows += 1
                 assert "2021-01-01 12:00" == row.get("date")
+        assert rows == len(obj)
 
     def test_convert_ok(self):
         src = os.path.join(self._data_dir, "test.csv")
@@ -499,11 +501,13 @@ class TestDateFormatConvert(TestFileTransform):
         Helper.set_property(instance, "columns", ["date"])
         Helper.set_property(instance, "formatter", "%Y-%m-%d %H:%M")
         instance.execute()
-
+        rows = 0
         with open(src, mode="r", encoding="utf-8") as f:
             reader = csv.DictReader(f)
             for row in reader:
+                rows += 1
                 assert "2021-01-01 12:00" == row.get("date")
+        assert rows == len(obj)
 
 
 class TestExcelConvert(TestFileTransform):
