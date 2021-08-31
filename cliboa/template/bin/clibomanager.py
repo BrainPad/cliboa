@@ -20,7 +20,7 @@ import sys
 if __name__ == "__main__":
     # setting of environment values
     sys.path.append(os.getcwd())
-    os.environ.setdefault("LISBOA_ENV", "common.environment")
+    os.environ.setdefault("CLIBOA_ENV", "common.environment")
     try:
         from cliboa.client import run
 
