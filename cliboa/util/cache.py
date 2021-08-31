@@ -104,23 +104,23 @@ class StorageIO(object):
     def __init__(self):
         self._logger = LisboaLog.get_logger(__name__)
         # Add process id to create an unique cache file name
-        self.__cache_file = (
+        self._cache_file = (
             "/tmp/" + self.CACHE_PREFIX + str(os.getpid()) + self.CACHE_SUFFIX
         )
 
     @property
     def cache_file(self):
-        return self.__cache_file
+        return self._cache_file
 
     def save(self, v):
         """
         Save one column of input data to storage as a temporal file.
         """
-        with open(self.__cache_file, "a", encoding="utf-8") as f:
+        with open(self._cache_file, "a", encoding="utf-8") as f:
             f.write(str(v) + "\n")
 
     def remove(self):
         """
         Remove a cache file
         """
-        os.remove(self.__cache_file)
+        os.remove(self._cache_file)

@@ -63,14 +63,14 @@ class ScenarioWorker(object):
     def execute_scenario(self):
         self._before_scenario()
         try:
-            return self.__execute_steps()
+            return self._execute_steps()
         except Exception as e:
             self._logger.error(e)
             raise e
         finally:
             self._after_scenario()
 
-    def __execute_steps(self):
+    def _execute_steps(self):
         """
         Execute steps in scenario.yml
         """

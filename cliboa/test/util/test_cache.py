@@ -18,17 +18,17 @@ from cliboa.util.cache import StorageIO
 
 class TestStorageIO(object):
     def setup_method(self, method):
-        self.__tmp_valid_cache_file = "/tmp/cliboa_cache_" + str(os.getpid()) + ".tmp"
-        self.__tmp_invalid_cache_file = "/tmp/cliboa_cache.tmp"
-        if os.path.exists(self.__tmp_valid_cache_file):
-            os.remove(self.__tmp_valid_cache_file)
+        self._tmp_valid_cache_file = "/tmp/cliboa_cache_" + str(os.getpid()) + ".tmp"
+        self._tmp_invalid_cache_file = "/tmp/cliboa_cache.tmp"
+        if os.path.exists(self._tmp_valid_cache_file):
+            os.remove(self._tmp_valid_cache_file)
 
     def test_save_ok(self):
         s = StorageIO()
         s.save(["spam"])
-        assert os.path.exists(self.__tmp_valid_cache_file) is True
+        assert os.path.exists(self._tmp_valid_cache_file) is True
 
     def test_save_ng(self):
         s = StorageIO()
         s.save("spam")
-        assert os.path.exists(self.__tmp_invalid_cache_file) is False
+        assert os.path.exists(self._tmp_invalid_cache_file) is False

@@ -59,11 +59,11 @@ class SqliteRead(BaseSqlite):
             return d
 
         self._sqlite_adptr.connect(self._dbname)
-        cur = self._sqlite_adptr.fetch(sql=self.__get_query(), row_factory=dict_factory)
+        cur = self._sqlite_adptr.fetch(sql=self._get_query(), row_factory=dict_factory)
         for r in cur:
             self._s.save(r)
 
-    def __get_query(self):
+    def _get_query(self):
         """
         Get sql to read
         """

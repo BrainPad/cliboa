@@ -51,13 +51,13 @@ class FtpUtil(object):
             tls=False (bool): use secure connection
         """
 
-        self.__host = host
-        self.__user = user
-        self.__password = password
-        self.__timeout = timeout
-        self.__retryTimes = retryTimes
-        self.__port = port
-        self.__tls = tls
+        self._host = host
+        self._user = user
+        self._password = password
+        self._timeout = timeout
+        self._retryTimes = retryTimes
+        self._port = port
+        self._tls = tls
         self._logger = LisboaLog.get_logger(__name__)
 
     def list_files(self, dir, dest, pattern):
@@ -75,7 +75,7 @@ class FtpUtil(object):
         Raises:
             IOError: ftplib failure
         """
-        return self.__execute(list_file_func, dir=dir, dest=dest, pattern=pattern)
+        return self._execute(list_file_func, dir=dir, dest=dest, pattern=pattern)
 
     def clear_files(self, dir, pattern):
         """
@@ -88,7 +88,7 @@ class FtpUtil(object):
         Raises:
             IOError: failed to remove
         """
-        self.__execute(clear_file_func, dir=dir, pattern=pattern)
+        self._execute(clear_file_func, dir=dir, pattern=pattern)
 
     def remove_specific_file(self, dir, fname):
         """
@@ -101,7 +101,7 @@ class FtpUtil(object):
         Raises:
             IOError: failed to remove
         """
-        self.__execute(remove_specific_file_func, dir=dir, fname=fname)
+        self._execute(remove_specific_file_func, dir=dir, fname=fname)
 
     def file_mdtm(self, dir, unixtime=False):
         """
@@ -118,9 +118,9 @@ class FtpUtil(object):
         Raises:
             IOError: ftplib failure
         """
-        return self.__execute(file_mdtm_func, dir=dir, unixtime=unixtime)
+        return self._execute(file_mdtm_func, dir=dir, unixtime=unixtime)
 
-    def __execute(self, func, **kwargs):
+    def _execute(self, func, **kwargs):
         """
         Connect to ftp server and execute defined function.
 
@@ -137,9 +137,9 @@ class FtpUtil(object):
         if not func:
             raise ValueError("Function must not be empty.")
 
-        for _ in range(self.__retryTimes):
+        for _ in range(self._retryTimes):
             try:
-                return self.__ftp_call(func, **kwargs)
+                return self._ftp_call(func, **kwargs)
             except Exception as e:
                 self._logger.warning(e)
                 self._logger.warning(kwargs)
@@ -151,18 +151,18 @@ class FtpUtil(object):
 
         raise IOError(errno.ENOENT, "FTP failed.")
 
-    def __ftp_call(self, func, **kwargs):
-        if self.__tls:
-            with FTP_TLS(host=self.__host, timeout=self.__timeout) as ftp:
+    def _ftp_call(self, func, **kwargs):
+        if self._tls:
+            with FTP_TLS(host=self._host, timeout=self._timeout) as ftp:
                 ftp.set_debuglevel(1)
-                ftp.login(user=self.__user, passwd=self.__password)
+                ftp.login(user=self._user, passwd=self._password)
                 ftp.prot_p()
                 return func(ftp=ftp, **kwargs)
         else:
             with FTP() as ftp:
                 ftp.set_debuglevel(1)
-                ftp.connect(host=self.__host, port=self.__port, timeout=self.__timeout)
-                ftp.login(user=self.__user, passwd=self.__password)
+                ftp.connect(host=self._host, port=self._port, timeout=self._timeout)
+                ftp.login(user=self._user, passwd=self._password)
                 return func(ftp=ftp, **kwargs)
 
 
