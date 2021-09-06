@@ -48,7 +48,7 @@ class CliboAdmin(object):
             )
         elif self._args.option == "create":
             self._create_new_project(self._args.dir_name)
-            print("Adding a new project '" + self._args.dir_name + "' was successfule.")
+            print("Adding a new project '" + self._args.dir_name + "' was successful.")
 
     def _init_project(self, ini_dir):
         """
