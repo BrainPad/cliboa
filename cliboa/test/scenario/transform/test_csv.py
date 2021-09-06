@@ -1058,6 +1058,63 @@ class TestCsvConvert(TestCsvTransform):
                 line = t.readline()
                 idx += 1
 
+    def test_add_header(self):
+        # create test file
+        csv_list = [["key", "data"], ["1", "spam"], ["2", "spam"], ["3", "spam"]]
+        test_csv = self._create_csv(csv_list)
+
+        # set the essential attributes
+        instance = CsvConvert()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test\.csv")
+        Helper.set_property(instance, "headers_existence", True)
+        instance.execute()
+
+        with open(test_csv, "r") as t:
+            reader = csv.reader(t)
+            line = next(reader)
+        assert line == ["key", "data"]
+
+    def test_delete_header(self):
+        # create test file
+        csv_list = [["key", "data"], ["1", "spam"], ["2", "spam"], ["3", "spam"]]
+        test_csv = self._create_csv(csv_list)
+
+        # set the essential attributes
+        instance = CsvConvert()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test\.csv")
+        Helper.set_property(instance, "headers_existence", False)
+        instance.execute()
+
+        with open(test_csv, "r") as t:
+            reader = csv.reader(t)
+            line = next(reader)
+        assert line == ["1", "spam"]
+
+    def test_convert_header_with_headers_options_is_False(self):
+        # create test file
+        csv_list = [["key", "data"], ["1", "spam"], ["2", "spam"], ["3", "spam"]]
+        test_csv = self._create_csv(csv_list)
+
+        # set the essential attributes
+        instance = CsvConvert()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test\.csv")
+        Helper.set_property(
+            instance, "headers", [{"key": "new_key"}, {"data": "new_data"}]
+        )
+        Helper.set_property(instance, "headers_existence", False)
+        instance.execute()
+
+        with open(test_csv, "r") as t:
+            reader = csv.reader(t)
+            line = next(reader)
+        assert line == ["1", "spam"]
+
 
 class TestCsvSort(TestCsvTransform):
     def test_sort(self):
