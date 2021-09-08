@@ -17,6 +17,7 @@ import csv
 import gzip
 import os
 import shutil
+import subprocess
 import tarfile
 import tempfile
 import zipfile
@@ -773,3 +774,47 @@ class FileArchive(FileBaseTransform):
                 raise InvalidParameter(
                     "'format' must set one of the followings [tar, zip]"
                 )
+
+class ExecuteShellScript(FileBaseTransform):
+    """
+    Hash All Column Value
+    """
+    def __init__(self):
+        super().__init__()
+        self._command = ""
+        self._work_dir = ""
+
+    def command(self, command):
+        self._command = command
+
+    def work_dir(self, work_dir):
+        self._work_dir = work_dir
+
+    def execute(self, *args):
+        # essential parameters check
+        valid = EssentialParameters(
+            self.__class__.__name__,
+            [
+                self._command
+            ],
+        )
+        valid()
+
+        # Setting Up Directory
+        default_dir =os.getcwd()
+
+        if self._work_dir:
+            os.chdir(self._work_dir)
+
+        # Run Commands
+        content = self._command.get("content")
+        file = self._command.get("file")
+        if content:
+            for command in content.split("&&"):
+                subprocess.run(command.strip().split(" "))
+        elif file:
+            self.check_file_existence(file)
+            subprocess.call(file)
+
+        # Set Directory to default
+        os.chdir(default_dir)
