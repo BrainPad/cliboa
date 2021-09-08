@@ -11,11 +11,13 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+from collections import OrderedDict
 import os
 import yaml
+import json
 
 from abc import abstractmethod
-from cliboa.core.validator import EssentialKeys, ScenarioYamlKey, ScenarioYamlType
+from cliboa.core.validator import EssentialKeys, ScenarioYamlKey, ScenarioYamlType, ScenarioJsonKey, ScenarioJsonType
 from cliboa.util.lisboa_log import LisboaLog
 
 
@@ -117,7 +119,81 @@ class YamlScenarioParser(ScenarioParser):
         valid()
 
 
-class JsonScenarioParser:
+class JsonScenarioParser(ScenarioParser):
     """
-    TODO: implement in the future
+    scenario.json parser
     """
+    def parse(self):
+        self._logger.info("Start to parse scenario.json")
+
+        # Load projet scenario file
+        with open(self._pj_scenario_file, "r") as pj_f:
+            pj_json_dict = json.load(pj_f, object_pairs_hook=OrderedDict)
+            self._valid_scenario_json(pj_json_dict)
+            self._exists_ess_keys(pj_json_dict["scenario"])
+
+        # Load common scenario file (if exist)
+        cmn_json_dict = None
+        if os.path.isfile(self._cmn_scenario_file):
+            with open(self._cmn_scenario_file, "r") as cmn_f:
+                cmn_json_dict = json.load(cmn_f, object_pairs_hook=OrderedDict)
+                self._valid_scenario_json(cmn_json_dict)
+                self._exists_ess_keys(cmn_json_dict["scenario"])
+
+        if cmn_json_dict:
+            json_list = self._merge_scenario_json(
+                pj_json_dict["scenario"], cmn_json_dict["scenario"]
+            )
+        else:
+            json_list = pj_json_dict.get("scenario")
+
+        self._logger.info("Finish to parse scenario.json")
+        return json_list
+
+    def _valid_scenario_json(self, json_dict):
+        """
+        validate instance type and essential key in scenario.json
+        """
+        valids = [ScenarioJsonKey, ScenarioJsonType]
+        for valid in valids:
+            valid(json_dict)()
+
+    def _merge_scenario_json(self, pj_json_list, cmn_json_list):
+        """
+        Merge project scenario.json and common scenario.json.
+        If the same class specification exists,
+        scenario.yml of projet is taken priority.
+        """
+        for pj_json_dict in pj_json_list:
+            # If same class exists, merge arguments
+            if pj_json_dict.get("parallel"):
+                for row in pj_json_dict.get("parallel"):
+                    self._merge(row, cmn_json_list)
+            else:
+                self._merge(pj_json_dict, cmn_json_list)
+
+        return pj_json_list
+
+    def _merge(self, pj_json_dict, cmn_json_list):
+        cmn_json_dict_in_list = [
+            d for d in cmn_json_list if d.get("class") == pj_json_dict.get("class")
+        ]
+        if not cmn_json_dict_in_list:
+            return
+
+        pj_cls_attrs = pj_json_dict.get("arguments", "")
+        cmn_cls_attrs = cmn_json_dict_in_list[0].get("arguments")
+
+        # Merge arguments
+        if pj_cls_attrs and cmn_cls_attrs:
+            pj_cls_attrs = dict(cmn_cls_attrs, **pj_cls_attrs)
+        elif not pj_cls_attrs and cmn_cls_attrs:
+            pj_cls_attrs = cmn_cls_attrs
+        pj_json_dict["arguments"] = pj_cls_attrs
+
+    def _exists_ess_keys(self, scenario_json_list):
+        """
+        Check if the essential keys exist in scenario.yml
+        """
+        valid = EssentialKeys(scenario_json_list)
+        valid()

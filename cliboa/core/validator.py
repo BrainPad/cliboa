@@ -57,6 +57,30 @@ class ScenarioYamlKey(ValidatorChain):
                 "scenario.yml is invalid. 'scenario:' key does not exist, or 'scenario:' key exists but content under 'scenario:' key does not exist."  # noqa
             )
 
+class ScenarioJsonType(ValidatorChain):
+    def __call__(self):
+        """
+        Validate parsed scenario.json instance type
+        """
+        json_dict = self._val
+        if not isinstance(json_dict, dict):
+            raise ScenarioFileInvalid(
+                "scenario.json is invalid. Check scenario.json format."
+            )
+
+
+class ScenarioJsonKey(ValidatorChain):
+    def __call__(self):
+        """
+        Validate scenario key in scenario.json
+        """
+        json_dict = self._val
+        scenario = json_dict.get("scenario")
+        if not scenario:
+            raise ScenarioFileInvalid(
+                "scenario.json is invalid. 'scenario:' key does not exist, or 'scenario:' key exists but content under 'scenario:' key does not exist."  # noqa
+            )
+
 
 class ProjectDirectoryExistence(object):
     """
@@ -105,6 +129,7 @@ class EssentialParameters(object):
 class EssentialKeys(object):
     """
     Check if 'step: ' and 'class: $class_name' exist in scenario.yml
+    # TODO change variable and comment dependenced by yaml
     """
 
     def __init__(self, scenario_yaml_list):
