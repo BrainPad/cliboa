@@ -55,15 +55,9 @@ class CsvColumnHash(FileBaseTransform):
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self.check_file_existence(files)
 
-        root, ext = os.path.splitext(files[0])
-        if ext == ".csv":
-            delimiter = ","
-        elif ext == ".tsv":
-            delimiter = "\t"
-
         stringToHash = lambda strings: hashlib.sha256(strings.encode()).hexdigest()
         
-        for fi, fo in super().io_files(files, ext="csv"):
+        for fi, fo in super().io_files(files, ext="csv"):            
             df = pandas.read_csv(
                 fi,
                 dtype=str,
