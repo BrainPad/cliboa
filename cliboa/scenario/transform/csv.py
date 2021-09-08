@@ -35,7 +35,7 @@ import hashlib
 
 class CsvColumnHash(FileBaseTransform):
     """
-    Hash(SHA256) csv (tsv) date field columns
+    Hash(SHA256) specific columns from csv file.
     """
 
     def __init__(self):
