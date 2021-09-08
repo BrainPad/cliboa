@@ -91,15 +91,16 @@ class BigQueryRead(BaseBigQuery):
             key_filepath = self._credentials
         else:
             key_filepath = self._source_path_reader(self._credentials)
-        df = pandas.read_gbq(
-            query="SELECT * FROM %s.%s" % (self._dataset, self._tblname)
-            if self._query is None
-            else self._query,
-            dialect="standard",
+
+        gbq_client = bigquery.Client(
             location=self._location,
-            project_id=self._project_id,
+            project=self._project_id,
             credentials=ServiceAccount.auth(key_filepath),
         )
+
+        query = "SELECT * FROM %s.%s" % (self._dataset, self._tblname) if self._query is None else self._query
+
+        df = gbq_client.query(query).to_dataframe()
         ObjectStore.put(self._key, df)
 
     def _save_as_file_via_gcs(self):
@@ -235,13 +236,15 @@ class BigQueryReadCache(BaseBigQuery):
             key_filepath = self._credentials
         else:
             key_filepath = self._source_path_reader(self._credentials)
-        df = pandas.read_gbq(
-            query=self._get_query(),
-            dialect="standard",
+
+        gbq_client = bigquery.Client(
             location=self._location,
-            project_id=self._project_id,
+            project=self._project_id,
             credentials=ServiceAccount.auth(key_filepath),
         )
+
+        df = gbq_client.query(self._get_query()).to_dataframe()
+
         ObjectStore.put(self._key, df)
 
 
