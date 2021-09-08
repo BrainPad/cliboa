@@ -57,6 +57,7 @@ class ScenarioYamlKey(ValidatorChain):
                 "scenario.yml is invalid. 'scenario:' key does not exist, or 'scenario:' key exists but content under 'scenario:' key does not exist."  # noqa
             )
 
+
 class ScenarioJsonType(ValidatorChain):
     def __call__(self):
         """

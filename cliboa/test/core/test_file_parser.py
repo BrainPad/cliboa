@@ -17,10 +17,11 @@ import sys
 
 import pytest
 import yaml
+import json
 
 from cliboa.client import CommandArgumentParser
 from cliboa.conf import env
-from cliboa.core.file_parser import YamlScenarioParser
+from cliboa.core.file_parser import YamlScenarioParser, JsonScenarioParser
 from cliboa.test import BaseCliboaTest
 from cliboa.util.exception import ScenarioFileInvalid
 
@@ -343,3 +344,22 @@ class TestYamlScenarioParser(BaseCliboaTest):
         for scenario in yaml_scenario_list:
             for dict in scenario.get("parallel"):
                 assert "dummy_host" == dict.get("arguments")["host"]
+
+
+class TestJsonScenarioParser(BaseCliboaTest):
+    def setup(self):
+        cmd_parser = CommandArgumentParser()
+        sys.argv.clear()
+        sys.argv.append("spam")
+        sys.argv.append("spam")
+        self._cmd_args = cmd_parser.parse()
+        self._pj_dir = os.path.join(env.BASE_DIR, "project", "spam")
+        self._cmn_dir = env.COMMON_DIR
+        self._pj_scenario_file = os.path.join(
+            env.BASE_DIR, "project", "spam", "scenario.yml"
+        )
+        self._cmn_scenario_dir = env.COMMON_SCENARIO_DIR
+        self._cmn_scenario_file = os.path.join(env.COMMON_DIR, "scenario.yml")
+
+        os.makedirs(self._pj_dir, exist_ok=True)
+        os.makedirs(self._cmn_scenario_dir, exist_ok=True)
