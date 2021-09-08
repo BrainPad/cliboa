@@ -33,9 +33,9 @@ from datetime import datetime
 import hashlib
 
 
-class HashConvert(FileBaseTransform):
+class CsvColumnHash(FileBaseTransform):
     """
-    Convert csv (tsv) date field columns to another date field format columns
+    Hash(SHA256) csv (tsv) date field columns
     """
 
     def __init__(self):
@@ -55,7 +55,7 @@ class HashConvert(FileBaseTransform):
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self.check_file_existence(files)
 
-        _, ext = os.path.splitext(files[0])
+        root, ext = os.path.splitext(files[0])
         if ext == ".csv":
             delimiter = ","
         elif ext == ".tsv":
@@ -69,10 +69,9 @@ class HashConvert(FileBaseTransform):
                 dtype=str,
                 encoding=self._encoding,
             )
-
             for c in self._columns:
                 df[c] = df[c].apply(stringToHash)
-            
+        
             df.to_csv(
                 fo,
                 encoding=self._encoding,

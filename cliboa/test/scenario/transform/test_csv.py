@@ -20,6 +20,7 @@ import pytest
 from glob import glob
 from cliboa.conf import env
 from cliboa.scenario.transform.csv import (
+    CsvColumnHash,
     CsvColumnConcat,
     CsvColumnExtract,
     ColumnLengthAdjust,
@@ -54,6 +55,76 @@ class TestCsvTransform(BaseCliboaTest):
             for row in data:
                 writer.writerow(row)
         return src
+
+
+class TestCsvColumnHash(TestCsvTransform):
+    def test_execute_ok(self):
+        # create test csv
+        test_csv_data = [["id", "name", "passwd"], ["1", "spam", "spam1234"]]
+        self._create_csv(test_csv_data)
+
+        # set the essential attributes
+        instance = CsvColumnHash()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "columns", ["passwd"])
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        rows = 1
+        with open(output_file, "r") as o:
+            reader = csv.DictReader(o)
+            for r in reader:
+                rows += 1
+                assert "ec77022924e329f8e01deab92a4092ed8b7ec2365f1e719ac4e9686744341d95" == r.get("passwd")
+        assert rows == len(test_csv_data)
+    
+    def test_execute_ok_with_multiple_columns(self):
+        # create test csv
+        test_csv_data = [["id", "name", "passwd", "email"], ["1", "spam", "spam1234", "spam@spam.com"]]
+        self._create_csv(test_csv_data)
+
+        # set the essential attributes
+        instance = CsvColumnHash()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "columns", ["passwd", "email"])
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        rows = 1
+        with open(output_file, "r") as o:
+            reader = csv.DictReader(o)
+            for r in reader:
+                rows += 1
+                assert "ec77022924e329f8e01deab92a4092ed8b7ec2365f1e719ac4e9686744341d95" == r.get("passwd")
+                assert "f1907cb728a1dd88f435bb3557bc746ebedf4218276befd66d45ed79f1e8b9cf" == r.get("email")
+        assert rows == len(test_csv_data)
+    
+    def test_execute_ok_with_multiple_rows(self):
+        # create test csv
+        test_csv_data = [
+            ["id", "name", "passwd"],
+            ["1", "spam", "spam1234"],
+            ["2", "spam2", "spam1234"]
+        ]
+        self._create_csv(test_csv_data)
+
+        # set the essential attributes
+        instance = CsvColumnHash()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "columns", ["passwd"])
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        rows = 1
+        with open(output_file, "r") as o:
+            reader = csv.DictReader(o)
+            for r in reader:
+                rows += 1
+                assert "ec77022924e329f8e01deab92a4092ed8b7ec2365f1e719ac4e9686744341d95" == r.get("passwd")
+        assert rows == len(test_csv_data)
 
 
 class TestCsvColumnExtract(TestCsvTransform):

@@ -1,5 +1,5 @@
-# HashConvert
-Convert date format of columns of a csv file to another date format.
+# CsvColumnHash
+Hash columns of a csv file with SHA256
 
 # Parameters
 |Parameters|Explanation|Required|Default|Remarks|
@@ -8,28 +8,26 @@ Convert date format of columns of a csv file to another date format.
 |src_pattern|Regex which is to find target files.|Yes|None||
 |dest_dir|Path of the directory which is for output files.|No|None||
 |encoding|Character encoding when read and write|No|utf-8||
-<!-- |formatter|Date format to convert|Yes|None|Syntax is same as [strftime](https://www.programiz.com/python-programming/datetime/strftime)| -->
-|columns|Csv column names which change the date format|Yes|None||
+|columns|Csv column names which hash with SHA256|Yes|None||
 |nonfile_error|Whether an error is thrown when files are not found in src_dir.|No|False||
 
 # Examples
 ```
 scenario:
 - step:
-  class: HashConvert
+  class: CsvColumnHash
   arguments:
     src_dir: /in
     src_pattern: test\.csv
     dest_dir: /out
-    <!-- formatter: "%Y-%m-%d %H:%M" -->
     columns:
       - passwd
 
 Input: /in/test.csv
 id, name, passwd
-1, cliboa, cliboa1234
+1, spam, spam1234
 
 Output: /out/test.csv
 id, name, passwd
-1, cliboa, ####
+1, spam, ec77022924e329f8e01deab92a4092ed8b7ec2365f1e719ac4e9686744341d95
 ```
