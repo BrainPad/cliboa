@@ -57,7 +57,7 @@ class CsvColumnHash(FileBaseTransform):
 
         stringToHash = lambda strings: hashlib.sha256(strings.encode()).hexdigest()
         
-        for fi, fo in super().io_files(files, ext="csv"):            
+        for fi, fo in super().io_files(files, ext="csv"):
             df = pandas.read_csv(
                 fi,
                 dtype=str,
