@@ -156,6 +156,71 @@ class CsvColumnConcat(FileBaseTransform):
             )
 
 
+class CsvMergeExclusive(FileBaseTransform):
+    """
+    Compare specific columns each file.
+    If matched, exclude rows.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self._src_column = None
+        self._target_compare_path = None
+        self._target_column = None
+
+    def src_column(self, src_column):
+        self._src_column = src_column
+
+    def target_compare_path(self, target_compare_path):
+        self._target_compare_path = target_compare_path
+
+    def target_column(self, target_column):
+        self._target_column = target_column
+
+    def execute(self, *args):
+        valid = EssentialParameters(
+            self.__class__.__name__, [self._src_dir,
+                                      self._src_pattern,
+                                      self._src_column,
+                                      self._target_compare_path,
+                                      self._target_column]
+        )
+        valid()
+
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+        self.check_file_existence(files)
+
+        target = super().get_target_files(
+            os.path.dirname(self._target_compare_path),
+            os.path.basename(self._target_compare_path))
+        self.check_file_existence(target)
+
+        df_target = pandas.read_csv(self._target_compare_path)
+        if self._target_column not in df_target:
+            raise KeyError(
+                "Target Compare file does not exist target column [%s]." %
+                self._target_column)
+
+        df_target_list = df_target[self._target_column].values.tolist()
+
+        for fi, fo in super().io_files(files):
+            df = pandas.read_csv(fi)
+            try:
+                df[self._src_column].values.tolist()
+            except KeyError:
+                raise KeyError(
+                    "Src file does not exist target column [%s]." %
+                    self._target_column)
+
+            df = df[~df[self._src_column].isin(df_target_list)]
+
+            df.to_csv(
+                fo,
+                encoding=self._encoding,
+                index=False,
+            )
+
+
 class ColumnLengthAdjust(FileBaseTransform):
     """
     Adjust csv (tsv) column to maximum length
