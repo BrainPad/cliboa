@@ -685,7 +685,7 @@ class FileConvert(FileBaseTransform):
 
 class FileArchive(FileBaseTransform):
     """
-    Create archeve object.
+    Create archeve object.a
     """
 
     def __init__(self):
