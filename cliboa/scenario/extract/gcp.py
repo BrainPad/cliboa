@@ -92,10 +92,10 @@ class BigQueryRead(BaseBigQuery):
         else:
             key_filepath = self._source_path_reader(self._credentials)
 
-        gbq_client = bigquery.Client(
+        gbq_client = BigQuery.get_bigquery_client(
             location=self._location,
             project=self._project_id,
-            credentials=ServiceAccount.auth(key_filepath),
+            credentials=key_filepath
         )
 
         query = "SELECT * FROM %s.%s" % (self._dataset, self._tblname) if self._query is None else self._query
@@ -237,10 +237,10 @@ class BigQueryReadCache(BaseBigQuery):
         else:
             key_filepath = self._source_path_reader(self._credentials)
 
-        gbq_client = bigquery.Client(
+        gbq_client = BigQuery.get_bigquery_client(
             location=self._location,
             project=self._project_id,
-            credentials=ServiceAccount.auth(key_filepath),
+            credentials=key_filepath
         )
 
         df = gbq_client.query(self._get_query()).to_dataframe()
