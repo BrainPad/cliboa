@@ -30,6 +30,55 @@ from cliboa.util.sqlite import SqliteAdapter
 from cliboa.util.string import StringUtil
 from datetime import datetime
 
+import hashlib
+
+
+class HashConvert(FileBaseTransform):
+    """
+    Convert csv (tsv) date field columns to another date field format columns
+    """
+
+    def __init__(self):
+        super().__init__()
+        self._columns = []
+
+    def columns(self, columns):
+        self._columns = columns
+
+    def execute(self, *args):
+        valid = EssentialParameters(
+            self.__class__.__name__,
+            [self._src_dir, self._src_pattern, self._columns],
+        )
+        valid()
+
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+        self.check_file_existence(files)
+
+        _, ext = os.path.splitext(files[0])
+        if ext == ".csv":
+            delimiter = ","
+        elif ext == ".tsv":
+            delimiter = "\t"
+
+        stringToHash = lambda strings: hashlib.sha256(strings.encode()).hexdigest()
+        
+        for fi, fo in super().io_files(files, ext="csv"):
+            df = pandas.read_csv(
+                fi,
+                dtype=str,
+                encoding=self._encoding,
+            )
+
+            for c in self._columns:
+                df[c] = df[c].apply(stringToHash)
+            
+            df.to_csv(
+                fo,
+                encoding=self._encoding,
+                index=False,
+            )
+
 
 class CsvColumnExtract(FileBaseTransform):
     """
