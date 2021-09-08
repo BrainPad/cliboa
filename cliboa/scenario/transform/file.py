@@ -808,13 +808,12 @@ class ExecuteShellScript(FileBaseTransform):
 
         # Run Commands
         content = self._command.get("content")
-        file = self._command.get("file")
+        file_path = self._command.get("file")
         if content:
             for command in content.split("&&"):
                 subprocess.run(command.strip().split(" "))
-        elif file:
-            self.check_file_existence(file)
-            subprocess.call(file)
+        elif file_path:
+            subprocess.call(file_path)
 
         # Set Directory to default
         os.chdir(default_dir)
