@@ -18,14 +18,13 @@ import re
 import string
 from datetime import datetime
 
-import pandas
 from google.cloud import bigquery
 
 from cliboa.scenario.gcp import BaseBigQuery, BaseFirestore, BaseGcs
 from cliboa.scenario.validator import EssentialParameters
 from cliboa.util.cache import ObjectStore
 from cliboa.util.exception import InvalidParameter
-from cliboa.util.gcp import BigQuery, Firestore, Gcs, ServiceAccount
+from cliboa.util.gcp import BigQuery, Firestore, Gcs
 from cliboa.util.string import StringUtil
 
 
@@ -98,7 +97,8 @@ class BigQueryRead(BaseBigQuery):
             credentials=key_filepath
         )
 
-        query = "SELECT * FROM %s.%s" % (self._dataset, self._tblname) if self._query is None else self._query
+        query = "SELECT * FROM %s.%s" % (self._dataset, self._tblname)
+        if self._query: query = self._query
 
         df = gbq_client.query(query).to_dataframe()
         ObjectStore.put(self._key, df)
