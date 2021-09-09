@@ -1,4 +1,4 @@
-# Execute Shell Scirpt
+# Execute Shell Script
 Execute shell script. Can be execute from (.sh) file or inline command.
 
 # Parameters
@@ -12,8 +12,8 @@ Execute shell script. Can be execute from (.sh) file or inline command.
 ## Execute Inline Script
 ```
 scenario:
-- step: ExecuteShellScirpt
-  class: ExecuteShellScirpt
+- step: ExecuteShellScript
+  class: ExecuteShellScript
   arguments:
     command:
       content: >
@@ -25,8 +25,8 @@ scenario:
 ## Execute Inline Script
 ```
 scenario:
-- step: ExecuteShellScirpt
-  class: ExecuteShellScirpt
+- step: ExecuteShellScript
+  class: ExecuteShellScript
   arguments:
     command:
       file: /root/to/awesome-folder/awesome-script.sh
