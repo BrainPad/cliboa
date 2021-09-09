@@ -13,8 +13,10 @@ Download files from GCS.
 |delimiter|Delimiter, used with prefix to emulate hierarchy|No|None||
 |src_pattern|File pattern of source to download. Regexp is available|Yes|None||
 |dest_dir|Destination directory to download|No|None||
+|byte_size|Download part of file insted whole file (Integer)|No|None||
 
 # Examples
+
 ```
 - step:
   class: GcsDownload
