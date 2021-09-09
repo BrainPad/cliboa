@@ -15,6 +15,7 @@ import os
 import shutil
 import sys
 
+import json
 import pytest
 import yaml
 
@@ -33,10 +34,21 @@ class TestCommandArgumentParser(BaseCliboaTest):
         sys.argv.append("")
         sys.argv.append("spam")
 
-    def test_parse(self):
+    def test_yaml_parse(self):
         cmd_parser = CommandArgumentParser()
         cmd_args = cmd_parser.parse()
         assert cmd_args.project_name == "spam"
+
+    def test_json_parse(self):
+        sys.argv.clear()
+        sys.argv.append("project_name")
+        sys.argv.append("spam")
+        sys.argv.append("--format")
+        sys.argv.append("json")
+        cmd_parser = CommandArgumentParser()
+        cmd_args = cmd_parser.parse()
+        assert cmd_args.project_name == "spam"
+        assert cmd_args.format == "json"
 
 
 class TestScenarioRunner(BaseCliboaTest):
@@ -44,13 +56,23 @@ class TestScenarioRunner(BaseCliboaTest):
         cmd_parser = CommandArgumentParser()
         self._cmd_args = cmd_parser.parse()
         self._pj_dir = os.path.join(env.BASE_DIR, "project", "spam")
-        self._scenario_file = os.path.join(self._pj_dir, "scenario.yml")
+        self._scenario_yaml_file = os.path.join(self._pj_dir, "scenario.yml")
+        self._scenario_json_file = os.path.join(self._pj_dir, "scenario.json")
 
     @pytest.fixture(autouse=True)
     def setup_resource(self):
         os.makedirs(self._pj_dir)
         yield "test in progress"
         shutil.rmtree(self._pj_dir)
+
+    def setup_json_argv(self):
+        sys.argv.clear()
+        sys.argv.append("project_name")
+        sys.argv.append("spam")
+        sys.argv.append("--format")
+        sys.argv.append("json")
+        cmd_parser = CommandArgumentParser()
+        return cmd_parser.parse()
 
     def test_add_system_path(self):
         runner = ScenarioRunner(self._cmd_args)
@@ -69,10 +91,17 @@ class TestScenarioRunner(BaseCliboaTest):
             ]
         }
 
-        with open(self._scenario_file, "w") as f:
+        with open(self._scenario_yaml_file, "w") as f:
             f.write(yaml.dump(test_data, default_flow_style=False))
 
         runner = ScenarioRunner(self._cmd_args)
+        runner.create_scenario_queue()
+
+        with open(self._scenario_json_file, "w") as f:
+            json.dump(test_data, f, indent=4)
+
+        cmd_args = self.setup_json_argv()
+        runner = ScenarioRunner(cmd_args)
         runner.create_scenario_queue()
 
     def test_execute_scenario_ok(self):
@@ -85,10 +114,17 @@ class TestScenarioRunner(BaseCliboaTest):
                 }
             ]
         }
-        with open(self._scenario_file, "w") as f:
+        with open(self._scenario_yaml_file, "w") as f:
             f.write(yaml.dump(test_data, default_flow_style=False))
 
         runner = ScenarioRunner(self._cmd_args)
+        runner.execute_scenario()
+
+        with open(self._scenario_json_file, "w") as f:
+            json.dump(test_data, f, indent=4)
+
+        cmd_args = self.setup_json_argv()
+        runner = ScenarioRunner(cmd_args)
         runner.execute_scenario()
 
     def test_run_ng(self):

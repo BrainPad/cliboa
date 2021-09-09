@@ -12,16 +12,16 @@
 # all copies or substantial portions of the Software.
 #
 from collections import OrderedDict
+import json
 import os
 import yaml
-import json
 
 from abc import abstractmethod
 from cliboa.core.validator import (
-    EssentialKeys, 
-    ScenarioYamlKey, 
-    ScenarioYamlType, 
-    ScenarioJsonKey, 
+    EssentialKeys,
+    ScenarioYamlKey,
+    ScenarioYamlType,
+    ScenarioJsonKey,
     ScenarioJsonType
 )
 from cliboa.util.lisboa_log import LisboaLog
