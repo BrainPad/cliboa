@@ -60,7 +60,10 @@ class TestCsvTransform(BaseCliboaTest):
 class TestCsvColumnHash(TestCsvTransform):
     def test_execute_ok(self):
         # create test csv
-        test_csv_data = [["id", "name", "passwd"], ["1", "spam", "spam1234"]]
+        test_csv_data = [
+            ["id", "name", "passwd"],
+            ["1", "spam", "spam1234"]
+        ]
         self._create_csv(test_csv_data)
 
         # set the essential attributes
@@ -76,12 +79,16 @@ class TestCsvColumnHash(TestCsvTransform):
             reader = csv.DictReader(o)
             for r in reader:
                 rows += 1
-                assert "ec77022924e329f8e01deab92a4092ed8b7ec2365f1e719ac4e9686744341d95" == r.get("passwd")
+                assert "ec77022924e329f8e01deab92a4092ed8b7ec2365f1e719ac4e9686744341d95" \
+                    == r.get("passwd")
         assert rows == len(test_csv_data)
-    
+
     def test_execute_ok_with_multiple_columns(self):
         # create test csv
-        test_csv_data = [["id", "name", "passwd", "email"], ["1", "spam", "spam1234", "spam@spam.com"]]
+        test_csv_data = [
+            ["id", "name", "passwd", "email"],
+            ["1", "spam", "spam1234", "spam@spam.com"]
+        ]
         self._create_csv(test_csv_data)
 
         # set the essential attributes
@@ -97,10 +104,12 @@ class TestCsvColumnHash(TestCsvTransform):
             reader = csv.DictReader(o)
             for r in reader:
                 rows += 1
-                assert "ec77022924e329f8e01deab92a4092ed8b7ec2365f1e719ac4e9686744341d95" == r.get("passwd")
-                assert "f1907cb728a1dd88f435bb3557bc746ebedf4218276befd66d45ed79f1e8b9cf" == r.get("email")
+                assert "ec77022924e329f8e01deab92a4092ed8b7ec2365f1e719ac4e9686744341d95" \
+                    == r.get("passwd")
+                assert "f1907cb728a1dd88f435bb3557bc746ebedf4218276befd66d45ed79f1e8b9cf" \
+                    == r.get("email")
         assert rows == len(test_csv_data)
-    
+
     def test_execute_ok_with_multiple_rows(self):
         # create test csv
         test_csv_data = [
@@ -123,7 +132,8 @@ class TestCsvColumnHash(TestCsvTransform):
             reader = csv.DictReader(o)
             for r in reader:
                 rows += 1
-                assert "ec77022924e329f8e01deab92a4092ed8b7ec2365f1e719ac4e9686744341d95" == r.get("passwd")
+                assert "ec77022924e329f8e01deab92a4092ed8b7ec2365f1e719ac4e9686744341d95" \
+                    == r.get("passwd")
         assert rows == len(test_csv_data)
 
 
