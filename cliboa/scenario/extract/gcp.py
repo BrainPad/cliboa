@@ -98,7 +98,7 @@ class BigQueryRead(BaseBigQuery):
         )
 
         query = "SELECT * FROM %s.%s" % (self._dataset, self._tblname)
-        if self._query: query = self._query
+        query = self._query if self._query else query
 
         df = gbq_client.query(query).to_dataframe()
         ObjectStore.put(self._key, df)
