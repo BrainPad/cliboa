@@ -16,6 +16,7 @@ import os
 import random
 import re
 import string
+import time
 from datetime import datetime
 
 import pandas
@@ -346,6 +347,7 @@ class GcsDownload(BaseGcs):
         self._delimiter = None
         self._src_pattern = None
         self._dest_dir = "."
+        self._timeout = 0
 
     def prefix(self, prefix):
         self._prefix = prefix
@@ -358,6 +360,9 @@ class GcsDownload(BaseGcs):
 
     def dest_dir(self, dest_dir):
         self._dest_dir = dest_dir
+
+    def timeout(self, timeout):
+        self._timeout = timeout
 
     def execute(self, *args):
         super().execute()
@@ -381,16 +386,30 @@ class GcsDownload(BaseGcs):
         client = Gcs.get_gcs_client(key_filepath)
         bucket = client.bucket(self._bucket)
         dl_files = []
-        for blob in client.list_blobs(
-            bucket, prefix=self._prefix, delimiter=self._delimiter
-        ):
-            r = re.compile(self._src_pattern)
-            if not r.fullmatch(blob.name):
-                continue
-            dl_files.append(blob.name)
-            blob.download_to_filename(
-                os.path.join(self._dest_dir, os.path.basename(blob.name))
-            )
+
+        # Timeout Process
+        is_fetched = False
+        timeout = time.time() + self._timeout
+
+        while True:
+            for blob in client.list_blobs(
+                bucket, prefix=self._prefix, delimiter=self._delimiter
+            ):
+                r = re.compile(self._src_pattern)
+                if not r.fullmatch(blob.name):
+                    continue
+                dl_files.append(blob.name)
+                blob.download_to_filename(
+                    os.path.join(self._dest_dir, os.path.basename(blob.name))
+                )
+                is_fetched = True
+
+            if (time.time() > timeout) or is_fetched:
+                break
+
+            print("Data not found, Retrying until Data is found or timeout")
+            time.sleep(1)
+            
 
         ObjectStore.put(self._step, dl_files)
 
