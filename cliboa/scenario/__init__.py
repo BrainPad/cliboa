@@ -38,7 +38,8 @@ from .load.gcp import (
     CsvReadBigQueryCreate,
     FirestoreDocumentCreate,
     GcsFileUpload,
-    GcsUpload
+    GcsUpload,
+    BigQueryCopy
 )
 from .load.sftp import SftpFileLoad, SftpUpload
 from .load.sqlite import CsvReadSqliteCreate, SqliteCreation, SqliteImport

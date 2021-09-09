@@ -22,7 +22,7 @@ from cliboa.core.validator import EssentialParameters
 from cliboa.scenario.gcp import BaseBigQuery, BaseFirestore, BaseGcs
 from cliboa.scenario.load.file import FileWrite
 from cliboa.util.exception import FileNotFound, InvalidFileCount, InvalidFormat
-from cliboa.util.gcp import Firestore, Gcs, ServiceAccount
+from cliboa.util.gcp import BigQuery, Firestore, Gcs, ServiceAccount
 
 
 class BigQueryWrite(BaseBigQuery, FileWrite):
@@ -570,3 +570,68 @@ class FirestoreDocumentCreate(BaseFirestore):
                 fname = os.path.splitext(os.path.basename(file))[0]
                 doc = firestore_client.collection(self._collection).document(fname)
                 doc.set(json.load(f))
+
+class BigQueryCopy(BaseBigQuery):
+    """
+    Copy Bigquery from one table to another 
+    """
+
+    def __init__(self):
+        super().__init__()
+
+        self._dest_dataset = None
+        self._dest_tblname = None
+
+    def dest_dataset(self, dest_dataset):
+        self._dest_dataset = dest_dataset
+
+    def dest_tblname(self, dest_tblname):
+        self._dest_tblname = dest_tblname
+
+    def execute(self, *args):
+        super().execute()
+        valid = EssentialParameters(
+            self.__class__.__name__, [
+                self._dataset,
+                self._tblname,
+                self._location,
+                self._dest_dataset,
+                self._dest_tblname
+            ]
+        )
+        valid()
+
+        # Read Credentials
+        if isinstance(self._credentials, str):
+            self._logger.warning(
+                (
+                    "DeprecationWarning: "
+                    "In the near future, "
+                    "the `credentials` will be changed to accept only dictionary types. "
+                    "Please see more information "
+                    "https://github.com/BrainPad/cliboa/blob/master/docs/modules/bigquery_write.md"
+                )
+            )
+            key_filepath = self._credentials
+        else:
+            key_filepath = self._source_path_reader(self._credentials)
+
+        # Define Source Table and Destination Table
+        source_table_id = f"{self._project_id}.{self._dataset}.{self._tblname}"
+        destination_table_id= f"{self._project_id}.{self._dest_dataset}.{self._dest_tblname}"
+
+        # Client Setup
+        gbq_client = BigQuery.get_bigquery_client(
+            credentials=key_filepath,
+            project=self._project_id,
+            location=self._location
+        )
+
+        # Create Copy Job
+        job = gbq_client.copy_table(source_table_id, destination_table_id)
+
+        # Wait for the job to complete.
+        job.result()  
+
+        print("A copy of the table created.")
+

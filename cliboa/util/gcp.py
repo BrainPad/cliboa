@@ -41,7 +41,7 @@ class BigQuery(object):
     _logger = LisboaLog.get_logger(__name__)
 
     @staticmethod
-    def get_bigquery_client(credentials):
+    def get_bigquery_client(credentials, project=None, location=None):
         """
         get bigquery client object
         Args:
@@ -50,7 +50,9 @@ class BigQuery(object):
         credentials_info = ServiceAccount.auth(credentials)
         return (
             bigquery.Client(
-                credentials=credentials_info, project=credentials_info.project_id
+                credentials=credentials_info,
+                project=project if project else credentials_info.project_id,
+                location=location
             )
             if credentials_info
             else bigquery.Client()
