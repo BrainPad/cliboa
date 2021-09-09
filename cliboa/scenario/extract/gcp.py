@@ -11,6 +11,7 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+from io import BytesIO
 import json
 import os
 import random
@@ -346,6 +347,7 @@ class GcsDownload(BaseGcs):
         self._delimiter = None
         self._src_pattern = None
         self._dest_dir = "."
+        self._byte_size = None
 
     def prefix(self, prefix):
         self._prefix = prefix
@@ -358,6 +360,9 @@ class GcsDownload(BaseGcs):
 
     def dest_dir(self, dest_dir):
         self._dest_dir = dest_dir
+
+    def byte_size(self, byte_size):
+        self._byte_size = int(byte_size)
 
     def execute(self, *args):
         super().execute()
@@ -388,8 +393,13 @@ class GcsDownload(BaseGcs):
             if not r.fullmatch(blob.name):
                 continue
             dl_files.append(blob.name)
-            blob.download_to_filename(
-                os.path.join(self._dest_dir, os.path.basename(blob.name))
+            file_obj = open(os.path.join(self._dest_dir, os.path.basename(blob.name)), "wb")
+
+            client.download_blob_to_file(
+                blob,
+                file_obj,
+                start=0,
+                end=self._byte_size
             )
 
         ObjectStore.put(self._step, dl_files)
