@@ -58,7 +58,7 @@ class CsvColumnHash(FileBaseTransform):
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self.check_file_existence(files)
 
-        for fi, fo in super().io_files(files, ext="csv"):
+        for fi, fo in super().io_files(files):
             df = pandas.read_csv(
                 fi,
                 dtype=str,
