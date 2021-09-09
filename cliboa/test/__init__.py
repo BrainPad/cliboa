@@ -28,8 +28,6 @@ class BaseCliboaTest(TestCase):
         """
         setup resource for test
         """
-        print("AAAAAAAAAAAAAAAAAAAAAAAA")
-        print(os.getcwd())
         os.makedirs("common", exist_ok=True)
         os.makedirs("conf", exist_ok=True)
         os.makedirs("logs", exist_ok=True)
