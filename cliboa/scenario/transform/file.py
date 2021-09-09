@@ -17,7 +17,6 @@ import csv
 import gzip
 import os
 import shutil
-import subprocess
 import tarfile
 import tempfile
 import zipfile

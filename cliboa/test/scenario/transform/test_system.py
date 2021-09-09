@@ -23,6 +23,7 @@ from cliboa.scenario.transform.system import (
 )
 from cliboa.util.helper import Helper
 
+
 class TestExecuteShellScript(BaseCliboaTest):
     def setUp(self):
         self._data_dir = os.path.join(env.BASE_DIR, "data")

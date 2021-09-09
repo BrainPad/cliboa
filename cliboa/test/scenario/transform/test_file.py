@@ -15,7 +15,6 @@ import bz2
 import csv
 import gzip
 import os
-import subprocess
 import pytest
 import shutil
 import tarfile

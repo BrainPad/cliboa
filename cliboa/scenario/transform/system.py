@@ -17,6 +17,7 @@ import subprocess
 from cliboa.core.validator import EssentialParameters
 from cliboa.scenario.base import BaseStep
 
+
 class ExecuteShellScript(BaseStep):
     """
     Execute Shell Script
@@ -43,7 +44,7 @@ class ExecuteShellScript(BaseStep):
         valid()
 
         # Setting Up Directory
-        default_dir =os.getcwd()
+        default_dir = os.getcwd()
 
         try:
             if self._work_dir:
@@ -52,7 +53,7 @@ class ExecuteShellScript(BaseStep):
             # Run Commands
             content = self._command.get("content")
             file_path = self._command.get("file")
-            
+
             if content:
                 for command in content.split("&&"):
                     subprocess.run(command.strip().split(" "))
