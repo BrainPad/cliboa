@@ -64,6 +64,10 @@ from .transform.file import (
     FileDivide,
     FileRename,
     FileArchive,
+)
+
+from .transform.system import (
     ExecuteShellScript
 )
+
 from .transform.gpg import GpgGenerateKey, GpgEncrypt, GpgDecrypt
