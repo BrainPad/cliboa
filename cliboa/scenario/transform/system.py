@@ -45,17 +45,20 @@ class ExecuteShellScript(BaseStep):
         # Setting Up Directory
         default_dir =os.getcwd()
 
-        if self._work_dir:
-            os.chdir(self._work_dir)
+        try:
+            if self._work_dir:
+                os.chdir(self._work_dir)
 
-        # Run Commands
-        content = self._command.get("content")
-        file_path = self._command.get("file")
-        if content:
-            for command in content.split("&&"):
-                subprocess.run(command.strip().split(" "))
-        elif file_path:
-            subprocess.call(file_path)
-
-        # Set Directory to default
-        os.chdir(default_dir)
+            # Run Commands
+            content = self._command.get("content")
+            file_path = self._command.get("file")
+            
+            if content:
+                for command in content.split("&&"):
+                    subprocess.run(command.strip().split(" "))
+            elif file_path:
+                subprocess.call(file_path)
+        finally:
+            # Set Directory to default
+            if self._work_dir:
+                os.chdir(default_dir)
