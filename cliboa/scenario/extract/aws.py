@@ -13,6 +13,7 @@
 #
 import os
 import re
+import time
 
 from cliboa.adapter.aws import S3Adapter
 from cliboa.scenario.aws import BaseS3
@@ -30,6 +31,7 @@ class S3Download(BaseS3):
         self._delimiter = ""
         self._src_pattern = None
         self._dest_dir = "."
+        self._timeout = 0
 
     def prefix(self, prefix):
         self._prefix = prefix
@@ -43,6 +45,9 @@ class S3Download(BaseS3):
     def dest_dir(self, dest_dir):
         self._dest_dir = dest_dir
 
+    def timeout(self, timeout):
+        self._timeout = timeout
+
     def execute(self, *args):
         super().execute()
 
@@ -53,14 +58,30 @@ class S3Download(BaseS3):
         client = adapter.get_client()
 
         p = client.get_paginator("list_objects")
-        for page in p.paginate(
-            Bucket=self._bucket, Delimiter=self._delimiter, Prefix=self._prefix
-        ):
-            for c in page.get("Contents", []):
-                path = c.get("Key")
-                filename = os.path.basename(path)
-                rec = re.compile(self._src_pattern)
-                if not rec.fullmatch(filename):
-                    continue
-                dest_path = os.path.join(self._dest_dir, filename)
-                client.download_file(self._bucket, path, dest_path)
+
+        # Timeout Process
+        is_fetched = False
+        timeout = time.time() + self._timeout
+
+        while True:
+            for page in p.paginate(
+                Bucket=self._bucket,
+                Delimiter=self._delimiter,
+                Prefix=self._prefix
+            ):
+                for c in page.get("Contents", []):
+                    path = c.get("Key")
+                    filename = os.path.basename(path)
+                    rec = re.compile(self._src_pattern)
+                    if not rec.fullmatch(filename):
+                        continue
+                    dest_path = os.path.join(self._dest_dir, filename)
+                    client.download_file(self._bucket, path, dest_path)
+                    is_fetched = True
+
+
+            if (time.time() > timeout) or is_fetched:
+                break
+
+            print("Data not found, Retrying until Data is found or timeout")
+            time.sleep(1)
