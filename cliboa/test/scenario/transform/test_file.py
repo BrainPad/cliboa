@@ -32,7 +32,7 @@ from cliboa.scenario.transform.file import (
     FileConvert,
     FileDecompress,
     FileDivide,
-    FileRename,
+    FileRename
 )
 from cliboa.test import BaseCliboaTest
 from cliboa.util.exception import (
