@@ -21,6 +21,8 @@ from cliboa.conf import env
 from cliboa.core.validator import (
     ProjectDirectoryExistence,
     ScenarioFileExistence,
+    ScenarioJsonKey,
+    ScenarioJsonType,
     ScenarioYamlKey,
     ScenarioYamlType,
     EssentialKeys,
@@ -121,6 +123,86 @@ class TestValidators(object):
             valid_instance()
         assert (
             "scenario.yml is invalid. 'scenario:' key does not exist, or 'scenario:' key exists but content under 'scenario:' key does not exist."  # noqa
+            in str(excinfo.value)
+        )
+
+    def test_scenario_json_type_ok(self):
+        """
+        scenario.json type is valid
+        """
+        test_data = {
+            "scenario": [
+                {
+                    "arguments": {"retry_count": 10},
+                    "class": "SftpDownload",
+                    "step": "sftp_download",
+                }
+            ]
+        }
+        valid_instance = ScenarioJsonType(test_data)
+        ret = valid_instance()
+        assert ret is None
+
+    def test_scenario_json_type_ng(self):
+        """
+        scenario.json type is invalid
+        """
+        test_data = [
+            {
+                "scenario": {
+                    "arguments": {"retry_count": 10},
+                    "class": "SftpDownload",
+                    "step": "sftp_download",
+                }
+            }
+        ]
+        with pytest.raises(ScenarioFileInvalid) as excinfo:
+            valid_instance = ScenarioJsonType(test_data)
+            valid_instance()
+        assert "scenario.json is invalid. Check scenario.json format." in str(
+            excinfo.value
+        )
+
+    def test_scenario_json_key_ok(self):
+        """
+        scenario.json essential key is valid
+        """
+        test_data = {
+            "scenario": [
+                {
+                    "arguments": {"retry_count": 10},
+                    "class": "SftpDownload",
+                    "step": "sftp_download",
+                }
+            ]
+        }
+        valid_instance = ScenarioJsonKey(test_data)
+        ret = valid_instance()
+        assert ret is None
+
+    def test_scenario_json_key_ng_with_no_content(self):
+        """
+        scenario.json essential key exists, but content does not exist.
+        """
+        test_data = {"scenario": ""}
+        with pytest.raises(ScenarioFileInvalid) as excinfo:
+            valid_instance = ScenarioJsonKey(test_data)
+            valid_instance()
+        assert (
+            "scenario.json is invalid. 'scenario:' key does not exist, or 'scenario:' key exists but content under 'scenario:' key does not exist."  # noqa
+            in str(excinfo.value)
+        )
+
+    def test_scenario_json_key_ng_with_no_scenario_key(self):
+        """
+        scenario.json essential key does not exist.
+        """
+        test_data = {"spam": ""}
+        with pytest.raises(ScenarioFileInvalid) as excinfo:
+            valid_instance = ScenarioJsonKey(test_data)
+            valid_instance()
+        assert (
+            "scenario.json is invalid. 'scenario:' key does not exist, or 'scenario:' key exists but content under 'scenario:' key does not exist."  # noqa
             in str(excinfo.value)
         )
 
