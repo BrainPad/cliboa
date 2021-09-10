@@ -23,7 +23,8 @@ from .extract.gcp import (
     BigQueryReadCache,
     FirestoreDocumentDownload,
     GcsDownload,
-    GcsDownloadFileDelete
+    GcsDownloadFileDelete,
+    GcsToBigQuery
 )
 from .extract.http import HttpDownload, HttpDownloadViaBasicAuth
 from .extract.mysql import MysqlRead

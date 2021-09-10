@@ -17,6 +17,7 @@ import random
 import re
 import string
 from datetime import datetime
+import io
 
 import pandas
 from google.cloud import bigquery
@@ -462,3 +463,178 @@ class FirestoreDocumentDownload(BaseFirestore):
 
         with open(os.path.join(self._dest_dir, doc.id), mode="wt") as f:
             f.write(json.dumps(doc.to_dict()))
+
+
+class GcsToBigQuery(BaseGcs, BaseBigQuery):
+    # default bulk line count to change to dataframe object
+    _BULK_LINE_CNT = 10000
+
+    # BigQuery insert mode
+    _REPLACE = "replace"
+    _APPEND = "append"
+
+    def __init__(self):
+        super().__init__()
+        self._prefix = None
+        self._delimiter = None
+        self._src_pattern = None
+        self._dest_dir = "."
+        self._src_dir = ""
+
+        self._table_schema = None
+        self._replace = True
+        self._columns = []
+        self._has_header = True
+
+    def prefix(self, prefix):
+        self._prefix = prefix
+
+    def delimiter(self, delimiter):
+        self._delimiter = delimiter
+
+    def src_pattern(self, src_pattern):
+        self._src_pattern = src_pattern
+
+    def dest_dir(self, dest_dir):
+        self._dest_dir = dest_dir
+
+    def table_schema(self, table_schema):
+        self._table_schema = table_schema
+
+    def replace(self, replace):
+        self._replace = replace
+
+    def has_header(self, has_header):
+        self._has_header = has_header
+
+    def _exec_insert_with_df(self, df, is_inserted, if_exists):
+        if is_inserted is True:
+            # if_exists after the first insert execution
+            if_exists = self._APPEND
+        dest_tbl = self._dataset + "." + self._tblname
+        # self._logger.info("Start insert %s rows to %s" % (len(insert_rows), dest_tbl))
+
+        if isinstance(self._credentials, str):
+            self._logger.warning(
+                (
+                    "DeprecationWarning: "
+                    "In the near future, "
+                    "the `credentials` will be changed to accept only dictionary types. "
+                    "Please see more information "
+                    "https://github.com/BrainPad/cliboa/blob/master/docs/modules/bigquery_write.md"
+                )
+            )
+            key_filepath = self._credentials
+        else:
+            key_filepath = self._source_path_reader(self._credentials)
+
+        df.to_gbq(
+            dest_tbl,
+            project_id=self._project_id,
+            if_exists=if_exists,
+            table_schema=self._table_schema,
+            location=self._location,
+            credentials=ServiceAccount.auth(key_filepath),
+        )
+
+    def _set_auth(self, project_id, credentials, location):
+        self.project_id(project_id)
+        self.credentials(credentials)
+        self.location(location)
+
+    def parse_auth_param(self):
+        # project_id
+        if type(self._project_id) is dict:
+            project_id_from = self._project_id["From"]
+            project_id_to = self._project_id["To"]
+        else:
+            project_id_from = project_id_to = self._project_id
+        # credentials
+        if type(self._credentials) is dict:
+            credentials_from = self._credentials["From"]
+            credentials_to = self._credentials["To"]
+        else:
+            credentials_from = credentials_to = self._credentials
+        # location
+        if type(self._location) is dict:
+            location_from = self._location["From"]
+            location_to = self._location["To"]
+        else:
+            location_from = location_to = self._location
+
+        return (project_id_from, credentials_from, location_from), \
+            (project_id_to, credentials_to, location_to)
+
+    def execute(self, *args):
+        auth_from, auth_to = self.parse_auth_param()
+
+        # Gcs Read
+        self._set_auth(*auth_from)
+
+        BaseGcs.execute(self)
+        gcs_valid = EssentialParameters(self.__class__.__name__, [self._src_pattern])
+        gcs_valid()
+        if isinstance(self._credentials, str):
+            self._logger.warning(
+                (
+                    "DeprecationWarning: "
+                    "In the near future, "
+                    "the `credentials` will be changed to accept only dictionary types. "
+                    "Please see more information "
+                    "https://github.com/BrainPad/cliboa/blob/master/docs/modules/gcs_download.md"
+                )
+            )
+            key_filepath = self._credentials
+        else:
+            key_filepath = self._source_path_reader(self._credentials)
+        client = Gcs.get_gcs_client(key_filepath)
+        bucket = client.bucket(self._bucket)
+
+        files = []
+        for blob in client.list_blobs(
+            bucket, prefix=self._prefix, delimiter=self._delimiter
+        ):
+            r = re.compile(self._src_pattern)
+            if not r.fullmatch(blob.name):
+                continue
+            file_obj = io.BytesIO()
+            blob.download_to_file(file_obj)
+            files.append(file_obj)
+
+        # BigQuery Write
+        self._set_auth(*auth_to)
+
+        BaseBigQuery.execute(self)
+        bigquery_valid = EssentialParameters(self.__class__.__name__, [self._table_schema])
+        bigquery_valid()
+
+        is_inserted = False
+        # initial if_exists
+        if_exists = self._REPLACE if self._replace is True else self._APPEND
+        self._columns = [name_and_type["name"] for name_and_type in self._table_schema]
+        for file_obj in files:
+            file_obj.seek(0)
+            if self._has_header is True:
+                df = pandas.read_csv(file_obj)
+                try:
+                    df = df[self._columns]
+                except KeyError:
+                    pass
+
+            else:
+                df = pandas.read_csv(file_obj, header=None, names=self._columns)
+                if df.shape[1] < len(self._columns):
+                    df = df.iloc[:, :len(self._columns)]
+
+            # bulk insert
+            if len(df) > self._BULK_LINE_CNT:
+                for row in range(0, len(df), self._BULK_LINE_CNT):
+                    self._exec_insert_with_df(
+                        df.iloc[row: row+self._BULK_LINE_CNT],
+                        is_inserted,
+                        if_exists
+                    )
+                    is_inserted = True
+            else:
+                self._exec_insert_with_df(df, is_inserted, if_exists)
+                is_inserted = True
