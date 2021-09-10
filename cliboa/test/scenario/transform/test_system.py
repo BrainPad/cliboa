@@ -39,9 +39,11 @@ class TestExecuteShellScript(BaseCliboaTest):
         instance.execute()
 
         files = glob(os.path.join(self._data_dir, "*.csv"))
-        assert 2 == len(files)
-        assert "foo.csv" == os.path.basename(files[0])
-        assert "test.csv" == os.path.basename(files[1])
+        file_names = list(map(lambda x: os.path.basename(x), files))
+
+        assert len(files) == 2
+        assert "foo.csv" in file_names
+        assert "test.csv" in file_names
 
     def test_file_script(self):
         test_script_path = os.path.join(self._data_dir, "test.sh")
@@ -59,5 +61,6 @@ class TestExecuteShellScript(BaseCliboaTest):
         instance.execute()
 
         files = glob(os.path.join(self._data_dir, "*.csv"))
+
         assert 1 == len(files)
         assert "foo.csv" == os.path.basename(files[0])
