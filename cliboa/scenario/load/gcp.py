@@ -602,19 +602,7 @@ class BigQueryCopy(BaseBigQuery):
         valid()
 
         # Read Credentials
-        if isinstance(self._credentials, str):
-            self._logger.warning(
-                (
-                    "DeprecationWarning: "
-                    "In the near future, "
-                    "the `credentials` will be changed to accept only dictionary types. "
-                    "Please see more information "
-                    "https://github.com/BrainPad/cliboa/blob/master/docs/modules/bigquery_write.md"
-                )
-            )
-            key_filepath = self._credentials
-        else:
-            key_filepath = self._source_path_reader(self._credentials)
+        key_filepath = self._source_path_reader(self._credentials)
 
         # Define Source Table and Destination Table
         source_table_id = f"{self._project_id}.{self._dataset}.{self._tblname}"
