@@ -607,7 +607,11 @@ class BigQueryCopy(BaseBigQuery):
 
         # Define Source Table and Destination Table
         source_table_id = "{}.{}.{}".format(self._project_id, self._dataset, self._tblname)
-        destination_table_id = "{}.{}.{}".format(self._project_id, self._dest_dataset, self._dest_tblname)
+        destination_table_id = "{}.{}.{}".format(
+            self._project_id,
+            self._dest_dataset,
+            self._dest_tblname
+        )
 
         # Client Setup
         gbq_client = BigQuery.get_bigquery_client(
