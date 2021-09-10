@@ -30,6 +30,49 @@ from cliboa.util.sqlite import SqliteAdapter
 from cliboa.util.string import StringUtil
 from datetime import datetime
 
+import hashlib
+
+
+class CsvColumnHash(FileBaseTransform):
+    """
+    Hash(SHA256) specific columns from csv file.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self._columns = []
+
+    def columns(self, columns):
+        self._columns = columns
+
+    def _stringToHash(self, string):
+        return hashlib.sha256(string.encode()).hexdigest()
+
+    def execute(self, *args):
+        valid = EssentialParameters(
+            self.__class__.__name__,
+            [self._src_dir, self._src_pattern, self._columns],
+        )
+        valid()
+
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+        self.check_file_existence(files)
+
+        for fi, fo in super().io_files(files):
+            df = pandas.read_csv(
+                fi,
+                dtype=str,
+                encoding=self._encoding,
+            )
+            for c in self._columns:
+                df[c] = df[c].apply(self._stringToHash)
+
+            df.to_csv(
+                fo,
+                encoding=self._encoding,
+                index=False,
+            )
+
 
 class CsvColumnExtract(FileBaseTransform):
     """

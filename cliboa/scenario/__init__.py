@@ -54,6 +54,7 @@ from .transform.csv import (
     CsvConvert,
     CsvSort,
     CsvToJsonl,
+    CsvColumnHash,
 )
 from .transform.file import (
     DateFormatConvert,
