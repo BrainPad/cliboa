@@ -52,7 +52,7 @@ class TestExecuteShellScript(BaseCliboaTest):
         with open(test_script_path, "w") as t:
             t.write("#!/bin/sh\n")
             t.write("\n")
-            t.write(f"touch {test_file_path}")
+            t.write("touch {}".format(test_file_path))
 
         subprocess.call(['chmod', '0777', test_script_path])
 
