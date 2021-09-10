@@ -1,0 +1,27 @@
+scenario:
+- step: Download a file from Kankotyo site
+  class: HttpDownload
+  arguments:
+    src_url: https://www.mlit.go.jp/common
+    src_pattern: 001302036.xlsx
+    dest_dir: data
+    dest_pattern: test_{{ today }}_.xlsx
+    with_vars:
+        today: date '+%Y%m%d'
+- step: Convert a excel file to a csv file
+  class: ExcelConvert
+  arguments:
+    src_dir: data
+    src_pattern: test.xlsx
+    dest_dir: data
+    dest_pattern: test.csv
+- step:
+  class: CsvRead
+  io: input
+  arguments:
+    src_path: data/test.csv
+- step:
+  class: SqliteImport
+  arguments:
+    dbname: test.db
+    tblname: test_table

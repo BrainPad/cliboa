@@ -1,0 +1,24 @@
+scenario:
+- step:
+  class: SftpDownload
+  arguments:
+    host: $hostname
+    user: $username
+    password: $password
+    src_dir: /usr/local
+    src_pattern: test.csv.gz
+    dest_dir: /tmp
+- step: 
+  class: FileDecompress
+  arguments:
+    src_dir: /tmp
+    src_pattern: test.*\.csv.*\.gz
+- step:
+  class: SftpUpload
+  arguments:
+    host: $hostname
+    user: $username
+    password: $password
+    src_dir: /tmp
+    src_pattern: test.*\.csv
+    dest_dir: /usr/local

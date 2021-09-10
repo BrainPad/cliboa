@@ -47,7 +47,7 @@ class CliboAdmin(object):
                 + "' was successful."
             )
         elif self._args.option == "create":
-            self._create_new_project(self._args.dir_name)
+            self._create_new_project(self._args.dir_name, self._args.template)
             print("Adding a new project '" + self._args.dir_name + "' was successful.")
 
     def _init_project(self, ini_dir):
@@ -108,7 +108,7 @@ class CliboAdmin(object):
         cmn_ini_path = os.path.join(ini_dir, "common", "__init__.py")
         open(cmn_ini_path, "w").close()
 
-    def _create_new_project(self, new_project_dir):
+    def _create_new_project(self, new_project_dir, template):
         """
         Create an individual project configuration
         """
@@ -121,10 +121,14 @@ class CliboAdmin(object):
         os.makedirs(
             os.path.join("project", new_project_dir, "scenario"), exist_ok=False
         )
-        with open(
-            os.path.join("project", new_project_dir, "scenario.yml"), "w"
-        ) as yaml:
-            yaml.write("scenario:" + "\n")
+
+        scenario_path = os.path.join(
+            os.path.dirname(cliboa.__path__[0]),
+            "cliboa/template",
+            "scenario.{}.yml".format(template) if template else "scenario.default.yml",
+        )
+
+        copyfile(scenario_path, os.path.join("project", new_project_dir, "scenario.yml"))
 
     def _get_pipfile_and_requirements_path(self, cliboa_install_path):
         """
@@ -171,8 +175,21 @@ class CommandArgumentParser(object):
         parser.add_argument(
             "dir_name", help="init $directory_name or create $project_directory_name"
         )
+        parser.add_argument(
+            "--template",
+            choices=[
+                "sftp-decompress-sftp",
+                "http-covertcsv-sqlite"
+            ],
+            help="Define scenario template"
+        )
         return parser.parse_args()
 
+class ScenarioBuilder(object):
+    
+
+    def __init__(self, template):
+        self._template = template
 
 def main():
     parser = CommandArgumentParser()
