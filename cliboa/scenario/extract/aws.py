@@ -31,7 +31,6 @@ class S3Download(BaseS3):
         self._delimiter = ""
         self._src_pattern = None
         self._dest_dir = "."
-        self._timeout = 0
 
     def prefix(self, prefix):
         self._prefix = prefix
@@ -45,8 +44,63 @@ class S3Download(BaseS3):
     def dest_dir(self, dest_dir):
         self._dest_dir = dest_dir
 
-    def timeout(self, timeout):
-        self._timeout = timeout
+    def execute(self, *args):
+        super().execute()
+
+        valid = EssentialParameters(self.__class__.__name__, [self._src_pattern])
+        valid()
+
+        adapter = S3Adapter(self._access_key, self._secret_key, self._profile)
+        client = adapter.get_client()
+
+        p = client.get_paginator("list_objects")
+
+        for page in p.paginate(
+            Bucket=self._bucket,
+            Delimiter=self._delimiter,
+            Prefix=self._prefix
+        ):
+            for c in page.get("Contents", []):
+                path = c.get("Key")
+                filename = os.path.basename(path)
+                rec = re.compile(self._src_pattern)
+                if not rec.fullmatch(filename):
+                    continue
+                dest_path = os.path.join(self._dest_dir, filename)
+                client.download_file(self._bucket, path, dest_path)
+
+
+class S3DownloadPool(BaseS3):
+    """
+    Download from S3 (With Pooling)
+    """
+
+    def __init__(self):
+        super().__init__()
+        self._prefix = ""
+        self._delimiter = ""
+        self._src_pattern = None
+        self._dest_dir = "."
+        self._pool_timeout = 10
+        self._pool_idle_time = 1
+
+    def prefix(self, prefix):
+        self._prefix = prefix
+
+    def delimiter(self, delimiter):
+        self._delimiter = delimiter
+
+    def src_pattern(self, src_pattern):
+        self._src_pattern = src_pattern
+
+    def dest_dir(self, dest_dir):
+        self._dest_dir = dest_dir
+
+    def pool_timeout(self, pool_timeout):
+        self._pool_timeout = pool_timeout
+
+    def pool_idle_time(self, pool_idle_time):
+        self._pool_idle_time = pool_idle_time
 
     def execute(self, *args):
         super().execute()
@@ -61,7 +115,7 @@ class S3Download(BaseS3):
 
         # Timeout Process
         is_fetched = False
-        timeout = time.time() + self._timeout
+        timeout = time.time() + self._pool_timeout
 
         while True:
             for page in p.paginate(
@@ -84,4 +138,4 @@ class S3Download(BaseS3):
                 break
 
             print("Data not found, Retrying until Data is found or timeout")
-            time.sleep(1)
+            time.sleep(self._pool_idle_time)
