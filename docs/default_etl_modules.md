@@ -53,6 +53,7 @@ SqliteExport
 |[SftpUpload](/docs/modules/sftp_upload.md)|Upload a file via sftp|
 |[SqliteImport](/docs/modules/sqlite_import.md)|Read content from csv files and insert them into sqlite table|
 |[S3Upload](/docs/modules/s3_upload.md)|Upload files to S3|
+|[GcsCopy](/docs/modules/bigquery_copy.md)|Upload files to GCS|
 
 
 ## Other Modules
