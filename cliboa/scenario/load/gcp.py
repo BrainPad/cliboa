@@ -571,9 +571,10 @@ class FirestoreDocumentCreate(BaseFirestore):
                 doc = firestore_client.collection(self._collection).document(fname)
                 doc.set(json.load(f))
 
+
 class BigQueryCopy(BaseBigQuery):
     """
-    Copy Bigquery from one table to another 
+    Copy Bigquery from one table to another
     """
 
     def __init__(self):
@@ -606,7 +607,7 @@ class BigQueryCopy(BaseBigQuery):
 
         # Define Source Table and Destination Table
         source_table_id = f"{self._project_id}.{self._dataset}.{self._tblname}"
-        destination_table_id= f"{self._project_id}.{self._dest_dataset}.{self._dest_tblname}"
+        destination_table_id = f"{self._project_id}.{self._dest_dataset}.{self._dest_tblname}"
 
         # Client Setup
         gbq_client = BigQuery.get_bigquery_client(
@@ -619,7 +620,6 @@ class BigQueryCopy(BaseBigQuery):
         job = gbq_client.copy_table(source_table_id, destination_table_id)
 
         # Wait for the job to complete.
-        job.result()  
+        job.result()
 
         print("A copy of the table created.")
-

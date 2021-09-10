@@ -16,6 +16,7 @@ from cliboa.util.helper import Helper
 from unittest.mock import patch
 from cliboa.util.gcp import BigQuery
 
+
 class TestBigQueryCopy(object):
 
     @patch.object(BigQueryCopy, "_source_path_reader", return_value="/awesome-path/key.json")
