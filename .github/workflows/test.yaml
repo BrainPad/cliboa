@@ -28,7 +28,7 @@ jobs:
           pipenv run flake8 .
       - name: check black format
         run: |
-          if [ ${{ matrix.python_versions }} != "3.5" ]; then
+          if [ ${{ matrix.python_versions }} -ne 3.5 ]; then
             pipenv run --check .
           else
             echo "black does not support python${{ matrix.python_versions }}"
