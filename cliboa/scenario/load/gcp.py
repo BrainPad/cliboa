@@ -592,13 +592,14 @@ class BigQueryCopy(BaseBigQuery):
     def execute(self, *args):
         super().execute()
         valid = EssentialParameters(
-            self.__class__.__name__, [
+            self.__class__.__name__,
+            [
                 self._dataset,
                 self._tblname,
                 self._location,
                 self._dest_dataset,
-                self._dest_tblname
-            ]
+                self._dest_tblname,
+            ],
         )
         valid()
 
@@ -606,18 +607,16 @@ class BigQueryCopy(BaseBigQuery):
         key_filepath = self._source_path_reader(self._credentials)
 
         # Define Source Table and Destination Table
-        source_table_id = "{}.{}.{}".format(self._project_id, self._dataset, self._tblname)
+        source_table_id = "{}.{}.{}".format(
+            self._project_id, self._dataset, self._tblname
+        )
         destination_table_id = "{}.{}.{}".format(
-            self._project_id,
-            self._dest_dataset,
-            self._dest_tblname
+            self._project_id, self._dest_dataset, self._dest_tblname
         )
 
         # Client Setup
         gbq_client = BigQuery.get_bigquery_client(
-            credentials=key_filepath,
-            project=self._project_id,
-            location=self._location
+            credentials=key_filepath, project=self._project_id, location=self._location
         )
 
         # Create Copy Job

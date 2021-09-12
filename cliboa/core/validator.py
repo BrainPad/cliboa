@@ -138,9 +138,7 @@ class EssentialKeys(object):
 
     def __call__(self):
         if type(self._scenario_yaml_list) is not list:
-            raise ScenarioFileInvalid(
-                "scenario.yml is invalid. it wad not a list"
-            )
+            raise ScenarioFileInvalid("scenario.yml is invalid. it wad not a list")
         for scenario_yaml_dict in self._scenario_yaml_list:
             multi_proc_cnt = scenario_yaml_dict.get("multi_process_count")
             force_continue = scenario_yaml_dict.get("force_continue")

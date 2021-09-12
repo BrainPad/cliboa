@@ -52,7 +52,7 @@ class BigQuery(object):
             bigquery.Client(
                 credentials=credentials_info,
                 project=project if project else credentials_info.project_id,
-                location=location
+                location=location,
             )
             if credentials_info
             else bigquery.Client()

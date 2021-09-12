@@ -92,9 +92,7 @@ class BigQueryRead(BaseBigQuery):
             key_filepath = self._source_path_reader(self._credentials)
 
         gbq_client = BigQuery.get_bigquery_client(
-            location=self._location,
-            project=self._project_id,
-            credentials=key_filepath
+            location=self._location, project=self._project_id, credentials=key_filepath
         )
 
         query = "SELECT * FROM %s.%s" % (self._dataset, self._tblname)
@@ -238,9 +236,7 @@ class BigQueryReadCache(BaseBigQuery):
             key_filepath = self._source_path_reader(self._credentials)
 
         gbq_client = BigQuery.get_bigquery_client(
-            location=self._location,
-            project=self._project_id,
-            credentials=key_filepath
+            location=self._location, project=self._project_id, credentials=key_filepath
         )
 
         df = gbq_client.query(self._get_query()).to_dataframe()

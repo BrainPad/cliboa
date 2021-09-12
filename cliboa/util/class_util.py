@@ -2,7 +2,6 @@ from cliboa.conf import env
 
 
 class ClassUtil(object):
-
     def is_custom_cls(self, cls_name):
         """
         Check if given class is a custom class.

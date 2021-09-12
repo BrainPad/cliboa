@@ -184,9 +184,7 @@ class ScenarioManager(object):
                 Helper.set_property(instance, arg, s_dict.get(arg))
 
         Helper.set_property(
-            instance,
-            "logger",
-            LisboaLog.get_logger(instance.__class__.__name__),
+            instance, "logger", LisboaLog.get_logger(instance.__class__.__name__),
         )
 
         return instance

@@ -250,12 +250,7 @@ class TestValidators(object):
         """
         Block requires both "step" and "class"
         """
-        test_yaml = [
-            {
-                "step": "test step",
-                "class": "SampleClass",
-            }
-        ]
+        test_yaml = [{"step": "test step", "class": "SampleClass",}]
         valid_instance = EssentialKeys(test_yaml)
         valid_instance()
 
@@ -267,14 +262,8 @@ class TestValidators(object):
         test_yaml = [
             {
                 "parallel": [
-                    {
-                        "step": "test step 1",
-                        "class": "SampleClass",
-                    },
-                    {
-                        "step": "test step 2",
-                        "class": "SampleClass",
-                    },
+                    {"step": "test step 1", "class": "SampleClass",},
+                    {"step": "test step 2", "class": "SampleClass",},
                 ]
             }
         ]
@@ -308,13 +297,8 @@ class TestValidators(object):
         test_yaml = [
             {
                 "parallel": [
-                    {
-                        "step": "test step 1",
-                        "class": "SampleClass",
-                    },
-                    {
-                        "class": "SampleClass",
-                    },
+                    {"step": "test step 1", "class": "SampleClass",},
+                    {"class": "SampleClass",},
                 ]
             }
         ]

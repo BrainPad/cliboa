@@ -80,7 +80,8 @@ class GpgGenerateKey(GpgBase):
         super().execute()
 
         valid = EssentialParameters(
-            self.__class__.__name__, [self._dest_dir, self._name_email])
+            self.__class__.__name__, [self._dest_dir, self._name_email]
+        )
         valid()
 
         Gpg(self._gnupghome).generate_key(

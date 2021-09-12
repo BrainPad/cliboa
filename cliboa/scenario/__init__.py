@@ -23,7 +23,7 @@ from .extract.gcp import (
     BigQueryReadCache,
     FirestoreDocumentDownload,
     GcsDownload,
-    GcsDownloadFileDelete
+    GcsDownloadFileDelete,
 )
 from .extract.http import HttpDownload, HttpDownloadViaBasicAuth
 from .extract.mysql import MysqlRead
@@ -39,7 +39,7 @@ from .load.gcp import (
     FirestoreDocumentCreate,
     GcsFileUpload,
     GcsUpload,
-    BigQueryCopy
+    BigQueryCopy,
 )
 from .load.sftp import SftpFileLoad, SftpUpload
 from .load.sqlite import CsvReadSqliteCreate, SqliteCreation, SqliteImport
@@ -68,8 +68,6 @@ from .transform.file import (
     FileArchive,
 )
 
-from .transform.system import (
-    ExecuteShellScript
-)
+from .transform.system import ExecuteShellScript
 
 from .transform.gpg import GpgGenerateKey, GpgEncrypt, GpgDecrypt

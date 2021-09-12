@@ -673,11 +673,7 @@ class FileConvert(FileBaseTransform):
 
         for fi, fo in super().io_files(files):
             File().convert_encoding(
-                fi,
-                fo,
-                self._encoding_from,
-                self._encoding_to,
-                self._errors,
+                fi, fo, self._encoding_from, self._encoding_to, self._errors,
             )
 
             self._logger.info("Encoded file %s" % fi)
@@ -701,8 +697,7 @@ class FileArchive(FileBaseTransform):
 
     def execute(self, *args):
         valid = EssentialParameters(
-            self.__class__.__name__,
-            [self._src_dir, self._src_pattern, self._format],
+            self.__class__.__name__, [self._src_dir, self._src_pattern, self._format],
         )
         valid()
 
