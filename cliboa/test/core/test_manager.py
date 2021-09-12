@@ -111,7 +111,7 @@ class TestYamlScenarioManager(BaseCliboaTest):
         """
         Valid scenario.yml with no arguments
         """
-        pj_yaml_dict = {"scenario": [{"step": "sample_step", "class": "SampleStep",}]}
+        pj_yaml_dict = {"scenario": [{"step": "sample_step", "class": "SampleStep"}]}
         self._create_scenario_file(pj_yaml_dict)
 
         manager = YamlScenarioManager(self._cmd_args)
@@ -425,7 +425,7 @@ class TestJsonScenarioManager(BaseCliboaTest):
         """
         Valid scenario.json with no arguments
         """
-        pj_json_dict = {"scenario": [{"step": "sample_step", "class": "SampleStep",}]}
+        pj_json_dict = {"scenario": [{"step": "sample_step", "class": "SampleStep"}]}
         self._create_scenario_file(pj_json_dict)
 
         manager = JsonScenarioManager(self._cmd_args)

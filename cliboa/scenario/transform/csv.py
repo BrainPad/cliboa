@@ -176,7 +176,7 @@ class ColumnLengthAdjust(FileBaseTransform):
 
     def execute(self, *args):
         valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir, self._src_pattern, self._adjust,],
+            self.__class__.__name__, [self._src_dir, self._src_pattern, self._adjust],
         )
         valid()
 
@@ -242,7 +242,7 @@ class CsvMerge(FileBaseTransform):
         # essential parameters check
         valid = EssentialParameters(
             self.__class__.__name__,
-            [self._src_dir, self._src1_pattern, self._src2_pattern, self._dest_dir,],
+            [self._src_dir, self._src1_pattern, self._src2_pattern, self._dest_dir],
         )
         valid()
 
@@ -441,7 +441,7 @@ class CsvHeaderConvert(FileBaseTransform):
         else:
             valid = EssentialParameters(
                 self.__class__.__name__,
-                [self._src_dir, self._src_pattern, self._headers,],
+                [self._src_dir, self._src_pattern, self._headers],
             )
             valid()
 
@@ -656,7 +656,7 @@ class CsvConvert(FileBaseTransform):
         # essential parameters check
         valid = EssentialParameters(
             self.__class__.__name__,
-            [self._src_dir, self._src_pattern, self._before_format, self._before_enc,],
+            [self._src_dir, self._src_pattern, self._before_format, self._before_enc],
         )
         valid()
 
@@ -733,7 +733,7 @@ class CsvSort(FileBaseTransform):
         # essential parameters check
         valid = EssentialParameters(
             self.__class__.__name__,
-            [self._order, self._src_dir, self._src_pattern, self._dest_dir,],
+            [self._order, self._src_dir, self._src_pattern, self._dest_dir],
         )
         valid()
 
