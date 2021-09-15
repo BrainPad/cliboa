@@ -14,18 +14,19 @@
 import os
 import shutil
 import sys
+
 import pytest
 
 from cliboa.client import CommandArgumentParser
 from cliboa.conf import env
 from cliboa.core.validator import (
+    EssentialKeys,
     ProjectDirectoryExistence,
     ScenarioFileExistence,
     ScenarioYamlKey,
-    ScenarioYamlType,
-    EssentialKeys,
+    ScenarioYamlType
 )
-from cliboa.util.exception import FileNotFound, ScenarioFileInvalid, DirStructureInvalid
+from cliboa.util.exception import DirStructureInvalid, FileNotFound, ScenarioFileInvalid
 
 
 class TestValidators(object):
@@ -208,6 +209,33 @@ class TestValidators(object):
         valid_instance = EssentialKeys(test_yaml)
         valid_instance()
 
+    def test_essential_keys_ok_4(self):
+        """
+        If block starts with "parallel_with_config"
+        all steps under the "parallel_with_config" requires both "step" and "class"
+        """
+        test_yaml = [
+            {
+                "parallel_with_config": {
+                    "config": {
+                        "multi_process_count": 2
+                    },
+                    "steps": [
+                        {
+                            "step": "test step 1",
+                            "class": "SampleClass",
+                        },
+                        {
+                            "step": "test step 2",
+                            "class": "SampleClass",
+                        },
+                    ],
+                }
+            }
+        ]
+        valid_instance = EssentialKeys(test_yaml)
+        valid_instance()
+
     def test_essential_keys_ng1(self):
         """
         Block requires both "step" and "class"
@@ -234,6 +262,79 @@ class TestValidators(object):
                         "class": "SampleClass",
                     },
                 ]
+            }
+        ]
+        with pytest.raises(ScenarioFileInvalid) as excinfo:
+            valid_instance = EssentialKeys(test_yaml)
+            valid_instance()
+        assert "scenario.yml is invalid. 'step:' does not exist." in str(excinfo.value)
+
+    def test_essential_keys_ng_3(self):
+        """
+        If block starts with "parallel_with_config"
+        all steps under the "parallel_with_config" requires both "step" and "class"
+        """
+        test_yaml = [
+            {
+                "parallel_with_config": {
+                    "steps": [
+                        {
+                            "step": "test step 1",
+                            "class": "SampleClass",
+                        },
+                        {
+                            "step": "test step 2",
+                            "class": "SampleClass",
+                        },
+                    ],
+                }
+            }
+        ]
+        with pytest.raises(ScenarioFileInvalid) as excinfo:
+            valid_instance = EssentialKeys(test_yaml)
+            valid_instance()
+        assert "scenario.yml is invalid. 'config:' key does not exist, or 'config:' value does not exist." in str(excinfo.value) # noqa
+
+    def test_essential_keys_ng_4(self):
+        """
+        If block starts with "parallel_with_config"
+        all steps under the "parallel_with_config" requires both "step" and "class"
+        """
+        test_yaml = [
+            {
+                "parallel_with_config": {
+                    "config": {
+                        "multi_process_count": 2
+                    },
+                }
+            }
+        ]
+        with pytest.raises(ScenarioFileInvalid) as excinfo:
+            valid_instance = EssentialKeys(test_yaml)
+            valid_instance()
+        assert "scenario.yml is invalid. 'steps:' key does not exist, or 'steps:' value does not exist." in str(excinfo.value) # noqa
+
+    def test_essential_keys_ng_5(self):
+        """
+        If block starts with "parallel_with_config"
+        all steps under the "parallel_with_config" requires both "step" and "class"
+        """
+        test_yaml = [
+            {
+                "parallel_with_config": {
+                    "config": {
+                        "multi_process_count": 2
+                    },
+                    "steps": [
+                        {
+                            "step": "test step 1",
+                            "class": "SampleClass",
+                        },
+                        {
+                            "class": "SampleClass",
+                        },
+                    ],
+                }
             }
         ]
         with pytest.raises(ScenarioFileInvalid) as excinfo:

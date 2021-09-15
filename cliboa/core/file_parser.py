@@ -84,11 +84,12 @@ class YamlScenarioParser(ScenarioParser):
         """
         for pj_yaml_dict in pj_yaml_list:
             # If same class exists, merge arguments
-            """
-            TODO parallel_with_config merge
-            """
             if pj_yaml_dict.get("parallel"):
                 for row in pj_yaml_dict.get("parallel"):
+                    self._merge(row, cmn_yaml_list)
+            elif pj_yaml_dict.get("parallel_with_config"):
+                steps = pj_yaml_dict.get("parallel_with_config").get("steps")
+                for row in steps:
                     self._merge(row, cmn_yaml_list)
             else:
                 self._merge(pj_yaml_dict, cmn_yaml_list)
