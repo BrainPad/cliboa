@@ -18,14 +18,13 @@ import re
 import string
 from datetime import datetime
 
-import pandas
 from google.cloud import bigquery
 
 from cliboa.scenario.gcp import BaseBigQuery, BaseFirestore, BaseGcs
 from cliboa.scenario.validator import EssentialParameters
 from cliboa.util.cache import ObjectStore
 from cliboa.util.exception import InvalidParameter
-from cliboa.util.gcp import BigQuery, Firestore, Gcs, ServiceAccount
+from cliboa.util.gcp import BigQuery, Firestore, Gcs
 from cliboa.util.string import StringUtil
 
 
@@ -91,15 +90,17 @@ class BigQueryRead(BaseBigQuery):
             key_filepath = self._credentials
         else:
             key_filepath = self._source_path_reader(self._credentials)
-        df = pandas.read_gbq(
-            query="SELECT * FROM %s.%s" % (self._dataset, self._tblname)
-            if self._query is None
-            else self._query,
-            dialect="standard",
+
+        gbq_client = BigQuery.get_bigquery_client(
             location=self._location,
-            project_id=self._project_id,
-            credentials=ServiceAccount.auth(key_filepath),
+            project=self._project_id,
+            credentials=key_filepath
         )
+
+        query = "SELECT * FROM %s.%s" % (self._dataset, self._tblname)
+        query = self._query if self._query else query
+
+        df = gbq_client.query(query).to_dataframe()
         ObjectStore.put(self._key, df)
 
     def _save_as_file_via_gcs(self):
@@ -235,13 +236,15 @@ class BigQueryReadCache(BaseBigQuery):
             key_filepath = self._credentials
         else:
             key_filepath = self._source_path_reader(self._credentials)
-        df = pandas.read_gbq(
-            query=self._get_query(),
-            dialect="standard",
+
+        gbq_client = BigQuery.get_bigquery_client(
             location=self._location,
-            project_id=self._project_id,
-            credentials=ServiceAccount.auth(key_filepath),
+            project=self._project_id,
+            credentials=key_filepath
         )
+
+        df = gbq_client.query(self._get_query()).to_dataframe()
+
         ObjectStore.put(self._key, df)
 
 

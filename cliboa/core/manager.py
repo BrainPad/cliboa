@@ -18,7 +18,7 @@ import subprocess
 from abc import abstractmethod
 
 from cliboa.conf import env
-from cliboa.core.file_parser import YamlScenarioParser
+from cliboa.core.file_parser import JsonScenarioParser, YamlScenarioParser
 from cliboa.core.listener import StepStatusListener
 from cliboa.core.scenario_queue import ScenarioQueue
 from cliboa.core.step_queue import StepQueue
@@ -29,7 +29,7 @@ from cliboa.core.validator import (
 from cliboa.scenario import *  # noqa
 from cliboa.util.cache import StepArgument
 from cliboa.util.class_util import ClassUtil
-from cliboa.util.exception import CliboaException, InvalidParameter, ScenarioFileInvalid
+from cliboa.util.exception import InvalidParameter, ScenarioFileInvalid
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
 from cliboa.util.parallel_with_config import ParallelWithConfig
@@ -345,4 +345,8 @@ class JsonScenarioManager(ScenarioManager):
     """
 
     def parse_file(self):
-        raise CliboaException("Not implemented yet")
+        """
+        Parse json format file to list object
+        """
+        parser = JsonScenarioParser(self._pj_scenario_file, self._cmn_scenario_file)
+        return parser.parse()
