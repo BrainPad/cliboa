@@ -715,3 +715,52 @@ class TestJsonScenarioParser(BaseCliboaTest):
         for scenario in json_scenario_list:
             for dict in scenario.get("parallel"):
                 assert "dummy_host" == dict.get("arguments")["host"]
+
+    def test_parse_with_pj_and_cmn_json_parallel_with_config(self):
+        """
+        Test for parallel_with_config operation
+        """
+        pj_json_dict = {
+            "scenario": [
+                {
+                    "parallel_with_config": {
+                        "config": {
+                            "multi_process_count": 5
+                        },
+                        "steps": [
+                            {
+                                "arguments": {"retry_count": 10},
+                                "class": "SftpDownload",
+                                "step": "sftp_download",
+                            },
+                            {
+                                "arguments": {"retry_count": 10},
+                                "class": "SftpDownload",
+                                "step": "sftp_download",
+                            },
+                        ],
+                    }
+                }
+            ]
+        }
+        with open(self._pj_scenario_file, "w") as f:
+            json.dump(pj_json_dict, f, indent=4)
+
+        cmn_json_dict = {
+            "scenario": [
+                {
+                    "arguments": {"host": "dummy_host"},
+                    "class": "SftpDownload",
+                    "step": "sftp_download",
+                }
+            ]
+        }
+        with open(self._cmn_scenario_file, "w") as f:
+            json.dump(cmn_json_dict, f, indent=4)
+
+        parser = JsonScenarioParser(self._pj_scenario_file, self._cmn_scenario_file)
+        json_scenario_list = parser.parse()
+
+        for scenario in json_scenario_list:
+            for dict in scenario.get("parallel_with_config").get("steps"):
+                assert "dummy_host" == dict.get("arguments")["host"]

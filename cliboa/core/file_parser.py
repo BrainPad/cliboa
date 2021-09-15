@@ -179,6 +179,10 @@ class JsonScenarioParser(ScenarioParser):
             if pj_json_dict.get("parallel"):
                 for row in pj_json_dict.get("parallel"):
                     self._merge(row, cmn_json_list)
+            elif pj_json_dict.get("parallel_with_config"):
+                steps = pj_json_dict.get("parallel_with_config").get("steps")
+                for row in steps:
+                    self._merge(row, cmn_json_list)
             else:
                 self._merge(pj_json_dict, cmn_json_list)
 
