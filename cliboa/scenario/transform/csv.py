@@ -326,6 +326,44 @@ class CsvMerge(FileBaseTransform):
         )
 
 
+class CsvColumnSelect(FileBaseTransform):
+    """
+    Select columns in Csv file in specified order
+    """
+    def __init__(self):
+        super().__init__()
+        self._column_order = None
+
+    def column_order(self, column_order):
+        self._column_order = column_order
+
+    def execute(self, *args):
+        # essential parameters check
+        valid = EssentialParameters(
+            self.__class__.__name__, [self._src_dir,
+                                      self._src_pattern,
+                                      self._column_order]
+        )
+        valid()
+
+        files = File().get_target_files(self._src_dir, self._src_pattern)
+        if len(files) == 0:
+            raise FileNotFound("No files are found.")
+        self._logger.info("Files found %s" % files)
+        for fi, fo in super().io_files(files):
+            df = pandas.read_csv(fi, dtype=str, encoding=self._encoding)
+            if set(self._column_order) - set(df.columns.values):
+                raise InvalidParameter(
+                    "column_order define not included target file's column : %s"
+                    % (set(self._column_order) - set(df.columns.values)))
+            df = df.loc[:, self._column_order]
+            df.to_csv(
+                fo,
+                encoding=self._encoding,
+                index=False,
+            )
+
+
 class CsvConcat(FileBaseTransform):
     """
     Concat csv files
