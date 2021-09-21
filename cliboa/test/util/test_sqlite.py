@@ -85,7 +85,7 @@ class TestSqliteCreation(object):
         db_file = os.path.join(self._db_dir, "spam.db")
         self._adptr.connect(db_file)
 
-        columns = ["id", "na\"me", "a'ge"]
+        columns = ["id", 'na"me', "a'ge"]
         self._adptr.create_table("spam_table", columns)
         result = self._adptr.get_column_names("spam_table")
 

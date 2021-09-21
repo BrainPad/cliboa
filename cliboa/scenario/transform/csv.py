@@ -30,6 +30,42 @@ from cliboa.util.sqlite import SqliteAdapter
 from cliboa.util.string import StringUtil
 from datetime import datetime
 
+import hashlib
+
+
+class CsvColumnHash(FileBaseTransform):
+    """
+    Hash(SHA256) specific columns from csv file.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self._columns = []
+
+    def columns(self, columns):
+        self._columns = columns
+
+    def _stringToHash(self, string):
+        return hashlib.sha256(string.encode()).hexdigest()
+
+    def execute(self, *args):
+        valid = EssentialParameters(
+            self.__class__.__name__, [self._src_dir, self._src_pattern, self._columns],
+        )
+        valid()
+
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+        self.check_file_existence(files)
+
+        for fi, fo in super().io_files(files):
+            df = pandas.read_csv(fi, dtype=str, encoding=self._encoding,)
+            for c in self._columns:
+                df[c] = df[c].apply(self._stringToHash)
+
+            df.to_csv(
+                fo, encoding=self._encoding, index=False,
+            )
+
 
 class CsvColumnExtract(FileBaseTransform):
     """
@@ -98,9 +134,8 @@ class CsvColumnConcat(FileBaseTransform):
 
     def execute(self, *args):
         valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir,
-                                      self._src_pattern,
-                                      self._dest_column_name]
+            self.__class__.__name__,
+            [self._src_dir, self._src_pattern, self._dest_column_name],
         )
         valid()
 
@@ -111,11 +146,7 @@ class CsvColumnConcat(FileBaseTransform):
         self.check_file_existence(files)
 
         for fi, fo in super().io_files(files):
-            df = pandas.read_csv(
-                fi,
-                dtype=str,
-                encoding=self._encoding,
-            )
+            df = pandas.read_csv(fi, dtype=str, encoding=self._encoding,)
 
             dest_str = None
             for c in self._columns:
@@ -127,9 +158,7 @@ class CsvColumnConcat(FileBaseTransform):
             df[self._dest_column_name] = dest_str
 
             df.to_csv(
-                fo,
-                encoding=self._encoding,
-                index=False,
+                fo, encoding=self._encoding, index=False,
             )
 
 
@@ -147,12 +176,7 @@ class ColumnLengthAdjust(FileBaseTransform):
 
     def execute(self, *args):
         valid = EssentialParameters(
-            self.__class__.__name__,
-            [
-                self._src_dir,
-                self._src_pattern,
-                self._adjust,
-            ],
+            self.__class__.__name__, [self._src_dir, self._src_pattern, self._adjust],
         )
         valid()
 
@@ -218,12 +242,7 @@ class CsvMerge(FileBaseTransform):
         # essential parameters check
         valid = EssentialParameters(
             self.__class__.__name__,
-            [
-                self._src_dir,
-                self._src1_pattern,
-                self._src2_pattern,
-                self._dest_dir,
-            ],
+            [self._src_dir, self._src1_pattern, self._src2_pattern, self._dest_dir],
         )
         valid()
 
@@ -333,18 +352,10 @@ class CsvConcat(FileBaseTransform):
             self._logger.warning("Two or more input files are required.")
 
         file = files.pop(0)
-        df1 = pandas.read_csv(
-            file,
-            dtype=str,
-            encoding=self._encoding,
-        )
+        df1 = pandas.read_csv(file, dtype=str, encoding=self._encoding,)
 
         for file in files:
-            df2 = pandas.read_csv(
-                file,
-                dtype=str,
-                encoding=self._encoding,
-            )
+            df2 = pandas.read_csv(file, dtype=str, encoding=self._encoding,)
             df1 = pandas.concat([df1, df2])
 
         # TODO All the statements inside 'if' block will be deleted in the near future.
@@ -430,11 +441,7 @@ class CsvHeaderConvert(FileBaseTransform):
         else:
             valid = EssentialParameters(
                 self.__class__.__name__,
-                [
-                    self._src_dir,
-                    self._src_pattern,
-                    self._headers,
-                ],
+                [self._src_dir, self._src_pattern, self._headers],
             )
             valid()
 
@@ -593,10 +600,7 @@ class CsvFormatChange(FileBaseTransform):
                         i, delimiter=Csv.delimiter_convert(self._before_format)
                     )
                     with open(
-                        fo,
-                        mode="wt",
-                        newline="",
-                        encoding=self._after_enc,
+                        fo, mode="wt", newline="", encoding=self._after_enc,
                     ) as o:
                         writer = csv.writer(
                             o,
@@ -616,6 +620,7 @@ class CsvConvert(FileBaseTransform):
     def __init__(self):
         super().__init__()
         self._headers = []
+        self._headers_existence = True
         self._before_format = "csv"
         self._before_enc = self._encoding
         self._after_format = None
@@ -625,6 +630,9 @@ class CsvConvert(FileBaseTransform):
 
     def headers(self, headers):
         self._headers = headers
+
+    def headers_existence(self, headers_existence):
+        self._headers_existence = headers_existence
 
     def before_format(self, before_format):
         self._before_format = before_format
@@ -648,12 +656,7 @@ class CsvConvert(FileBaseTransform):
         # essential parameters check
         valid = EssentialParameters(
             self.__class__.__name__,
-            [
-                self._src_dir,
-                self._src_pattern,
-                self._before_format,
-                self._before_enc,
-            ],
+            [self._src_dir, self._src_pattern, self._before_format, self._before_enc],
         )
         valid()
 
@@ -680,6 +683,8 @@ class CsvConvert(FileBaseTransform):
 
                     for i, line in enumerate(reader):
                         if i == 0:
+                            if self._headers_existence is False:
+                                continue
                             writer.writerow(self._replace_headers(line))
                         else:
                             writer.writerow(line)
@@ -728,12 +733,7 @@ class CsvSort(FileBaseTransform):
         # essential parameters check
         valid = EssentialParameters(
             self.__class__.__name__,
-            [
-                self._order,
-                self._src_dir,
-                self._src_pattern,
-                self._dest_dir,
-            ],
+            [self._order, self._src_dir, self._src_pattern, self._dest_dir],
         )
         valid()
 

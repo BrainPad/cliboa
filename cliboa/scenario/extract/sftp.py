@@ -126,7 +126,8 @@ class SftpDownload(SftpExtract):
             self._port,
         )
         files = sftp.list_files(
-            self._src_dir, self._dest_dir,
+            self._src_dir,
+            self._dest_dir,
             re.compile(self._src_pattern),
             self._endfile_suffix,
             self._ignore_empty_file,
@@ -232,7 +233,10 @@ class SftpDownloadFileDelete(SftpExtract):
 
                 if endfile_suffix:
                     sftp.remove_specific_file(
-                        super().get_step_argument("src_dir"), file + endfile_suffix)
-                    self._logger.info("%s is successfully deleted." % (file + endfile_suffix))
+                        super().get_step_argument("src_dir"), file + endfile_suffix
+                    )
+                    self._logger.info(
+                        "%s is successfully deleted." % (file + endfile_suffix)
+                    )
         else:
             self._logger.info("No files to delete.")

@@ -68,7 +68,9 @@ class Sftp(object):
         self._port = 22 if port is None else port
         self._logger = logging.getLogger(__name__)
 
-    def list_files(self, dir, dest, pattern, endfile_suffix=None, ignore_empty_file=False):
+    def list_files(
+        self, dir, dest, pattern, endfile_suffix=None, ignore_empty_file=False
+    ):
         """
         Fetch all the files in specified directory
 
@@ -90,7 +92,8 @@ class Sftp(object):
             dest=dest,
             pattern=pattern,
             endfile_suffix=endfile_suffix,
-            ignore_empty_file=ignore_empty_file)
+            ignore_empty_file=ignore_empty_file,
+        )
 
     def clear_files(self, dir, pattern):
         """
@@ -291,19 +294,20 @@ def put_file_func(**kwargs):
     _logger = logging.getLogger(__name__)
 
     if _logger.isEnabledFor(logging.DEBUG):
-        def cb(sent, size):
-            _logger.debug('Transfer %s / %s' % (sent, size))
 
-        file_size = os.stat(kwargs['src']).st_size
-        with open(kwargs['src'], "rb") as fl:
-            _logger.debug('Open src file')
-            with kwargs['sftp'].file(tmp_dest, "wb") as fr:
-                _logger.debug('Open dest file')
+        def cb(sent, size):
+            _logger.debug("Transfer %s / %s" % (sent, size))
+
+        file_size = os.stat(kwargs["src"]).st_size
+        with open(kwargs["src"], "rb") as fl:
+            _logger.debug("Open src file")
+            with kwargs["sftp"].file(tmp_dest, "wb") as fr:
+                _logger.debug("Open dest file")
                 fr.set_pipelined(True)
                 _transfer_with_callback(
                     reader=fl, writer=fr, file_size=file_size, callback=cb
                 )
-            _logger.debug('End')
+            _logger.debug("End")
     else:
         kwargs["sftp"].put(kwargs["src"], tmp_dest)
 
@@ -331,17 +335,17 @@ def _transfer_with_callback(reader, writer, file_size, callback):
     """
     size = 0
     _logger = logging.getLogger(__name__)
-    _logger.debug('Call back method')
+    _logger.debug("Call back method")
     while True:
         data = reader.read(32768)
         writer.write(data)
         size += len(data)
         if len(data) == 0:
-            _logger.debug('No data')
+            _logger.debug("No data")
             break
         if callback is not None:
             callback(size, file_size)
-    _logger.debug('Size %s' % size)
+    _logger.debug("Size %s" % size)
     return size
 
 

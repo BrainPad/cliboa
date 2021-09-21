@@ -26,7 +26,7 @@ class Environment:
         Load environment.py in project
         If values are not set in environment.py, default values are used
         """
-        env_module = os.environ.get("LISBOA_ENV")
+        env_module = os.environ.get("CLIBOA_ENV")
         if not env_module:
             # Assume executing unit test codes
             mod = import_module("cliboa.common.environment")
