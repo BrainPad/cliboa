@@ -76,10 +76,10 @@ class SqliteCreation(SqliteTransaction):
 
         # get table column definition
         self._sqlite_adptr.connect(self._dbname)
-        column_def = self.__get_column_def()
+        column_def = self._get_column_def()
 
         if self._refresh is True:
-            self.__refresh_table(column_def)
+            self._refresh_table(column_def)
 
         # database transaction
         def insert():
@@ -92,7 +92,7 @@ class SqliteCreation(SqliteTransaction):
 
                     # Check only once
                     if i == 1:
-                        self.__valid_column_def(column_def, l_dict)
+                        self._valid_column_def(column_def, l_dict)
 
                     # execute bulk insert
                     if i % self._insert_cnt == 0:
@@ -112,7 +112,7 @@ class SqliteCreation(SqliteTransaction):
         super().execute(insert)
         self._s.remove()
 
-    def __get_column_def(self):
+    def _get_column_def(self):
         """
         Get table column definition
         """
@@ -125,7 +125,7 @@ class SqliteCreation(SqliteTransaction):
             column_def.append(c[1])
         return column_def
 
-    def __valid_column_def(self, column_def, l_dict):
+    def _valid_column_def(self, column_def, l_dict):
         """
         Check column definitions in scenario.yml and cache file columns
         """
@@ -137,7 +137,7 @@ class SqliteCreation(SqliteTransaction):
                 % ", ".join(inconsistent_columns)
             )
 
-    def __refresh_table(self, column_def):
+    def _refresh_table(self, column_def):
         """
         Drop and recreate the table by using the existing table column definition
         """

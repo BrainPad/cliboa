@@ -28,14 +28,14 @@ class EssentialParameters(object):
             cls_name: class name which has validation target parameters
             param_list: list of validation target parameters
         """
-        self.__cls_name = cls_name
-        self.__param_list = param_list
+        self._cls_name = cls_name
+        self._param_list = param_list
 
     def __call__(self):
-        for p in self.__param_list:
+        for p in self._param_list:
             if not p:
                 raise InvalidParameter(
-                    "The essential parameter is not specified in %s." % self.__cls_name
+                    "The essential parameter is not specified in %s." % self._cls_name
                 )
 
 
@@ -51,28 +51,28 @@ class SqliteTableExistence(object):
             tblname: table name
             returns_bool: return bool or not
         """
-        self.__sqlite_adptr = SqliteAdapter()
-        self.__dbname = dbname
-        self.__tblname = tblname
-        self.__returns_bool = returns_bool
+        self._sqlite_adptr = SqliteAdapter()
+        self._dbname = dbname
+        self._tblname = tblname
+        self._returns_bool = returns_bool
         self._logger = LisboaLog.get_logger(__name__)
 
     def __call__(self):
         try:
-            self.__sqlite_adptr.connect(self.__dbname)
-            cur = self.__sqlite_adptr.fetch(
+            self._sqlite_adptr.connect(self._dbname)
+            cur = self._sqlite_adptr.fetch(
                 'SELECT name FROM sqlite_master WHERE type="table" AND name="%s"'
-                % self.__tblname
+                % self._tblname
             )
             result = cur.fetchall()
-            if self.__returns_bool is True:
+            if self._returns_bool is True:
                 return True if result else False
 
-            if not result and self.__returns_bool is False:
-                raise SqliteInvalid("Sqlite table %s not found" % self.__tblname)
+            if not result and self._returns_bool is False:
+                raise SqliteInvalid("Sqlite table %s not found" % self._tblname)
 
         finally:
-            self.__sqlite_adptr.close()
+            self._sqlite_adptr.close()
 
 
 class IOInput(object):
@@ -81,10 +81,10 @@ class IOInput(object):
     """
 
     def __init__(self, io):
-        self.__io = io
+        self._io = io
 
     def __call__(self):
-        if self.__io != "input":
+        if self._io != "input":
             raise ScenarioFileInvalid("io: input is not specified.")
 
 
@@ -94,8 +94,8 @@ class IOOutput(object):
     """
 
     def __init__(self, io):
-        self.__io = io
+        self._io = io
 
     def __call__(self):
-        if self.__io != "output":
+        if self._io != "output":
             raise ScenarioFileInvalid("io: output is not specified.")
