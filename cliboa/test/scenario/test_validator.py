@@ -35,15 +35,15 @@ class TestEssentialParameters(object):
 
 class TestSqliteTableExistence(object):
     def setup_method(self, method):
-        self.__db_dir = os.path.join(env.BASE_DIR, "db")
+        self._db_dir = os.path.join(env.BASE_DIR, "db")
 
     def test_table_existence_ng_with_exc(self):
         """
         SqliteTableExistende invalid case
         """
         # create test db and insert dummy data
-        os.makedirs(self.__db_dir)
-        db_file = os.path.join(self.__db_dir, "spam.db")
+        os.makedirs(self._db_dir)
+        db_file = os.path.join(self._db_dir, "spam.db")
         conn = sqlite3.connect(db_file)
         conn.execute("create table spam_table (id, name, age);")
         conn.execute("insert into spam_table (id, name, age) values(1,1,1);")
@@ -53,7 +53,7 @@ class TestSqliteTableExistence(object):
         with pytest.raises(SqliteInvalid) as excinfo:
             valid = SqliteTableExistence(db_file, "spam_table2")
             valid()
-        shutil.rmtree(self.__db_dir)
+        shutil.rmtree(self._db_dir)
         assert "not found" in str(excinfo.value)
 
     def test_table_existence_ng_with_bool(self):
@@ -61,8 +61,8 @@ class TestSqliteTableExistence(object):
         SqliteTableExistence invalid case
         """
         # create test db and insert dummy data
-        os.makedirs(self.__db_dir)
-        db_file = os.path.join(self.__db_dir, "spam.db")
+        os.makedirs(self._db_dir)
+        db_file = os.path.join(self._db_dir, "spam.db")
         conn = sqlite3.connect(db_file)
         conn.execute("create table spam_table (id, name, age);")
         conn.execute("insert into spam_table (id, name, age) values(1,1,1);")
@@ -71,7 +71,7 @@ class TestSqliteTableExistence(object):
 
         valid = SqliteTableExistence(db_file, "spam_table2", True)
         exists_tbl = valid()
-        shutil.rmtree(self.__db_dir)
+        shutil.rmtree(self._db_dir)
         assert exists_tbl is False
 
     def test_table_existence_ok_with_bool(self):
@@ -79,8 +79,8 @@ class TestSqliteTableExistence(object):
         SqliteTableExistence invalid case
         """
         # create test db and insert dummy data
-        os.makedirs(self.__db_dir)
-        db_file = os.path.join(self.__db_dir, "spam.db")
+        os.makedirs(self._db_dir)
+        db_file = os.path.join(self._db_dir, "spam.db")
         conn = sqlite3.connect(db_file)
         conn.execute("create table spam_table (id, name, age);")
         conn.execute("insert into spam_table (id, name, age) values(1,1,1);")
@@ -89,5 +89,5 @@ class TestSqliteTableExistence(object):
 
         valid = SqliteTableExistence(db_file, "spam_table", True)
         exists_tbl = valid()
-        shutil.rmtree(self.__db_dir)
+        shutil.rmtree(self._db_dir)
         assert exists_tbl is True

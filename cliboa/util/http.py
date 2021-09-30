@@ -26,38 +26,38 @@ class FormAuth(object):
     """
 
     def __init__(self):
-        self.__form_url = None
-        self.__form_id = None
-        self.__form_password = None
+        self._form_url = None
+        self._form_id = None
+        self._form_password = None
 
     @property
     def form_url(self):
-        return self.__form_url
+        return self._form_url
 
     @form_url.setter
     def form_url(self, form_url):
-        self.__form_url = form_url
+        self._form_url = form_url
 
     @property
     def form_id(self):
-        return self.__form_id
+        return self._form_id
 
     @form_id.setter
     def form_id(self, form_id):
-        self.__form_id = form_id
+        self._form_id = form_id
 
     @property
     def form_password(self):
-        return self.__form_password
+        return self._form_password
 
     @form_password.setter
     def form_password(self, form_password):
-        self.__form_password = form_password
+        self._form_password = form_password
 
     def execute(self, *args):
         valid = EssentialParameters(
             self.__class__.__name__,
-            [self.__form_url, self.__form_id, self.__form_password],
+            [self._form_url, self._form_id, self._form_password],
         )
         valid()
 

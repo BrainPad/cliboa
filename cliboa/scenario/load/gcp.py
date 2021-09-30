@@ -229,7 +229,7 @@ class BigQueryCreate(BaseBigQuery):
                 l_dict = ast.literal_eval(l_str)
                 cache_list.append(l_dict)
                 if len(cache_list) == self.BULK_LINE_CNT:
-                    df = pandas.DataFrame(self.__create_insert_data(cache_list))
+                    df = pandas.DataFrame(self._create_insert_data(cache_list))
                     if inserts is True:
                         # if_exists after the first insert execution
                         if_exists = self.APPEND
@@ -248,7 +248,7 @@ class BigQueryCreate(BaseBigQuery):
                     cache_list.clear()
                     inserts = True
             if len(cache_list) > 0:
-                df = pandas.DataFrame(self.__create_insert_data(cache_list))
+                df = pandas.DataFrame(self._create_insert_data(cache_list))
                 if inserts is True:
                     # if_exists after the first insert execution
                     if_exists = self.APPEND
@@ -266,7 +266,7 @@ class BigQueryCreate(BaseBigQuery):
                 )
         self._s.remove()
 
-    def __create_insert_data(self, cache_list):
+    def _create_insert_data(self, cache_list):
         """
         Create insert data like the below.
 
@@ -417,7 +417,7 @@ class CsvReadBigQueryCreate(BaseBigQuery, FileWrite):
         super().__init__()
         self._table_schema = None
         self._replace = True
-        self.__columns = []
+        self._columns = []
 
     def table_schema(self, table_schema):
         self._table_schema = table_schema
@@ -443,26 +443,26 @@ class CsvReadBigQueryCreate(BaseBigQuery, FileWrite):
         is_inserted = False
         # initial if_exists
         if_exists = self.REPLACE if self._replace is True else self.APPEND
-        self.__columns = [name_and_type["name"] for name_and_type in self._table_schema]
+        self._columns = [name_and_type["name"] for name_and_type in self._table_schema]
         with open(files[0], "r", encoding=self._encoding) as f:
             reader = csv.DictReader(f, delimiter=",")
             for r in reader:
                 # extract only the specified columns
                 row_dict = {}
-                for c in self.__columns:
+                for c in self._columns:
                     if not r.get(c):
                         continue
                     row_dict[c] = r.get(c)
                 insert_rows.append(row_dict)
 
                 if len(insert_rows) == self.BULK_LINE_CNT:
-                    self.__exec_insert(insert_rows, is_inserted, if_exists)
+                    self._exec_insert(insert_rows, is_inserted, if_exists)
                     insert_rows.clear()
                     is_inserted = True
             if len(insert_rows) > 0:
-                self.__exec_insert(insert_rows, is_inserted, if_exists)
+                self._exec_insert(insert_rows, is_inserted, if_exists)
 
-    def __exec_insert(self, insert_rows, is_inserted, if_exists):
+    def _exec_insert(self, insert_rows, is_inserted, if_exists):
         """
         Execute insert into a BigQuery table
         Args:
@@ -470,7 +470,7 @@ class CsvReadBigQueryCreate(BaseBigQuery, FileWrite):
             is_inserted: if the data is already inserted or not
             if_exists: replace or append
         """
-        df = pandas.DataFrame(self.__format_insert_data(insert_rows))
+        df = pandas.DataFrame(self._format_insert_data(insert_rows))
         if is_inserted is True:
             # if_exists after the first insert execution
             if_exists = self.APPEND
@@ -497,7 +497,7 @@ class CsvReadBigQueryCreate(BaseBigQuery, FileWrite):
             credentials=ServiceAccount.auth(key_filepath),
         )
 
-    def __format_insert_data(self, insert_rows):
+    def _format_insert_data(self, insert_rows):
         """
         Format insert data to pass DataFrame as the below.
 
@@ -511,7 +511,7 @@ class CsvReadBigQueryCreate(BaseBigQuery, FileWrite):
             insert_rows: dictionary list of input cache
         """
         insert_data = {}
-        for c in self.__columns:
+        for c in self._columns:
             v_list = [d.get(c) for d in insert_rows]
             if not v_list:
                 raise InvalidFormat(
