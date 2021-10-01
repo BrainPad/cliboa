@@ -145,12 +145,20 @@ class EssentialKeys(object):
             multi_proc_cnt = scenario_yaml_dict.get("multi_process_count")
             force_continue = scenario_yaml_dict.get("force_continue")
             parallel_steps = scenario_yaml_dict.get("parallel")
+            parallel_with_config = scenario_yaml_dict.get("parallel_with_config")
             if multi_proc_cnt:
                 continue
             elif force_continue is not None:
                 continue
             elif parallel_steps:
                 for s in parallel_steps:
+                    self._exists_step(s)
+                    self._exists_class(s)
+            elif parallel_with_config:
+                self._exists_config(parallel_with_config)
+                self._exists_multi_process_count(parallel_with_config["config"])
+                self._exists_steps(parallel_with_config)
+                for s in parallel_with_config["steps"]:
                     self._exists_step(s)
                     self._exists_class(s)
             else:
@@ -167,4 +175,22 @@ class EssentialKeys(object):
         if not dict.get("class"):
             raise ScenarioFileInvalid(
                 "scenario.yml is invalid. 'class:' key does not exist, or 'class:' value does not exist."  # noqa
+            )
+
+    def _exists_config(self, dict):
+        if not dict.get("config"):
+            raise ScenarioFileInvalid(
+                "scenario.yml is invalid. 'config:' key does not exist, or 'config:' value does not exist."  # noqa
+            )
+
+    def _exists_steps(self, dict):
+        if not dict.get("steps"):
+            raise ScenarioFileInvalid(
+                "scenario.yml is invalid. 'steps:' key does not exist, or 'steps:' value does not exist."  # noqa
+            )
+
+    def _exists_multi_process_count(self, dict):
+        if not dict.get("multi_process_count"):
+            raise ScenarioFileInvalid(
+                "scenario.yml is invalid. 'multi_process_count:' key does not exist, or 'multi_process_count:' value does not exist."  # noqa
             )

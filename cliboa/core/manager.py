@@ -32,6 +32,7 @@ from cliboa.util.class_util import ClassUtil
 from cliboa.util.exception import InvalidParameter, ScenarioFileInvalid
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.parallel_with_config import ParallelWithConfig
 
 __all__ = ["YamlScenarioManager", "JsonScenarioManager"]
 
@@ -144,6 +145,15 @@ class ScenarioManager(object):
                 instance = self._create_instance(row)
                 instances.append(instance)
                 StepArgument._put(row["step"], instance)
+        elif "parallel_with_config" in s_dict.keys():
+            steps_config_block = s_dict.get("parallel_with_config")
+            steps, config = self._split_steps_config(steps_config_block)
+            parallel = ParallelWithConfig([], config)
+            for row in steps:
+                instance = self._create_instance(row)
+                parallel.steps.append(instance)
+                StepArgument._put(row["step"], instance)
+            instances.append(parallel)
         else:
             instance = self._create_instance(s_dict)
             instances.append(instance)
@@ -275,6 +285,28 @@ class ScenarioManager(object):
         shell_output = re.sub("'", "", str(shell_output))
 
         return re.sub(r"{{(\s?)%s(\s?)}}" % var_name, shell_output, yaml_v)
+
+    def _split_steps_config(self, block):
+        """
+        If "config" exist in arguments of parallel_with_config,
+        split into two(list of steps and config)
+
+        Args:
+            arguments (dict): List of steps
+
+        Returns:
+            tuple: (steps, config parameter)
+        """
+        exists_config = "config" in block.keys()
+        config = {}
+        if exists_config:
+            variables = block["config"]
+            for k, v in variables.items():
+                config[k] = v
+        steps = []
+        if "steps" in block.keys():
+            steps = block["steps"]
+        return steps, config
 
     def _append_listeners(self, instance, args, values):
         listeners = [StepStatusListener()]

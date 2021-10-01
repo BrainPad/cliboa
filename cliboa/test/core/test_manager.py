@@ -13,9 +13,11 @@
 #
 import json
 import os
-import pytest
 import shutil
 import sys
+from datetime import datetime, timedelta
+
+import pytest
 import yaml
 
 from cliboa.client import CommandArgumentParser
@@ -24,7 +26,7 @@ from cliboa.core.manager import JsonScenarioManager, YamlScenarioManager
 from cliboa.core.scenario_queue import ScenarioQueue
 from cliboa.test import BaseCliboaTest
 from cliboa.util.exception import ScenarioFileInvalid
-from datetime import datetime, timedelta
+from cliboa.util.parallel_with_config import ParallelWithConfig
 
 
 class TestYamlScenarioManager(BaseCliboaTest):
@@ -110,6 +112,63 @@ class TestYamlScenarioManager(BaseCliboaTest):
         assert ScenarioQueue.step_queue.multi_proc_cnt == 3
         assert ScenarioQueue.step_queue.force_continue is True
         for i, instance in enumerate(instances):
+            if i == 0:
+                assert instance._step == "sample_step_1"
+                assert instance._retry_count == 1
+            elif i == 1:
+                assert instance._step == "sample_step_2"
+                assert instance._retry_count == 2
+
+    def test_create_scenario_queue_ok_parallel_with_config(self):
+        """
+        Valid scenario.yml
+        """
+        pj_yaml_dict = {
+            "scenario": [
+                {
+                    "multi_process_count": 3
+                },
+                {
+                    "force_continue": True
+                },
+                {
+                    "parallel_with_config": {
+                        "config": {
+                            "multi_process_count": 3
+                        },
+                        "steps": [
+                            {
+                                "step": "sample_step_1",
+                                "class": "SampleStep",
+                                "arguments": {
+                                    "retry_count": 1
+                                },
+                            },
+                            {
+                                "step": "sample_step_2",
+                                "class": "SampleStep",
+                                "arguments": {
+                                    "retry_count": 2
+                                },
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+        self._create_scenario_file(pj_yaml_dict)
+
+        manager = YamlScenarioManager(self._cmd_args)
+        manager.create_scenario_queue()
+        instances = ScenarioQueue.step_queue.pop()
+
+        assert len(instances) == 1
+        assert isinstance(instances[0], ParallelWithConfig)
+        assert ScenarioQueue.step_queue.multi_proc_cnt == 3
+        assert ScenarioQueue.step_queue.force_continue is True
+        print(instances)
+        assert instances[0].config["multi_process_count"] == 3
+        for i, instance in enumerate(instances[0].steps):
             if i == 0:
                 assert instance._step == "sample_step_1"
                 assert instance._retry_count == 1
