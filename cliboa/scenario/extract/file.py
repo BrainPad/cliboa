@@ -11,13 +11,8 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import csv
-from glob import glob
-
 from cliboa.scenario.base import BaseStep
-from cliboa.scenario.validator import EssentialParameters, IOInput
-from cliboa.util.cache import ObjectStore
-from cliboa.util.exception import CliboaException, FileNotFound
+from cliboa.scenario.validator import EssentialParameters
 
 
 class FileRead(BaseStep):
@@ -50,56 +45,3 @@ class FileRead(BaseStep):
             self.__class__.__name__, [self._src_dir, self._src_pattern]
         )
         valid()
-
-
-class CsvRead(FileRead):
-    """
-    Read the specified csv file
-
-    Deprecated.
-    """
-
-    LOAD_CHUNK_SIZE = 10000
-
-    def __init__(self):
-        super().__init__()
-        self._columns = None
-
-    def columns(self, columns):
-        self._columns = columns
-
-    def execute(self, *args):
-        self._logger.warning("Deprecated. Please do not use this class.")
-
-        input_valid = IOInput(self._io)
-        input_valid()
-
-        files = glob(self._src_path)
-        if len(files) > 1:
-            raise CliboaException("Input file must be only one.")
-
-        if len(files) == 0:
-            raise FileNotFound("The specified csv file not found.")
-
-        with open(files[0], "r", encoding=self._encoding) as f:
-
-            # save per one column
-            if self._columns:
-                reader = csv.DictReader(f, delimiter=",")
-                for row in reader:
-                    # extract only the specified columns
-                    row_dict = {}
-                    for c in self._columns:
-                        if not row.get(c):
-                            continue
-                        row_dict[c] = row.get(c)
-                    self._s.save(row_dict)
-            else:
-                reader = csv.reader(f)
-                header = next(reader, None)
-                for row in reader:
-                    row_dict = dict(zip(header, row))
-                    self._s.save(row_dict)
-
-        # cache downloaded file names
-        ObjectStore.put(self._step, files)

@@ -50,8 +50,7 @@ class CsvColumnHash(FileBaseTransform):
 
     def execute(self, *args):
         valid = EssentialParameters(
-            self.__class__.__name__,
-            [self._src_dir, self._src_pattern, self._columns],
+            self.__class__.__name__, [self._src_dir, self._src_pattern, self._columns],
         )
         valid()
 
@@ -59,18 +58,12 @@ class CsvColumnHash(FileBaseTransform):
         self.check_file_existence(files)
 
         for fi, fo in super().io_files(files):
-            df = pandas.read_csv(
-                fi,
-                dtype=str,
-                encoding=self._encoding,
-            )
+            df = pandas.read_csv(fi, dtype=str, encoding=self._encoding,)
             for c in self._columns:
                 df[c] = df[c].apply(self._stringToHash)
 
             df.to_csv(
-                fo,
-                encoding=self._encoding,
-                index=False,
+                fo, encoding=self._encoding, index=False,
             )
 
 
@@ -141,9 +134,8 @@ class CsvColumnConcat(FileBaseTransform):
 
     def execute(self, *args):
         valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir,
-                                      self._src_pattern,
-                                      self._dest_column_name]
+            self.__class__.__name__,
+            [self._src_dir, self._src_pattern, self._dest_column_name],
         )
         valid()
 
@@ -154,11 +146,7 @@ class CsvColumnConcat(FileBaseTransform):
         self.check_file_existence(files)
 
         for fi, fo in super().io_files(files):
-            df = pandas.read_csv(
-                fi,
-                dtype=str,
-                encoding=self._encoding,
-            )
+            df = pandas.read_csv(fi, dtype=str, encoding=self._encoding,)
 
             dest_str = None
             for c in self._columns:
@@ -170,9 +158,7 @@ class CsvColumnConcat(FileBaseTransform):
             df[self._dest_column_name] = dest_str
 
             df.to_csv(
-                fo,
-                encoding=self._encoding,
-                index=False,
+                fo, encoding=self._encoding, index=False,
             )
 
 
@@ -190,12 +176,7 @@ class ColumnLengthAdjust(FileBaseTransform):
 
     def execute(self, *args):
         valid = EssentialParameters(
-            self.__class__.__name__,
-            [
-                self._src_dir,
-                self._src_pattern,
-                self._adjust,
-            ],
+            self.__class__.__name__, [self._src_dir, self._src_pattern, self._adjust],
         )
         valid()
 
@@ -261,12 +242,7 @@ class CsvMerge(FileBaseTransform):
         # essential parameters check
         valid = EssentialParameters(
             self.__class__.__name__,
-            [
-                self._src_dir,
-                self._src1_pattern,
-                self._src2_pattern,
-                self._dest_dir,
-            ],
+            [self._src_dir, self._src1_pattern, self._src2_pattern, self._dest_dir],
         )
         valid()
 
@@ -376,18 +352,10 @@ class CsvConcat(FileBaseTransform):
             self._logger.warning("Two or more input files are required.")
 
         file = files.pop(0)
-        df1 = pandas.read_csv(
-            file,
-            dtype=str,
-            encoding=self._encoding,
-        )
+        df1 = pandas.read_csv(file, dtype=str, encoding=self._encoding,)
 
         for file in files:
-            df2 = pandas.read_csv(
-                file,
-                dtype=str,
-                encoding=self._encoding,
-            )
+            df2 = pandas.read_csv(file, dtype=str, encoding=self._encoding,)
             df1 = pandas.concat([df1, df2])
 
         # TODO All the statements inside 'if' block will be deleted in the near future.
@@ -401,254 +369,6 @@ class CsvConcat(FileBaseTransform):
             encoding=self._encoding,
             index=False,
         )
-
-
-class CsvHeaderConvert(FileBaseTransform):
-    """
-    Convert csv headers
-
-    Deprecated.
-    Please Use CsvConvert instead.
-    """
-
-    def __init__(self):
-        super().__init__()
-        self._headers = []
-
-    def headers(self, headers):
-        self._headers = headers
-
-    def execute(self, *args):
-        self._logger.warning("Deprecated. Please Use CsvConvert instead.")
-
-        if self._dest_pattern:
-            self._logger.warning(
-                "'dest_pattern' will be unavailable in the near future."
-                + "Basically every classes which extends FileBaseTransform will be allowed"
-                + " plural input files, and output files will be the same name with input"
-                + " file names.\n"
-                "At that time, if 'dest_dir' is given, transformed files will be created in the given directory.\n"  # noqa
-                + "If not, original files will be updated by transformed files."
-            )
-
-            valid = EssentialParameters(
-                self.__class__.__name__,
-                [
-                    self._src_dir,
-                    self._src_pattern,
-                    self._dest_dir,
-                    self._dest_pattern,
-                    self._headers,
-                ],
-            )
-            valid()
-
-            target_files = super().get_target_files(self._src_dir, self._src_pattern)
-            if len(target_files) == 0:
-                raise InvalidCount(
-                    "An input file %s does not exist."
-                    % os.path.join(self._src_dir, self._src_pattern)
-                )
-            elif len(target_files) > 1:
-                self._logger.error("Hit target files %s" % target_files)
-                raise InvalidCount("Input files must be only one.")
-            self._logger.info("A target file to be converted: %s")
-
-            dest_path = os.path.join(self._dest_dir, self._dest_pattern)
-            self._logger.info(
-                "Convert header of %s. An output file is %s."
-                % (target_files[0], dest_path)
-            )
-            with open(target_files[0], "r", encoding=self._encoding) as s, open(
-                dest_path, "w", encoding=self._encoding
-            ) as d:
-                reader = csv.reader(s)
-                writer = csv.writer(d, quoting=csv.QUOTE_ALL)
-                headers = next(reader, None)
-                new_headers = self._replace_headers(headers)
-                writer.writerow(new_headers)
-                for r in reader:
-                    writer.writerow(r)
-                d.flush()
-        else:
-            valid = EssentialParameters(
-                self.__class__.__name__,
-                [
-                    self._src_dir,
-                    self._src_pattern,
-                    self._headers,
-                ],
-            )
-            valid()
-
-            files = super().get_target_files(self._src_dir, self._src_pattern)
-            self.check_file_existence(files)
-
-            for fi, fo in super().io_writers(files, encoding=self._encoding):
-                self._logger.info(
-                    "Convert header of %s. An output file is %s." % (fi, fo)
-                )
-                reader = csv.reader(fi)
-                writer = csv.writer(fo, quoting=csv.QUOTE_ALL)
-                headers = next(reader, None)
-                new_headers = self._replace_headers(headers)
-                writer.writerow(new_headers)
-                for r in reader:
-                    writer.writerow(r)
-
-    def _replace_headers(self, old_headers):
-        """
-        Replace old headers to new headers
-        """
-        converter = {}
-        for headers in self._headers:
-            for k, v in headers.items():
-                converter[k] = v
-
-        new_headers = []
-        for oh in old_headers:
-            r = converter.get(oh)
-            new_headers.append(r if r is not None else oh)
-
-        return new_headers
-
-
-class CsvFormatChange(FileBaseTransform):
-    """
-    Change csv format
-
-    Deprecated.
-    Please Use CsvConvert instead.
-    """
-
-    def __init__(self):
-        super().__init__()
-        self._before_format = None
-        self._before_enc = None
-        self._after_format = None
-        self._after_enc = None
-        self._after_nl = "LF"
-        self._quote = "QUOTE_MINIMAL"
-
-    def before_format(self, before_format):
-        self._before_format = before_format
-
-    def before_enc(self, before_enc):
-        self._before_enc = before_enc
-
-    def after_format(self, after_format):
-        self._after_format = after_format
-
-    def after_enc(self, after_enc):
-        self._after_enc = after_enc
-
-    def after_nl(self, after_nl):
-        self._after_nl = after_nl
-
-    def quote(self, quote):
-        self._quote = quote
-
-    def execute(self, *args):
-        self._logger.warning("Deprecated. Please Use CsvConvert instead.")
-
-        # TODO All the statements inside 'if' block will be deleted in the near future.
-        if self._dest_pattern:
-            self._logger.warning(
-                "'dest_pattern' will be unavailable in the near future."
-                + "Basically every classes which extends FileBaseTransform will be allowed"
-                + " plural input files, and output files will be the same name with input"
-                + " file names.\n"
-                "At that time, if 'dest_dir' is given, transformed files will be created in the given directory.\n"  # noqa
-                + "If not, original files will be updated by transformed files."
-            )
-
-            # essential parameters check
-            valid = EssentialParameters(
-                self.__class__.__name__,
-                [
-                    self._src_dir,
-                    self._src_pattern,
-                    self._before_format,
-                    self._before_enc,
-                    self._after_format,
-                    self._after_enc,
-                    self._dest_dir,
-                    self._dest_pattern,
-                ],
-            )
-            valid()
-
-            files = super().get_target_files(self._src_dir, self._src_pattern)
-            if len(files) != 1:
-                raise Exception("Input file must be only one.")
-            self._logger.info("Files found %s" % files)
-
-            with open(files[0], mode="rt", encoding=self._before_enc) as i:
-                reader = csv.reader(
-                    i, delimiter=Csv.delimiter_convert(self._before_format)
-                )
-                with open(
-                    os.path.join(self._dest_dir, self._dest_pattern),
-                    mode="wt",
-                    newline="",
-                    encoding=self._after_enc,
-                ) as o:
-                    writer = csv.writer(
-                        o,
-                        delimiter=Csv.delimiter_convert(self._after_format),
-                        quoting=Csv.quote_convert(self._quote),
-                        lineterminator=Csv.newline_convert(self._after_nl),
-                    )
-                    with open(
-                        os.path.join(self._dest_dir, self._dest_pattern),
-                        mode="wt",
-                        newline="",
-                        encoding=self._after_enc,
-                    ) as o:
-                        writer = csv.writer(
-                            o,
-                            delimiter=Csv.delimiter_convert(self._after_format),
-                            quoting=Csv.quote_convert(self._quote),
-                            lineterminator=Csv.newline_convert(self._after_nl),
-                        )
-                        for line in reader:
-                            writer.writerow(line)
-        else:
-            valid = EssentialParameters(
-                self.__class__.__name__,
-                [
-                    self._src_dir,
-                    self._src_pattern,
-                    self._before_format,
-                    self._before_enc,
-                    self._after_format,
-                    self._after_enc,
-                ],
-            )
-            valid()
-
-            files = super().get_target_files(self._src_dir, self._src_pattern)
-            self.check_file_existence(files)
-
-            for fi, fo in super().io_files(files, ext=self._after_format):
-                with open(fi, mode="rt", encoding=self._before_enc) as i:
-                    reader = csv.reader(
-                        i, delimiter=Csv.delimiter_convert(self._before_format)
-                    )
-                    with open(
-                        fo,
-                        mode="wt",
-                        newline="",
-                        encoding=self._after_enc,
-                    ) as o:
-                        writer = csv.writer(
-                            o,
-                            delimiter=Csv.delimiter_convert(self._after_format),
-                            quoting=Csv.quote_convert(self._quote),
-                            lineterminator=Csv.newline_convert(self._after_nl),
-                        )
-                        for line in reader:
-                            writer.writerow(line)
 
 
 class CsvConvert(FileBaseTransform):
@@ -695,12 +415,7 @@ class CsvConvert(FileBaseTransform):
         # essential parameters check
         valid = EssentialParameters(
             self.__class__.__name__,
-            [
-                self._src_dir,
-                self._src_pattern,
-                self._before_format,
-                self._before_enc,
-            ],
+            [self._src_dir, self._src_pattern, self._before_format, self._before_enc],
         )
         valid()
 
@@ -777,12 +492,7 @@ class CsvSort(FileBaseTransform):
         # essential parameters check
         valid = EssentialParameters(
             self.__class__.__name__,
-            [
-                self._order,
-                self._src_dir,
-                self._src_pattern,
-                self._dest_dir,
-            ],
+            [self._order, self._src_dir, self._src_pattern, self._dest_dir],
         )
         valid()
 
