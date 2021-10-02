@@ -22,7 +22,7 @@ from cliboa.core.validator import (
     ScenarioYamlKey,
     ScenarioYamlType,
     ScenarioJsonKey,
-    ScenarioJsonType
+    ScenarioJsonType,
 )
 from cliboa.util.lisboa_log import LisboaLog
 
@@ -129,6 +129,7 @@ class JsonScenarioParser(ScenarioParser):
     """
     scenario.json parser
     """
+
     def parse(self):
         self._logger.info("Start to parse scenario.json")
 

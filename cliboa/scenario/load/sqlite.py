@@ -78,13 +78,9 @@ class SqliteImport(SqliteTransaction):
             if self._refresh is True:
                 # Drop table in advance, If refresh is True
                 self._sqlite_adptr.drop_table(self._tblname)
-                self._sqlite_adptr.create_table(
-                    self._tblname, csv_columns, self._primary_key
-                )
+                self._sqlite_adptr.create_table(self._tblname, csv_columns, self._primary_key)
             else:
-                self._sqlite_adptr.create_table(
-                    self._tblname, csv_columns, self._primary_key
-                )
+                self._sqlite_adptr.create_table(self._tblname, csv_columns, self._primary_key)
 
                 if self._force_insert is True:
                     db_columns = self._sqlite_adptr.get_column_names(self._tblname)

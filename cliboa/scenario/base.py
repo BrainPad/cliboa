@@ -132,9 +132,7 @@ class BaseStep(object):
         if src is None:
             return src
         if isinstance(src, dict) and "content" in src:
-            with tempfile.NamedTemporaryFile(
-                mode="w", encoding=encoding, delete=False
-            ) as fp:
+            with tempfile.NamedTemporaryFile(mode="w", encoding=encoding, delete=False) as fp:
                 fp.write(src["content"])
                 return fp.name
         elif isinstance(src, dict) and "file" in src:

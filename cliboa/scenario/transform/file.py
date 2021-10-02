@@ -171,9 +171,7 @@ class FileBaseTransform(BaseStep):
             - output writer
         """
         if not "t" == mode and not "b" == mode:
-            raise InvalidParameter(
-                "Unknown mode. One of the following is allowed [t, b]"
-            )
+            raise InvalidParameter("Unknown mode. One of the following is allowed [t, b]")
 
         if "b" in mode:
             encoding = None
@@ -203,9 +201,7 @@ class FileDecompress(FileBaseTransform):
 
     def execute(self, *args):
         # essential parameters check
-        valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir, self._src_pattern]
-        )
+        valid = EssentialParameters(self.__class__.__name__, [self._src_dir, self._src_pattern])
         valid()
 
         files = super().get_target_files(self._src_dir, self._src_pattern)
@@ -216,15 +212,11 @@ class FileDecompress(FileBaseTransform):
             if ext == ".zip":
                 self._logger.info("Decompress zip file %s" % f)
                 with zipfile.ZipFile(f) as zp:
-                    zp.extractall(
-                        self._dest_dir if self._dest_dir is not None else self._src_dir
-                    )
+                    zp.extractall(self._dest_dir if self._dest_dir is not None else self._src_dir)
             elif ext == ".tar":
                 self._logger.info("Decompress tar file %s" % f)
                 with tarfile.open(f, "r:*") as tf:
-                    tf.extractall(
-                        self._dest_dir if self._dest_dir is not None else self._src_dir
-                    )
+                    tf.extractall(self._dest_dir if self._dest_dir is not None else self._src_dir)
             elif ext == ".bz2":
                 self._logger.info("Decompress bz2 file %s" % f)
                 dcom_name = os.path.splitext(os.path.basename(f))[0]
@@ -288,9 +280,7 @@ class FileCompress(FileBaseTransform):
             if self._format == "zip":
                 self._logger.info("Compress file %s to zip." % f)
                 with zipfile.ZipFile(
-                    os.path.join(dir, (os.path.basename(f) + ".zip")),
-                    "w",
-                    zipfile.ZIP_DEFLATED,
+                    os.path.join(dir, (os.path.basename(f) + ".zip")), "w", zipfile.ZIP_DEFLATED,
                 ) as o:
                     o.write(f, arcname=os.path.basename(f))
             elif self._format in ("gz", "gzip"):
@@ -350,9 +340,7 @@ class DateFormatConvert(FileBaseTransform):
             self._logger.warning("'dest_path' will be unavailable in the near future.")
 
             file = files[0]
-            with codecs.open(
-                file, mode="r", encoding=self._encoding
-            ) as fi, codecs.open(
+            with codecs.open(file, mode="r", encoding=self._encoding) as fi, codecs.open(
                 self._dest_path, mode="w", encoding=self._encoding
             ) as fo:
                 reader = csv.DictReader(fi, delimiter=delimiter)
@@ -426,9 +414,7 @@ class ExcelConvert(FileBaseTransform):
             elif len(target_files) > 1:
                 self._logger.error("Hit target files %s" % target_files)
                 raise InvalidCount("Input files must be only one.")
-            self._logger.info(
-                "A target file to be converted: %s" % os.path.join(target_files[0])
-            )
+            self._logger.info("A target file to be converted: %s" % os.path.join(target_files[0]))
 
             # convert
             _, dest_ext = os.path.splitext(self._dest_pattern)
@@ -444,9 +430,7 @@ class ExcelConvert(FileBaseTransform):
             df.to_csv(dest_path, encoding=self._encoding)
 
         else:
-            valid = EssentialParameters(
-                self.__class__.__name__, [self._src_dir, self._src_pattern]
-            )
+            valid = EssentialParameters(self.__class__.__name__, [self._src_dir, self._src_pattern])
             valid()
 
             files = super().get_target_files(self._src_dir, self._src_pattern)
@@ -531,8 +515,7 @@ class FileDivide(FileBaseTransform):
                 index = index + 1
         else:
             valid = EssentialParameters(
-                self.__class__.__name__,
-                [self._src_dir, self._src_pattern, self._divide_rows],
+                self.__class__.__name__, [self._src_dir, self._src_pattern, self._divide_rows],
             )
             valid()
 
@@ -610,9 +593,7 @@ class FileRename(FileBaseTransform):
 
     def execute(self, *args):
         # essential parameters check
-        valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir, self._src_pattern]
-        )
+        valid = EssentialParameters(self.__class__.__name__, [self._src_dir, self._src_pattern])
         valid()
 
         files = super().get_target_files(self._src_dir, self._src_pattern)
@@ -673,11 +654,7 @@ class FileConvert(FileBaseTransform):
 
         for fi, fo in super().io_files(files):
             File().convert_encoding(
-                fi,
-                fo,
-                self._encoding_from,
-                self._encoding_to,
-                self._errors,
+                fi, fo, self._encoding_from, self._encoding_to, self._errors,
             )
 
             self._logger.info("Encoded file %s" % fi)
@@ -701,8 +678,7 @@ class FileArchive(FileBaseTransform):
 
     def execute(self, *args):
         valid = EssentialParameters(
-            self.__class__.__name__,
-            [self._src_dir, self._src_pattern, self._format],
+            self.__class__.__name__, [self._src_dir, self._src_pattern, self._format],
         )
         valid()
 
@@ -743,9 +719,7 @@ class FileArchive(FileBaseTransform):
                         )
                         zp.write(file, arcname=arcname)
             else:
-                raise InvalidParameter(
-                    "'format' must set one of the followings [tar, zip]"
-                )
+                raise InvalidParameter("'format' must set one of the followings [tar, zip]")
         else:
             valid = EssentialParameters(self.__class__.__name__, [self._dest_name])
             valid()
@@ -770,6 +744,4 @@ class FileArchive(FileBaseTransform):
                         )
                         zp.write(file, arcname=arcname)
             else:
-                raise InvalidParameter(
-                    "'format' must set one of the followings [tar, zip]"
-                )
+                raise InvalidParameter("'format' must set one of the followings [tar, zip]")

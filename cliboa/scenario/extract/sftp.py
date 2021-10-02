@@ -93,8 +93,7 @@ class SftpDownload(SftpExtract):
     def execute(self, *args):
         # essential parameters check
         valid = EssentialParameters(
-            self.__class__.__name__,
-            [self._host, self._user, self._src_dir, self._src_pattern],
+            self.__class__.__name__, [self._host, self._user, self._src_dir, self._src_pattern],
         )
         valid()
 
@@ -126,7 +125,8 @@ class SftpDownload(SftpExtract):
             self._port,
         )
         files = sftp.list_files(
-            self._src_dir, self._dest_dir,
+            self._src_dir,
+            self._dest_dir,
             re.compile(self._src_pattern),
             self._endfile_suffix,
             self._ignore_empty_file,
@@ -152,8 +152,7 @@ class SftpDelete(SftpExtract):
     def execute(self, *args):
         # essential parameters check
         valid = EssentialParameters(
-            self.__class__.__name__,
-            [self._host, self._user, self._src_dir, self._src_pattern],
+            self.__class__.__name__, [self._host, self._user, self._src_dir, self._src_pattern],
         )
         valid()
 
@@ -211,9 +210,7 @@ class SftpDownloadFileDelete(SftpExtract):
                 )
                 key_filepath = super().get_step_argument("key")
             else:
-                key_filepath = self._source_path_reader(
-                    super().get_step_argument("key")
-                )
+                key_filepath = self._source_path_reader(super().get_step_argument("key"))
 
             sftp = Sftp(
                 super().get_step_argument("host"),
@@ -232,7 +229,8 @@ class SftpDownloadFileDelete(SftpExtract):
 
                 if endfile_suffix:
                     sftp.remove_specific_file(
-                        super().get_step_argument("src_dir"), file + endfile_suffix)
+                        super().get_step_argument("src_dir"), file + endfile_suffix
+                    )
                     self._logger.info("%s is successfully deleted." % (file + endfile_suffix))
         else:
             self._logger.info("No files to delete.")

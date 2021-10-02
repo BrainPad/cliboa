@@ -40,9 +40,7 @@ class TestSftp(BaseCliboaTest):
             return
 
         with ExitStack() as stack:
-            mock_func = stack.enter_context(
-                patch("cliboa.util.sftp.remove_specific_file_func")
-            )
+            mock_func = stack.enter_context(patch("cliboa.util.sftp.remove_specific_file_func"))
             stack.enter_context(patch("paramiko.SSHClient.connect"))
             stack.enter_context(patch("paramiko.SSHClient.open_sftp"))
             sftp = Sftp(host="test", user="admin", password="dummypass")
@@ -55,9 +53,7 @@ class TestSftp(BaseCliboaTest):
             return
 
         with ExitStack() as stack:
-            mock_func = stack.enter_context(
-                patch("cliboa.util.sftp.get_specific_file_func")
-            )
+            mock_func = stack.enter_context(patch("cliboa.util.sftp.get_specific_file_func"))
             stack.enter_context(patch("paramiko.SSHClient.connect"))
             stack.enter_context(patch("paramiko.SSHClient.open_sftp"))
             sftp = Sftp(host="test", user="admin", password="dummypass")

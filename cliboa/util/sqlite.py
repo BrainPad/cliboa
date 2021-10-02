@@ -95,9 +95,7 @@ class SqliteAdapter(object):
         """
         self._con.commit()
 
-    def execute_many_insert(
-        self, tblname, column_def, insert_rows, is_replace_into=True
-    ):
+    def execute_many_insert(self, tblname, column_def, insert_rows, is_replace_into=True):
         """
         Execute many INSERT INTO SQL
 
@@ -114,11 +112,7 @@ class SqliteAdapter(object):
         columns = ",".join(self.escape_columns(column_def))
         holders = "?" * len(column_def)
         insert_sql = "REPLACE INTO" if is_replace_into else "INSERT INTO"
-        sql = insert_sql + " %s (%s) VALUES (%s)" % (
-            tblname,
-            columns,
-            ",".join(list(holders)),
-        )
+        sql = insert_sql + " %s (%s) VALUES (%s)" % (tblname, columns, ",".join(list(holders)),)
         self._logger.debug("sql: %s" % sql)
         values = []
         for row in insert_rows:
@@ -151,9 +145,7 @@ class SqliteAdapter(object):
             self.execute(sql % (tblname, " TEXT, ".join(columns) + " TEXT"))
         else:
             sql = "CREATE TABLE IF NOT EXISTS %s (%s, PRIMARY KEY(%s))"
-            self.execute(
-                sql % (tblname, " TEXT, ".join(columns) + " TEXT", primary_key)
-            )
+            self.execute(sql % (tblname, " TEXT, ".join(columns) + " TEXT", primary_key))
         self.commit()
 
     def drop_table(self, tblname):

@@ -16,18 +16,14 @@ class Gpg(object):
 
     def generate_key(self, dest_dir, name_real=None, name_email=None, passphrase=None):
         input_data = self._gpg.gen_key_input(
-            name_real=name_real,
-            name_email=name_email,
-            passphrase=passphrase,
+            name_real=name_real, name_email=name_email, passphrase=passphrase,
         )
 
         key = self._gpg.gen_key(input_data)
 
         public_keys = self._gpg.export_keys(key.fingerprint)
         private_keys = self._gpg.export_keys(
-            keyids=key.fingerprint,
-            secret=True,
-            passphrase=passphrase,
+            keyids=key.fingerprint, secret=True, passphrase=passphrase,
         )
 
         with open(os.path.join(dest_dir, "public"), "w") as f:
@@ -48,9 +44,7 @@ class Gpg(object):
         for key in keys:
             self._gpg.trust_keys(key["fingerprint"], trust_level)
 
-    def encrypt(
-        self, src_path, dest_path, recipients, passphrase=None, always_trust=False
-    ):
+    def encrypt(self, src_path, dest_path, recipients, passphrase=None, always_trust=False):
         with open(src_path, "rb") as f:
             status = self._gpg.encrypt_file(
                 file=f,
@@ -70,10 +64,7 @@ class Gpg(object):
     def decrypt(self, src_path, dest_path, passphrase=None, always_trust=False):
         with open(src_path, "rb") as f:
             status = self._gpg.decrypt_file(
-                file=f,
-                always_trust=always_trust,
-                passphrase=passphrase,
-                output=dest_path,
+                file=f, always_trust=always_trust, passphrase=passphrase, output=dest_path,
             )
 
         if status.ok is False:

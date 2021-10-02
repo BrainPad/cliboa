@@ -84,15 +84,11 @@ class CsvColumnExtract(FileBaseTransform):
         self._column_numbers = column_numbers
 
     def execute(self, *args):
-        valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir, self._src_pattern]
-        )
+        valid = EssentialParameters(self.__class__.__name__, [self._src_dir, self._src_pattern])
         valid()
 
         if not self._columns and not self._column_numbers:
-            raise InvalidParameter(
-                "Specifying either 'column' or 'column_numbers' is essential."
-            )
+            raise InvalidParameter("Specifying either 'column' or 'column_numbers' is essential.")
         if self._columns and self._column_numbers:
             raise InvalidParameter("Cannot specify both 'column' and 'column_numbers'.")
 
@@ -134,8 +130,7 @@ class CsvColumnConcat(FileBaseTransform):
 
     def execute(self, *args):
         valid = EssentialParameters(
-            self.__class__.__name__,
-            [self._src_dir, self._src_pattern, self._dest_column_name],
+            self.__class__.__name__, [self._src_dir, self._src_pattern, self._dest_column_name],
         )
         valid()
 
@@ -189,9 +184,7 @@ class ColumnLengthAdjust(FileBaseTransform):
                 raise Exception("Input file must be only one.")
             self._logger.info("Files found %s" % files)
 
-            with codecs.open(
-                files[0], mode="r", encoding=self._encoding
-            ) as fi, codecs.open(
+            with codecs.open(files[0], mode="r", encoding=self._encoding) as fi, codecs.open(
                 self._dest_path, mode="w", encoding=self._encoding
             ) as fo:
                 reader = csv.DictReader(fi)
@@ -259,13 +252,11 @@ class CsvMerge(FileBaseTransform):
         target2_files = File().get_target_files(self._src_dir, self._src2_pattern)
         if len(target1_files) == 0:
             raise InvalidCount(
-                "An input file %s does not exist."
-                % os.path.join(self._src_dir, self._src1_pattern)
+                "An input file %s does not exist." % os.path.join(self._src_dir, self._src1_pattern)
             )
         elif len(target2_files) == 0:
             raise InvalidCount(
-                "An input file %s does not exist."
-                % os.path.join(self._src_dir, self._src2_pattern)
+                "An input file %s does not exist." % os.path.join(self._src_dir, self._src2_pattern)
             )
         elif len(target1_files) > 1:
             self._logger.error("Hit target files %s" % target1_files)
@@ -276,14 +267,10 @@ class CsvMerge(FileBaseTransform):
 
         self._logger.info("Merge %s and %s." % (target1_files[0], target2_files[0]))
         df1 = pandas.read_csv(
-            os.path.join(self._src_dir, target1_files[0]),
-            dtype=str,
-            encoding=self._encoding,
+            os.path.join(self._src_dir, target1_files[0]), dtype=str, encoding=self._encoding,
         )
         df2 = pandas.read_csv(
-            os.path.join(self._src_dir, target2_files[0]),
-            dtype=str,
-            encoding=self._encoding,
+            os.path.join(self._src_dir, target2_files[0]), dtype=str, encoding=self._encoding,
         )
         df = pandas.merge(df1, df2)
         if "Unnamed: 0" in df.index:
@@ -296,9 +283,7 @@ class CsvMerge(FileBaseTransform):
             dest_name = self._dest_name
 
         df.to_csv(
-            os.path.join(self._dest_dir, dest_name),
-            encoding=self._encoding,
-            index=False,
+            os.path.join(self._dest_dir, dest_name), encoding=self._encoding, index=False,
         )
 
 
@@ -316,9 +301,7 @@ class CsvConcat(FileBaseTransform):
 
     def execute(self, *args):
         # essential parameters check
-        valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir, self._dest_dir]
-        )
+        valid = EssentialParameters(self.__class__.__name__, [self._src_dir, self._dest_dir])
         valid()
 
         if self._dest_pattern:
@@ -335,9 +318,7 @@ class CsvConcat(FileBaseTransform):
                 "Specifying either 'src_pattern' or 'src_filenames' is essential."
             )
         if self._src_pattern and self._src_filenames:
-            raise InvalidParameter(
-                "Cannot specify both 'src_pattern' and 'src_filenames'."
-            )
+            raise InvalidParameter("Cannot specify both 'src_pattern' and 'src_filenames'.")
 
         if self._src_pattern:
             files = File().get_target_files(self._src_dir, self._src_pattern)
@@ -365,9 +346,7 @@ class CsvConcat(FileBaseTransform):
             dest_name = self._dest_name
 
         df1.to_csv(
-            os.path.join(self._dest_dir, dest_name),
-            encoding=self._encoding,
-            index=False,
+            os.path.join(self._dest_dir, dest_name), encoding=self._encoding, index=False,
         )
 
 
@@ -429,9 +408,7 @@ class CsvConvert(FileBaseTransform):
 
         for fi, fo in super().io_files(files, ext=self._after_format):
             with open(fi, mode="rt", encoding=self._before_enc) as i:
-                reader = csv.reader(
-                    i, delimiter=Csv.delimiter_convert(self._before_format)
-                )
+                reader = csv.reader(i, delimiter=Csv.delimiter_convert(self._before_format))
                 with open(fo, mode="wt", newline="", encoding=self._after_enc) as o:
                     writer = csv.writer(
                         o,
@@ -534,18 +511,16 @@ class CsvToJsonl(FileBaseTransform):
 
     def execute(self, *args):
         # essential parameters check
-        valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir, self._src_pattern]
-        )
+        valid = EssentialParameters(self.__class__.__name__, [self._src_dir, self._src_pattern])
         valid()
 
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self.check_file_existence(files)
 
         for fi, fo in super().io_files(files, ext="jsonl"):
-            with open(
-                fi, mode="r", encoding=self._encoding, newline=""
-            ) as i, jsonlines.open(fo, mode="w") as writer:
+            with open(fi, mode="r", encoding=self._encoding, newline="") as i, jsonlines.open(
+                fo, mode="w"
+            ) as writer:
                 reader = csv.DictReader(i)
                 for row in reader:
                     writer.write(row)

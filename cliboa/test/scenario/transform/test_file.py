@@ -32,7 +32,7 @@ from cliboa.scenario.transform.file import (
     FileConvert,
     FileDecompress,
     FileDivide,
-    FileRename
+    FileRename,
 )
 from cliboa.test import BaseCliboaTest
 from cliboa.util.exception import (
@@ -199,9 +199,7 @@ class TestFileTransformFunctions(TestFileTransform):
         with pytest.raises(InvalidParameter) as execinfo:
             for reader, writer in instance.io_writers(files, mode="s"):
                 pass
-        assert "Unknown mode. One of the following is allowed [t, b]" == str(
-            execinfo.value
-        )
+        assert "Unknown mode. One of the following is allowed [t, b]" == str(execinfo.value)
 
     def test_file_check_exist(self):
         instance = FileBaseTransform()
@@ -389,9 +387,7 @@ class TestFileCompress(TestFileTransform):
         assert os.path.exists(compressed_file_2)
 
         decompressed_file_1 = os.path.join(self._out_dir, "test1.txt")
-        with gzip.open(compressed_file_1, "rb") as i, open(
-            decompressed_file_1, "wb"
-        ) as o:
+        with gzip.open(compressed_file_1, "rb") as i, open(decompressed_file_1, "wb") as o:
             while True:
                 buf = i.read()
                 if buf == b"":
@@ -401,9 +397,7 @@ class TestFileCompress(TestFileTransform):
             assert "This is test 1" == f.read()
 
         decompressed_file_2 = os.path.join(self._out_dir, "test2.txt")
-        with gzip.open(compressed_file_2, "rb") as i, open(
-            decompressed_file_2, "wb"
-        ) as o:
+        with gzip.open(compressed_file_2, "rb") as i, open(decompressed_file_2, "wb") as o:
             while True:
                 buf = i.read()
                 if buf == b"":
@@ -429,9 +423,7 @@ class TestFileCompress(TestFileTransform):
         assert os.path.exists(compressed_file_2)
 
         decompressed_file_1 = os.path.join(self._out_dir, "test1.txt")
-        with bz2.open(compressed_file_1, mode="rb") as i, open(
-            decompressed_file_1, mode="wb"
-        ) as o:
+        with bz2.open(compressed_file_1, mode="rb") as i, open(decompressed_file_1, mode="wb") as o:
             while True:
                 buf = i.read()
                 if buf == b"":
@@ -441,9 +433,7 @@ class TestFileCompress(TestFileTransform):
             assert "This is test 1" == f.read()
 
         decompressed_file_2 = os.path.join(self._out_dir, "test2.txt")
-        with bz2.open(compressed_file_2, mode="rb") as i, open(
-            decompressed_file_2, mode="wb"
-        ) as o:
+        with bz2.open(compressed_file_2, mode="rb") as i, open(decompressed_file_2, mode="wb") as o:
             while True:
                 buf = i.read()
                 if buf == b"":

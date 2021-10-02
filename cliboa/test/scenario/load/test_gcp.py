@@ -18,7 +18,6 @@ from cliboa.util.gcp import BigQuery
 
 
 class TestBigQueryCopy(object):
-
     @patch.object(BigQueryCopy, "_source_path_reader", return_value="/awesome-path/key.json")
     @patch.object(BigQuery, "get_bigquery_client")
     def test_table_copy(self, m_get_bigquery_client, mock_path_reader):
@@ -37,12 +36,12 @@ class TestBigQueryCopy(object):
 
         # Tests
         m_get_bigquery_client.assert_called_with(
-            credentials='/awesome-path/key.json',
-            location='asia-northeast1',
-            project='awesome-project'
+            credentials="/awesome-path/key.json",
+            location="asia-northeast1",
+            project="awesome-project",
         )
 
         gbq_client.copy_table.assert_called_with(
-            'awesome-project.awesome_dataset.awesome_table',
-            'awesome-project.copy_awesome_dataset.copy_awesome_table'
+            "awesome-project.awesome_dataset.awesome_table",
+            "awesome-project.copy_awesome_dataset.copy_awesome_table",
         )

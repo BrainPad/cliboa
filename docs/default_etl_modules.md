@@ -45,7 +45,6 @@ Can use ETL modules as below by default.
 |[AzureBlobUpload](/docs/modules/azureblob_upload.md)|Upload files to Azure Blob Storage|
 |[CsvWrite](/docs/modules/csv_write.md)|Write contents read by 'io: input' to a csv file|
 |[BigQueryWrite](/docs/modules/bigquery_write.md)|Read content from a file and insert it into a table of bigquery|
-|[CsvReadSqliteCreate](/docs/modules/csv_read_sqlite_create.md)|Read content from a file and insert it into a table of sqlite|
 |[FirestoreDocumentCreate](/docs/modules/firestore_document_create.md)|Create document|
 |[GcsUpload](/docs/modules/gcs_upload.md)|Upload files to GCS|
 |[SftpUpload](/docs/modules/sftp_upload.md)|Upload a file via sftp|

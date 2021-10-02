@@ -93,9 +93,7 @@ class HttpDownloadViaBasicAuth(HttpDownload):
         self._password = password
 
     def execute(self, *args):
-        valid = EssentialParameters(
-            self.__class__.__name__, [self._user, self._password]
-        )
+        valid = EssentialParameters(self.__class__.__name__, [self._user, self._password])
         valid()
 
         super().execute()

@@ -122,12 +122,7 @@ class BigQueryRead(BaseBigQuery):
         if self._dataset and self._tblname:
             table_ref = gbq_client.dataset(self._dataset).table(self._tblname)
         elif self._dataset and not self._tblname:
-            tmp_tbl = (
-                "tmp_"
-                + StringUtil().random_str(self._RANDOM_STR_LENGTH)
-                + "_"
-                + ymd_hms
-            )
+            tmp_tbl = "tmp_" + StringUtil().random_str(self._RANDOM_STR_LENGTH) + "_" + ymd_hms
             table_ref = gbq_client.dataset(self._dataset).table(tmp_tbl)
         gcs_client = Gcs.get_gcs_client(key_filepath)
         gcs_bucket = gcs_client.bucket(self._bucket)
@@ -146,12 +141,7 @@ class BigQueryRead(BaseBigQuery):
         comp_format_and_ext = {"GZIP": ".gz"}
         comp_ext = comp_format_and_ext.get(str(BigQuery.get_compression_type()))
         if self._filename:
-            dest_gcs = "gs://%s/%s/%s%s" % (
-                self._bucket,
-                prefix,
-                self._filename,
-                comp_ext,
-            )
+            dest_gcs = "gs://%s/%s/%s%s" % (self._bucket, prefix, self._filename, comp_ext,)
         else:
             dest_gcs = "gs://%s/%s/*%s%s" % (self._bucket, prefix, ext, comp_ext)
 
@@ -231,16 +221,12 @@ class GcsDownload(BaseGcs):
         client = Gcs.get_gcs_client(key_filepath)
         bucket = client.bucket(self._bucket)
         dl_files = []
-        for blob in client.list_blobs(
-            bucket, prefix=self._prefix, delimiter=self._delimiter
-        ):
+        for blob in client.list_blobs(bucket, prefix=self._prefix, delimiter=self._delimiter):
             r = re.compile(self._src_pattern)
             if not r.fullmatch(blob.name):
                 continue
             dl_files.append(blob.name)
-            blob.download_to_filename(
-                os.path.join(self._dest_dir, os.path.basename(blob.name))
-            )
+            blob.download_to_filename(os.path.join(self._dest_dir, os.path.basename(blob.name)))
 
         ObjectStore.put(self._step, dl_files)
 

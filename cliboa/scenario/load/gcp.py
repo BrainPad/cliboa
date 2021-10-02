@@ -165,9 +165,7 @@ class BigQueryWrite(BaseBigQuery, FileWrite):
         for c in self._columns:
             v_list = [d.get(c) for d in insert_rows]
             if not v_list:
-                raise InvalidFormat(
-                    "Specified column %s does not exist in an input file." % c
-                )
+                raise InvalidFormat("Specified column %s does not exist in an input file." % c)
             insert_data[c] = v_list
         return insert_data
 
@@ -195,9 +193,7 @@ class GcsUpload(BaseGcs):
     def execute(self, *args):
         super().execute()
 
-        valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir, self._src_pattern]
-        )
+        valid = EssentialParameters(self.__class__.__name__, [self._src_dir, self._src_pattern])
         valid()
 
         if isinstance(self._credentials, str):
@@ -244,8 +240,7 @@ class FirestoreDocumentCreate(BaseFirestore):
         super().execute()
 
         valid = EssentialParameters(
-            self.__class__.__name__,
-            [self._collection, self._src_dir, self._src_pattern],
+            self.__class__.__name__, [self._collection, self._src_dir, self._src_pattern],
         )
         valid()
 
@@ -296,13 +291,7 @@ class BigQueryCopy(BaseBigQuery):
         super().execute()
         valid = EssentialParameters(
             self.__class__.__name__,
-            [
-                self._dataset,
-                self._tblname,
-                self._location,
-                self._dest_dataset,
-                self._dest_tblname,
-            ],
+            [self._dataset, self._tblname, self._location, self._dest_dataset, self._dest_tblname],
         )
         valid()
 
@@ -310,9 +299,7 @@ class BigQueryCopy(BaseBigQuery):
         key_filepath = self._source_path_reader(self._credentials)
 
         # Define Source Table and Destination Table
-        source_table_id = "{}.{}.{}".format(
-            self._project_id, self._dataset, self._tblname
-        )
+        source_table_id = "{}.{}.{}".format(self._project_id, self._dataset, self._tblname)
         destination_table_id = "{}.{}.{}".format(
             self._project_id, self._dest_dataset, self._dest_tblname
         )

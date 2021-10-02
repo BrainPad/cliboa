@@ -61,9 +61,7 @@ class BaseBigQuery(BaseGcp):
 
     def execute(self, *args):
         super().execute()
-        valid = EssentialParameters(
-            self.__class__.__name__, [self._location, self._dataset]
-        )
+        valid = EssentialParameters(self.__class__.__name__, [self._location, self._dataset])
         valid()
 
 

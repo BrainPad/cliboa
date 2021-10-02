@@ -56,8 +56,7 @@ class FormAuth(object):
 
     def execute(self, *args):
         valid = EssentialParameters(
-            self.__class__.__name__,
-            [self._form_url, self._form_id, self._form_password],
+            self.__class__.__name__, [self._form_url, self._form_id, self._form_password],
         )
         valid()
 
@@ -88,9 +87,7 @@ class Download(Http):
 
     VALID_HTTP_STATUS = 200
 
-    def __init__(
-        self, url, dest_path, timeout, retry_cnt=2, retry_intvl_sec=10, **params
-    ):
+    def __init__(self, url, dest_path, timeout, retry_cnt=2, retry_intvl_sec=10, **params):
         super().__init__(url, dest_path, timeout, retry_cnt, retry_intvl_sec, params)
 
     def execute(self):
@@ -115,6 +112,4 @@ class Download(Http):
             sleep(self._retry_intvl_sec)
 
         if res is not None:
-            raise HTTPError(
-                "Http request failed. HTTP Status code: %s" % res.status_code
-            )
+            raise HTTPError("Http request failed. HTTP Status code: %s" % res.status_code)

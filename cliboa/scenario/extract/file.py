@@ -41,7 +41,5 @@ class FileRead(BaseStep):
 
     def execute(self, *args):
         # essential parameters check
-        valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir, self._src_pattern]
-        )
+        valid = EssentialParameters(self.__class__.__name__, [self._src_dir, self._src_pattern])
         valid()
