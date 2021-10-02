@@ -19,7 +19,11 @@ from unittest.mock import patch
 
 from cliboa.client import CommandArgumentParser
 from cliboa.conf import env
-from cliboa.core.listener import ScenarioStatusListener, StepStatusListener, StepListener
+from cliboa.core.listener import (
+    ScenarioStatusListener,
+    StepStatusListener,
+    StepListener,
+)
 from cliboa.core.strategy import SingleProcExecutor, StepExecutor
 from cliboa.core.worker import ScenarioWorker
 from cliboa.scenario.sample_step import SampleCustomStep

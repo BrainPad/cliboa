@@ -32,7 +32,9 @@ class TestExecuteShellScript(BaseCliboaTest):
 
     def test_inline_script(self):
         instance = ExecuteShellScript()
-        Helper.set_property(instance, "command", {"content": "touch foo.csv && touch test.csv"})
+        Helper.set_property(
+            instance, "command", {"content": "touch foo.csv && touch test.csv"}
+        )
         Helper.set_property(instance, "work_dir", self._data_dir)
         instance.execute()
 
