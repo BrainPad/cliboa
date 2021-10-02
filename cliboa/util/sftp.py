@@ -68,9 +68,7 @@ class Sftp(object):
         self._port = 22 if port is None else port
         self._logger = logging.getLogger(__name__)
 
-    def list_files(
-        self, dir, dest, pattern, endfile_suffix=None, ignore_empty_file=False
-    ):
+    def list_files(self, dir, dest, pattern, endfile_suffix=None, ignore_empty_file=False):
         """
         Fetch all the files in specified directory
 

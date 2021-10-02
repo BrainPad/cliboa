@@ -299,9 +299,7 @@ class BigQueryCopy(BaseBigQuery):
         key_filepath = self._source_path_reader(self._credentials)
 
         # Define Source Table and Destination Table
-        source_table_id = "{}.{}.{}".format(
-            self._project_id, self._dataset, self._tblname
-        )
+        source_table_id = "{}.{}.{}".format(self._project_id, self._dataset, self._tblname)
         destination_table_id = "{}.{}.{}".format(
             self._project_id, self._dest_dataset, self._dest_tblname
         )
