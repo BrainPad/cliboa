@@ -12,7 +12,6 @@
 # all copies or substantial portions of the Software.
 #
 
-import codecs
 import csv
 import jsonlines
 import os
@@ -175,44 +174,20 @@ class ColumnLengthAdjust(FileBaseTransform):
         )
         valid()
 
-        # TODO All the statements inside 'if' block will be deleted in the near future.
-        if self._dest_path:
-            self._logger.warning("'dest_path' will be unavailable in the near future.")
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+        self.check_file_existence(files)
+        for fi, fo in super().io_writers(files, encoding=self._encoding):
+            reader = csv.DictReader(fi)
+            writer = csv.DictWriter(fo, reader.fieldnames)
+            writer.writeheader()
 
-            files = super().get_target_files(self._src_dir, self._src_pattern)
-            if len(files) != 1:
-                raise Exception("Input file must be only one.")
-            self._logger.info("Files found %s" % files)
-
-            with codecs.open(files[0], mode="r", encoding=self._encoding) as fi, codecs.open(
-                self._dest_path, mode="w", encoding=self._encoding
-            ) as fo:
-                reader = csv.DictReader(fi)
-                writer = csv.DictWriter(fo, reader.fieldnames)
-                writer.writeheader()
-
-                for row in reader:
-                    for k, v in self._adjust.items():
-                        f1 = row.get(k)
-                        if len(f1) > v:
-                            row[k] = f1[:v]
-                    writer.writerow(row)
-                fo.flush()
-        else:
-            files = super().get_target_files(self._src_dir, self._src_pattern)
-            self.check_file_existence(files)
-            for fi, fo in super().io_writers(files, encoding=self._encoding):
-                reader = csv.DictReader(fi)
-                writer = csv.DictWriter(fo, reader.fieldnames)
-                writer.writeheader()
-
-                for row in reader:
-                    for k, v in self._adjust.items():
-                        f1 = row.get(k)
-                        if len(f1) > v:
-                            row[k] = f1[:v]
-                    writer.writerow(row)
-                fo.flush()
+            for row in reader:
+                for k, v in self._adjust.items():
+                    f1 = row.get(k)
+                    if len(f1) > v:
+                        row[k] = f1[:v]
+                writer.writerow(row)
+            fo.flush()
 
 
 class CsvMerge(FileBaseTransform):
