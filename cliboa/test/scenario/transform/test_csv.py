@@ -497,137 +497,6 @@ class TestCsvMerge(TestCsvTransform):
 
 
 class TestCsvConcat(TestCsvTransform):
-    # TODO Old version test.
-    def test_execute_ok1_old(self):
-        try:
-            os.makedirs(self._data_dir, exist_ok=True)
-
-            # create test file
-            csv_list1 = [["key", "data"], ["c1", "001"], ["c2", "0.01"], ["c3", "spam"]]
-            with open(os.path.join(self._data_dir, "test1.csv"), "w") as t1:
-                writer = csv.writer(t1)
-                writer.writerows(csv_list1)
-
-            csv_list2 = [["key", "data"], ["d1", "1,23"], ["d2", "ABC"], ["d3", "spam"]]
-            with open(os.path.join(self._data_dir, "test2.csv"), "w") as t2:
-                writer = csv.writer(t2)
-                writer.writerows(csv_list2)
-
-            csv_list3 = [["key", "data"], ["c1", "000"], ["c2", "ABC"], ["c3", "spam"]]
-            with open(os.path.join(self._data_dir, "test3.csv"), "w") as t3:
-                writer = csv.writer(t3)
-                writer.writerows(csv_list3)
-
-            # set the essential attributes
-            instance = CsvConcat()
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-            Helper.set_property(instance, "src_dir", self._data_dir)
-            Helper.set_property(instance, "src_filenames", ["test1.csv", "test2.csv", "test3.csv"])
-            Helper.set_property(instance, "dest_dir", self._data_dir)
-            Helper.set_property(instance, "dest_pattern", "test.csv")
-            instance.execute()
-
-            with open(os.path.join(self._data_dir, "test.csv")) as t:
-                reader = csv.reader(t)
-                concatenated_list = [row for row in reader]
-        finally:
-            shutil.rmtree(self._data_dir)
-        assert concatenated_list == [
-            ["key", "data"],
-            ["c1", "001"],
-            ["c2", "0.01"],
-            ["c3", "spam"],
-            ["d1", "1,23"],
-            ["d2", "ABC"],
-            ["d3", "spam"],
-            ["c1", "000"],
-            ["c2", "ABC"],
-            ["c3", "spam"],
-        ]
-
-    # TODO Old version test.
-    def test_execute_ok2_old(self):
-        try:
-            os.makedirs(self._data_dir, exist_ok=True)
-
-            # create test file
-            csv_list1 = [["key", "data"], ["c1", "spam"], ["c2", "spam"]]
-            with open(os.path.join(self._data_dir, "test1.csv"), "w") as t1:
-                writer = csv.writer(t1)
-                writer.writerows(csv_list1)
-
-            csv_list2 = [["key", "data"], ["c1", "spam"], ["c2", "spam"]]
-            with open(os.path.join(self._data_dir, "test2.csv"), "w") as t2:
-                writer = csv.writer(t2)
-                writer.writerows(csv_list2)
-
-            # set the essential attributes
-            instance = CsvConcat()
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-            Helper.set_property(instance, "src_dir", self._data_dir)
-            Helper.set_property(instance, "src_pattern", r"test.*\.csv")
-            Helper.set_property(instance, "dest_dir", self._data_dir)
-            Helper.set_property(instance, "dest_pattern", "test.csv")
-            instance.execute()
-
-            with open(os.path.join(self._data_dir, "test.csv")) as t:
-                reader = csv.reader(t)
-                concatenated_list = [row for row in reader]
-        finally:
-            shutil.rmtree(self._data_dir)
-        assert concatenated_list == [
-            ["key", "data"],
-            ["c1", "spam"],
-            ["c2", "spam"],
-            ["c1", "spam"],
-            ["c2", "spam"],
-        ]
-
-    # TODO Old version test.
-    def test_execute_ok3_old3(self):
-        try:
-            os.makedirs(self._data_dir, exist_ok=True)
-
-            # create test file
-            csv_list1 = [["key", "data"], ["c1", "spam"], ["c2", "spam"]]
-            with open(os.path.join(self._data_dir, "test1.csv"), "w") as t1:
-                writer = csv.writer(t1)
-                writer.writerows(csv_list1)
-
-            # set the essential attributes
-            instance = CsvConcat()
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-            Helper.set_property(instance, "src_dir", self._data_dir)
-            Helper.set_property(instance, "src_pattern", r"test.*\.csv")
-            Helper.set_property(instance, "dest_dir", self._data_dir)
-            Helper.set_property(instance, "dest_pattern", "test.csv")
-            instance.execute()
-
-            with open(os.path.join(self._data_dir, "test.csv")) as t:
-                reader = csv.reader(t)
-                concatenated_list = [row for row in reader]
-        finally:
-            shutil.rmtree(self._data_dir)
-        assert concatenated_list == [
-            ["key", "data"],
-            ["c1", "spam"],
-            ["c2", "spam"],
-        ]
-
-    # TODO Old version test.
-    def test_excute_ng_multiple_target_old(self):
-        with pytest.raises(InvalidParameter) as execinfo:
-            # set the essential attributes
-            instance = CsvConcat()
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-            Helper.set_property(instance, "src_dir", self._data_dir)
-            Helper.set_property(instance, "src_pattern", r"test.*\.csv")
-            Helper.set_property(instance, "src_filenames", ["test1.csv", "test2.csv"])
-            Helper.set_property(instance, "dest_dir", self._data_dir)
-            Helper.set_property(instance, "dest_pattern", "test.csv")
-            instance.execute()
-        assert "Cannot specify both 'src_pattern' and 'src_filenames'." in str(execinfo.value)
-
     def test_execute_ok1(self):
         # create test file
         csv_list1 = [["key", "data"], ["c1", "001"], ["c2", "0.01"], ["c3", "spam"]]
@@ -703,7 +572,7 @@ class TestCsvConcat(TestCsvTransform):
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test.*\.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
-        Helper.set_property(instance, "dest_pattern", "test.csv")
+        Helper.set_property(instance, "dest_name", "test.csv")
         instance.execute()
 
         with open(os.path.join(self._data_dir, "test.csv")) as t:
