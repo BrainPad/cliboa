@@ -210,18 +210,15 @@ class CsvMerge(FileBaseTransform):
         # essential parameters check
         valid = EssentialParameters(
             self.__class__.__name__,
-            [self._src_dir, self._src1_pattern, self._src2_pattern, self._dest_dir],
+            [
+                self._src_dir,
+                self._src1_pattern,
+                self._src2_pattern,
+                self._dest_dir,
+                self._dest_name,
+            ],
         )
         valid()
-
-        if self._dest_pattern:
-            self._logger.warning(
-                "'dest_pattern' will be unavailable in the near future."
-                + "'dest_pattern' will change to 'dest_name'."
-            )
-        else:
-            valid = EssentialParameters(self.__class__.__name__, [self._dest_name])
-            valid()
 
         target1_files = File().get_target_files(self._src_dir, self._src1_pattern)
         target2_files = File().get_target_files(self._src_dir, self._src2_pattern)
@@ -251,11 +248,7 @@ class CsvMerge(FileBaseTransform):
         if "Unnamed: 0" in df.index:
             del df["Unnamed: 0"]
 
-        # TODO All the statements inside 'if' block will be deleted in the near future.
-        if self._dest_pattern:
-            dest_name = self._dest_pattern
-        else:
-            dest_name = self._dest_name
+        dest_name = self._dest_name
 
         df.to_csv(
             os.path.join(self._dest_dir, dest_name), encoding=self._encoding, index=False,
@@ -276,17 +269,10 @@ class CsvConcat(FileBaseTransform):
 
     def execute(self, *args):
         # essential parameters check
-        valid = EssentialParameters(self.__class__.__name__, [self._src_dir, self._dest_dir])
+        valid = EssentialParameters(
+            self.__class__.__name__, [self._src_dir, self._dest_dir, self._dest_name]
+        )
         valid()
-
-        if self._dest_pattern:
-            self._logger.warning(
-                "'dest_pattern' will be unavailable in the near future."
-                + "'dest_pattern' will change to 'dest_name'."
-            )
-        else:
-            valid = EssentialParameters(self.__class__.__name__, [self._dest_name])
-            valid()
 
         if not self._src_pattern and not self._src_filenames:
             raise InvalidParameter(
@@ -314,11 +300,7 @@ class CsvConcat(FileBaseTransform):
             df2 = pandas.read_csv(file, dtype=str, encoding=self._encoding,)
             df1 = pandas.concat([df1, df2])
 
-        # TODO All the statements inside 'if' block will be deleted in the near future.
-        if self._dest_pattern:
-            dest_name = self._dest_pattern
-        else:
-            dest_name = self._dest_name
+        dest_name = self._dest_name
 
         df1.to_csv(
             os.path.join(self._dest_dir, dest_name), encoding=self._encoding, index=False,
