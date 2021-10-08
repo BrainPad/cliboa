@@ -11,7 +11,6 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import ast
 import csv
 import json
 import os
@@ -21,7 +20,7 @@ import pandas
 from cliboa.core.validator import EssentialParameters
 from cliboa.scenario.gcp import BaseBigQuery, BaseFirestore, BaseGcs
 from cliboa.scenario.load.file import FileWrite
-from cliboa.util.exception import FileNotFound, InvalidFileCount, InvalidFormat
+from cliboa.util.exception import FileNotFound, InvalidFormat
 from cliboa.util.gcp import BigQuery, Firestore, Gcs, ServiceAccount
 
 
@@ -166,184 +165,9 @@ class BigQueryWrite(BaseBigQuery, FileWrite):
         for c in self._columns:
             v_list = [d.get(c) for d in insert_rows]
             if not v_list:
-                raise InvalidFormat(
-                    "Specified column %s does not exist in an input file." % c
-                )
+                raise InvalidFormat("Specified column %s does not exist in an input file." % c)
             insert_data[c] = v_list
         return insert_data
-
-
-class BigQueryCreate(BaseBigQuery):
-    """
-    @deprecated
-    Please Use BigQueryWrite instead.
-
-    Insert data into BigQuery table
-    """
-
-    # default bulk line count to change to dataframe object
-    BULK_LINE_CNT = 10000
-
-    # BigQuery insert mode
-    REPLACE = "replace"
-    APPEND = "append"
-
-    def __init__(self):
-        super().__init__()
-        self._table_schema = None
-        self._replace = True
-
-    def table_schema(self, table_schema):
-        self._table_schema = table_schema
-
-    def replace(self, replace):
-        self._replace = replace
-
-    def execute(self, *args):
-        self._logger.warning("Deprecated. Please Use BigQueryWrite instead.")
-
-        super().execute()
-
-        param_valid = EssentialParameters(self.__class__.__name__, [self._table_schema])
-        param_valid()
-
-        cache_list = []
-        inserts = False
-        # initial if_exists
-        if_exists = self.REPLACE if self._replace is True else self.APPEND
-
-        if isinstance(self._credentials, str):
-            self._logger.warning(
-                (
-                    "DeprecationWarning: "
-                    "In the near future, "
-                    "the `credentials` will be changed to accept only dictionary types. "
-                )
-            )
-            key_filepath = self._credentials
-        else:
-            key_filepath = self._source_path_reader(self._credentials)
-
-        with open(self._s.cache_file, "r", encoding="utf-8") as f:
-            for i, l_str in enumerate(f):
-                l_dict = ast.literal_eval(l_str)
-                cache_list.append(l_dict)
-                if len(cache_list) == self.BULK_LINE_CNT:
-                    df = pandas.DataFrame(self._create_insert_data(cache_list))
-                    if inserts is True:
-                        # if_exists after the first insert execution
-                        if_exists = self.APPEND
-                    dest_tbl = self._dataset + "." + self._tblname
-                    self._logger.info(
-                        "Start insert %s rows to %s" % (len(cache_list), dest_tbl)
-                    )
-                    df.to_gbq(
-                        dest_tbl,
-                        project_id=self._project_id,
-                        if_exists=if_exists,
-                        table_schema=self._table_schema,
-                        location=self._location,
-                        credentials=ServiceAccount.auth(key_filepath),
-                    )
-                    cache_list.clear()
-                    inserts = True
-            if len(cache_list) > 0:
-                df = pandas.DataFrame(self._create_insert_data(cache_list))
-                if inserts is True:
-                    # if_exists after the first insert execution
-                    if_exists = self.APPEND
-                dest_tbl = self._dataset + "." + self._tblname
-                self._logger.info(
-                    "Start insert %s rows to %s" % (len(cache_list), dest_tbl)
-                )
-                df.to_gbq(
-                    dest_tbl,
-                    project_id=self._project_id,
-                    if_exists=if_exists,
-                    table_schema=self._table_schema,
-                    location=self._location,
-                    credentials=ServiceAccount.auth(key_filepath),
-                )
-        self._s.remove()
-
-    def _create_insert_data(self, cache_list):
-        """
-        Create insert data like the below.
-
-        insert_data = {
-            "column1": [1, 2],
-            "column2": ["spam", "spam"],
-            ...
-        }
-
-        Args
-            cache_list: dictionary list of input cache
-        """
-        insert_data = {}
-        columns = [name_and_type["name"] for name_and_type in self._table_schema]
-        for c in columns:
-            v_list = [d.get(c) for d in cache_list]
-            if not v_list:
-                raise InvalidFormat(
-                    "Specified column %s does not exist in an input file." % c
-                )
-            insert_data[c] = v_list
-        return insert_data
-
-
-class GcsFileUpload(BaseGcs):
-    """
-    @deprecated
-    Please Use GcsUpload instead.
-
-    Upload local files to GCS
-    """
-
-    def __init__(self):
-        super().__init__()
-        self._src_dir = None
-        self._src_pattern = None
-        self._dest_dir = ""
-
-    def src_dir(self, src_dir):
-        self._src_dir = src_dir
-
-    def src_pattern(self, src_pattern):
-        self._src_pattern = src_pattern
-
-    def dest_dir(self, dest_dir):
-        self._dest_dir = dest_dir
-
-    def execute(self, *args):
-        self._logger.warning("Deprecated. Please Use GcsUpload instead.")
-
-        super().execute()
-
-        valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir, self._src_pattern]
-        )
-        valid()
-
-        if isinstance(self._credentials, str):
-            self._logger.warning(
-                (
-                    "DeprecationWarning: "
-                    "In the near future, "
-                    "the `credentials` will be changed to accept only dictionary types. "
-                )
-            )
-            key_filepath = self._credentials
-        else:
-            key_filepath = self._source_path_reader(self._credentials)
-        gcs_client = Gcs.get_gcs_client(key_filepath)
-        bucket = gcs_client.bucket(self._bucket)
-        files = super().get_target_files(self._src_dir, self._src_pattern)
-        self._logger.info("Upload files %s" % files)
-        for file in files:
-            self._logger.info("Start upload %s" % file)
-            blob = bucket.blob(os.path.join(self._dest_dir, os.path.basename(file)))
-            blob.upload_from_filename(file)
-            self._logger.info("Finish upload %s" % file)
 
 
 class GcsUpload(BaseGcs):
@@ -369,9 +193,7 @@ class GcsUpload(BaseGcs):
     def execute(self, *args):
         super().execute()
 
-        valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir, self._src_pattern]
-        )
+        valid = EssentialParameters(self.__class__.__name__, [self._src_dir, self._src_pattern])
         valid()
 
         if isinstance(self._credentials, str):
@@ -398,129 +220,6 @@ class GcsUpload(BaseGcs):
             self._logger.info("Finish upload %s" % file)
 
 
-class CsvReadBigQueryCreate(BaseBigQuery, FileWrite):
-    """
-    deprecated
-    Please Use GcsUpload instead.
-
-    Read csv and Insert data into BigQuery table
-    """
-
-    # default bulk line count to change to dataframe object
-    BULK_LINE_CNT = 10000
-
-    # BigQuery insert mode
-    REPLACE = "replace"
-    APPEND = "append"
-
-    def __init__(self):
-        super().__init__()
-        self._table_schema = None
-        self._replace = True
-        self._columns = []
-
-    def table_schema(self, table_schema):
-        self._table_schema = table_schema
-
-    def replace(self, replace):
-        self._replace = replace
-
-    def execute(self, *args):
-        self._logger.warning("Deprecated. Please Use BigQueryWrite instead.")
-
-        BaseBigQuery.execute(self)
-
-        param_valid = EssentialParameters(self.__class__.__name__, [self._table_schema])
-        param_valid()
-
-        files = super().get_target_files(self._src_dir, self._src_pattern)
-        if len(files) > 1:
-            raise InvalidFileCount("Input file must be only one.")
-        if len(files) == 0:
-            raise FileNotFound("The specified csv file not found.")
-
-        insert_rows = []
-        is_inserted = False
-        # initial if_exists
-        if_exists = self.REPLACE if self._replace is True else self.APPEND
-        self._columns = [name_and_type["name"] for name_and_type in self._table_schema]
-        with open(files[0], "r", encoding=self._encoding) as f:
-            reader = csv.DictReader(f, delimiter=",")
-            for r in reader:
-                # extract only the specified columns
-                row_dict = {}
-                for c in self._columns:
-                    if not r.get(c):
-                        continue
-                    row_dict[c] = r.get(c)
-                insert_rows.append(row_dict)
-
-                if len(insert_rows) == self.BULK_LINE_CNT:
-                    self._exec_insert(insert_rows, is_inserted, if_exists)
-                    insert_rows.clear()
-                    is_inserted = True
-            if len(insert_rows) > 0:
-                self._exec_insert(insert_rows, is_inserted, if_exists)
-
-    def _exec_insert(self, insert_rows, is_inserted, if_exists):
-        """
-        Execute insert into a BigQuery table
-        Args:
-            insert_rows: rows to insert
-            is_inserted: if the data is already inserted or not
-            if_exists: replace or append
-        """
-        df = pandas.DataFrame(self._format_insert_data(insert_rows))
-        if is_inserted is True:
-            # if_exists after the first insert execution
-            if_exists = self.APPEND
-        dest_tbl = self._dataset + "." + self._tblname
-        self._logger.info("Start insert %s rows to %s" % (len(insert_rows), dest_tbl))
-        if isinstance(self._credentials, str):
-            self._logger.warning(
-                (
-                    "DeprecationWarning: "
-                    "In the near future, "
-                    "the `credentials` will be changed to accept only dictionary types. "
-                )
-            )
-            key_filepath = self._credentials
-        else:
-            key_filepath = self._source_path_reader(self._credentials)
-
-        df.to_gbq(
-            dest_tbl,
-            project_id=self._project_id,
-            if_exists=if_exists,
-            table_schema=self._table_schema,
-            location=self._location,
-            credentials=ServiceAccount.auth(key_filepath),
-        )
-
-    def _format_insert_data(self, insert_rows):
-        """
-        Format insert data to pass DataFrame as the below.
-
-        insert_data = {
-            "column1": [1, 2],
-            "column2": ["spam", "spam"],
-            ...
-        }
-
-        Args
-            insert_rows: dictionary list of input cache
-        """
-        insert_data = {}
-        for c in self._columns:
-            v_list = [d.get(c) for d in insert_rows]
-            if not v_list:
-                raise InvalidFormat(
-                    "Specified column %s does not exist in an input file." % c
-                )
-            insert_data[c] = v_list
-        return insert_data
-
-
 class FirestoreDocumentCreate(BaseFirestore):
     """
     Create document on FIrestore
@@ -541,8 +240,7 @@ class FirestoreDocumentCreate(BaseFirestore):
         super().execute()
 
         valid = EssentialParameters(
-            self.__class__.__name__,
-            [self._collection, self._src_dir, self._src_pattern],
+            self.__class__.__name__, [self._collection, self._src_dir, self._src_pattern],
         )
         valid()
 
@@ -593,13 +291,7 @@ class BigQueryCopy(BaseBigQuery):
         super().execute()
         valid = EssentialParameters(
             self.__class__.__name__,
-            [
-                self._dataset,
-                self._tblname,
-                self._location,
-                self._dest_dataset,
-                self._dest_tblname,
-            ],
+            [self._dataset, self._tblname, self._location, self._dest_dataset, self._dest_tblname],
         )
         valid()
 
@@ -607,9 +299,7 @@ class BigQueryCopy(BaseBigQuery):
         key_filepath = self._source_path_reader(self._credentials)
 
         # Define Source Table and Destination Table
-        source_table_id = "{}.{}.{}".format(
-            self._project_id, self._dataset, self._tblname
-        )
+        source_table_id = "{}.{}.{}".format(self._project_id, self._dataset, self._tblname)
         destination_table_id = "{}.{}.{}".format(
             self._project_id, self._dest_dataset, self._dest_tblname
         )

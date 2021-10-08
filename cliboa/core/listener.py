@@ -86,14 +86,10 @@ class ScenarioStatusListener(BaseListener):
     """
 
     def before_scenario(self, worker):
-        self._logger.info(
-            "Start scenario execution. %s" % (worker.get_scenario_queue_status())
-        )
+        self._logger.info("Start scenario execution. %s" % (worker.get_scenario_queue_status()))
 
     def after_scenario(self, worker):
-        self._logger.info(
-            "Finish scenario execution. %s" % (worker.get_scenario_queue_status())
-        )
+        self._logger.info("Finish scenario execution. %s" % (worker.get_scenario_queue_status()))
 
 
 class StepStatusListener(StepListener):

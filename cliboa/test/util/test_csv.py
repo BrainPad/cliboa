@@ -63,9 +63,7 @@ class TestCsv(object):
         try:
             output_file = os.path.join(self._data_dir, "output.csv")
             remain_column_numbers = [1]
-            Csv.extract_columns_with_numbers(
-                test_csv, output_file, remain_column_numbers
-            )
+            Csv.extract_columns_with_numbers(test_csv, output_file, remain_column_numbers)
             rows = 0
             with open(output_file, "r") as o:
                 reader = csv.reader(o)
@@ -92,9 +90,7 @@ class TestCsv(object):
         try:
             output_file = os.path.join(self._data_dir, "output.csv")
             remain_column_numbers = [1, 3]
-            Csv.extract_columns_with_numbers(
-                test_csv, output_file, remain_column_numbers
-            )
+            Csv.extract_columns_with_numbers(test_csv, output_file, remain_column_numbers)
             rows = 0
             with open(output_file, "r") as o:
                 reader = csv.reader(o)

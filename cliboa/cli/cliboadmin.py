@@ -41,11 +41,7 @@ class CliboAdmin(object):
         """
         if self._args.option == "init":
             self._init_project(self._args.dir_name)
-            print(
-                "Initialization of cliboa project '"
-                + self._args.dir_name
-                + "' was successful."
-            )
+            print("Initialization of cliboa project '" + self._args.dir_name + "' was successful.")
         elif self._args.option == "create":
             self._create_new_project(self._args.dir_name)
             print("Adding a new project '" + self._args.dir_name + "' was successful.")
@@ -91,9 +87,7 @@ class CliboAdmin(object):
         copyfile(requirements_path, os.path.join(ini_dir, "requirements.txt"))
 
         # copy environment.py
-        cmn_env_path = os.path.join(
-            cliboa_install_path, "cliboa", "conf", "default_environment.py"
-        )
+        cmn_env_path = os.path.join(cliboa_install_path, "cliboa", "conf", "default_environment.py")
         copyfile(cmn_env_path, os.path.join(self._cmn_dir, "environment.py"))
 
         # copy logging.conf
@@ -118,12 +112,8 @@ class CliboAdmin(object):
 
         # make essential directories and files
         os.makedirs(os.path.join("project", new_project_dir), exist_ok=False)
-        os.makedirs(
-            os.path.join("project", new_project_dir, "scenario"), exist_ok=False
-        )
-        with open(
-            os.path.join("project", new_project_dir, "scenario.yml"), "w"
-        ) as yaml:
+        os.makedirs(os.path.join("project", new_project_dir, "scenario"), exist_ok=False)
+        with open(os.path.join("project", new_project_dir, "scenario.yml"), "w") as yaml:
             yaml.write("scenario:" + "\n")
 
     def _get_pipfile_and_requirements_path(self, cliboa_install_path):
@@ -149,14 +139,10 @@ class CliboAdmin(object):
             "3.9": "Pipfile.above39",
         }
         pipfile_path = os.path.join(
-            cliboa_install_path,
-            "cliboa/template",
-            py_major_ver_and_pipfile[py_major_ver],
+            cliboa_install_path, "cliboa/template", py_major_ver_and_pipfile[py_major_ver],
         )
         requirements_path = os.path.join(
-            cliboa_install_path,
-            "cliboa/template",
-            py_major_ver_and_requirements[py_major_ver],
+            cliboa_install_path, "cliboa/template", py_major_ver_and_requirements[py_major_ver],
         )
         return pipfile_path, requirements_path
 

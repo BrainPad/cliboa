@@ -18,9 +18,7 @@ from cliboa.util.gcp import BigQuery
 
 
 class TestBigQueryCopy(object):
-    @patch.object(
-        BigQueryCopy, "_source_path_reader", return_value="/awesome-path/key.json"
-    )
+    @patch.object(BigQueryCopy, "_source_path_reader", return_value="/awesome-path/key.json")
     @patch.object(BigQuery, "get_bigquery_client")
     def test_table_copy(self, m_get_bigquery_client, mock_path_reader):
         # Arrange

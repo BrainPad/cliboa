@@ -40,9 +40,7 @@ class ScenarioYamlType(ValidatorChain):
         """
         yaml_dict = self._val
         if not isinstance(yaml_dict, dict):
-            raise ScenarioFileInvalid(
-                "scenario.yml is invalid. Check scenario.yml format."
-            )
+            raise ScenarioFileInvalid("scenario.yml is invalid. Check scenario.yml format.")
 
 
 class ScenarioYamlKey(ValidatorChain):
@@ -65,9 +63,7 @@ class ScenarioJsonType(ValidatorChain):
         """
         json_dict = self._val
         if not isinstance(json_dict, dict):
-            raise ScenarioFileInvalid(
-                "scenario.json is invalid. Check scenario.json format."
-            )
+            raise ScenarioFileInvalid("scenario.json is invalid. Check scenario.json format.")
 
 
 class ScenarioJsonKey(ValidatorChain):
@@ -122,9 +118,7 @@ class EssentialParameters(object):
     def __call__(self):
         for p in self._param_list:
             if not p:
-                raise Exception(
-                    "The essential parameter is not specified in %s." % self._cls_name
-                )
+                raise Exception("The essential parameter is not specified in %s." % self._cls_name)
 
 
 class EssentialKeys(object):
@@ -165,9 +159,7 @@ class EssentialKeys(object):
 
     def _exists_step(self, dict):
         if "step" not in dict.keys():
-            raise ScenarioFileInvalid(
-                "scenario.yml is invalid. 'step:' does not exist."
-            )
+            raise ScenarioFileInvalid("scenario.yml is invalid. 'step:' does not exist.")
 
     def _exists_class(self, dict):
         if not dict.get("class"):

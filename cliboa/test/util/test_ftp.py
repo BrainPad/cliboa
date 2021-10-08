@@ -34,9 +34,7 @@ class TestFtpUtil(BaseCliboaTest):
         pattern = "(.*).txt"
         os.makedirs(self._dest_dir, exist_ok=True)
         ftp_util.list_files(src_dir, self._dest_dir, re.compile(pattern))
-        exists_downloaded_file = os.path.exists(
-            os.path.join(self._dest_dir, "readme.txt")
-        )
+        exists_downloaded_file = os.path.exists(os.path.join(self._dest_dir, "readme.txt"))
         shutil.rmtree(self._dest_dir)
         self.assertTrue(exists_downloaded_file)
 

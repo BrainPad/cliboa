@@ -53,11 +53,7 @@ class TestYamlScenarioManager(BaseCliboaTest):
         """
         pj_yaml_dict = {
             "scenario": [
-                {
-                    "step": "sample_step",
-                    "class": "SampleStep",
-                    "arguments": {"retry_count": 10},
-                }
+                {"step": "sample_step", "class": "SampleStep", "arguments": {"retry_count": 10}}
             ]
         }
         self._create_scenario_file(pj_yaml_dict)
@@ -285,10 +281,7 @@ class TestYamlScenarioManager(BaseCliboaTest):
                     "step": "sample_step",
                     "class": "SampleStep",
                     "arguments": {
-                        "memo": {
-                            "one": "foo_{{ today }}.csv",
-                            "two": "foo_{{ yesterday }}.csv",
-                        },
+                        "memo": {"one": "foo_{{ today }}.csv", "two": "foo_{{ yesterday }}.csv"},
                         "with_vars": {
                             "today": "date '+%Y%m%d'",
                             "yesterday": "date '+%Y%m%d' --date='1 day ago'",
@@ -325,14 +318,8 @@ class TestYamlScenarioManager(BaseCliboaTest):
                     "class": "SampleStep",
                     "arguments": {
                         "memo": [
-                            {
-                                "one": "foo_{{ today }}.csv",
-                                "two": "foo_{{ yesterday }}.csv",
-                            },
-                            {
-                                "one": "foo_{{ today }}.txt",
-                                "two": "foo_{{ yesterday }}.txt",
-                            },
+                            {"one": "foo_{{ today }}.csv", "two": "foo_{{ yesterday }}.csv"},
+                            {"one": "foo_{{ today }}.txt", "two": "foo_{{ yesterday }}.txt"},
                         ],
                         "with_vars": {
                             "today": "date '+%Y%m%d'",
@@ -424,11 +411,7 @@ class TestJsonScenarioManager(BaseCliboaTest):
         """
         pj_json_dict = {
             "scenario": [
-                {
-                    "step": "sample_step",
-                    "class": "SampleStep",
-                    "arguments": {"retry_count": 10},
-                }
+                {"step": "sample_step", "class": "SampleStep", "arguments": {"retry_count": 10}}
             ]
         }
         self._create_scenario_file(pj_json_dict)
@@ -599,10 +582,7 @@ class TestJsonScenarioManager(BaseCliboaTest):
                     "step": "sample_step",
                     "class": "SampleStep",
                     "arguments": {
-                        "memo": {
-                            "one": "foo_{{ today }}.csv",
-                            "two": "foo_{{ yesterday }}.csv",
-                        },
+                        "memo": {"one": "foo_{{ today }}.csv", "two": "foo_{{ yesterday }}.csv"},
                         "with_vars": {
                             "today": "date '+%Y%m%d'",
                             "yesterday": "date '+%Y%m%d' --date='1 day ago'",
@@ -639,14 +619,8 @@ class TestJsonScenarioManager(BaseCliboaTest):
                     "class": "SampleStep",
                     "arguments": {
                         "memo": [
-                            {
-                                "one": "foo_{{ today }}.csv",
-                                "two": "foo_{{ yesterday }}.csv",
-                            },
-                            {
-                                "one": "foo_{{ today }}.txt",
-                                "two": "foo_{{ yesterday }}.txt",
-                            },
+                            {"one": "foo_{{ today }}.csv", "two": "foo_{{ yesterday }}.csv"},
+                            {"one": "foo_{{ today }}.txt", "two": "foo_{{ yesterday }}.txt"},
                         ],
                         "with_vars": {
                             "today": "date '+%Y%m%d'",

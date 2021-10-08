@@ -35,9 +35,7 @@ class TestYamlScenarioParser(BaseCliboaTest):
         self._cmd_args = cmd_parser.parse()
         self._pj_dir = os.path.join(env.BASE_DIR, "project", "spam")
         self._cmn_dir = env.COMMON_DIR
-        self._pj_scenario_file = os.path.join(
-            env.BASE_DIR, "project", "spam", "scenario.yml"
-        )
+        self._pj_scenario_file = os.path.join(env.BASE_DIR, "project", "spam", "scenario.yml")
         self._cmn_scenario_dir = env.COMMON_SCENARIO_DIR
         self._cmn_scenario_file = os.path.join(env.COMMON_DIR, "scenario.yml")
 
@@ -89,9 +87,7 @@ class TestYamlScenarioParser(BaseCliboaTest):
         Valid project scenario.yml and common scenario.yml.
         There is no arguments in project scenario.yml
         """
-        pj_yaml_dict = {
-            "scenario": [{"class": "SftpDownload", "step": "sftp_download"}]
-        }
+        pj_yaml_dict = {"scenario": [{"class": "SftpDownload", "step": "sftp_download"}]}
         with open(self._pj_scenario_file, "w") as f:
             f.write(yaml.dump(pj_yaml_dict, default_flow_style=False))
 
@@ -133,9 +129,7 @@ class TestYamlScenarioParser(BaseCliboaTest):
         with open(self._pj_scenario_file, "w") as f:
             f.write(yaml.dump(pj_yaml_dict, default_flow_style=False))
 
-        cmn_yaml_dict = {
-            "scenario": [{"class": "SftpDownload", "step": "sftp_download"}]
-        }
+        cmn_yaml_dict = {"scenario": [{"class": "SftpDownload", "step": "sftp_download"}]}
         with open(self._cmn_scenario_file, "w") as f:
             f.write(yaml.dump(cmn_yaml_dict, default_flow_style=False))
 
@@ -155,19 +149,13 @@ class TestYamlScenarioParser(BaseCliboaTest):
         """
         pj_yaml_dict = {
             "scenario": [
-                {
-                    "arguments": {"retry_count": 10},
-                    "class": "SampleStep",
-                    "step": "sample step",
-                }
+                {"arguments": {"retry_count": 10}, "class": "SampleStep", "step": "sample step"}
             ]
         }
         with open(self._pj_scenario_file, "w") as f:
             f.write(yaml.dump(pj_yaml_dict, default_flow_style=False))
 
-        cmn_yaml_dict = {
-            "scenario": [{"class": "SftpDownload", "step": "sftp_download"}]
-        }
+        cmn_yaml_dict = {"scenario": [{"class": "SftpDownload", "step": "sftp_download"}]}
         with open(self._cmn_scenario_file, "w") as f:
             f.write(yaml.dump(cmn_yaml_dict, default_flow_style=False))
 
@@ -244,9 +232,7 @@ class TestYamlScenarioParser(BaseCliboaTest):
         project scenario.yml and common scenario.yml.
         There is no class: in project scenario.yml
         """
-        pj_yaml_dict = {
-            "scenario": [{"arguments": {"retry_count": 10}, "step": "sftp_download"}]
-        }
+        pj_yaml_dict = {"scenario": [{"arguments": {"retry_count": 10}, "step": "sftp_download"}]}
         with open(self._pj_scenario_file, "w") as f:
             f.write(yaml.dump(pj_yaml_dict, default_flow_style=False))
 
@@ -287,9 +273,7 @@ class TestYamlScenarioParser(BaseCliboaTest):
             f.write(yaml.dump(pj_yaml_dict, default_flow_style=False))
 
         cmn_yaml_dict = {
-            "scenario": [
-                {"arguments": {"retry_count": 10}, "class": "", "step": "sftp_download"}
-            ]
+            "scenario": [{"arguments": {"retry_count": 10}, "class": "", "step": "sftp_download"}]
         }
         with open(self._cmn_scenario_file, "w") as f:
             f.write(yaml.dump(cmn_yaml_dict, default_flow_style=False))
@@ -406,9 +390,7 @@ class TestJsonScenarioParser(BaseCliboaTest):
         self._cmd_args = cmd_parser.parse()
         self._pj_dir = os.path.join(env.BASE_DIR, "project", "spam")
         self._cmn_dir = env.COMMON_DIR
-        self._pj_scenario_file = os.path.join(
-            env.BASE_DIR, "project", "spam", "scenario.json"
-        )
+        self._pj_scenario_file = os.path.join(env.BASE_DIR, "project", "spam", "scenario.json")
         self._cmn_scenario_dir = env.COMMON_SCENARIO_DIR
         self._cmn_scenario_file = os.path.join(env.COMMON_DIR, "scenario.json")
 
@@ -460,9 +442,7 @@ class TestJsonScenarioParser(BaseCliboaTest):
         Valid project scenario.json and common scenario.json.
         There is no arguments in project scenario.json
         """
-        pj_json_dict = {
-            "scenario": [{"class": "SftpDownload", "step": "sftp_download"}]
-        }
+        pj_json_dict = {"scenario": [{"class": "SftpDownload", "step": "sftp_download"}]}
         with open(self._pj_scenario_file, "w") as f:
             json.dump(pj_json_dict, f, indent=4)
 
@@ -504,9 +484,7 @@ class TestJsonScenarioParser(BaseCliboaTest):
         with open(self._pj_scenario_file, "w") as f:
             json.dump(pj_json_dict, f, indent=4)
 
-        cmn_json_dict = {
-            "scenario": [{"class": "SftpDownload", "step": "sftp_download"}]
-        }
+        cmn_json_dict = {"scenario": [{"class": "SftpDownload", "step": "sftp_download"}]}
         with open(self._cmn_scenario_file, "w") as f:
             json.dump(cmn_json_dict, f, indent=4)
 
@@ -526,19 +504,13 @@ class TestJsonScenarioParser(BaseCliboaTest):
         """
         pj_json_dict = {
             "scenario": [
-                {
-                    "arguments": {"retry_count": 10},
-                    "class": "SampleStep",
-                    "step": "sample step",
-                }
+                {"arguments": {"retry_count": 10}, "class": "SampleStep", "step": "sample step"}
             ]
         }
         with open(self._pj_scenario_file, "w") as f:
             json.dump(pj_json_dict, f, indent=4)
 
-        cmn_json_dict = {
-            "scenario": [{"class": "SftpDownload", "step": "sftp_download"}]
-        }
+        cmn_json_dict = {"scenario": [{"class": "SftpDownload", "step": "sftp_download"}]}
         with open(self._cmn_scenario_file, "w") as f:
             json.dump(cmn_json_dict, f, indent=4)
 
@@ -615,9 +587,7 @@ class TestJsonScenarioParser(BaseCliboaTest):
         project scenario.json and common scenario.json.
         There is no class: in project scenario.json
         """
-        pj_json_dict = {
-            "scenario": [{"arguments": {"retry_count": 10}, "step": "sftp_download"}]
-        }
+        pj_json_dict = {"scenario": [{"arguments": {"retry_count": 10}, "step": "sftp_download"}]}
         with open(self._pj_scenario_file, "w") as f:
             json.dump(pj_json_dict, f, indent=4)
 
@@ -658,9 +628,7 @@ class TestJsonScenarioParser(BaseCliboaTest):
             json.dump(pj_json_dict, f, indent=4)
 
         cmn_json_dict = {
-            "scenario": [
-                {"arguments": {"retry_count": 10}, "class": "", "step": "sftp_download"}
-            ]
+            "scenario": [{"arguments": {"retry_count": 10}, "class": "", "step": "sftp_download"}]
         }
         with open(self._cmn_scenario_file, "w") as f:
             json.dump(cmn_json_dict, f, indent=4)

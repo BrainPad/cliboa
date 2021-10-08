@@ -20,6 +20,4 @@ class BlobServiceAdapter(object):
         if connection_string:
             return BlobServiceClient.from_connection_string(connection_string)
         else:
-            return BlobServiceClient(
-                account_url=account_url, credential=account_access_key
-            )
+            return BlobServiceClient(account_url=account_url, credential=account_access_key)

@@ -68,9 +68,7 @@ class Sftp(object):
         self._port = 22 if port is None else port
         self._logger = logging.getLogger(__name__)
 
-    def list_files(
-        self, dir, dest, pattern, endfile_suffix=None, ignore_empty_file=False
-    ):
+    def list_files(self, dir, dest, pattern, endfile_suffix=None, ignore_empty_file=False):
         """
         Fetch all the files in specified directory
 
@@ -212,9 +210,7 @@ class Sftp(object):
                 if ssh is not None:
                     ssh.close()
 
-            self._logger.warning(
-                "Unexpected error occurred. Retry will start in 10 sec."
-            )
+            self._logger.warning("Unexpected error occurred. Retry will start in 10 sec.")
             sleep(10)
 
         raise IOError(err, "SFTP failed.")
@@ -304,9 +300,7 @@ def put_file_func(**kwargs):
             with kwargs["sftp"].file(tmp_dest, "wb") as fr:
                 _logger.debug("Open dest file")
                 fr.set_pipelined(True)
-                _transfer_with_callback(
-                    reader=fl, writer=fr, file_size=file_size, callback=cb
-                )
+                _transfer_with_callback(reader=fl, writer=fr, file_size=file_size, callback=cb)
             _logger.debug("End")
     else:
         kwargs["sftp"].put(kwargs["src"], tmp_dest)

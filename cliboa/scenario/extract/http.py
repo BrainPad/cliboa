@@ -71,9 +71,7 @@ class HttpDownload(HttpExtract):
             else os.path.join(self._dest_dir, self._src_pattern)
         )
 
-        d = Download(
-            url, dest_path, self._timeout, self._retry_count, **self.get_params()
-        )
+        d = Download(url, dest_path, self._timeout, self._retry_count, **self.get_params())
         d.execute()
 
     def get_params(self):
@@ -95,9 +93,7 @@ class HttpDownloadViaBasicAuth(HttpDownload):
         self._password = password
 
     def execute(self, *args):
-        valid = EssentialParameters(
-            self.__class__.__name__, [self._user, self._password]
-        )
+        valid = EssentialParameters(self.__class__.__name__, [self._user, self._password])
         valid()
 
         super().execute()

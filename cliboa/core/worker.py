@@ -81,9 +81,7 @@ class ScenarioWorker(object):
             if res is None:
                 continue
             elif res == StepStatus.SUCCESSFUL_TERMINATION:
-                self._logger.info(
-                    "Step response [successful termination]. Scenario will be end."
-                )
+                self._logger.info("Step response [successful termination]. Scenario will be end.")
                 break
             else:
                 self._logger.error("Step response [%s]. Scenario will be end." % res)
