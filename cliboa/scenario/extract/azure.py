@@ -42,9 +42,7 @@ class AzureBlobDownload(BaseAzureBlob):
     def execute(self, *args):
         super().execute()
 
-        valid = EssentialParameters(
-            self.__class__.__name__, [self._src_pattern, self._dest_dir]
-        )
+        valid = EssentialParameters(self.__class__.__name__, [self._src_pattern, self._dest_dir])
         valid()
 
         service = BlobServiceAdapter().get_client(
@@ -60,9 +58,7 @@ class AzureBlobDownload(BaseAzureBlob):
             if not rec.fullmatch(filename):
                 continue
             dest_path = os.path.join(self._dest_dir, os.path.basename(filename))
-            blob_client = service.get_blob_client(
-                container=self._container_name, blob=filename
-            )
+            blob_client = service.get_blob_client(container=self._container_name, blob=filename)
 
             with open(dest_path, "wb") as local_blob:
                 blob_data = blob_client.download_blob()

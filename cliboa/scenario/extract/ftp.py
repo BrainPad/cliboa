@@ -81,8 +81,7 @@ class FtpDownload(FtpExtract):
     def execute(self, *args):
         # essential parameters check
         valid = EssentialParameters(
-            self.__class__.__name__,
-            [self._host, self._user, self._src_dir, self._src_pattern],
+            self.__class__.__name__, [self._host, self._user, self._src_dir, self._src_pattern],
         )
         valid()
 
@@ -98,9 +97,7 @@ class FtpDownload(FtpExtract):
             self._port,
             self._tls,
         )
-        files = ftp_util.list_files(
-            self._src_dir, self._dest_dir, re.compile(self._src_pattern)
-        )
+        files = ftp_util.list_files(self._src_dir, self._dest_dir, re.compile(self._src_pattern))
 
         if self._quit is True and len(files) == 0:
             self._logger.info("No file was found. After process will not be processed")
@@ -134,8 +131,6 @@ class FtpDownloadFileDelete(FtpExtract):
                 super().get_step_argument("tls"),
             )
             for file in files:
-                ftp_util.remove_specific_file(
-                    super().get_step_argument("src_dir"), file
-                )
+                ftp_util.remove_specific_file(super().get_step_argument("src_dir"), file)
         else:
             self._logger.info("No files to delete.")

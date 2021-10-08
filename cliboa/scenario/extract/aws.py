@@ -53,9 +53,7 @@ class S3Download(BaseS3):
         client = adapter.get_client()
 
         p = client.get_paginator("list_objects")
-        for page in p.paginate(
-            Bucket=self._bucket, Delimiter=self._delimiter, Prefix=self._prefix
-        ):
+        for page in p.paginate(Bucket=self._bucket, Delimiter=self._delimiter, Prefix=self._prefix):
             for c in page.get("Contents", []):
                 path = c.get("Key")
                 filename = os.path.basename(path)

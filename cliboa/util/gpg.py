@@ -44,9 +44,7 @@ class Gpg(object):
         for key in keys:
             self._gpg.trust_keys(key["fingerprint"], trust_level)
 
-    def encrypt(
-        self, src_path, dest_path, recipients, passphrase=None, always_trust=False
-    ):
+    def encrypt(self, src_path, dest_path, recipients, passphrase=None, always_trust=False):
         with open(src_path, "rb") as f:
             status = self._gpg.encrypt_file(
                 file=f,
@@ -66,10 +64,7 @@ class Gpg(object):
     def decrypt(self, src_path, dest_path, passphrase=None, always_trust=False):
         with open(src_path, "rb") as f:
             status = self._gpg.decrypt_file(
-                file=f,
-                always_trust=always_trust,
-                passphrase=passphrase,
-                output=dest_path,
+                file=f, always_trust=always_trust, passphrase=passphrase, output=dest_path,
             )
 
         if status.ok is False:

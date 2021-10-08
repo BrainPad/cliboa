@@ -65,8 +65,6 @@ class TestGpg(BaseCliboaTest):
         Helper.set_property(instance, "passphrase", "password")
         instance.execute()
 
-        with open(
-            os.path.join(self._result_dir, self._file_name), mode="r", encoding="utf-8"
-        ) as f:
+        with open(os.path.join(self._result_dir, self._file_name), mode="r", encoding="utf-8") as f:
             txt = f.read()
             assert txt == "This is test"

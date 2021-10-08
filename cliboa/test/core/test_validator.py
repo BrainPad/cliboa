@@ -37,9 +37,7 @@ class TestValidators(object):
         sys.argv.append("spam")
         sys.argv.append("spam")
         self._pj_dir = os.path.join(env.BASE_DIR, "project", "spam")
-        self._scenario_file = os.path.join(
-            env.BASE_DIR, "project", "spam", "scenario.yml"
-        )
+        self._scenario_file = os.path.join(env.BASE_DIR, "project", "spam", "scenario.yml")
         os.makedirs(self._pj_dir, exist_ok=True)
 
     def teardown_method(self, method):
@@ -79,9 +77,7 @@ class TestValidators(object):
         with pytest.raises(ScenarioFileInvalid) as excinfo:
             valid_instance = ScenarioYamlType(test_data)
             valid_instance()
-        assert "scenario.yml is invalid. Check scenario.yml format." in str(
-            excinfo.value
-        )
+        assert "scenario.yml is invalid. Check scenario.yml format." in str(excinfo.value)
 
     def test_scenario_yaml_key_ok(self):
         """
@@ -159,9 +155,7 @@ class TestValidators(object):
         with pytest.raises(ScenarioFileInvalid) as excinfo:
             valid_instance = ScenarioJsonType(test_data)
             valid_instance()
-        assert "scenario.json is invalid. Check scenario.json format." in str(
-            excinfo.value
-        )
+        assert "scenario.json is invalid. Check scenario.json format." in str(excinfo.value)
 
     def test_scenario_json_key_ok(self):
         """
@@ -222,9 +216,7 @@ class TestValidators(object):
         with pytest.raises(DirStructureInvalid) as excinfo:
             valid_instance = ProjectDirectoryExistence()
             valid_instance(self._pj_dir)
-        assert "Project directory %s does not exist" % self._pj_dir in str(
-            excinfo.value
-        )
+        assert "Project directory %s does not exist" % self._pj_dir in str(excinfo.value)
 
     def test_scenario_file_existence_ok(self):
         """

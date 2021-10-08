@@ -61,8 +61,7 @@ class SqliteTableExistence(object):
         try:
             self._sqlite_adptr.connect(self._dbname)
             cur = self._sqlite_adptr.fetch(
-                'SELECT name FROM sqlite_master WHERE type="table" AND name="%s"'
-                % self._tblname
+                'SELECT name FROM sqlite_master WHERE type="table" AND name="%s"' % self._tblname
             )
             result = cur.fetchall()
             if self._returns_bool is True:

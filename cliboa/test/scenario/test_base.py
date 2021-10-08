@@ -41,9 +41,7 @@ class TestBase(TestCase):
         """
         instance = SampleCustomStep()
         instance._logger = LisboaLog.get_logger(__name__)
-        Helper.set_property(
-            instance, "logger", LisboaLog.get_logger(instance.__class__.__name__)
-        )
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(instance.__class__.__name__))
         Helper.set_property(instance, "password", "test")
         instance.trigger()
         ret = False
@@ -59,9 +57,7 @@ class TestBase(TestCase):
         In log file, 'access_key' and 'secret_key' of AWS are masked.
         """
         instance = SampleCustomStep()
-        Helper.set_property(
-            instance, "logger", LisboaLog.get_logger(instance.__class__.__name__)
-        )
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(instance.__class__.__name__))
         Helper.set_property(instance, "access_key", "test")
         Helper.set_property(instance, "secret_key", "test")
         instance.trigger()
@@ -78,9 +74,7 @@ class TestBase(TestCase):
 
     def test_source_path_reader_with_none(self):
         instance = SampleCustomStep()
-        Helper.set_property(
-            instance, "logger", LisboaLog.get_logger(instance.__class__.__name__)
-        )
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(instance.__class__.__name__))
         ret = instance._source_path_reader(None)
 
         assert ret is None
@@ -107,9 +101,7 @@ class TestBase(TestCase):
 
     def test_source_path_reader_with_content(self):
         instance = SampleCustomStep()
-        Helper.set_property(
-            instance, "logger", LisboaLog.get_logger(instance.__class__.__name__)
-        )
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(instance.__class__.__name__))
         ret = instance._source_path_reader({"content": "test"})
         with open(ret, "r") as fp:
             actual = fp.read()

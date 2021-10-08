@@ -44,8 +44,7 @@ class BaseRdbms(BaseStep):
 
     def execute(self, *args):
         valid = EssentialParameters(
-            self.__class__.__name__,
-            [self._host, self._dbname, self._user, self._password],
+            self.__class__.__name__, [self._host, self._dbname, self._user, self._password],
         )
         valid()
 
@@ -72,15 +71,11 @@ class BaseRdbmsRead(BaseRdbms):
     def execute(self, *args):
         super().execute()
 
-        valid = EssentialParameters(
-            self.__class__.__name__, [self._query, self._dest_path]
-        )
+        valid = EssentialParameters(self.__class__.__name__, [self._query, self._dest_path])
         valid()
 
         with self.get_adaptor() as ps:
-            with open(
-                self._dest_path, mode="w", encoding=self._encoding, newline=""
-            ) as f:
+            with open(self._dest_path, mode="w", encoding=self._encoding, newline="") as f:
                 if isinstance(self._query, str):
                     self._logger.warning(
                         (
@@ -103,9 +98,7 @@ class BaseRdbmsRead(BaseRdbms):
                             columns = [i[0] for i in cur.description]
                             writer.writerow(columns)
                         elif type(row) is dict:
-                            writer = csv.DictWriter(
-                                f, list(row.keys()), quoting=csv.QUOTE_ALL
-                            )
+                            writer = csv.DictWriter(f, list(row.keys()), quoting=csv.QUOTE_ALL)
                             writer.writeheader()
                     if writer:
                         writer.writerow(self.callback_handler(row))

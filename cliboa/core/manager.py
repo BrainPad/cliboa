@@ -53,26 +53,18 @@ class ScenarioManager(object):
         )
         if cmd_args.format == "yaml":
             self._pj_scenario_file = (
-                os.path.join(
-                    env.PROJECT_DIR, cmd_args.project_name, env.SCENARIO_FILE_NAME
-                )
+                os.path.join(env.PROJECT_DIR, cmd_args.project_name, env.SCENARIO_FILE_NAME)
                 + ".yml"
             )
-            self._cmn_scenario_file = (
-                os.path.join(env.COMMON_DIR, env.SCENARIO_FILE_NAME) + ".yml"
-            )
+            self._cmn_scenario_file = os.path.join(env.COMMON_DIR, env.SCENARIO_FILE_NAME) + ".yml"
         else:
             self._pj_scenario_file = (
-                os.path.join(
-                    env.PROJECT_DIR, cmd_args.project_name, env.SCENARIO_FILE_NAME
-                )
+                os.path.join(env.PROJECT_DIR, cmd_args.project_name, env.SCENARIO_FILE_NAME)
                 + "."
                 + cmd_args.format
             )
             self._cmn_scenario_file = (
-                os.path.join(env.COMMON_DIR, env.SCENARIO_FILE_NAME)
-                + "."
-                + cmd_args.format
+                os.path.join(env.COMMON_DIR, env.SCENARIO_FILE_NAME) + "." + cmd_args.format
             )
 
     def create_scenario_queue(self):
@@ -118,13 +110,9 @@ class ScenarioManager(object):
         """
         for block in scenario_list:
             if "multi_process_count" in block.keys():
-                Helper.set_property(
-                    queue, "multi_proc_cnt", block.get("multi_process_count")
-                )
+                Helper.set_property(queue, "multi_proc_cnt", block.get("multi_process_count"))
             elif "force_continue" in block.keys():
-                Helper.set_property(
-                    queue, "force_continue", block.get("force_continue")
-                )
+                Helper.set_property(queue, "force_continue", block.get("force_continue"))
             else:
                 instance = self._create_executable_instances(block)
                 queue.push(instance)
@@ -263,9 +251,7 @@ class ScenarioManager(object):
         Returns:
             str: replaced value
         """
-        shell_output = subprocess.Popen(
-            cmd, stdout=subprocess.PIPE, shell=True
-        ).communicate()[0]
+        shell_output = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True).communicate()[0]
         shell_output = shell_output.strip()
         # remove head byte string
         shell_output = re.sub("^b", "", str(shell_output))

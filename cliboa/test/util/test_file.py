@@ -54,17 +54,13 @@ class TestFile(object):
         open(test_file_sub, "w").close()
 
         # execute1
-        target_files = File().get_target_files(
-            self._data_dir, "test(.*).csv", tree=True
-        )
+        target_files = File().get_target_files(self._data_dir, "test(.*).csv", tree=True)
         assert len(target_files) == 2
         assert target_files[0] == os.path.join(self._data_dir, "sub", "test_sub.csv")
         assert target_files[1] == os.path.join(self._data_dir, "test.csv")
 
         # execute2
-        target_files = File().get_target_files(
-            self._data_dir, "test(.*).csv", tree=False
-        )
+        target_files = File().get_target_files(self._data_dir, "test(.*).csv", tree=False)
         assert len(target_files) == 1
         assert target_files[0] == os.path.join(self._data_dir, "test.csv")
 
