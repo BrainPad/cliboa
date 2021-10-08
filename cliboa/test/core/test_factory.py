@@ -23,8 +23,9 @@ from cliboa.core.factory import (
     StepExecutorFactory,
 )
 from cliboa.core.manager import JsonScenarioManager, YamlScenarioManager
-from cliboa.core.strategy import MultiProcExecutor, SingleProcExecutor
+from cliboa.core.strategy import MultiProcExecutor, MultiProcWithConfigExecutor, SingleProcExecutor
 from cliboa.test import BaseCliboaTest
+from cliboa.util.parallel_with_config import ParallelWithConfig
 
 
 class TestFactory(BaseCliboaTest):
@@ -78,6 +79,15 @@ class TestStepExecutorFactory(TestFactory):
         """
         s = StepExecutorFactory.create(["1", "2"])
         self.assertTrue(isinstance(s, type(MultiProcExecutor(None))))
+
+    def test_create_multi_with_config(self):
+        """
+        Succeeded to create MultiProcess instance with config
+        """
+        instance = [ParallelWithConfig(["1", "2"], {"multi_process_count": 2})]
+        s = StepExecutorFactory.create(instance)
+        print(s)
+        self.assertTrue(isinstance(s, type(MultiProcWithConfigExecutor(instance))))
 
 
 class TestCustomInstanceFactory(TestFactory):

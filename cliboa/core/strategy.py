@@ -21,7 +21,7 @@ from cliboa.core.scenario_queue import ScenarioQueue
 from cliboa.util.exception import StepExecutionFailed
 from cliboa.util.lisboa_log import LisboaLog
 
-__all__ = ["SingleProcExecutor", "MultiProcExecutor"]
+__all__ = ["SingleProcExecutor", "MultiProcExecutor", "MultiProcWithConfigExecutor"]
 
 
 class StepExecutor(object):
@@ -89,6 +89,38 @@ class MultiProcExecutor(StepExecutor):
 
         try:
             with Pool(processes=ScenarioQueue.step_queue.multi_proc_cnt) as p:
+                for r in p.imap_unordered(self._async_step_execute, packed):
+                    if r == "NG":
+                        if ScenarioQueue.step_queue.force_continue:
+                            self._logger.warning("Multi process response. %s" % r)
+                        else:
+                            raise StepExecutionFailed("Multi process response. %s" % r)
+        except Exception as e:
+            self._logger.error("Exception occurred during multi process execution.")
+            raise e
+
+
+class MultiProcWithConfigExecutor(MultiProcExecutor):
+    """
+    Execute steps in queue in multi process with given config
+    """
+    def __init__(self, obj):
+        super().__init__(obj)
+        self._step = obj[0].steps
+        self._multi_proc_cnt = None
+        if "multi_process_count" in obj[0].config.keys():
+            self._multi_proc_cnt = obj[0].config["multi_process_count"]
+
+    def execute_steps(self, args):
+        self._logger.info(
+            "Multi process start. Execute step count=%s."
+            % self._multi_proc_cnt
+        )
+        install_mp_handler()
+        packed = [cloudpickle.dumps(step) for step in self._step]
+
+        try:
+            with Pool(processes=self._multi_proc_cnt) as p:
                 for r in p.imap_unordered(self._async_step_execute, packed):
                     if r == "NG":
                         if ScenarioQueue.step_queue.force_continue:

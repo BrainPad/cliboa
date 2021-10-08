@@ -95,6 +95,10 @@ class YamlScenarioParser(ScenarioParser):
             if pj_yaml_dict.get("parallel"):
                 for row in pj_yaml_dict.get("parallel"):
                     self._merge(row, cmn_yaml_list)
+            elif pj_yaml_dict.get("parallel_with_config"):
+                steps = pj_yaml_dict.get("parallel_with_config").get("steps")
+                for row in steps:
+                    self._merge(row, cmn_yaml_list)
             else:
                 self._merge(pj_yaml_dict, cmn_yaml_list)
 
@@ -175,6 +179,10 @@ class JsonScenarioParser(ScenarioParser):
             # If same class exists, merge arguments
             if pj_json_dict.get("parallel"):
                 for row in pj_json_dict.get("parallel"):
+                    self._merge(row, cmn_json_list)
+            elif pj_json_dict.get("parallel_with_config"):
+                steps = pj_json_dict.get("parallel_with_config").get("steps")
+                for row in steps:
                     self._merge(row, cmn_json_list)
             else:
                 self._merge(pj_json_dict, cmn_json_list)
