@@ -18,7 +18,6 @@ import tempfile
 from abc import abstractmethod
 
 from cliboa.conf import env
-from cliboa.scenario.validator import IOOutput
 from cliboa.util.cache import StepArgument, StorageIO
 from cliboa.util.exception import FileNotFound, InvalidParameter
 from cliboa.util.file import File
@@ -133,9 +132,7 @@ class BaseStep(object):
         if src is None:
             return src
         if isinstance(src, dict) and "content" in src:
-            with tempfile.NamedTemporaryFile(
-                mode="w", encoding=encoding, delete=False
-            ) as fp:
+            with tempfile.NamedTemporaryFile(mode="w", encoding=encoding, delete=False) as fp:
                 fp.write(src["content"])
                 return fp.name
         elif isinstance(src, dict) and "file" in src:
@@ -151,21 +148,3 @@ class BaseStep(object):
         """
         # TODO Currently not doing anything
         raise e
-
-
-class Stdout(BaseStep):
-    """
-    @deprecated
-    Standard output for io: input
-    """
-
-    def __init__(self):
-        super().__init__()
-
-    def execute(self, *args):
-        output_valid = IOOutput(self._io)
-        output_valid()
-
-        with open(self._s.cache_file, "r", encoding="utf-8") as f:
-            for l in f:
-                print(l)

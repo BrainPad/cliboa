@@ -18,8 +18,6 @@ Can use ETL modules as below by default.
 |[SftpDownloadFileDelete](/docs/modules/sftp_download_file_delete.md)|Remove files downloaded via class 'SftpDownload' from SFTP server|
 |[S3Download](/docs/modules/s3_download.md)|Download files from S3|
 |[SqliteExport](/docs/modules/sqlite_export.md)|Export a table data to csv|
-|[SqliteReadRow](/docs/modules/sqlite_read_row.md)|Execute query and call result handler|
-SqliteExport
 |[FirestoreDocumentDownload](/docs/modules/firestore_document_download.md)|Download a document from Firestore|
 
 
@@ -31,7 +29,6 @@ SqliteExport
 |[CsvConvert](/docs/modules/csv_convert.md)|Create new csv(tsv) file with given parameters|
 |[CsvMerge](/docs/modules/csv_merge.md)|Merge two csv files to a csv file|
 |[CsvConcat](/docs/modules/csv_concat.md)|Concat csv files|
-|[CsvHeaderConvert](/docs/modules/csv_header_convert.md)|Convert headers of a csv file|
 |[DateFormatConvert](/docs/modules/date_format_convert.md)|Convert date format of columns of a csv file to another date format|
 |[ExcelConvert](/docs/modules/excel_convert.md)|Convert a excel file to a csv file|
 |[FileCompress](/docs/modules/file_compress.md)|Compress a file|
@@ -48,7 +45,6 @@ SqliteExport
 |[AzureBlobUpload](/docs/modules/azureblob_upload.md)|Upload files to Azure Blob Storage|
 |[CsvWrite](/docs/modules/csv_write.md)|Write contents read by 'io: input' to a csv file|
 |[BigQueryWrite](/docs/modules/bigquery_write.md)|Read content from a file and insert it into a table of bigquery|
-|[CsvReadSqliteCreate](/docs/modules/csv_read_sqlite_create.md)|Read content from a file and insert it into a table of sqlite|
 |[FirestoreDocumentCreate](/docs/modules/firestore_document_create.md)|Create document|
 |[GcsUpload](/docs/modules/gcs_upload.md)|Upload files to GCS|
 |[SftpUpload](/docs/modules/sftp_upload.md)|Upload a file via sftp|

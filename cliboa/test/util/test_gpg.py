@@ -67,9 +67,7 @@ class TestGpg(BaseCliboaTest):
             passphrase="password",
         )
 
-        with open(
-            os.path.join(self._result_dir, self._file_name), mode="r", encoding="utf-8"
-        ) as f:
+        with open(os.path.join(self._result_dir, self._file_name), mode="r", encoding="utf-8") as f:
             txt = f.read()
             assert txt == "This is test"
 
@@ -171,8 +169,6 @@ class TestGpg(BaseCliboaTest):
             always_trust=True,
         )
 
-        with open(
-            os.path.join(self._result_dir, self._file_name), mode="r", encoding="utf-8"
-        ) as f:
+        with open(os.path.join(self._result_dir, self._file_name), mode="r", encoding="utf-8") as f:
             txt = f.read()
             assert txt == "This is test"

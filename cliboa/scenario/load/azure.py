@@ -61,9 +61,7 @@ class AzureBlobUpload(BaseAzureBlob):
         if len(files) > 0:
             for f in files:
                 path = os.path.join(self._dest_dir, os.path.basename(f))
-                blob_client = service.get_blob_client(
-                    container=self._container_name, blob=path
-                )
+                blob_client = service.get_blob_client(container=self._container_name, blob=path)
                 with open(f, "rb") as data:
                     blob_client.upload_blob(data, overwrite=True)
         else:

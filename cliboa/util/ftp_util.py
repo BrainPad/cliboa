@@ -29,14 +29,7 @@ class FtpUtil(object):
     RETRY_SEC = 10
 
     def __init__(
-        self,
-        host,
-        user,
-        password,
-        timeout=TIMEOUT_SEC,
-        retryTimes=3,
-        port=21,
-        tls=False,
+        self, host, user, password, timeout=TIMEOUT_SEC, retryTimes=3, port=21, tls=False,
     ):
         """
         Must set whether password or key
@@ -144,9 +137,7 @@ class FtpUtil(object):
                 self._logger.warning(e)
                 self._logger.warning(kwargs)
 
-            self._logger.warning(
-                "Unexpected error occurred. Retry will start in 10 sec."
-            )
+            self._logger.warning("Unexpected error occurred. Retry will start in 10 sec.")
             sleep(FtpUtil.RETRY_SEC)
 
         raise IOError(errno.ENOENT, "FTP failed.")

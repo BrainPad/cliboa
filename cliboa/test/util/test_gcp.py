@@ -32,9 +32,7 @@ class TestBigQuery(TestCase):
 
     def test_get_extract_job_config_with_header(self):
         self.assertTrue(
-            isinstance(
-                BigQuery.get_extract_job_config(), type(bigquery.ExtractJobConfig())
-            )
+            isinstance(BigQuery.get_extract_job_config(), type(bigquery.ExtractJobConfig()))
         )
 
     def test_get_extract_job_config_with_no_header(self):

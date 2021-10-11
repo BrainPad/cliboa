@@ -31,6 +31,4 @@ class StringUtil(object):
         Returns:
             str: New randomly generated string
         """
-        return "".join(
-            [random.choice(string.ascii_letters + string.digits) for i in range(length)]
-        )
+        return "".join([random.choice(string.ascii_letters + string.digits) for i in range(length)])

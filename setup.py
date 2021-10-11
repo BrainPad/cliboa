@@ -29,7 +29,7 @@ setup(
     version="1.3.7b0",
     description="application framework for ETL(ELT) processing",
     long_description=read("README.md"),
-    long_description_content_type='text/markdown',
+    long_description_content_type="text/markdown",
     url="https://github.com/BrainPad/cliboa",  # Optional
     author="BrainPad",
     # author_email='brainpad.co.jp',

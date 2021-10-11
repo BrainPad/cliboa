@@ -19,7 +19,11 @@ from unittest.mock import patch
 
 from cliboa.client import CommandArgumentParser
 from cliboa.conf import env
-from cliboa.core.listener import ScenarioStatusListener, StepStatusListener, StepListener
+from cliboa.core.listener import (
+    ScenarioStatusListener,
+    StepStatusListener,
+    StepListener,
+)
 from cliboa.core.strategy import SingleProcExecutor, StepExecutor
 from cliboa.core.worker import ScenarioWorker
 from cliboa.scenario.sample_step import SampleCustomStep
@@ -103,9 +107,7 @@ class TestAppropriateListnerCall(unittest.TestCase):
             )
 
             step = SampleCustomStep()
-            Helper.set_property(
-                step, "logger", LisboaLog.get_logger(step.__class__.__name__)
-            )
+            Helper.set_property(step, "logger", LisboaLog.get_logger(step.__class__.__name__))
             Helper.set_property(step, "listeners", [StepStatusListener()])
             executor = SingleProcExecutor([step])
             executor.execute_steps(None)
@@ -135,9 +137,7 @@ class TestAppropriateListnerCall(unittest.TestCase):
             )
 
             step = ErrorSampleCustomStep()
-            Helper.set_property(
-                step, "logger", LisboaLog.get_logger(step.__class__.__name__)
-            )
+            Helper.set_property(step, "logger", LisboaLog.get_logger(step.__class__.__name__))
             Helper.set_property(step, "listeners", [StepStatusListener()])
             executor = SingleProcExecutor([step])
 
@@ -157,9 +157,7 @@ class TestListenerArguments(unittest.TestCase):
             return
 
         step = SampleCustomStep()
-        Helper.set_property(
-            step, "logger", LisboaLog.get_logger(step.__class__.__name__)
-        )
+        Helper.set_property(step, "logger", LisboaLog.get_logger(step.__class__.__name__))
         clz = CustomStepListener()
         values = {"test_key": "test_value"}
         clz.__dict__.update(values)

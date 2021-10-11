@@ -21,7 +21,6 @@ from mock import patch
 
 
 class TestS3Download(BaseCliboaTest):
-
     @patch.object(S3Adapter, "get_client")
     def test_execute_ok(self, m_get_client):
         with tempfile.TemporaryDirectory() as tmp_dir:

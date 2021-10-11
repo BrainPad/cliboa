@@ -25,7 +25,14 @@ jobs:
           pipenv install --dev --skip-lock --sequential
       - name: execute flake8
         run: |
-          pipenv run flake8
+          pipenv run flake8 .
+      - name: check black format
+        run: |
+          if [ ${{ matrix.python_versions }} -ne 3.5 ]; then
+            pipenv run black --check .
+          else
+            echo "black does not support python${{ matrix.python_versions }}"
+          fi
       - name: execute unittest and instrument coverage
         run: |
           pipenv run coverage

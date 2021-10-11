@@ -32,14 +32,12 @@ from cliboa.scenario.transform.file import (
     FileConvert,
     FileDecompress,
     FileDivide,
-    FileRename
+    FileRename,
 )
 from cliboa.test import BaseCliboaTest
 from cliboa.util.exception import (
     CliboaException,
     FileNotFound,
-    InvalidCount,
-    InvalidFormat,
     InvalidParameter,
 )
 from cliboa.util.helper import Helper
@@ -199,9 +197,7 @@ class TestFileTransformFunctions(TestFileTransform):
         with pytest.raises(InvalidParameter) as execinfo:
             for reader, writer in instance.io_writers(files, mode="s"):
                 pass
-        assert "Unknown mode. One of the following is allowed [t, b]" == str(
-            execinfo.value
-        )
+        assert "Unknown mode. One of the following is allowed [t, b]" == str(execinfo.value)
 
     def test_file_check_exist(self):
         instance = FileBaseTransform()
@@ -389,9 +385,7 @@ class TestFileCompress(TestFileTransform):
         assert os.path.exists(compressed_file_2)
 
         decompressed_file_1 = os.path.join(self._out_dir, "test1.txt")
-        with gzip.open(compressed_file_1, "rb") as i, open(
-            decompressed_file_1, "wb"
-        ) as o:
+        with gzip.open(compressed_file_1, "rb") as i, open(decompressed_file_1, "wb") as o:
             while True:
                 buf = i.read()
                 if buf == b"":
@@ -401,9 +395,7 @@ class TestFileCompress(TestFileTransform):
             assert "This is test 1" == f.read()
 
         decompressed_file_2 = os.path.join(self._out_dir, "test2.txt")
-        with gzip.open(compressed_file_2, "rb") as i, open(
-            decompressed_file_2, "wb"
-        ) as o:
+        with gzip.open(compressed_file_2, "rb") as i, open(decompressed_file_2, "wb") as o:
             while True:
                 buf = i.read()
                 if buf == b"":
@@ -429,9 +421,7 @@ class TestFileCompress(TestFileTransform):
         assert os.path.exists(compressed_file_2)
 
         decompressed_file_1 = os.path.join(self._out_dir, "test1.txt")
-        with bz2.open(compressed_file_1, mode="rb") as i, open(
-            decompressed_file_1, mode="wb"
-        ) as o:
+        with bz2.open(compressed_file_1, mode="rb") as i, open(decompressed_file_1, mode="wb") as o:
             while True:
                 buf = i.read()
                 if buf == b"":
@@ -441,9 +431,7 @@ class TestFileCompress(TestFileTransform):
             assert "This is test 1" == f.read()
 
         decompressed_file_2 = os.path.join(self._out_dir, "test2.txt")
-        with bz2.open(compressed_file_2, mode="rb") as i, open(
-            decompressed_file_2, mode="wb"
-        ) as o:
+        with bz2.open(compressed_file_2, mode="rb") as i, open(decompressed_file_2, mode="wb") as o:
             while True:
                 buf = i.read()
                 if buf == b"":
@@ -454,35 +442,6 @@ class TestFileCompress(TestFileTransform):
 
 
 class TestDateFormatConvert(TestFileTransform):
-    # TODO Old version test.
-    def test_convert_ok_old(self):
-        src = os.path.join(self._data_dir, "test.csv")
-        obj = [
-            {"No": "1", "date": "2021/01/01 12:00:00"},
-        ]
-        with open(src, mode="w", encoding="utf-8") as f:
-            writer = csv.DictWriter(f, list(obj[0].keys()), quoting=csv.QUOTE_ALL)
-            writer.writeheader()
-            for r in obj:
-                writer.writerow(r)
-
-        instance = DateFormatConvert()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test\.csv")
-        Helper.set_property(instance, "columns", ["date"])
-        Helper.set_property(instance, "formatter", "%Y-%m-%d %H:%M")
-        dest_path = os.path.join(self._out_dir, "test.csv")
-        Helper.set_property(instance, "dest_path", dest_path)
-        instance.execute()
-        rows = 0
-        with open(dest_path, mode="r", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                rows += 1
-                assert "2021-01-01 12:00" == row.get("date")
-        assert rows == len(obj)
-
     def test_convert_ok(self):
         src = os.path.join(self._data_dir, "test.csv")
         obj = [
@@ -511,63 +470,6 @@ class TestDateFormatConvert(TestFileTransform):
 
 
 class TestExcelConvert(TestFileTransform):
-    # TODO Old version test.
-    def test_execute_ng_invalid_extension_old(self):
-        with pytest.raises(InvalidFormat) as execinfo:
-            # create test file
-            excel_file = os.path.join(self._data_dir, "test.xlxs")
-            open(excel_file, "w").close()
-            excel_file2 = os.path.join(self._data_dir, "test.xlxs.bk")
-            open(excel_file2, "w").close()
-
-            # set the essential attributes
-            instance = ExcelConvert()
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-            Helper.set_property(instance, "src_dir", self._data_dir)
-            Helper.set_property(instance, "src_pattern", "test.xlxs")
-            Helper.set_property(instance, "dest_dir", self._data_dir)
-            Helper.set_property(instance, "dest_pattern", "test.xlxs")
-            instance.execute()
-        assert "not supported" in str(execinfo.value)
-
-    # TODO Old version test.
-    def test_excute_ng_multiple_src_old(self):
-        with pytest.raises(InvalidCount) as execinfo:
-            excel_file = os.path.join(self._data_dir, "test1.xlxs")
-            open(excel_file, "w").close()
-            excel_file2 = os.path.join(self._data_dir, "test2.xlxs")
-            open(excel_file2, "w").close()
-
-            # set the essential attributes
-            instance = ExcelConvert()
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-            Helper.set_property(instance, "src_dir", self._data_dir)
-            Helper.set_property(instance, "src_pattern", r"test(.*)\.xlxs")
-            Helper.set_property(instance, "dest_dir", self._data_dir)
-            Helper.set_property(instance, "dest_pattern", r"test(.*).xlxs")
-            instance.execute()
-
-        assert "must be only one" in str(execinfo.value)
-
-    # TODO Old version test.
-    def test_execute_ok_old(self):
-        # create test file
-        excel_file = os.path.join(self._data_dir, "test.xlxs")
-        workbook = xlsxwriter.Workbook(excel_file)
-        workbook.close()
-
-        # set the essential attributes
-        instance = ExcelConvert()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test\.xlxs")
-        Helper.set_property(instance, "dest_dir", self._data_dir)
-        Helper.set_property(instance, "dest_pattern", "test.csv")
-        instance.execute()
-
-        exists_csv = glob(os.path.join(self._data_dir, "test.csv"))
-        assert "test.csv" in exists_csv[0]
-
     def test_convert_ok(self):
         excel_file = os.path.join(self._data_dir, "test.xlxs")
         workbook = xlsxwriter.Workbook(excel_file)
@@ -585,35 +487,6 @@ class TestExcelConvert(TestFileTransform):
 
 
 class TestFileDivide(TestFileTransform):
-    # TODO Old version test.
-    def test_execute_old(self):
-        file1 = os.path.join(self._data_dir, "test.txt")
-        with open(file1, mode="w", encoding="utf-8") as f:
-            for i in range(100):
-                f.write("%s\n" % str(i))
-
-        instance = FileDivide()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test\.txt")
-        Helper.set_property(instance, "dest_dir", self._out_dir)
-        Helper.set_property(instance, "dest_pattern", "out.txt")
-        Helper.set_property(instance, "divide_rows", 10)
-        instance.execute()
-
-        row_index = 0
-        for i in range(1, 11):
-            file = os.path.join(self._out_dir, "out.%s.txt" % i)
-            assert os.path.exists(file)
-            with open(file, "r", encoding="utf-8", newline="") as f:
-                while True:
-                    line = f.readline()
-                    if line:
-                        assert str(row_index) == line.splitlines()[0]
-                        row_index += 1
-                    else:
-                        break
-
     def test_execute_ok(self):
         file1 = os.path.join(self._data_dir, "test.txt")
         with open(file1, mode="w", encoding="utf-8") as f:
@@ -864,69 +737,6 @@ class TestFileConvert(TestFileTransform):
 
 
 class TestFileArchive(TestFileTransform):
-    # TODO Old version test.
-    def test_compress_tar_old(self):
-        test_file = os.path.join(self._data_dir, "test.txt")
-
-        with open(test_file, "w") as t:
-            t.write("ABCDEF")
-
-        # set the essential attributes
-        instance = FileArchive()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test\.txt")
-        Helper.set_property(instance, "format", "tar")
-        Helper.set_property(instance, "dest_pattern", "foo")
-        instance.execute()
-
-        files = glob(os.path.join(self._data_dir, "*.tar"))
-        assert 1 == len(files)
-        assert "foo.tar" == os.path.basename(files[0])
-
-    # TODO Old version test.
-    def test_compress_zip_old(self):
-        test_file = os.path.join(self._data_dir, "test.txt")
-
-        with open(test_file, "w") as t:
-            t.write("ABCDEF")
-
-        # set the essential attributes
-        instance = FileArchive()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test\.txt")
-        Helper.set_property(instance, "format", "zip")
-        Helper.set_property(instance, "dest_pattern", "foo")
-        instance.execute()
-
-        files = glob(os.path.join(self._data_dir, "*.zip"))
-        assert 1 == len(files)
-        assert "foo.zip" == os.path.basename(files[0])
-
-    # TODO Old version test.
-    def test_compress_with_path_old(self):
-        result_dir = os.path.join(self._data_dir, "out")
-        os.makedirs(result_dir, exist_ok=True)
-        test_file = os.path.join(self._data_dir, "test.txt")
-
-        with open(test_file, "w") as t:
-            t.write("ABCDEF")
-
-        # set the essential attributes
-        instance = FileArchive()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test\.txt")
-        Helper.set_property(instance, "format", "zip")
-        Helper.set_property(instance, "dest_dir", result_dir)
-        Helper.set_property(instance, "dest_pattern", "foo")
-        instance.execute()
-
-        files = glob(os.path.join(result_dir, "foo.zip"))
-        assert 1 == len(files)
-        assert "foo.zip" == os.path.basename(files[0])
-
     def test_compress_tar(self):
         test_file = os.path.join(self._data_dir, "test.txt")
 

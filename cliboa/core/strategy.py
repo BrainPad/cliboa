@@ -81,8 +81,7 @@ class MultiProcExecutor(StepExecutor):
 
     def execute_steps(self, args):
         self._logger.info(
-            "Multi process start. Execute step count=%s."
-            % ScenarioQueue.step_queue.multi_proc_cnt
+            "Multi process start. Execute step count=%s." % ScenarioQueue.step_queue.multi_proc_cnt
         )
         install_mp_handler()
         packed = [cloudpickle.dumps(step) for step in self._step]

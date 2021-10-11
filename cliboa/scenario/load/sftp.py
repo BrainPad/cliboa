@@ -72,56 +72,6 @@ class SftpBaseLoad(BaseStep):
         self._retry_count = retry_count
 
 
-# deprecated
-class SftpFileLoad(SftpBaseLoad):
-    """
-    deprecated
-    Please Use SftpUpload instead.
-
-    Upload file to sftp server
-    """
-
-    def __init__(self):
-        SftpBaseLoad.__init__(self)
-
-    def execute(self, *args):
-        self._logger.warning("Deprecated. Please Use SftpUpload instead.")
-
-        # essential parameters check
-        valid = EssentialParameters(
-            self.__class__.__name__,
-            [self._host, self._user, self._src_dir, self._src_pattern, self._dest_dir],
-        )
-        valid()
-
-        if isinstance(self._key, str):
-            self._logger.warning(
-                (
-                    "DeprecationWarning: "
-                    "In the near future, "
-                    "the `key` will be changed to accept only dictionary types."
-                )
-            )
-            key_filepath = self._key
-        else:
-            key_filepath = self._source_path_reader(self._key)
-
-        sftp = Sftp(
-            self._host,
-            self._user,
-            self._password,
-            key_filepath,
-            self._passphrase,
-            self._timeout,
-            self._retry_count,
-            self._port,
-        )
-
-        files = super().get_target_files(self._src_dir, self._src_pattern)
-        for file in files:
-            sftp.put_file(file, os.path.join(self._dest_dir, os.path.basename(file)))
-
-
 class SftpUpload(SftpBaseLoad):
     """
     Upload file to sftp server

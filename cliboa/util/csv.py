@@ -16,7 +16,6 @@ from cliboa.util.exception import CliboaException
 
 
 class Csv(object):
-
     @staticmethod
     def quote_convert(string):
         """
@@ -45,9 +44,7 @@ class Csv(object):
         elif string.upper() == "TSV":
             return "\t"
         else:
-            raise CliboaException(
-                "Unknown string. One of the followings are allowed [CSV, TSV]"
-            )
+            raise CliboaException("Unknown string. One of the followings are allowed [CSV, TSV]")
 
     @staticmethod
     def newline_convert(string):
@@ -65,10 +62,7 @@ class Csv(object):
 
     @staticmethod
     def extract_columns_with_names(
-        input_file,
-        output_file,
-        remain_column_names,
-        enc="utf-8",
+        input_file, output_file, remain_column_names, enc="utf-8",
     ):
         """
         Extract only the necessary columns from a CSV file and output a new CSV
@@ -93,9 +87,7 @@ class Csv(object):
             out_f.flush()
 
     @staticmethod
-    def extract_columns_with_numbers(
-        input_file, output_file, remain_column_numbers, enc="utf-8"
-    ):
+    def extract_columns_with_numbers(input_file, output_file, remain_column_numbers, enc="utf-8"):
         """
         Extract only the necessary columns from a CSV file and output a new CSV
 

@@ -11,11 +11,7 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import ast
-import csv
-
 from cliboa.scenario.base import BaseStep
-from cliboa.scenario.validator import IOOutput
 
 
 class FileWrite(BaseStep):
@@ -45,43 +41,3 @@ class FileWrite(BaseStep):
 
     def mode(self, mode):
         self._mode = mode
-
-
-class CsvWrite(FileWrite):
-    """
-    Write data fetched by io: input to csv file
-
-    Deprecated.
-    """
-
-    def __init__(self):
-        super().__init__()
-
-    def execute(self, *args):
-        self._logger.warning("Deprecated. Please do not use this class.")
-
-        super().execute()
-        input_valid = IOOutput(self._io)
-        input_valid()
-
-        with open(self._s.cache_file, "r", encoding=self._encoding) as i, open(
-            self._dest_path, self._mode, encoding=self._encoding
-        ) as o:
-            writer = csv.writer(o, quoting=csv.QUOTE_ALL)
-
-            # write csv header
-            head_dict = ast.literal_eval(i.readline())
-            header = []
-            for k in head_dict.keys():
-                header.append(k)
-            writer.writerow(header)
-
-            # write as csv per one line
-            i.seek(0)
-            for l_str in i:
-                l_dict = ast.literal_eval(l_str)
-                contents = []
-                for k, v in l_dict.items():
-                    contents.append(v)
-                writer.writerow(contents)
-        self._s.remove()

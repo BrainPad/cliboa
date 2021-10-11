@@ -79,8 +79,7 @@ class GpgGenerateKey(GpgBase):
     def execute(self, *args):
         super().execute()
 
-        valid = EssentialParameters(
-            self.__class__.__name__, [self._dest_dir, self._name_email])
+        valid = EssentialParameters(self.__class__.__name__, [self._dest_dir, self._name_email])
         valid()
 
         Gpg(self._gnupghome).generate_key(
@@ -167,10 +166,7 @@ class GpgDecrypt(GpgBase):
                     else os.path.join(self._src_dir, os.path.basename(root))
                 )
                 gpg.decrypt(
-                    file,
-                    dest_path,
-                    passphrase=self._passphrase,
-                    always_trust=self._always_trust,
+                    file, dest_path, passphrase=self._passphrase, always_trust=self._always_trust,
                 )
             else:
                 self._logger.warning("Extention was not gpg. %s" % file)
