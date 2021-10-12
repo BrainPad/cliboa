@@ -110,14 +110,6 @@ See [README.md](../README.md#markdown-header-write-a-scenario-of-etl-processing)
     },
     {
       "step": null,
-      "class": "CsvRead",
-      "io": "input",
-      "arguments": {
-        "src_path": "data/test.csv"
-      }
-    },
-    {
-      "step": null,
       "class": "SqliteImport",
       "arguments": {
         "dbname": "test.db",

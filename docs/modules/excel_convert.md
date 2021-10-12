@@ -11,7 +11,6 @@ Which means, currently only excel to csv is supported.
 |src_dir|Path of the directory which target files are placed.|Yes|None||
 |src_pattern|Regex which is to find target files.|Yes|None||
 |dest_dir|Path of the directory which is for output files.|No|None||
-|dest_pattern|Output file name|No|None|Deprecated. 'dest_pattern' will be unavailable in the near future.|
 |encoding|Character encoding when read and write|No|utf-8||
 |nonfile_error|Whether an error is thrown when files are not found in src_dir.|No|False||
 

@@ -1,5 +1,5 @@
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
+# Copyright BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -11,10 +11,6 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import os
-
-from cliboa.util.lisboa_log import LisboaLog
-
 global _STEP_ARGUMENT_CACHE
 global _PROCESS_STORE_CACHE
 _STEP_ARGUMENT_CACHE = {}
@@ -91,34 +87,3 @@ class ObjectStore(object):
             dict: Value. Returns None if the key does not exist
         """
         return _PROCESS_STORE_CACHE.get(k)
-
-
-class StorageIO(object):
-    """
-    Cache object to storage temporary
-    """
-
-    CACHE_PREFIX = "cliboa_cache_"
-    CACHE_SUFFIX = ".tmp"
-
-    def __init__(self):
-        self._logger = LisboaLog.get_logger(__name__)
-        # Add process id to create an unique cache file name
-        self._cache_file = "/tmp/" + self.CACHE_PREFIX + str(os.getpid()) + self.CACHE_SUFFIX
-
-    @property
-    def cache_file(self):
-        return self._cache_file
-
-    def save(self, v):
-        """
-        Save one column of input data to storage as a temporal file.
-        """
-        with open(self._cache_file, "a", encoding="utf-8") as f:
-            f.write(str(v) + "\n")
-
-    def remove(self):
-        """
-        Remove a cache file
-        """
-        os.remove(self._cache_file)

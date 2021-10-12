@@ -9,7 +9,6 @@ This class behaves exactly same with the method 'pandas.concat'.
 |src_pattern|Regex which is to find target files.|Yes|None||
 |src_filenames|File names of source to concat.|No|None|Specify either src_pattern or src_filenames is essential.|
 |dest_dir|Path of the directory which is for output files.|No|None||
-|dest_pattern|Destination of file pattern to concat|No|None|Deprecated. Use dest_name instead.|
 |dest_name|Output file name|Yes|None||
 |encoding|Character encoding when read and write|No|utf-8||
 

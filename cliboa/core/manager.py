@@ -174,7 +174,7 @@ class ScenarioManager(object):
             ret = self._set_values(instance, cls_attrs_dict, with_vars)
             values.update(ret)
 
-        base_args = ["step", "symbol", "parallel", "io", "listeners"]
+        base_args = ["step", "symbol", "parallel", "listeners"]
         for arg in base_args:
             if arg == "listeners":
                 self._append_listeners(instance, s_dict.get(arg), values)
