@@ -95,7 +95,6 @@ class SqliteTransaction(BaseSqlite):
 class SqliteQueryExecute(SqliteTransaction):
     """
     Execute only row query of insert, update or delete
-    If would like to execute read query, use SqliteRead class
     """
 
     def __init__(self):

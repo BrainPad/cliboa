@@ -1,5 +1,5 @@
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
+# Copyright BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -12,7 +12,7 @@
 # all copies or substantial portions of the Software.
 #
 
-from cliboa.util.exception import InvalidParameter, ScenarioFileInvalid, SqliteInvalid
+from cliboa.util.exception import InvalidParameter, SqliteInvalid
 from cliboa.util.lisboa_log import LisboaLog
 from cliboa.util.sqlite import SqliteAdapter
 
@@ -72,29 +72,3 @@ class SqliteTableExistence(object):
 
         finally:
             self._sqlite_adptr.close()
-
-
-class IOInput(object):
-    """
-    Validation for io: input
-    """
-
-    def __init__(self, io):
-        self._io = io
-
-    def __call__(self):
-        if self._io != "input":
-            raise ScenarioFileInvalid("io: input is not specified.")
-
-
-class IOOutput(object):
-    """
-    Validation for io: input
-    """
-
-    def __init__(self, io):
-        self._io = io
-
-    def __call__(self):
-        if self._io != "output":
-            raise ScenarioFileInvalid("io: output is not specified.")
