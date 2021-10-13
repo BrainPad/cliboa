@@ -9,7 +9,6 @@ This class behaves exactly same with the method 'pandas.merge'.
 |src1_pattern|File pattern of source to merge. Regexp is available.|Yes|None||
 |src2_pattern|File pattern of source to merge. Regexp is available.|Yes|None||
 |dest_dir|Path of the directory which is for output files.|No|None||
-|dest_pattern|Destination of file pattern to merge|No|None|Deprecated. Use dest_name instead.|
 |dest_name|Output file name|Yes|None||
 |encoding|Character encoding when read and write|No|utf-8||
 

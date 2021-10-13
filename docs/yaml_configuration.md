@@ -89,11 +89,6 @@ scenario:
     dest_dir: data
     dest_pattern: test.csv
 - step:
-  class: CsvRead
-  io: input
-  arguments:
-    src_path: data/test.csv
-- step:
   class: SqliteImport
   arguments:
     dbname: test.db

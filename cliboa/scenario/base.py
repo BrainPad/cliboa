@@ -18,7 +18,7 @@ import tempfile
 from abc import abstractmethod
 
 from cliboa.conf import env
-from cliboa.util.cache import StepArgument, StorageIO
+from cliboa.util.cache import StepArgument
 from cliboa.util.exception import FileNotFound, InvalidParameter
 from cliboa.util.file import File
 
@@ -29,11 +29,9 @@ class BaseStep(object):
     """
 
     def __init__(self):
-        self._s = StorageIO()
         self._step = None
         self._symbol = None
         self._parallel = None
-        self._io = None
         self._logger = None
         self._listeners = []
 
@@ -45,9 +43,6 @@ class BaseStep(object):
 
     def parallel(self, parallel):
         self._parallel = parallel
-
-    def io(self, io):
-        self._io = io
 
     def logger(self, logger):
         self._logger = logger
