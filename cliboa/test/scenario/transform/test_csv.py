@@ -24,6 +24,7 @@ from cliboa.scenario.transform.csv import (
     CsvColumnConcat,
     CsvColumnExtract,
     ColumnLengthAdjust,
+    CsvColumnSelect,
     CsvConcat,
     CsvConvert,
     CsvMerge,
@@ -248,6 +249,98 @@ class TestCsvColumnExtract(TestCsvTransform):
                     test_csv_data[2][2],
                 ]
         assert rows == len(test_csv_data)
+
+
+class TestCsvColumnSelect(TestCsvTransform):
+    def test_execute_ok(self):
+        # create test csv
+        test_csv_data = [["key", "data", "name"],
+                         ["1", "spam1", "SPAM1"],
+                         ["2", "spam2", "SPAM2"]]
+        self._create_csv(test_csv_data)
+
+        column_order = ['name', 'key', 'data']
+
+        # set the essential attributes
+        instance = CsvColumnSelect()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "column_order", column_order)
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            for i, row in enumerate(reader):
+                if i == 0:
+                    self.assertEqual(
+                        ["name", "key", "data"],
+                        row)
+                if i == 1:
+                    self.assertEqual(
+                        ["SPAM1", "1", "spam1"],
+                        row)
+                if i == 2:
+                    self.assertEqual(
+                        ["SPAM2", "2", "spam2"],
+                        row)
+
+    def test_execute_ok_define_part_of_src_columns(self):
+        # create test csv
+        test_csv_data = [["key", "data", "name"],
+                         ["1", "spam1", "SPAM1"],
+                         ["2", "spam2", "SPAM2"]]
+        self._create_csv(test_csv_data)
+
+        column_order = ['name', 'key']
+
+        # set the essential attributes
+        instance = CsvColumnSelect()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "column_order", column_order)
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            for i, row in enumerate(reader):
+                if i == 0:
+                    self.assertEqual(
+                        ["name", "key"],
+                        row)
+                if i == 1:
+                    self.assertEqual(
+                        ["SPAM1", "1"],
+                        row)
+                if i == 2:
+                    self.assertEqual(
+                        ["SPAM2", "2"],
+                        row)
+
+    def test_execute_ng_define_not_included_column(self):
+        # create test csv
+        test_csv_data = [["key", "data", "name"],
+                         ["1", "spam1", "SPAM1"],
+                         ["2", "spam2", "SPAM2"]]
+        self._create_csv(test_csv_data)
+
+        column_order = ['name', 'key', 'data', 'dummy']
+
+        # set the essential attributes
+        instance = CsvColumnSelect()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "column_order", column_order)
+        with pytest.raises(InvalidParameter) as execinfo:
+            instance.execute()
+        assert \
+            "column_order define not included target file's column : {'dummy'}"\
+            == str(execinfo.value)
 
 
 class TestCsvColumnConcat(TestCsvTransform):
