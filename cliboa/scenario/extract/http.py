@@ -23,9 +23,12 @@ class HttpExtract(BaseStep):
     def __init__(self):
         super().__init__()
         self._src_url = None
+        # TODO deprecated.
         self._src_pattern = None
         self._dest_dir = None
+        # TODO deprecated.
         self._dest_pattern = None
+        self._dest_name = None
         self._timeout = 30
         self._retry_count = 3
 
@@ -41,6 +44,9 @@ class HttpExtract(BaseStep):
     def dest_pattern(self, dest_pattern):
         self._dest_pattern = dest_pattern
 
+    def dest_name(self, dest_name):
+        self._dest_name = dest_name
+
     def timeout(self, timeout):
         self._timeout = timeout
 
@@ -48,11 +54,7 @@ class HttpExtract(BaseStep):
         self._retry_count = retry_count
 
     def execute(self, *args):
-        # essential parameters check
-        valid = EssentialParameters(
-            self.__class__.__name__, [self._src_url, self._src_pattern, self._dest_dir]
-        )
-        valid()
+        pass
 
 
 class HttpDownload(HttpExtract):
@@ -60,16 +62,29 @@ class HttpDownload(HttpExtract):
         super().__init__()
 
     def execute(self, *args):
-        super().execute()
-
         os.makedirs(self._dest_dir, exist_ok=True)
 
-        url = os.path.join(self._src_url, self._src_pattern)
-        dest_path = (
-            os.path.join(self._dest_dir, self._dest_pattern)
-            if self._dest_pattern
-            else os.path.join(self._dest_dir, self._src_pattern)
-        )
+        if self._src_pattern:
+            # Deprecated URL must be a specific string, does not have to be a pattern of regex.
+            self._logger.warning(
+                "Deprecated URL must be a specific string, does not have to be a pattern of regex.")
+            valid = EssentialParameters(
+                self.__class__.__name__, [self._src_url, self._src_pattern, self._dest_dir]
+            )
+            valid()
+            url = os.path.join(self._src_url, self._src_pattern)
+            dest_path = (
+                os.path.join(self._dest_dir, self._dest_pattern)
+                if self._dest_pattern
+                else os.path.join(self._dest_dir, self._src_pattern)
+            )
+        else:
+            valid = EssentialParameters(
+                self.__class__.__name__, [self._src_url, self._dest_dir, self._dest_name]
+            )
+            valid()
+            url = self._src_url
+            dest_path = os.path.join(self._dest_dir, self._dest_name)
 
         d = Download(url, dest_path, self._timeout, self._retry_count, **self.get_params())
         d.execute()
