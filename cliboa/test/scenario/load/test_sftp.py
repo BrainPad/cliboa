@@ -27,86 +27,78 @@ from cliboa.util.lisboa_log import LisboaLog
 class TestSftpUpload(object):
     def setup_method(self, method):
         self._data_dir = os.path.join(env.BASE_DIR, "data")
+        os.makedirs(self._data_dir, exist_ok=True)
+
+    def tearDown(self):
+        shutil.rmtree(self._data_dir, ignore_errors=True)
 
     def test_execute_with_files(self):
-        try:
-            os.makedirs(self._data_dir)
-            dir_path = Path(self._data_dir)
-            (dir_path / "a.txt").touch()
-            (dir_path / "b.txt").touch()
-            (dir_path / "c.exe").touch()
+        dir_path = Path(self._data_dir)
+        (dir_path / "a.txt").touch()
+        (dir_path / "b.txt").touch()
+        (dir_path / "c.exe").touch()
 
-            instance = SftpUpload()
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-            Helper.set_property(instance, "host", "dummy.host")
-            Helper.set_property(instance, "user", "dummy_user")
-            Helper.set_property(instance, "password", "dummy_pass")
-            Helper.set_property(instance, "src_dir", self._data_dir)
-            Helper.set_property(instance, "src_pattern", ".*.txt")
-            Helper.set_property(instance, "dest_dir", self._data_dir)
-            Helper.set_property(instance, "step", "sftp_class")
+        instance = SftpUpload()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "host", "dummy.host")
+        Helper.set_property(instance, "user", "dummy_user")
+        Helper.set_property(instance, "password", "dummy_pass")
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", ".*.txt")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "step", "sftp_class")
 
-            with ExitStack() as stack:
-                mock_sftp = stack.enter_context(patch("cliboa.util.sftp.Sftp.put_file"))
+        with ExitStack() as stack:
+            mock_sftp = stack.enter_context(patch("cliboa.adapter.sftp.SftpAdapter.execute"))
 
-                instance.execute()
+            instance.execute()
 
-                assert mock_sftp.called
-        finally:
-            shutil.rmtree(self._data_dir)
+            assert mock_sftp.called
 
     def test_execute_with_key(self):
-        try:
-            os.makedirs(self._data_dir)
-            dummy_pass = os.path.join(self._data_dir, "id_rsa")
-            with open(dummy_pass, "w") as f:
-                f.write("test")
-            dir_path = Path(self._data_dir)
-            (dir_path / "a.txt").touch()
-            (dir_path / "b.txt").touch()
-            (dir_path / "c.exe").touch()
+        dummy_pass = os.path.join(self._data_dir, "id_rsa")
+        with open(dummy_pass, "w") as f:
+            f.write("test")
+        dir_path = Path(self._data_dir)
+        (dir_path / "a.txt").touch()
+        (dir_path / "b.txt").touch()
+        (dir_path / "c.exe").touch()
 
-            instance = SftpUpload()
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-            Helper.set_property(instance, "host", "dummy.host")
-            Helper.set_property(instance, "user", "dummy_user")
-            Helper.set_property(instance, "key", dummy_pass)
-            Helper.set_property(instance, "src_dir", self._data_dir)
-            Helper.set_property(instance, "src_pattern", ".*.txt")
-            Helper.set_property(instance, "dest_dir", self._data_dir)
-            Helper.set_property(instance, "step", "sftp_class")
+        instance = SftpUpload()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "host", "dummy.host")
+        Helper.set_property(instance, "user", "dummy_user")
+        Helper.set_property(instance, "key", dummy_pass)
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", ".*.txt")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "step", "sftp_class")
 
-            with ExitStack() as stack:
-                mock_sftp = stack.enter_context(patch("cliboa.util.sftp.Sftp.put_file"))
+        with ExitStack() as stack:
+            mock_sftp = stack.enter_context(patch("cliboa.adapter.sftp.SftpAdapter.execute"))
 
-                instance.execute()
+            instance.execute()
 
-                assert mock_sftp.called
-        finally:
-            shutil.rmtree(self._data_dir)
+            assert mock_sftp.called
 
     def test_execute_with_key_content(self):
-        try:
-            os.makedirs(self._data_dir)
-            dir_path = Path(self._data_dir)
-            (dir_path / "a.txt").touch()
-            (dir_path / "b.txt").touch()
-            (dir_path / "c.exe").touch()
-            instance = SftpUpload()
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-            Helper.set_property(instance, "host", "dummy.host")
-            Helper.set_property(instance, "user", "dummy_user")
-            Helper.set_property(instance, "key", {"content": "dummy_rsa"})
-            Helper.set_property(instance, "src_dir", self._data_dir)
-            Helper.set_property(instance, "src_pattern", ".*.txt")
-            Helper.set_property(instance, "dest_dir", self._data_dir)
-            Helper.set_property(instance, "step", "sftp_class")
+        dir_path = Path(self._data_dir)
+        (dir_path / "a.txt").touch()
+        (dir_path / "b.txt").touch()
+        (dir_path / "c.exe").touch()
+        instance = SftpUpload()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "host", "dummy.host")
+        Helper.set_property(instance, "user", "dummy_user")
+        Helper.set_property(instance, "key", {"content": "dummy_rsa"})
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", ".*.txt")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "step", "sftp_class")
 
-            with ExitStack() as stack:
-                mock_sftp = stack.enter_context(patch("cliboa.util.sftp.Sftp.put_file"))
+        with ExitStack() as stack:
+            mock_sftp = stack.enter_context(patch("cliboa.adapter.sftp.SftpAdapter.execute"))
 
-                instance.execute()
+            instance.execute()
 
-                assert mock_sftp.called
-        finally:
-            shutil.rmtree(self._data_dir)
+            assert mock_sftp.called

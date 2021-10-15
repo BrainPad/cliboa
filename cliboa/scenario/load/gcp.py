@@ -17,11 +17,11 @@ import os
 
 import pandas
 
+from cliboa.adapter.gcp import ServiceAccount, BigQueryAdapter, FireStoreAdapter, GcsAdapter
 from cliboa.core.validator import EssentialParameters
 from cliboa.scenario.gcp import BaseBigQuery, BaseFirestore, BaseGcs
 from cliboa.scenario.load.file import FileWrite
 from cliboa.util.exception import FileNotFound, InvalidFormat
-from cliboa.util.gcp import BigQuery, Firestore, Gcs, ServiceAccount
 
 
 class BigQueryWrite(BaseBigQuery, FileWrite):
@@ -126,26 +126,13 @@ class BigQueryWrite(BaseBigQuery, FileWrite):
         dest_tbl = self._dataset + "." + self._tblname
         self._logger.info("Start insert %s rows to %s" % (len(insert_rows), dest_tbl))
 
-        if isinstance(self._credentials, str):
-            self._logger.warning(
-                (
-                    "DeprecationWarning: "
-                    "In the near future, "
-                    "the `credentials` will be changed to accept only dictionary types. "
-                    "Please see more information "
-                    "https://github.com/BrainPad/cliboa/blob/master/docs/modules/bigquery_write.md"
-                )
-            )
-            key_filepath = self._credentials
-        else:
-            key_filepath = self._source_path_reader(self._credentials)
         df.to_gbq(
             dest_tbl,
             project_id=self._project_id,
             if_exists=if_exists,
             table_schema=self._table_schema,
             location=self._location,
-            credentials=ServiceAccount.auth(key_filepath),
+            credentials=ServiceAccount().auth(self.get_credentials()),
         )
 
     def _format_insert_data(self, insert_rows):
@@ -196,20 +183,7 @@ class GcsUpload(BaseGcs):
         valid = EssentialParameters(self.__class__.__name__, [self._src_dir, self._src_pattern])
         valid()
 
-        if isinstance(self._credentials, str):
-            self._logger.warning(
-                (
-                    "DeprecationWarning: "
-                    "In the near future, "
-                    "the `credentials` will be changed to accept only dictionary types. "
-                    "Please see more information "
-                    "https://github.com/BrainPad/cliboa/blob/master/docs/modules/gcs_upload.md"
-                )
-            )
-            key_filepath = self._credentials
-        else:
-            key_filepath = self._source_path_reader(self._credentials)
-        gcs_client = Gcs.get_gcs_client(key_filepath)
+        gcs_client = GcsAdapter().get_client(credentials=self.get_credentials())
         bucket = gcs_client.bucket(self._bucket)
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self._logger.info("Upload files %s" % files)
@@ -248,21 +222,7 @@ class FirestoreDocumentCreate(BaseFirestore):
         if len(files) == 0:
             raise FileNotFound("No files are found.")
 
-        if isinstance(self._credentials, str):
-            self._logger.warning(
-                (
-                    "DeprecationWarning: "
-                    "In the near future, "
-                    "the `credentials` will be changed to accept only dictionary types. "
-                    "Please see more information "
-                    "https://github.com/BrainPad/cliboa/blob/master/docs/modules/firestore_document_create.md"  # noqa
-                )
-            )
-            key_filepath = self._credentials
-        else:
-            key_filepath = self._source_path_reader(self._credentials)
-        firestore_client = Firestore.get_firestore_client(key_filepath)
-
+        firestore_client = FireStoreAdapter().get_client(self.get_credentials())
         for file in files:
             with open(file) as f:
                 fname = os.path.splitext(os.path.basename(file))[0]
@@ -295,9 +255,6 @@ class BigQueryCopy(BaseBigQuery):
         )
         valid()
 
-        # Read Credentials
-        key_filepath = self._source_path_reader(self._credentials)
-
         # Define Source Table and Destination Table
         source_table_id = "{}.{}.{}".format(self._project_id, self._dataset, self._tblname)
         destination_table_id = "{}.{}.{}".format(
@@ -305,8 +262,10 @@ class BigQueryCopy(BaseBigQuery):
         )
 
         # Client Setup
-        gbq_client = BigQuery.get_bigquery_client(
-            credentials=key_filepath, project=self._project_id, location=self._location
+        gbq_client = BigQueryAdapter().get_client(
+            credentials=self.get_credentials(),
+            project=self._project_id,
+            location=self._location,
         )
 
         # Create Copy Job

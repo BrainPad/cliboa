@@ -1,5 +1,5 @@
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
+# Copyright BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -11,59 +11,18 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import os
 import re
 
-from cliboa.scenario.base import BaseStep
+from cliboa.scenario.ftp import BaseFtp
 from cliboa.scenario.validator import EssentialParameters
 from cliboa.util.cache import ObjectStore
 from cliboa.util.constant import StepStatus
 from cliboa.util.ftp_util import FtpUtil
 
 
-class FtpExtract(BaseStep):
+class FtpExtract(BaseFtp):
     def __init__(self):
         super().__init__()
-        self._src_dir = None
-        self._src_pattern = None
-        self._dest_dir = ""
-        self._host = None
-        self._port = 21
-        self._user = None
-        self._password = None
-        self._timeout = 30
-        self._retry_count = 3
-        self._tls = False
-
-    def src_dir(self, src_dir):
-        self._src_dir = src_dir
-
-    def src_pattern(self, src_pattern):
-        self._src_pattern = src_pattern
-
-    def dest_dir(self, dest_dir):
-        self._dest_dir = dest_dir
-
-    def host(self, host):
-        self._host = host
-
-    def port(self, port):
-        self._port = port
-
-    def user(self, user):
-        self._user = user
-
-    def password(self, password):
-        self._password = password
-
-    def timeout(self, timeout):
-        self._timeout = timeout
-
-    def retry_count(self, retry_count):
-        self._retry_count = retry_count
-
-    def tls(self, tls):
-        self._tls = tls
 
 
 class FtpDownload(FtpExtract):
@@ -85,19 +44,14 @@ class FtpDownload(FtpExtract):
         )
         valid()
 
-        os.makedirs(self._dest_dir, exist_ok=True)
-
-        # fetch src
-        ftp_util = FtpUtil(
-            self._host,
-            self._user,
-            self._password,
-            self._timeout,
-            self._retry_count,
-            self._port,
-            self._tls,
+        obj = FtpUtil().list_files(
+            dir=self._src_dir,
+            dest=self._dest_dir,
+            pattern=re.compile(self._src_pattern),
         )
-        files = ftp_util.list_files(self._src_dir, self._dest_dir, re.compile(self._src_pattern))
+
+        adaptor = super().get_adaptor()
+        files = adaptor.execute(obj)
 
         if self._quit is True and len(files) == 0:
             self._logger.info("No file was found. After process will not be processed")
@@ -121,16 +75,21 @@ class FtpDownloadFileDelete(FtpExtract):
         if files is not None and len(files) > 0:
             self._logger.info("Delete files %s" % files)
 
-            ftp_util = FtpUtil(
-                super().get_step_argument("host"),
-                super().get_step_argument("user"),
-                super().get_step_argument("password"),
-                super().get_step_argument("timeout"),
-                super().get_step_argument("retry_count"),
-                super().get_step_argument("port"),
-                super().get_step_argument("tls"),
-            )
+            self._host = super().get_step_argument("host")
+            self._user = super().get_step_argument("user")
+            self._password = super().get_step_argument("password")
+            self._timeout = super().get_step_argument("timeout")
+            self._retry_count = super().get_step_argument("retry_count")
+            self._port = super().get_step_argument("port")
+            self._tls = super().get_step_argument("tls")
+
+            adaptor = super().get_adaptor()
             for file in files:
-                ftp_util.remove_specific_file(super().get_step_argument("src_dir"), file)
+                obj = FtpUtil().remove_specific_file(
+                    dir=self._src_dir,
+                    fname=file,
+                )
+                adaptor.execute(obj)
+                self._logger.info("%s is successfully deleted." % file)
         else:
             self._logger.info("No files to delete.")

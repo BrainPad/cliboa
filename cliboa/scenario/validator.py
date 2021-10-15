@@ -11,10 +11,9 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-
+from cliboa.adapter.sqlite import SqliteAdapter
 from cliboa.util.exception import InvalidParameter, SqliteInvalid
 from cliboa.util.lisboa_log import LisboaLog
-from cliboa.util.sqlite import SqliteAdapter
 
 
 class EssentialParameters(object):

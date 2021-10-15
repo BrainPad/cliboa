@@ -1,5 +1,5 @@
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
+# Copyright BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -11,47 +11,12 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import errno
 import os
-from datetime import datetime
-from ftplib import FTP, FTP_TLS
-from time import sleep
 
-from cliboa.util.lisboa_log import LisboaLog
+from datetime import datetime
 
 
 class FtpUtil(object):
-    """
-    FTP common operation
-    """
-
-    TIMEOUT_SEC = 30
-    RETRY_SEC = 10
-
-    def __init__(
-        self, host, user, password, timeout=TIMEOUT_SEC, retryTimes=3, port=21, tls=False,
-    ):
-        """
-        Must set whether password or key
-
-        Args:
-            host (str): hostname
-            user (str): username
-            password (str): password
-            timeout=30 (int): timeout seconds
-            retryTimes=3 (int): retry count
-            port=21 (int): port number
-            tls=False (bool): use secure connection
-        """
-
-        self._host = host
-        self._user = user
-        self._password = password
-        self._timeout = timeout
-        self._retryTimes = retryTimes
-        self._port = port
-        self._tls = tls
-        self._logger = LisboaLog.get_logger(__name__)
 
     def list_files(self, dir, dest, pattern):
         """
@@ -62,13 +27,21 @@ class FtpUtil(object):
             dest (str): local directory where to place downloaded files from ftp
             pattern (object): regular pattern matching
 
-        Returns:
-            list: downloaded file names
+        Returns (tuple):
+            func: list_file_func
+            params: parameters for list_file_func
 
         Raises:
             IOError: ftplib failure
         """
-        return self._execute(list_file_func, dir=dir, dest=dest, pattern=pattern)
+        return (
+            list_file_func,
+            {
+                "dir": dir,
+                "dest": dest,
+                "pattern": pattern,
+            }
+        )
 
     def clear_files(self, dir, pattern):
         """
@@ -78,10 +51,20 @@ class FtpUtil(object):
             dir (str): remove target dir
             pattern (object): remove target file pattern
 
+        Returns (tuple):
+            func: clear_file_func
+            params: parameters for clear_file_func
+
         Raises:
             IOError: failed to remove
         """
-        self._execute(clear_file_func, dir=dir, pattern=pattern)
+        return (
+            list_file_func,
+            {
+                "dir": dir,
+                "pattern": pattern,
+            }
+        )
 
     def remove_specific_file(self, dir, fname):
         """
@@ -91,10 +74,20 @@ class FtpUtil(object):
             dir (str): remove target dir
             fname (str): file name (exact match)
 
+        Returns (tuple):
+            func: remove_specific_file_func
+            params: parameters for remove_specific_file_func
+
         Raises:
             IOError: failed to remove
         """
-        self._execute(remove_specific_file_func, dir=dir, fname=fname)
+        return (
+            remove_specific_file_func,
+            {
+                "dir": dir,
+                "fname": fname,
+            }
+        )
 
     def file_mdtm(self, dir, unixtime=False):
         """
@@ -104,6 +97,11 @@ class FtpUtil(object):
             dir (str): directory
             unixtime=False (bool): Whether response time returns
                                    as str(yyyyMMddHHmmss) or unixtime
+
+        Returns (tuple):
+            func: file_mdtm_func
+            params: parameters for file_mdtm_func
+
         Returns:
             dict: {file name: update time}
 
@@ -111,50 +109,13 @@ class FtpUtil(object):
         Raises:
             IOError: ftplib failure
         """
-        return self._execute(file_mdtm_func, dir=dir, unixtime=unixtime)
-
-    def _execute(self, func, **kwargs):
-        """
-        Connect to ftp server and execute defined function.
-
-        Args:
-            func (function): Callback function after connected to the ftp server.
-            kwargs (dict): arguments
-                           key name 'ftp' is a reserved word. do NOT use it.
-
-        Raises:
-            ValueError: Arguments are empty
-            IOError: ftplib failure
-        """
-
-        if not func:
-            raise ValueError("Function must not be empty.")
-
-        for _ in range(self._retryTimes):
-            try:
-                return self._ftp_call(func, **kwargs)
-            except Exception as e:
-                self._logger.warning(e)
-                self._logger.warning(kwargs)
-
-            self._logger.warning("Unexpected error occurred. Retry will start in 10 sec.")
-            sleep(FtpUtil.RETRY_SEC)
-
-        raise IOError(errno.ENOENT, "FTP failed.")
-
-    def _ftp_call(self, func, **kwargs):
-        if self._tls:
-            with FTP_TLS(host=self._host, timeout=self._timeout) as ftp:
-                ftp.set_debuglevel(1)
-                ftp.login(user=self._user, passwd=self._password)
-                ftp.prot_p()
-                return func(ftp=ftp, **kwargs)
-        else:
-            with FTP() as ftp:
-                ftp.set_debuglevel(1)
-                ftp.connect(host=self._host, port=self._port, timeout=self._timeout)
-                ftp.login(user=self._user, passwd=self._password)
-                return func(ftp=ftp, **kwargs)
+        return (
+            file_mdtm_func,
+            {
+                "dir": dir,
+                "unixtime": unixtime,
+            }
+        )
 
 
 def list_file_func(**kwargs):

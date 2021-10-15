@@ -16,11 +16,12 @@ import os
 import re
 from datetime import datetime
 
+from cliboa.adapter.gcp import BigQueryAdapter, FireStoreAdapter, GcsAdapter
 from cliboa.scenario.gcp import BaseBigQuery, BaseFirestore, BaseGcs
 from cliboa.scenario.validator import EssentialParameters
 from cliboa.util.cache import ObjectStore
 from cliboa.util.exception import InvalidParameter
-from cliboa.util.gcp import BigQuery, Firestore, Gcs
+from cliboa.util.gcp import BigQuery
 from cliboa.util.string import StringUtil
 
 
@@ -73,28 +74,17 @@ class BigQueryRead(BaseBigQuery):
 
     def _save_to_cache(self):
         self._logger.info("Save data to on memory")
-        if isinstance(self._credentials, str):
-            self._logger.warning(
-                (
-                    "DeprecationWarning: "
-                    "In the near future, "
-                    "the `credentials` will be changed to accept only dictionary types. "
-                    "Please see more information "
-                    "https://github.com/BrainPad/cliboa/blob/master/docs/modules/bigquery_read.md"
-                )
-            )
-            key_filepath = self._credentials
-        else:
-            key_filepath = self._source_path_reader(self._credentials)
 
-        gbq_client = BigQuery.get_bigquery_client(
-            location=self._location, project=self._project_id, credentials=key_filepath
+        client = BigQueryAdapter().get_client(
+            credentials=self.get_credentials(),
+            project=self._project_id,
+            location=self._location,
         )
 
         query = "SELECT * FROM %s.%s" % (self._dataset, self._tblname)
         query = self._query if self._query else query
 
-        df = gbq_client.query(query).to_dataframe()
+        df = client.query(query).to_dataframe()
         ObjectStore.put(self._key, df)
 
     def _save_as_file_via_gcs(self):
@@ -105,26 +95,15 @@ class BigQueryRead(BaseBigQuery):
         path = "%s-%s" % (StringUtil().random_str(self._RANDOM_STR_LENGTH), ymd_hms,)
         prefix = "%s/%s/%s" % (self._dataset, self._tblname, path)
 
-        if isinstance(self._credentials, str):
-            self._logger.warning(
-                (
-                    "DeprecationWarning: "
-                    "In the near future, "
-                    "the `credentials` will be changed to accept only dictionary types. "
-                    "Please see more information "
-                    "https://github.com/BrainPad/cliboa/blob/master/docs/modules/bigquery_read.md"
-                )
-            )
-            key_filepath = self._credentials
-        else:
-            key_filepath = self._source_path_reader(self._credentials)
-        gbq_client = BigQuery.get_bigquery_client(key_filepath)
+        gbq_client = BigQueryAdapter().get_client(credentials=self.get_credentials())
+
         if self._dataset and self._tblname:
             table_ref = gbq_client.dataset(self._dataset).table(self._tblname)
         elif self._dataset and not self._tblname:
             tmp_tbl = "tmp_" + StringUtil().random_str(self._RANDOM_STR_LENGTH) + "_" + ymd_hms
             table_ref = gbq_client.dataset(self._dataset).table(tmp_tbl)
-        gcs_client = Gcs.get_gcs_client(key_filepath)
+
+        gcs_client = GcsAdapter().get_client(credentials=self.get_credentials())
         gcs_bucket = gcs_client.bucket(self._bucket)
 
         # extract job config settings
@@ -205,20 +184,7 @@ class GcsDownload(BaseGcs):
         valid = EssentialParameters(self.__class__.__name__, [self._src_pattern])
         valid()
 
-        if isinstance(self._credentials, str):
-            self._logger.warning(
-                (
-                    "DeprecationWarning: "
-                    "In the near future, "
-                    "the `credentials` will be changed to accept only dictionary types. "
-                    "Please see more information "
-                    "https://github.com/BrainPad/cliboa/blob/master/docs/modules/gcs_download.md"
-                )
-            )
-            key_filepath = self._credentials
-        else:
-            key_filepath = self._source_path_reader(self._credentials)
-        client = Gcs.get_gcs_client(key_filepath)
+        client = GcsAdapter().get_client(credentials=self.get_credentials())
         bucket = client.bucket(self._bucket)
         dl_files = []
         for blob in client.list_blobs(bucket, prefix=self._prefix, delimiter=self._delimiter):
@@ -244,7 +210,7 @@ class GcsDownloadFileDelete(BaseGcs):
 
         if len(dl_files) > 0:
             self._logger.info("Delete files %s" % dl_files)
-            client = self._gcs_client()
+            client = GcsAdapter().get_client(credentials=self.get_credentials())
             bucket = client.bucket(super().get_step_argument("bucket"))
             for blob in client.list_blobs(
                 bucket,
@@ -279,21 +245,8 @@ class FirestoreDocumentDownload(BaseFirestore):
         )
         valid()
 
-        if isinstance(self._credentials, str):
-            self._logger.warning(
-                (
-                    "DeprecationWarning: "
-                    "In the near future, "
-                    "the `credentials` will be changed to accept only dictionary types. "
-                    "Please see more information "
-                    "https://github.com/BrainPad/cliboa/blob/master/docs/modules/firestore_document_download.md"  # noqa
-                )
-            )
-            key_filepath = self._credentials
-        else:
-            key_filepath = self._source_path_reader(self._credentials)
-        firestore_client = Firestore.get_firestore_client(key_filepath)
-        ref = firestore_client.document(self._collection, self._document)
+        client = FireStoreAdapter().get_client(self.get_credentials())
+        ref = client.document(self._collection, self._document)
         doc = ref.get()
 
         with open(os.path.join(self._dest_dir, doc.id), mode="wt") as f:

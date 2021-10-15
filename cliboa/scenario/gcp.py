@@ -1,5 +1,5 @@
 #
-# Copyright 2020 BrainPad Inc. All Rights Reserved.
+# Copyright BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -11,7 +11,6 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-
 from cliboa.scenario.base import BaseStep
 from cliboa.scenario.validator import EssentialParameters
 
@@ -35,6 +34,21 @@ class BaseGcp(BaseStep):
     def execute(self, *args):
         valid = EssentialParameters(self.__class__.__name__, [self._project_id])
         valid()
+
+    def get_credentials(self):
+        if isinstance(self._credentials, str):
+            self._logger.warning(
+                (
+                    "DeprecationWarning: "
+                    "In the near future, "
+                    "the `key` will be changed to accept only dictionary types. "
+                    "Please see more information "
+                    "https://github.com/BrainPad/cliboa/blob/master/docs/modules/sftp_download.md"
+                )
+            )
+            return self._credentials
+        else:
+            return self._source_path_reader(self._credentials)
 
 
 class BaseBigQuery(BaseGcp):

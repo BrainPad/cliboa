@@ -27,34 +27,35 @@ from cliboa.util.lisboa_log import LisboaLog
 class TestAzureBlobUpload(object):
     def setup_method(self, method):
         self._data_dir = os.path.join(env.BASE_DIR, "data")
+        os.makedirs(self._data_dir, exist_ok=True)
+
+    def tearDown(self):
+        shutil.rmtree(self._data_dir, ignore_errors=True)
 
     @patch.object(BlobServiceAdapter, "get_client")
     def test_execute_ok(self, m_get_client):
         # Arrange
         service = m_get_client.return_value
         blob_client = service.get_blob_client.return_value
-        try:
-            os.makedirs(self._data_dir)
-            dir_path = Path(self._data_dir)
-            (dir_path / "a.txt").touch()
-            (dir_path / "b.txt").touch()
-            (dir_path / "c.exe").touch()
 
-            # Act
-            instance = AzureBlobUpload()
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-            # use Postman echo
-            Helper.set_property(
-                instance, "account_url", "https://testtesttest.blob.core.windows.example/",
-            )
-            Helper.set_property(instance, "account_access_key", "dummy")
-            Helper.set_property(instance, "container_name", "test")
-            Helper.set_property(instance, "src_dir", self._data_dir)
-            Helper.set_property(instance, "src_pattern", r"(.*)\.txt")
-            Helper.set_property(instance, "dest_dir", "out")
-            instance.execute()
+        dir_path = Path(self._data_dir)
+        (dir_path / "a.txt").touch()
+        (dir_path / "b.txt").touch()
+        (dir_path / "c.exe").touch()
 
-            # Assert
-            assert blob_client.upload_blob.call_count == 2
-        finally:
-            shutil.rmtree(self._data_dir)
+        # Act
+        instance = AzureBlobUpload()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        # use Postman echo
+        Helper.set_property(
+            instance, "account_url", "https://testtesttest.blob.core.windows.example/",
+        )
+        Helper.set_property(instance, "account_access_key", "dummy")
+        Helper.set_property(instance, "container_name", "test")
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"(.*)\.txt")
+        Helper.set_property(instance, "dest_dir", "out")
+        instance.execute()
+
+        # Assert
+        assert blob_client.upload_blob.call_count == 2

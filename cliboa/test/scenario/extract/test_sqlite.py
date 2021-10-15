@@ -15,10 +15,10 @@ import csv
 import os
 import pytest
 
+from cliboa.adapter.sqlite import SqliteAdapter
 from cliboa.scenario.extract.sqlite import SqliteExport
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
-from cliboa.util.sqlite import SqliteAdapter
 
 
 class TestSqliteExport(object):

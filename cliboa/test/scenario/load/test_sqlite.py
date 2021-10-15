@@ -14,10 +14,10 @@
 import csv
 import os
 
+from cliboa.adapter.sqlite import SqliteAdapter
 from cliboa.scenario.load.sqlite import SqliteImport
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
-from cliboa.util.sqlite import SqliteAdapter
 
 
 class TestSqliteImport(object):
