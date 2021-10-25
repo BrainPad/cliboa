@@ -11,15 +11,15 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+from cliboa.adapter.gcp import BigQueryAdapter
 from cliboa.scenario.load.gcp import BigQueryCopy
 from cliboa.util.helper import Helper
 from unittest.mock import patch
-from cliboa.util.gcp import BigQuery
 
 
 class TestBigQueryCopy(object):
     @patch.object(BigQueryCopy, "_source_path_reader", return_value="/awesome-path/key.json")
-    @patch.object(BigQuery, "get_bigquery_client")
+    @patch.object(BigQueryAdapter, "get_client")
     def test_table_copy(self, m_get_bigquery_client, mock_path_reader):
         # Arrange
         gbq_client = m_get_bigquery_client.return_value

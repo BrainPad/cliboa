@@ -16,7 +16,8 @@ from unittest import TestCase
 import pytest
 from google.cloud import bigquery, storage
 
-from cliboa.util.gcp import BigQuery, Gcs, ServiceAccount
+from cliboa.adapter.gcp import BigQueryAdapter, GcsAdapter, ServiceAccount
+from cliboa.util.gcp import BigQuery
 
 
 class TestServiceAccount(TestCase):
@@ -28,7 +29,7 @@ class TestServiceAccount(TestCase):
 class TestBigQuery(TestCase):
     @pytest.mark.skip(reason="bigquery connection is necessary")
     def test_get_bigquery_client_no_credentials(self):
-        assert BigQuery.get_bigquery_client(None) == bigquery.Client()
+        assert BigQueryAdapter.get_client() == bigquery.Client()
 
     def test_get_extract_job_config_with_header(self):
         self.assertTrue(
@@ -61,4 +62,4 @@ class TestBigQuery(TestCase):
 class TestGcs(object):
     @pytest.mark.skip(reason="gcs connection is necessary")
     def test_get_gcs_client_no_credentials(self):
-        assert Gcs.get_gcs_client(None) == storage.Client()
+        assert GcsAdapter.get_client(None) == storage.Client()
