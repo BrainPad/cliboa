@@ -37,6 +37,7 @@ PyYaml = "==5.3.1"
 azure-storage-blob = "==12.3.2"
 python-gnupg = "==0.4.7"
 openpyxl = "==3.0.7"
+pyminizip = "==0.2.4"
 
 [requires]
 python_version = "3.9"

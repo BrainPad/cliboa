@@ -15,6 +15,7 @@ import bz2
 import csv
 import gzip
 import os
+import pyminizip
 import pytest
 import shutil
 import tarfile
@@ -237,6 +238,34 @@ class TestFileDecompress(TestFileTransform):
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test.*\.txt\.zip")
         Helper.set_property(instance, "dest_dir", self._out_dir)
+        instance.execute()
+
+        decompressed_file_1 = os.path.join(self._out_dir, "test1.txt")
+        decompressed_file_2 = os.path.join(self._out_dir, "test2.txt")
+        assert os.path.exists(decompressed_file_1)
+        assert os.path.exists(decompressed_file_2)
+        with open(decompressed_file_1, encoding="utf-8") as f:
+            assert "This is test 1" == f.read()
+        with open(decompressed_file_2, encoding="utf-8") as f:
+            assert "This is test 2" == f.read()
+
+    def test_zip_with_pwd(self):
+        pwd = "testpass"
+        files = self._create_files()
+        for file in files:
+            pyminizip.compress(
+                file,
+                "",
+                self._data_dir + "/" + os.path.basename(file) + ".zip",
+                pwd,
+                0
+            )
+        instance = FileDecompress()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.txt\.zip")
+        Helper.set_property(instance, "dest_dir", self._out_dir)
+        Helper.set_property(instance, "password", pwd)
         instance.execute()
 
         decompressed_file_1 = os.path.join(self._out_dir, "test1.txt")

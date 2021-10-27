@@ -182,9 +182,13 @@ class FileDecompress(FileBaseTransform):
     def __init__(self):
         super().__init__()
         self._chunk_size = None
+        self._password = None
 
     def chunk_size(self, chunk_size):
         self._chunk_size = chunk_size
+
+    def password(self, password):
+        self._password = password
 
     def execute(self, *args):
         # essential parameters check
@@ -198,8 +202,13 @@ class FileDecompress(FileBaseTransform):
             _, ext = os.path.splitext(f)
             if ext == ".zip":
                 self._logger.info("Decompress zip file %s" % f)
+                if self._password is not None:
+                    pwd = self._password.encode(self._encoding)
+                else:
+                    pwd = self._password
                 with zipfile.ZipFile(f) as zp:
-                    zp.extractall(self._dest_dir if self._dest_dir is not None else self._src_dir)
+                    zp.extractall(
+                        self._dest_dir if self._dest_dir is not None else self._src_dir, pwd=pwd),
             elif ext == ".tar":
                 self._logger.info("Decompress tar file %s" % f)
                 with tarfile.open(f, "r:*") as tf:
