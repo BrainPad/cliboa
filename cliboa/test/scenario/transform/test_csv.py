@@ -28,6 +28,7 @@ from cliboa.scenario.transform.csv import (
     CsvConcat,
     CsvConvert,
     CsvMerge,
+    CsvMergeExclusive,
     CsvSort,
     CsvToJsonl,
 )
@@ -471,6 +472,111 @@ class TestCsvColumnConcat(TestCsvTransform):
         assert "'test'" == str(e.value)
 
 
+class TestCsvMergeExclusive(TestCsvTransform):
+    def test_execute_ok(self):
+        # create test csv
+        test_src_csv_data = [["key", "data"], ["1", "spam1"], ["2", "spam2"]]
+        self._create_csv(test_src_csv_data, fname="test.csv")
+        test_target_csv_data = [["id", "name"], ["1", "first"], ["3", "third"]]
+        self._create_csv(test_target_csv_data, fname="alter.csv")
+
+        # set the essential attributes
+        instance = CsvMergeExclusive()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "src_column", "key")
+        Helper.set_property(instance, "target_compare_path",
+                            os.path.join(self._data_dir, "alter.csv"))
+        Helper.set_property(instance, "target_column", "id")
+
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        rows = 0
+        with open(output_file, "r") as o:
+            reader = csv.DictReader(o)
+            for r in reader:
+                rows += 1
+                assert r["key"] == test_src_csv_data[2][0]
+                assert r["data"] == test_src_csv_data[2][1]
+            assert rows == 1
+
+    def test_execute_ok_with_non_target(self):
+        # create test csv
+        test_src_csv_data = [["key", "data"], ["1", "spam1"], ["2", "spam2"]]
+        self._create_csv(test_src_csv_data, fname="test.csv")
+        test_target_csv_data = [["id", "name"], ["3", "third"], ["4", "fourth"]]
+        self._create_csv(test_target_csv_data, fname="alter.csv")
+
+        # set the essential attributes
+        instance = CsvMergeExclusive()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "src_column", "key")
+        Helper.set_property(instance, "target_compare_path",
+                            os.path.join(self._data_dir, "alter.csv"))
+        Helper.set_property(instance, "target_column", "id")
+
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        rows = 0
+        with open(output_file, "r") as o:
+            reader = csv.DictReader(o)
+            for r in reader:
+                rows += 1
+                if rows == 1:
+                    assert r["key"] == test_src_csv_data[1][0]
+                    assert r["data"] == test_src_csv_data[1][1]
+                if rows == 2:
+                    assert r["key"] == test_src_csv_data[2][0]
+                    assert r["data"] == test_src_csv_data[2][1]
+            assert rows == 2
+
+    def test_execute_ng_with_src_column_not_exist(self):
+        # create test csv
+        test_src_csv_data = [["key", "data"], ["1", "spam1"], ["2", "spam2"]]
+        self._create_csv(test_src_csv_data, fname="test.csv")
+        test_target_csv_data = [["id", "name"], ["3", "third"], ["4", "fourth"]]
+        self._create_csv(test_target_csv_data, fname="alter.csv")
+
+        # set the essential attributes
+        instance = CsvMergeExclusive()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "src_column", "dummy")
+        Helper.set_property(instance, "target_compare_path",
+                            os.path.join(self._data_dir, "alter.csv"))
+        Helper.set_property(instance, "target_column", "id")
+
+        with pytest.raises(Exception) as e:
+            instance.execute()
+        assert "'Src file does not exist target column [id].'" == str(e.value)
+
+    def test_execute_ng_with_target_column_not_exist(self):
+        # create test csv
+        test_src_csv_data = [["key", "data"], ["1", "spam1"], ["2", "spam2"]]
+        self._create_csv(test_src_csv_data, fname="test.csv")
+        test_target_csv_data = [["id", "name"], ["3", "third"], ["4", "fourth"]]
+        self._create_csv(test_target_csv_data, fname="alter.csv")
+
+        # set the essential attributes
+        instance = CsvMergeExclusive()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "src_column", "key")
+        Helper.set_property(instance, "target_compare_path",
+                            os.path.join(self._data_dir, "alter.csv"))
+        Helper.set_property(instance, "target_column", "dummy")
+
+        with pytest.raises(KeyError) as e:
+            instance.execute()
+        assert "'Target Compare file does not exist target column [dummy].'" \
+               == str(e.value)
+
+
 class TestColumnLengthAdjust(TestCsvTransform):
     def test_ok(self):
         test_csv_data = [["key", "data"], ["1", "1234567890"]]
@@ -494,6 +600,104 @@ class TestColumnLengthAdjust(TestCsvTransform):
 
 
 class TestCsvMerge(TestCsvTransform):
+    # TODO Old version test.
+    def test_execute_ok_old(self):
+        # create test file
+        csv_list1 = [["key", "data"], ["1", "spam"], ["2", "spam"], ["3", "spam"]]
+        self._create_csv(csv_list1, fname="test1.csv")
+
+        csv_list2 = [
+            ["key", "address"],
+            ["1", "spam"],
+            ["2", "spam"],
+            ["3", "spam"],
+        ]
+        self._create_csv(csv_list2, fname="test2.csv")
+
+        # set the essential attributes
+        instance = CsvMerge()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src1_pattern", r"test1\.csv")
+        Helper.set_property(instance, "src2_pattern", r"test2\.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "dest_name", "test.csv")
+        instance.execute()
+
+        exists_csv = glob(os.path.join(self._data_dir, "test.csv"))
+        assert "test.csv" in exists_csv[0]
+
+    # TODO Old version test.
+    def test_execute_ok_with_unnamed_old(self):
+        # create test file
+        csv_list1 = [["key", "data"], ["1", "spam"], ["2", "spam"], ["3", "spam"]]
+        self._create_csv(csv_list1, fname="test1.csv")
+
+        csv_list2 = [
+            ["key", "Unnamed: 0"],
+            ["1", "spam"],
+            ["2", "spam"],
+            ["3", "spam"],
+        ]
+        self._create_csv(csv_list2, fname="test2.csv")
+
+        # set the essential attributes
+        instance = CsvMerge()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src1_pattern", r"test1\.csv")
+        Helper.set_property(instance, "src2_pattern", r"test2\.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "dest_name", "test.csv")
+        instance.execute()
+
+        exists_csv = glob(os.path.join(self._data_dir, "test.csv"))
+        assert "test.csv" in exists_csv[0]
+
+    # TODO Old version test.
+    def test_execute_ng_multiple_target1_old(self):
+        with pytest.raises(InvalidCount) as execinfo:
+            # create test file
+            target1_file = os.path.join(self._data_dir, "test11.csv")
+            open(target1_file, "w").close()
+            target1_file = os.path.join(self._data_dir, "test111.csv")
+            open(target1_file, "w").close()
+            target2_file = os.path.join(self._data_dir, "test2.csv")
+            open(target2_file, "w").close()
+
+            # set the essential attributes
+            instance = CsvMerge()
+            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "src_dir", self._data_dir)
+            Helper.set_property(instance, "src1_pattern", "test1(.*).csv")
+            Helper.set_property(instance, "src2_pattern", "test2.csv")
+            Helper.set_property(instance, "dest_dir", self._data_dir)
+            Helper.set_property(instance, "dest_name", "test.csv")
+            instance.execute()
+        assert "must be only one" in str(execinfo.value)
+
+    # TODO Old version test.
+    def test_execute_ng_multiple_target2_old(self):
+        with pytest.raises(InvalidCount) as execinfo:
+            # create test file
+            target1_file = os.path.join(self._data_dir, "test1.csv")
+            open(target1_file, "w").close()
+            target2_file = os.path.join(self._data_dir, "test22.csv")
+            open(target2_file, "w").close()
+            target2_file = os.path.join(self._data_dir, "test222.csv")
+            open(target2_file, "w").close()
+
+            # set the essential attributes
+            instance = CsvMerge()
+            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "src_dir", self._data_dir)
+            Helper.set_property(instance, "src1_pattern", "test1.csv")
+            Helper.set_property(instance, "src2_pattern", "test2(.*).csv")
+            Helper.set_property(instance, "dest_dir", self._data_dir)
+            Helper.set_property(instance, "dest_name", "test.csv")
+            instance.execute()
+        assert "must be only one" in str(execinfo.value)
+
     def test_execute_ok(self):
         # create test file
         csv_list1 = [["key", "data"], ["1", "spam"], ["2", "spam"], ["3", "spam"]]
