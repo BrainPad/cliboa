@@ -10,4 +10,9 @@ class MysqlAdaptor(RdbmsSupport):
         kwargs["user"] = self._user
         kwargs["password"] = self._password
         kwargs["db"] = self._dbname
+        if self._port:
+            kwargs["port"] = self._port
         return pymysql.connect(**kwargs)
+
+    def insert(self, sql, params):
+        self._con.cursor().executemany(sql, params)

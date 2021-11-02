@@ -1,5 +1,5 @@
-# MysqlRead
-Execute a query to MySql server and get result as csv file.
+# PostgresqlRead
+Execute a query to Postgresql server and get result as csv file.
 
 # Parameters
 |Parameters|Explanation|Required|Default|Remarks|
@@ -8,7 +8,7 @@ Execute a query to MySql server and get result as csv file.
 |dbname|name of the database to use.|Yes|None||
 |user|User name to login the database|Yes|None||
 |password|Password to login the database|Yes|None||
-|port|Port number for the database|No|3306||
+|port|Port number for the database|No|5432||
 |query|Sql query string or file path for sql query|Yes|None|Either query or tblname is required|
 |tblname|Table name to be export records|Yes|None|Either query or tblname is required|
 |dest_path|File path which result of the query will be written|Yes|None||
@@ -18,8 +18,8 @@ Execute a query to MySql server and get result as csv file.
 # Examples
 ```
 scenario:
-- step: my_sql_select
-  class: MysqlRead
+- step: postgresql_select
+  class: PostgresqlRead
   arguments:
     host: dummy_host
     dbname: sample_db
@@ -30,8 +30,8 @@ scenario:
     dest_path: /user/local/data/query_result.csv
 
 scenario:
-- step: my_sql_select
-  class: MysqlRead
+- step: postgresql_select
+  class: PostgresqlRead
   arguments:
     host: dummy_host
     dbname: sample_db
@@ -42,8 +42,8 @@ scenario:
     dest_path: /user/local/data/query_result.csv
 
 scenario:
-- step: my_sql_select
-  class: MysqlRead
+- step: postgresql_select
+  class: PostgresqlRead
   arguments:
     host: dummy_host
     dbname: sample_db

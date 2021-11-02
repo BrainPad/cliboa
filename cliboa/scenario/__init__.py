@@ -23,6 +23,7 @@ from .extract.gcp import (
 )
 from .extract.http import HttpDownload, HttpDownloadViaBasicAuth
 from .extract.mysql import MysqlRead
+from .extract.postgres import PostgresqlRead
 from .extract.sftp import SftpDelete, SftpDownload, SftpDownloadFileDelete
 from .extract.sqlite import SqliteExport
 from .load.aws import S3Upload
@@ -33,6 +34,8 @@ from .load.gcp import (
     FirestoreDocumentCreate,
     GcsUpload,
 )
+from .load.mysql import MysqlWrite
+from .load.postgres import PostgresqlWrite
 from .load.sftp import SftpUpload
 from .load.sqlite import SqliteImport
 from .sqlite import SqliteQueryExecute

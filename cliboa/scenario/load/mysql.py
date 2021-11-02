@@ -12,10 +12,10 @@
 # all copies or substantial portions of the Software.
 #
 from cliboa.adapter.mysql import MysqlAdaptor
-from cliboa.scenario.rdbms import BaseRdbmsRead
+from cliboa.scenario.rdbms import BaseRdbmsWrite
 
 
-class MysqlRead(BaseRdbmsRead):
+class MysqlWrite(BaseRdbmsWrite):
     def __init__(self):
         super().__init__()
 
