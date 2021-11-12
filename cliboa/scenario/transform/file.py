@@ -57,6 +57,7 @@ class FileBaseTransform(BaseStep):
         self._dest_name = None
         self._encoding = "utf-8"
         self._nonfile_error = False
+        self._force_continue = False
 
     def src_dir(self, src_dir):
         self._src_dir = src_dir
@@ -76,6 +77,9 @@ class FileBaseTransform(BaseStep):
 
     def nonfile_error(self, nonfile_error):
         self._nonfile_error = nonfile_error
+
+    def force_continue(self, force_continue):
+        self._force_continue = force_continue
 
     def execute(self, *args):
         pass
