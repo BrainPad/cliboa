@@ -18,6 +18,7 @@ import os
 import pandas
 from cliboa.adapter.sqlite import SqliteAdapter
 from cliboa.core.validator import EssentialParameters
+from cliboa.scenario.extras import ExceptionHandler
 from cliboa.scenario.transform.file import FileBaseTransform
 from cliboa.util.csv import Csv
 from cliboa.util.exception import (
@@ -410,7 +411,7 @@ class CsvConcat(FileBaseTransform):
         )
 
 
-class CsvConvert(FileBaseTransform):
+class CsvConvert(FileBaseTransform, ExceptionHandler):
     """
     Change csv format
     """
@@ -467,23 +468,29 @@ class CsvConvert(FileBaseTransform):
             self._after_enc = self._before_enc
 
         for fi, fo in super().io_files(files, ext=self._after_format):
-            with open(fi, mode="rt", encoding=self._before_enc) as i:
-                reader = csv.reader(i, delimiter=Csv.delimiter_convert(self._before_format))
-                with open(fo, mode="wt", newline="", encoding=self._after_enc) as o:
-                    writer = csv.writer(
-                        o,
-                        delimiter=Csv.delimiter_convert(self._after_format),
-                        quoting=Csv.quote_convert(self._quote),
-                        lineterminator=Csv.newline_convert(self._after_nl),
-                    )
+            try:
+                with open(fi, mode="rt", encoding=self._before_enc) as i:
+                    reader = csv.reader(i, delimiter=Csv.delimiter_convert(self._before_format))
+                    with open(fo, mode="wt", newline="", encoding=self._after_enc) as o:
+                        writer = csv.writer(
+                            o,
+                            delimiter=Csv.delimiter_convert(self._after_format),
+                            quoting=Csv.quote_convert(self._quote),
+                            lineterminator=Csv.newline_convert(self._after_nl),
+                        )
 
-                    for i, line in enumerate(reader):
-                        if i == 0:
-                            if self._headers_existence is False:
-                                continue
-                            writer.writerow(self._replace_headers(line))
-                        else:
-                            writer.writerow(line)
+                        for i, line in enumerate(reader):
+                            if i == 0:
+                                if self._headers_existence is False:
+                                    continue
+                                writer.writerow(self._replace_headers(line))
+                            else:
+                                writer.writerow(line)
+            except Exception as e:
+                if self._force_continue is True:
+                    self.handle_error(e, fi)
+                else:
+                    raise e
 
     def _replace_headers(self, old_headers):
         """
