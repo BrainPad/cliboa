@@ -4,6 +4,7 @@
 import sys
 
 import pexpect
+import time
 
 args = sys.argv
 pypi_username = args[1]
@@ -17,6 +18,6 @@ proc.expect("Enter your username: ")
 proc.sendline(pypi_username)
 proc.expect("Enter your password: ")
 proc.sendline(pypi_password)
-proc = pexpect.spawn("cat /tmp/debug", encoding="utf-8") # debug
+time.sleep(0.1)
 proc.expect(pexpect.EOF)
 proc.close()
