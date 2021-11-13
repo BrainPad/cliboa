@@ -39,3 +39,4 @@ jobs:
         run: |
           # upload to pypi
           sudo python3 tools/script/deploy_to_pypi.py "${{ github.event.inputs.username }}" "${{ github.event.inputs.password }}" "${{ github.event.inputs.is_test }}"
+          cat /tmp/debug
