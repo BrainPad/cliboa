@@ -425,6 +425,7 @@ class CsvConvert(FileBaseTransform, ExceptionHandler):
         self._after_format = None
         self._after_enc = None
         self._after_nl = "LF"
+        self._reader_quote = "QUOTE_NONE"
         self._quote = "QUOTE_MINIMAL"
 
     def headers(self, headers):
@@ -448,6 +449,9 @@ class CsvConvert(FileBaseTransform, ExceptionHandler):
     def after_nl(self, after_nl):
         self._after_nl = after_nl
 
+    def reader_quote(self, reader_quote):
+        self._reader_quote = reader_quote
+
     def quote(self, quote):
         self._quote = quote
 
@@ -470,7 +474,11 @@ class CsvConvert(FileBaseTransform, ExceptionHandler):
         for fi, fo in super().io_files(files, ext=self._after_format):
             try:
                 with open(fi, mode="rt", encoding=self._before_enc) as i:
-                    reader = csv.reader(i, delimiter=Csv.delimiter_convert(self._before_format))
+                    reader = csv.reader(
+                        i,
+                        delimiter=Csv.delimiter_convert(self._before_format),
+                        quoting=Csv.quote_convert(self._reader_quote)
+                    )
                     with open(fo, mode="wt", newline="", encoding=self._after_enc) as o:
                         writer = csv.writer(
                             o,

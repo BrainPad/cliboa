@@ -15,6 +15,7 @@ Plural files can be converted at the same time, but format of all files must be 
 |after_format|File extension after converted|No|Same with before_format|"csv" or "tsv"|
 |after_enc|File encoding after converted|Same with before_enc|None||
 |after_nl|New line for converted csv|No|LF|"LF" or "CR" or "CRLF"|
+|reader_quote|quote type for read csv|No|QUOTE_NONE|"QUOTE_ALL" or "QUOTE_MINIMAL" or "QUOTE_NONNUMERIC" or "QUOTE_NONE"|
 |quote|quote type for converted csv|No|QUOTE_MINIMAL|"QUOTE_ALL" or "QUOTE_MINIMAL" or "QUOTE_NONNUMERIC" or "QUOTE_NONE"|
 |nonfile_error|Whether an error is thrown when files are not found in src_dir.|No|False||
 
