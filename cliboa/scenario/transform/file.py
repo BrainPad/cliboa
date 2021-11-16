@@ -136,6 +136,8 @@ class FileBaseTransform(BaseStep):
             fd, temp_file = tempfile.mkstemp()
             os.close(fd)
 
+            self._logger.info("target file is %s" % input_path)
+
             yield input_path, temp_file
 
             if input_path == output_path:
