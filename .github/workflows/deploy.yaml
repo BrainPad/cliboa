@@ -38,4 +38,4 @@ jobs:
       - name: upload to pypi
         run: |
           # upload to pypi
-          sudo python3 tools/script/deploy_to_pypi.py "${{ github.event.inputs.username }}" "${{ github.event.inputs.password }}" "${{ github.event.inputs.is_test }}"
+          sudo python3 tools/script/deploy_to_pypi.py "::add-mask::${{ github.event.inputs.username }}" "::add-mask::${{ github.event.inputs.password }}" "${{ github.event.inputs.is_test }}"
