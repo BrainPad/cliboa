@@ -228,13 +228,16 @@ class ScenarioManager(object):
                 var_name = match.strip()
                 if not var_name:
                     raise InvalidParameter("Alternative argument was empty.")
-                cmd = with_vars[var_name]
-                if not cmd:
-                    raise ScenarioFileInvalid(
-                        "scenario file is invalid. 'with_vars' definition against %s does not exist."  # noqa
-                        % var_name
-                    )
-                js = self._replace_vars(js, var_name, cmd)
+                if var_name.startswith("env."):
+                    js = self._replace_envs(js, var_name)
+                else:
+                    cmd = with_vars[var_name]
+                    if not cmd:
+                        raise ScenarioFileInvalid(
+                            "scenario file is invalid. 'with_vars' definition against %s does not exist."  # noqa
+                            % var_name
+                        )
+                    js = self._replace_vars(js, var_name, cmd)
                 yaml_v = json.loads(js)
             Helper.set_property(instance, yaml_k, yaml_v)
             values[yaml_k] = yaml_v
@@ -269,6 +272,21 @@ class ScenarioManager(object):
         shell_output = re.sub("'", "", str(shell_output))
 
         return re.sub(r"{{(\s?)%s(\s?)}}" % var_name, shell_output, yaml_v)
+
+    def _replace_envs(self, yaml_v, var_name):
+        """
+        This method replaces the value of {{ env.xxx }} from system environment values.
+        If values are not found in environment, key error will be raised.
+
+        Args:
+            yaml_v: Yaml value. Must contain {{ env.xxx }}
+            var_name: Name of env.xxx
+
+        Returns:
+            str: replaced value
+        """
+        env_value = os.environ[var_name[4:]]
+        return re.sub(r"{{(\s?)%s(\s?)}}" % var_name, env_value, yaml_v)
 
     def _split_steps_config(self, block):
         """
