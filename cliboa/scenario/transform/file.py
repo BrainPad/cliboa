@@ -24,6 +24,7 @@ import pandas
 
 from cliboa.core.validator import EssentialParameters
 from cliboa.scenario.base import BaseStep
+from cliboa.scenario.extras import ExceptionHandler
 from cliboa.util.date import DateUtil
 from cliboa.util.exception import (
     CliboaException,
@@ -33,7 +34,7 @@ from cliboa.util.exception import (
 from cliboa.util.file import File
 
 
-class FileBaseTransform(BaseStep):
+class FileBaseTransform(BaseStep, ExceptionHandler):
     """
     Base class of file transform classes
 
@@ -110,10 +111,6 @@ class FileBaseTransform(BaseStep):
             ext=None (str): Set an extension for output file,
                             if input and output extension would like to be changed.
                             "." is not necessary.
-
-        yield (tuple):
-            - input file path
-            - output file path
         """
         for input_path in iterable:
             root, name = os.path.split(input_path)
@@ -136,11 +133,20 @@ class FileBaseTransform(BaseStep):
             fd, temp_file = tempfile.mkstemp()
             os.close(fd)
 
-            yield input_path, temp_file
+            try:
+                self.io_files_execute(input_path, temp_file)
+            except Exception as e:
+                if self._force_continue is True:
+                    self.handle_error(e, input_path)
+                else:
+                    raise e
 
             if input_path == output_path:
                 os.remove(input_path)
             shutil.move(temp_file, output_path)
+
+    def io_files_execute(self, fi, fo):
+        pass
 
     def io_writers(self, iterable, mode="t", encoding="utf-8", ext=None):
         """
