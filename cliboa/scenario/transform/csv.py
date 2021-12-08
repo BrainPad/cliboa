@@ -18,7 +18,6 @@ import os
 import pandas
 from cliboa.adapter.sqlite import SqliteAdapter
 from cliboa.core.validator import EssentialParameters
-from cliboa.scenario.extras import ExceptionHandler
 from cliboa.scenario.transform.file import FileBaseTransform
 from cliboa.util.csv import Csv
 from cliboa.util.exception import (
@@ -411,7 +410,7 @@ class CsvConcat(FileBaseTransform):
         )
 
 
-class CsvConvert(FileBaseTransform, ExceptionHandler):
+class CsvConvert(FileBaseTransform):
     """
     Change csv format
     """
@@ -463,42 +462,40 @@ class CsvConvert(FileBaseTransform, ExceptionHandler):
         )
         valid()
 
-        files = super().get_target_files(self._src_dir, self._src_pattern)
-        self.check_file_existence(files)
-
         if self._after_format is None:
             self._after_format = self._before_format
         if self._after_enc is None:
             self._after_enc = self._before_enc
 
-        for fi, fo in super().io_files(files, ext=self._after_format):
-            try:
-                with open(fi, mode="rt", encoding=self._before_enc) as i:
-                    reader = csv.reader(
-                        i,
-                        delimiter=Csv.delimiter_convert(self._before_format),
-                        quoting=Csv.quote_convert(self._reader_quote)
-                    )
-                    with open(fo, mode="wt", newline="", encoding=self._after_enc) as o:
-                        writer = csv.writer(
-                            o,
-                            delimiter=Csv.delimiter_convert(self._after_format),
-                            quoting=Csv.quote_convert(self._quote),
-                            lineterminator=Csv.newline_convert(self._after_nl),
-                        )
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+        self.check_file_existence(files)
 
-                        for i, line in enumerate(reader):
-                            if i == 0:
-                                if self._headers_existence is False:
-                                    continue
-                                writer.writerow(self._replace_headers(line))
-                            else:
-                                writer.writerow(line)
-            except Exception as e:
-                if self._force_continue is True:
-                    self.handle_error(e, fi)
-                else:
-                    raise e
+        super().io_files(files,
+                         ext=self._after_format,
+                         func=self.io_files_execute)
+
+    def io_files_execute(self, fi, fo):
+        with open(fi, mode="rt", encoding=self._before_enc) as i:
+            reader = csv.reader(
+                i,
+                delimiter=Csv.delimiter_convert(self._before_format),
+                quoting=Csv.quote_convert(self._reader_quote)
+            )
+            with open(fo, mode="wt", newline="", encoding=self._after_enc) as o:
+                writer = csv.writer(
+                    o,
+                    delimiter=Csv.delimiter_convert(self._after_format),
+                    quoting=Csv.quote_convert(self._quote),
+                    lineterminator=Csv.newline_convert(self._after_nl),
+                )
+
+                for i, line in enumerate(reader):
+                    if i == 0:
+                        if self._headers_existence is False:
+                            continue
+                        writer.writerow(self._replace_headers(line))
+                    else:
+                        writer.writerow(line)
 
     def _replace_headers(self, old_headers):
         """

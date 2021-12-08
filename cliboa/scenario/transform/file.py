@@ -24,6 +24,7 @@ import pandas
 
 from cliboa.core.validator import EssentialParameters
 from cliboa.scenario.base import BaseStep
+from cliboa.scenario.extras import ExceptionHandler
 from cliboa.util.date import DateUtil
 from cliboa.util.exception import (
     CliboaException,
@@ -33,7 +34,7 @@ from cliboa.util.exception import (
 from cliboa.util.file import File
 
 
-class FileBaseTransform(BaseStep):
+class FileBaseTransform(BaseStep, ExceptionHandler):
     """
     Base class of file transform classes
 
@@ -98,7 +99,29 @@ class FileBaseTransform(BaseStep):
                 return
         self._logger.info("Files found %s" % files)
 
-    def io_files(self, iterable, ext=None):
+    def check_output_path(self, input_path, ext):
+        root, name = os.path.split(input_path)
+
+        if ext:
+            if ext.startswith("."):
+                output_name = os.path.splitext(name)[0] + ext
+            else:
+                output_name = os.path.splitext(name)[0] + "." + ext
+        else:
+            output_name = name
+
+        if self._dest_dir:
+            output_dir = self._dest_dir
+        else:
+            output_dir = root
+
+        output_path = os.path.join(output_dir, output_name)
+
+        fd, temp_file = tempfile.mkstemp()
+        os.close(fd)
+        return output_path, temp_file
+
+    def io_files(self, iterable, ext=None, func=None):
         """
         Iteration which returns input and output path.
         If the parameter "dest_dir" was given, the output file will be created under
@@ -110,35 +133,17 @@ class FileBaseTransform(BaseStep):
             ext=None (str): Set an extension for output file,
                             if input and output extension would like to be changed.
                             "." is not necessary.
-
-        yield (tuple):
-            - input file path
-            - output file path
         """
         for input_path in iterable:
-            root, name = os.path.split(input_path)
+            output_path, temp_file = self.check_output_path(input_path, ext)
 
-            if ext:
-                if ext.startswith("."):
-                    output_name = os.path.splitext(name)[0] + ext
+            try:
+                func(input_path, temp_file)
+            except Exception as e:
+                if self._force_continue is True:
+                    self.handle_error(e, input_path)
                 else:
-                    output_name = os.path.splitext(name)[0] + "." + ext
-            else:
-                output_name = name
-
-            if self._dest_dir:
-                output_dir = self._dest_dir
-            else:
-                output_dir = root
-
-            output_path = os.path.join(output_dir, output_name)
-
-            fd, temp_file = tempfile.mkstemp()
-            os.close(fd)
-
-            self._logger.info("target file is %s" % input_path)
-
-            yield input_path, temp_file
+                    raise e
 
             if input_path == output_path:
                 os.remove(input_path)
