@@ -24,6 +24,7 @@ import pandas
 
 from cliboa.core.validator import EssentialParameters
 from cliboa.scenario.base import BaseStep
+from cliboa.scenario.extras import ExceptionHandler
 from cliboa.util.date import DateUtil
 from cliboa.util.exception import (
     CliboaException,
@@ -33,7 +34,7 @@ from cliboa.util.exception import (
 from cliboa.util.file import File
 
 
-class FileBaseTransform(BaseStep):
+class FileBaseTransform(BaseStep, ExceptionHandler):
     """
     Base class of file transform classes
 
@@ -97,7 +98,34 @@ class FileBaseTransform(BaseStep):
                 return
         self._logger.info("Files found %s" % files)
 
-    def io_files(self, iterable, ext=None):
+    def check_output_path(self, input_path, ext):
+        root, name = os.path.split(input_path)
+
+        if ext:
+            if ext.startswith("."):
+                output_name = os.path.splitext(name)[0] + ext
+            else:
+                output_name = os.path.splitext(name)[0] + "." + ext
+        else:
+            output_name = name
+
+        if self._dest_dir:
+            output_dir = self._dest_dir
+        else:
+            output_dir = root
+
+        output_path = os.path.join(output_dir, output_name)
+
+        fd, temp_file = tempfile.mkstemp()
+        os.close(fd)
+        return output_path, temp_file
+
+    def overwrite_output_path(self, input_path, output_path, temp_file):
+        if input_path == output_path:
+            os.remove(input_path)
+        shutil.move(temp_file, output_path)
+
+    def io_files(self, iterable, ext=None, func=None):
         """
         Iteration which returns input and output path.
         If the parameter "dest_dir" was given, the output file will be created under
@@ -109,39 +137,19 @@ class FileBaseTransform(BaseStep):
             ext=None (str): Set an extension for output file,
                             if input and output extension would like to be changed.
                             "." is not necessary.
-
-        yield (tuple):
-            - input file path
-            - output file path
         """
         for input_path in iterable:
-            root, name = os.path.split(input_path)
+            output_path, temp_file = self.check_output_path(input_path, ext)
 
-            if ext:
-                if ext.startswith("."):
-                    output_name = os.path.splitext(name)[0] + ext
+            try:
+                func(input_path, temp_file)
+            except Exception as e:
+                if self._force_continue is True:
+                    self.handle_error(e, input_path)
                 else:
-                    output_name = os.path.splitext(name)[0] + "." + ext
-            else:
-                output_name = name
+                    raise e
 
-            if self._dest_dir:
-                output_dir = self._dest_dir
-            else:
-                output_dir = root
-
-            output_path = os.path.join(output_dir, output_name)
-
-            fd, temp_file = tempfile.mkstemp()
-            os.close(fd)
-
-            self._logger.info("target file is %s" % input_path)
-
-            yield input_path, temp_file
-
-            if input_path == output_path:
-                os.remove(input_path)
-            shutil.move(temp_file, output_path)
+            self.overwrite_output_path(input_path, output_path, temp_file)
 
     def io_writers(self, iterable, mode="t", encoding="utf-8", ext=None):
         """
@@ -157,10 +165,6 @@ class FileBaseTransform(BaseStep):
             ext=None (str): Set an extension for output file,
                             if input and output extension would like to be changed.
                             "." is not necessary.
-
-        yield (tuple):
-            - input writer
-            - output writer
         """
         if not "t" == mode and not "b" == mode:
             raise InvalidParameter("Unknown mode. One of the following is allowed [t, b]")
@@ -168,15 +172,19 @@ class FileBaseTransform(BaseStep):
         if "b" in mode:
             encoding = None
 
-        for fi, fo in self.io_files(iterable, ext=ext):
+        for input_path in iterable:
+            output_path, temp_file = self.check_output_path(input_path, ext)
+
             if mode == "t":
-                with open(fi, mode="r", encoding=encoding, newline="") as i, open(
-                    fo, mode="w", encoding=encoding, newline=""
+                with open(input_path, mode="r", encoding=encoding, newline="") as i, open(
+                    temp_file, mode="w", encoding=encoding, newline=""
                 ) as o:
                     yield i, o
             elif mode == "b":
-                with open(fi, mode="rb") as i, open(fo, mode="wb") as o:
+                with open(input_path, mode="rb") as i, open(temp_file, mode="wb") as o:
                     yield i, o
+
+            self.overwrite_output_path(input_path, output_path, temp_file)
 
 
 class FileDecompress(FileBaseTransform):
@@ -366,10 +374,12 @@ class ExcelConvert(FileBaseTransform):
         self.check_file_existence(files)
 
         # TODO Currently only excel to csv is supported.
-        for fi, fo in super().io_files(files, ext="csv"):
-            self._logger.info("Convert %s to %s" % (fi, fo))
-            df = pandas.read_excel(fi)
-            df.to_csv(fo, encoding=self._encoding)
+        super().io_files(files, ext="csv", func=self.convert)
+
+    def convert(self, fi, fo):
+        self._logger.info("Convert %s to %s" % (fi, fo))
+        df = pandas.read_excel(fi)
+        df.to_csv(fo, encoding=self._encoding)
 
 
 class FileDivide(FileBaseTransform):
@@ -527,12 +537,14 @@ class FileConvert(FileBaseTransform):
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self.check_file_existence(files)
 
-        for fi, fo in super().io_files(files):
-            File().convert_encoding(
-                fi, fo, self._encoding_from, self._encoding_to, self._errors,
-            )
+        super().io_files(files, func=self.convert)
 
-            self._logger.info("Encoded file %s" % fi)
+    def convert(self, fi, fo):
+        File().convert_encoding(
+            fi, fo, self._encoding_from, self._encoding_to, self._errors,
+        )
+
+        self._logger.info("Encoded file %s" % fi)
 
 
 class FileArchive(FileBaseTransform):
