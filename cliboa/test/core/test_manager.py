@@ -384,6 +384,29 @@ class TestYamlScenarioManager(BaseCliboaTest):
             manager.create_scenario_queue()
         assert "invalid" in str(excinfo.value)
 
+    def test_replace_environment_values(self):
+        os.environ["CLIBOA_TEST_ENV"] = "ABC"
+        pj_yaml_dict = {
+            "scenario": [
+                {
+                    "step": "sample_step",
+                    "class": "SampleStep",
+                    "arguments": {
+                        "memo": "foo_{{ env.CLIBOA_TEST_ENV }}_bar",
+                    },
+                }
+            ]
+        }
+        self._create_scenario_file(pj_yaml_dict)
+
+        manager = YamlScenarioManager(self._cmd_args)
+        manager.create_scenario_queue()
+        instances = ScenarioQueue.step_queue.pop()
+        instance = instances[0]
+
+        assert instance._step == "sample_step"
+        assert instance._memo == "foo_ABC_bar"
+
 
 class TestJsonScenarioManager(BaseCliboaTest):
     def setUp(self):
