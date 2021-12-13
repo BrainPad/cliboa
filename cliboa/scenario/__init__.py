@@ -27,6 +27,7 @@ from .extract.sftp import SftpDelete, SftpDownload, SftpDownloadFileDelete
 from .extract.sqlite import SqliteExport
 from .load.aws import S3Upload
 from .load.azure import AzureBlobUpload
+from .load.file import FileExists
 from .load.gcp import (
     BigQueryCopy,
     BigQueryWrite,
