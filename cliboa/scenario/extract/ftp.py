@@ -11,6 +11,7 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+import os
 import re
 
 from cliboa.scenario.ftp import BaseFtp
@@ -43,6 +44,8 @@ class FtpDownload(FtpExtract):
             self.__class__.__name__, [self._host, self._user, self._src_dir, self._src_pattern],
         )
         valid()
+
+        os.makedirs(self._dest_dir, exist_ok=True)
 
         obj = FtpUtil().list_files(
             dir=self._src_dir,
