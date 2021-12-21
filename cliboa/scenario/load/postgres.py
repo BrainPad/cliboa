@@ -11,14 +11,14 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-from cliboa.adapter.mysql import MysqlAdaptor
-from cliboa.scenario.rdbms import BaseRdbmsRead
+from cliboa.adapter.postgres import PostgresqlAdaptor
+from cliboa.scenario.rdbms import BaseRdbmsWrite
 
 
-class MysqlRead(BaseRdbmsRead):
+class PostgresqlWrite(BaseRdbmsWrite):
     def __init__(self):
         super().__init__()
 
     def get_adaptor(self):
-        return MysqlAdaptor(
+        return PostgresqlAdaptor(
             self._host, self._user, self._password, self._dbname, self._port)

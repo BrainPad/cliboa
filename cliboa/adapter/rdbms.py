@@ -13,7 +13,7 @@ class RdbmsSupport:
     not creating instance itself.
 
     By accessing context manager, the class automatically connects a database,
-    commit or rollback(when error occured) and finally closed the connection.
+    commit or rollback(when error occurred) and finally closed the connection.
 
     This class cannot be used by itself.
     Subclass must be created and implement abstract method that is to give a connection.
@@ -21,7 +21,7 @@ class RdbmsSupport:
 
     """
 
-    def __init__(self, host, user, password, dbname, encoding="UTF8"):
+    def __init__(self, host, user, password, dbname, port=None, encoding="UTF8"):
         self._logger = LisboaLog.get_logger(__name__)
 
         self._host = host
@@ -29,18 +29,19 @@ class RdbmsSupport:
         self._password = password
         self._dbname = dbname
         self._encoding = encoding
+        self._port = port
         self._con = None
 
     def __enter__(self):
         """
-        with RdmbsSupport open
+        with RdbmsSupport open
         """
         self._begin()
         return self
 
     def __exit__(self, *exc):
         """
-        with RdmbsSupport close
+        with RdbmsSupport close
         """
         e_type, e_val, _ = exc
         try:
@@ -80,7 +81,9 @@ class RdbmsSupport:
     def execute(self, sql, params=None):
         """
         Execute a query and returns a result.
-        Use for insert, update, delete
+        This method will be executed connection.execute() without considering
+        the differences between rdbms libraries.
+        Therefor this can be executed any methods, but can NOT be garanteed an expected result.
 
         Args:
             sql (str): query to execute
@@ -97,22 +100,21 @@ class RdbmsSupport:
         return ret
 
     def select(self, sql, params=None):
-        """
-        Execute a query and returns a cursor.
-
-        Args:
-            sql (str): query to execute
-            params=None (list): query parameters
-
-        Returns:
-            cursor
-        """
         cursor = self._con.cursor()
         if params:
             cursor.execute(sql, params)
         else:
             cursor.execute(sql)
         return cursor
+
+    def insert(self, sql, params=None):
+        raise Exception("Must be implemented in a sub class")
+
+    def update(self, sql, params=None):
+        raise Exception("Must be implemented in a sub class")
+
+    def delete(self, sql, params=None):
+        raise Exception("Must be implemented in a sub class")
 
     @abstractmethod
     def get_connection(self, **kwargs):
