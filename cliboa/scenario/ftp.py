@@ -11,8 +11,6 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import os
-
 from cliboa.scenario.base import BaseStep
 from cliboa.adapter.ftp import FtpAdapter
 
@@ -39,7 +37,6 @@ class BaseFtp(BaseStep):
         self._src_pattern = src_pattern
 
     def dest_dir(self, dest_dir):
-        os.makedirs(dest_dir, exist_ok=True)
         self._dest_dir = dest_dir
 
     def host(self, host):

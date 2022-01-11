@@ -66,7 +66,6 @@ class FileBaseTransform(BaseStep):
         self._src_pattern = src_pattern
 
     def dest_dir(self, dest_dir):
-        os.makedirs(dest_dir, exist_ok=True)
         self._dest_dir = dest_dir
 
     def dest_name(self, dest_name):
