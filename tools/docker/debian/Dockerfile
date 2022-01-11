@@ -17,13 +17,13 @@ RUN apt update -y && \
                    tk-dev \
                    pinentry-curses \
                    python \
-                   python-pip \
                    python3 \
                    python3-pip \
                    vim \
                    virtualenv \
                    wget \
-                   zlib1g-dev
+                   zlib1g-dev \
+                   libpq-dev
 
 # Download multiple python versions which cliboa supports
 RUN cd /usr/local/ && \
