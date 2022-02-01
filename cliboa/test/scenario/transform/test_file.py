@@ -695,6 +695,85 @@ class TestFileRename(TestFileTransform):
         assert os.path.exists(os.path.join(self._data_dir, "PRE-test1-SUF"))
         assert os.path.exists(os.path.join(self._data_dir, "PRE-test2-SUF"))
 
+    def test_execute_ok_5(self):
+        self._create_files()
+
+        instance = FileRename()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
+        Helper.set_property(instance, "regex_pattern", "[te]")
+        Helper.set_property(instance, "rep_str", "d")
+        instance.execute()
+
+        assert os.path.exists(os.path.join(self._data_dir, "ddsd1.txt"))
+        assert os.path.exists(os.path.join(self._data_dir, "ddsd2.txt"))
+
+    def test_execute_ok_6(self):
+        self._create_files()
+
+        instance = FileRename()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
+        Helper.set_property(instance, "prefix", "PRE-")
+        Helper.set_property(instance, "suffix", "-SUF")
+        Helper.set_property(instance, "regex_pattern", "test1")
+        Helper.set_property(instance, "rep_str", "dummy3")
+        instance.execute()
+
+        assert os.path.exists(os.path.join(self._data_dir, "PRE-dummy3-SUF.txt"))
+        assert os.path.exists(os.path.join(self._data_dir, "PRE-test2-SUF.txt"))
+
+    def test_execute_ok_7(self):
+        self._create_files()
+
+        instance = FileRename()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
+        Helper.set_property(instance, "prefix", "PRE-")
+        Helper.set_property(instance, "suffix", "-SUF")
+        Helper.set_property(instance, "regex_pattern", "test1")
+        Helper.set_property(instance, "rep_str", "dummy3")
+        Helper.set_property(instance, "ext", "csv")
+        instance.execute()
+
+        assert os.path.exists(os.path.join(self._data_dir, "PRE-dummy3-SUF.csv"))
+        assert os.path.exists(os.path.join(self._data_dir, "PRE-test2-SUF.csv"))
+
+    def test_execute_ng_1(self):
+        self._create_files()
+
+        instance = FileRename()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
+        Helper.set_property(instance, "prefix", "PRE-")
+        Helper.set_property(instance, "suffix", "-SUF")
+        Helper.set_property(instance, "regex_pattern", "test1")
+        with pytest.raises(InvalidParameter) as execinfo:
+            instance.execute()
+        assert \
+            "The converted string is not defined in yaml file: dest_str" \
+            == str(execinfo.value)
+
+    def test_execute_ng_2(self):
+        self._create_files()
+
+        instance = FileRename()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
+        Helper.set_property(instance, "prefix", "PRE-")
+        Helper.set_property(instance, "suffix", "-SUF")
+        Helper.set_property(instance, "rep_str", "test1")
+        with pytest.raises(InvalidParameter) as execinfo:
+            instance.execute()
+        assert \
+            "The conversion pattern is not defined in yaml file: regex_pattern" \
+            == str(execinfo.value)
+
 
 class TestFileConvert(TestFileTransform):
     def test_execute(self):
