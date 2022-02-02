@@ -23,6 +23,7 @@ from cliboa.scenario.transform.csv import (
     CsvColumnHash,
     CsvColumnConcat,
     CsvColumnExtract,
+    CsvValueExtract,
     ColumnLengthAdjust,
     CsvColumnSelect,
     CsvConcat,
@@ -250,6 +251,107 @@ class TestCsvColumnExtract(TestCsvTransform):
                     test_csv_data[2][2],
                 ]
         assert rows == len(test_csv_data)
+
+
+class TestCsvValueExtract(TestCsvTransform):
+    def test_execute_ok(self):
+        # create test csv
+        test_csv_data = [["key", "data", "name"],
+                         ["1", "spam1", "SPAM1"],
+                         ["2", "spam2", "SPAM2"]]
+        self._create_csv(test_csv_data)
+
+        # set the essential attributes
+        instance = CsvValueExtract()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "column_regex_pattern", {'data': '[0-9]'})
+
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            for i, row in enumerate(reader):
+                if i == 0:
+                    self.assertEqual(
+                        ["key", "data", "name"],
+                        row)
+                if i == 1:
+                    self.assertEqual(
+                        ["1", "1", "SPAM1"],
+                        row)
+                if i == 2:
+                    self.assertEqual(
+                        ["2", "2", "SPAM2"],
+                        row)
+
+    def test_execute_ok_with_target_multiple_column(self):
+        # create test csv
+        test_csv_data = [["key", "data", "name"],
+                         ["1", "spam1", "SPAM1"],
+                         ["2", "spam2", "SPAM2"],
+                         ["3", "spam", "SPAM3"]]
+        self._create_csv(test_csv_data)
+
+        # set the essential attributes
+        instance = CsvValueExtract()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "column_regex_pattern", {'data': '[0-9]', 'name': '[A-Z]*'})
+
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            for i, row in enumerate(reader):
+                if i == 0:
+                    self.assertEqual(
+                        ["key", "data", "name"],
+                        row)
+                if i == 1:
+                    self.assertEqual(
+                        ["1", "1", "SPAM"],
+                        row)
+                if i == 2:
+                    self.assertEqual(
+                        ["2", "2", "SPAM"],
+                        row)
+                if i == 3:
+                    self.assertEqual(
+                        ["3", "", "SPAM"],
+                        row)
+
+    def test_execute_ok_when_not_match(self):
+        # create test csv
+        test_csv_data = [["key", "data", "name"],
+                         ["1", "spam", "SPAM1"]]
+        self._create_csv(test_csv_data)
+
+        # set the essential attributes
+        instance = CsvValueExtract()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "column_regex_pattern", {'data': '[0-9]'})
+
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            for i, row in enumerate(reader):
+                if i == 0:
+                    self.assertEqual(
+                        ["key", "data", "name"],
+                        row)
+                if i == 1:
+                    self.assertEqual(
+                        ["1", "", "SPAM1"],
+                        row)
 
 
 class TestCsvColumnSelect(TestCsvTransform):
