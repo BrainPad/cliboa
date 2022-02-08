@@ -16,6 +16,7 @@ import csv
 import jsonlines
 import os
 import pandas
+import re
 from cliboa.adapter.sqlite import SqliteAdapter
 from cliboa.core.validator import EssentialParameters
 from cliboa.scenario.extras import ExceptionHandler
@@ -112,6 +113,47 @@ class CsvColumnExtract(FileBaseTransform):
                     column_numbers = self._column_numbers.split(",")
                     remain_column_numbers = [int(n) for n in column_numbers]
                 Csv.extract_columns_with_numbers(fi, fo, remain_column_numbers)
+
+
+class CsvValueExtract(FileBaseTransform):
+    """
+    Extract a specific column from a CSV file and then replace it with a regular expression.
+    """
+    def __init__(self):
+        super().__init__()
+        self._column_regex_pattern = None
+
+    def column_regex_pattern(self, column_regex_pattern):
+        self._column_regex_pattern = column_regex_pattern
+
+    def execute(self, *args):
+        valid = EssentialParameters(
+            self.__class__.__name__, [
+                self._src_dir,
+                self._src_pattern,
+                self._column_regex_pattern])
+        valid()
+
+        if self._dest_dir:
+            os.makedirs(self._dest_dir, exist_ok=True)
+
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+        self.check_file_existence(files)
+
+        for fi, fo in super().io_files(files):
+            with open(fi, mode="rt") as i:
+                reader = csv.DictReader(i)
+                with open(fo, mode="wt") as o:
+                    writer = csv.DictWriter(o, reader.fieldnames)
+                    writer.writeheader()
+                    for line in reader:
+                        for column, regex_pattern in self._column_regex_pattern.items():
+                            if re.search(regex_pattern, line[column]):
+                                line[column] = re.search(
+                                    regex_pattern, line[column]).group()
+                            else:
+                                line[column] = ''
+                        writer.writerow(dict(line))
 
 
 class CsvColumnConcat(FileBaseTransform):

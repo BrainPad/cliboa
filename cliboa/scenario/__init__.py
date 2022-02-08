@@ -43,6 +43,7 @@ from .transform.csv import (
     ColumnLengthAdjust,
     CsvColumnConcat,
     CsvColumnExtract,
+    CsvValueExtract,
     CsvConcat,
     CsvMerge,
     CsvConvert,
