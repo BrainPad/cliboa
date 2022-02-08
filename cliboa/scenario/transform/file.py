@@ -15,6 +15,7 @@ import bz2
 import csv
 import gzip
 import os
+import re
 import shutil
 import tarfile
 import tempfile
@@ -459,12 +460,24 @@ class FileRename(FileBaseTransform):
         super().__init__()
         self._prefix = ""
         self._suffix = ""
+        self._regex_pattern = ""
+        self._rep_str = ""
+        self._ext = ""
 
     def prefix(self, prefix):
         self._prefix = prefix
 
     def suffix(self, suffix):
         self._suffix = suffix
+
+    def regex_pattern(self, regex_pattern):
+        self._regex_pattern = regex_pattern
+
+    def rep_str(self, rep_str):
+        self._rep_str = rep_str
+
+    def ext(self, ext):
+        self._ext = ext
 
     def execute(self, *args):
         # essential parameters check
@@ -484,13 +497,27 @@ class FileRename(FileBaseTransform):
                 px = "."
 
             if "." in basename:
-                nameonly, ext = basename.split(".", 1)
-                ext = "." + ext
+                nameonly, extension = basename.split(".", 1)
+                extension = "." + extension
             else:
                 nameonly = basename
-                ext = ""
+                extension = ""
 
-            newfilename = self._prefix + px + nameonly + self._suffix + ext
+            if self._regex_pattern and self._rep_str:
+                nameonly = re.sub(self._regex_pattern, self._rep_str, nameonly)
+            elif self._regex_pattern:
+                raise InvalidParameter(
+                    "The converted string is not defined in yaml file: dest_str"
+                )
+            elif self._rep_str:
+                raise InvalidParameter(
+                    "The conversion pattern is not defined in yaml file: regex_pattern"
+                )
+
+            if self._ext:
+                extension = "." + self._ext
+
+            newfilename = self._prefix + px + nameonly + self._suffix + extension
             newfilepath = os.path.join(dirname, newfilename)
             os.rename(file, newfilepath)
             self._logger.info("File name changed %s -> %s" % (file, newfilepath))
