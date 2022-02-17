@@ -18,7 +18,7 @@ from contextlib import ExitStack
 from unittest.mock import patch
 
 from cliboa.conf import env
-from cliboa.scenario.extract.sftp import SftpDownload
+from cliboa.scenario.extract.sftp import SftpDownload, SftpFileExistsCheck
 from cliboa.util.cache import ObjectStore
 from cliboa.util.constant import StepStatus
 from cliboa.util.helper import Helper
@@ -135,3 +135,37 @@ class TestSftpDownload(object):
 
             assert mock_sftp.called
             assert ObjectStore.get("sftp_class") == ["test.txt"]
+
+
+class TestSftpFileExistsCheck:
+    def test_execute_file_found(self):
+        instance = SftpFileExistsCheck()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "host", "dummy.host")
+        Helper.set_property(instance, "user", "dummy_user")
+        Helper.set_property(instance, "password", "dummy_pass")
+        Helper.set_property(instance, "src_dir", "/")
+        Helper.set_property(instance, "src_pattern", ".*.txt")
+        with ExitStack() as stack:
+            mock_sftp = stack.enter_context(patch("cliboa.adapter.sftp.SftpAdapter.execute"))
+            mock_sftp.return_value = ["test.txt"]
+
+            instance.execute()
+            assert mock_sftp.called
+
+    def test_execute_file_not_found(self):
+        instance = SftpFileExistsCheck()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "host", "dummy.host")
+        Helper.set_property(instance, "user", "dummy_user")
+        Helper.set_property(instance, "password", "dummy_pass")
+        Helper.set_property(instance, "src_dir", "/")
+        Helper.set_property(instance, "src_pattern", ".*.txt")
+        with ExitStack() as stack:
+            mock_sftp = stack.enter_context(patch("cliboa.adapter.sftp.SftpAdapter.execute"))
+            mock_sftp.return_value = []
+
+            res = instance.execute()
+
+            assert mock_sftp.called
+            assert res == StepStatus.SUCCESSFUL_TERMINATION
