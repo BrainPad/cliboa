@@ -61,6 +61,10 @@ from .transform.file import (
     FileDivide,
     FileRename,
 )
+from .transform.json import (
+    JsonlToCsvBase,
+    JsonlToCsv,
+)
 
 from .transform.system import ExecuteShellScript
 
