@@ -87,8 +87,20 @@ class Download(Http):
 
     VALID_HTTP_STATUS = 200
 
-    def __init__(self, url, dest_path, timeout, retry_cnt=2, retry_intvl_sec=10, **params):
+    def __init__(
+            self,
+            url,
+            dest_path,
+            timeout,
+            retry_cnt=2,
+            retry_intvl_sec=10,
+            query_string=None,
+            **params
+    ):
+        # params is the **kwargs argument of request.get()
         super().__init__(url, dest_path, timeout, retry_cnt, retry_intvl_sec, params)
+        # only when using request.get()
+        self._query_string = query_string
 
     def execute(self):
         self._logger.info("Http GET url: %s" % self._url)
@@ -96,7 +108,9 @@ class Download(Http):
         res = None
         for _ in range(self._retry_cnt):
             try:
-                res = requests.get(self._url, timeout=self._timeout, **self._params)
+                res = requests.get(
+                    self._url, params=self._query_string, timeout=self._timeout, **self._params
+                )
                 res.raise_for_status()
                 with open(self._dest_path, "wb") as f:
                     f.write(res.content)
