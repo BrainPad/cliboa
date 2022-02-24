@@ -145,6 +145,32 @@ class Sftp(object):
             }
         )
 
+    def file_exists_check(self, dir, pattern, ignore_empty_file=False):
+        """
+        Fetch all the files name in specified directory
+
+        Args:
+            dir (str): fetch target directory
+            pattern (object): fetch file pattern
+            ignore_empty_file=False (bool):
+             If True, It is treated as if there is no file with size 0.
+
+        Returns (tuple):
+            func: file_exists_check_func
+            params: parameters for file_exists_check_func
+
+        Raises:
+            IOError: failed to get data
+        """
+        return (
+            file_exists_check_func,
+            {
+                "dir": dir,
+                "pattern": pattern,
+                "ignore_empty_file": ignore_empty_file,
+            }
+        )
+
 
 def list_file_func(**kwargs):
     """
@@ -251,6 +277,24 @@ def put_file_func(**kwargs):
         open(endfile, mode="w").close()
         kwargs["sftp"].put(endfile, kwargs["dest"] + endfile_suffix)
         os.remove(endfile)
+
+
+def file_exists_check_func(**kwargs):
+    """
+    Get all the file names which matches to pattern
+    """
+    files = []
+    for f in kwargs["sftp"].listdir(kwargs["dir"]):
+        if kwargs["pattern"].fullmatch(f) is None:
+            continue
+
+        fpath = os.path.join(kwargs["dir"], f)
+        if _is_file(kwargs["sftp"], fpath):
+            if kwargs["ignore_empty_file"] is True:
+                if _get_file_size(kwargs["sftp"], fpath) == 0:
+                    continue
+            files.append(f)
+    return files
 
 
 def _transfer_with_callback(reader, writer, file_size, callback):

@@ -107,8 +107,6 @@ class SftpDownloadFileDelete(SftpExtract):
     def execute(self, *args):
         files = ObjectStore.get(self._symbol)
 
-        print(self._host)
-
         if files is not None and len(files) > 0:
             self._logger.info("Delete files %s" % files)
 
@@ -141,3 +139,38 @@ class SftpDownloadFileDelete(SftpExtract):
                     self._logger.info("%s is successfully deleted." % (file + endfile_suffix))
         else:
             self._logger.info("No files to delete.")
+
+
+class SftpFileExistsCheck(SftpExtract):
+    """
+    File check in sftp server
+    """
+
+    def __init__(self):
+        super().__init__()
+        self._ignore_empty_file = False
+
+    def ignore_empty_file(self, ignore_empty_file):
+        self._ignore_empty_file = ignore_empty_file
+
+    def execute(self, *args):
+        # essential parameters check
+        valid = EssentialParameters(
+            self.__class__.__name__, [self._host, self._user, self._src_dir, self._src_pattern],
+        )
+        valid()
+
+        obj = Sftp().file_exists_check(
+            dir=self._src_dir,
+            pattern=re.compile(self._src_pattern),
+            ignore_empty_file=self._ignore_empty_file,
+        )
+
+        adaptor = super().get_adaptor()
+        files = adaptor.execute(obj)
+
+        if len(files) == 0:
+            self._logger.info("File not found. After process will not be processed")
+            return StepStatus.SUCCESSFUL_TERMINATION
+
+        self._logger.info("File was found. After process will be processed")

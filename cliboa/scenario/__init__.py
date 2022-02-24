@@ -24,7 +24,7 @@ from .extract.gcp import (
 from .extract.http import HttpDownload, HttpDownloadViaBasicAuth
 from .extract.mysql import MysqlRead
 from .extract.postgres import PostgresqlRead
-from .extract.sftp import SftpDelete, SftpDownload, SftpDownloadFileDelete
+from .extract.sftp import SftpDelete, SftpDownload, SftpDownloadFileDelete, SftpFileExistsCheck
 from .extract.sqlite import SqliteExport
 from .load.aws import S3Upload
 from .load.azure import AzureBlobUpload
