@@ -40,6 +40,8 @@ jobs:
           # upload to pypi
           PYPI_USERNAME=`jq -r '.inputs.username' $GITHUB_EVENT_PATH`
           PYPI_PASSWORD=`jq -r '.inputs.password' $GITHUB_EVENT_PATH`
-          echo "::add-mask::＄PYPI_USERNAME"
-          echo "::add-mask::＄PYPI_USERNAME"
-          sudo python3 tools/script/deploy_to_pypi.py "::add-mask::＄PYPI_USERNAME" "::add-mask::＄PYPI_PASSWORD" "${{ github.event.inputs.is_test }}"
+          echo $PYPI_USERNAME
+          echo ::add-mask::$PYPI_USERNAME
+          echo $PYPI_PASSWORD
+          echo ::add-mask::$PYPI_PASSWORD
+          sudo python3 tools/script/deploy_to_pypi.py ::add-mask::$PYPI_USERNAME ::add-mask::$PYPI_PASSWORD "${{ github.event.inputs.is_test }}"
