@@ -82,8 +82,7 @@ class TestFileTransformFunctions(TestFileTransform):
         instance = FileBaseTransform()
         Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
         files = self._create_files()
-        for fi, fo in instance.io_files(files):
-            pass
+        instance.io_files(files, func=self._func)
         assert os.path.exists(os.path.join(self._data_dir, "test1.txt")) is True
         assert os.path.exists(os.path.join(self._data_dir, "test2.txt")) is True
 
@@ -92,8 +91,7 @@ class TestFileTransformFunctions(TestFileTransform):
         Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
         Helper.set_property(instance, "dest_dir", self._data_dir)
         files = self._create_files()
-        for fi, fo in instance.io_files(files):
-            pass
+        instance.io_files(files, func=self._func)
         assert os.path.exists(os.path.join(self._data_dir, "test1.txt")) is True
         assert os.path.exists(os.path.join(self._data_dir, "test2.txt")) is True
 
@@ -102,8 +100,7 @@ class TestFileTransformFunctions(TestFileTransform):
         Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
         Helper.set_property(instance, "dest_dir", self._out_dir)
         files = self._create_files()
-        for fi, fo in instance.io_files(files):
-            pass
+        instance.io_files(files, func=self._func)
         assert os.path.exists(os.path.join(self._out_dir, "test1.txt")) is True
         assert os.path.exists(os.path.join(self._out_dir, "test2.txt")) is True
         assert os.path.exists(os.path.join(self._data_dir, "test1.txt")) is True
@@ -119,8 +116,7 @@ class TestFileTransformFunctions(TestFileTransform):
             renamed_file = os.path.join(root, "." + name)
             os.rename(file, renamed_file)
             files.append(renamed_file)
-        for fi, fo in instance.io_files(files):
-            pass
+        instance.io_files(files, func=self._func)
         assert os.path.exists(os.path.join(self._out_dir, ".test1.txt")) is True
         assert os.path.exists(os.path.join(self._out_dir, ".test2.txt")) is True
         assert os.path.exists(os.path.join(self._data_dir, ".test1.txt")) is True
@@ -130,8 +126,7 @@ class TestFileTransformFunctions(TestFileTransform):
         instance = FileBaseTransform()
         Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
         files = self._create_files()
-        for fi, fo in instance.io_files(files, ext="csv"):
-            pass
+        instance.io_files(files, ext="csv", func=self._func)
         assert os.path.exists(os.path.join(self._data_dir, "test1.txt")) is True
         assert os.path.exists(os.path.join(self._data_dir, "test2.txt")) is True
         assert os.path.exists(os.path.join(self._data_dir, "test1.csv")) is True
@@ -141,8 +136,7 @@ class TestFileTransformFunctions(TestFileTransform):
         instance = FileBaseTransform()
         Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
         files = self._create_files()
-        for fi, fo in instance.io_files(files, ext=".csv"):
-            pass
+        instance.io_files(files, ext=".csv", func=self._func)
         assert os.path.exists(os.path.join(self._data_dir, "test1.txt")) is True
         assert os.path.exists(os.path.join(self._data_dir, "test2.txt")) is True
         assert os.path.exists(os.path.join(self._data_dir, "test1.csv")) is True
@@ -220,6 +214,9 @@ class TestFileTransformFunctions(TestFileTransform):
         Helper.set_property(instance, "nonfile_error", False)
         ret = instance.check_file_existence([])
         assert ret is None
+
+    def _func(self, fi, fo):
+        pass
 
 
 class TestFileDecompress(TestFileTransform):

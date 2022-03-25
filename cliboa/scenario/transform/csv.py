@@ -19,7 +19,6 @@ import pandas
 import re
 from cliboa.adapter.sqlite import SqliteAdapter
 from cliboa.core.validator import EssentialParameters
-from cliboa.scenario.extras import ExceptionHandler
 from cliboa.scenario.transform.file import FileBaseTransform
 from cliboa.util.csv import Csv
 from cliboa.util.exception import (
@@ -61,14 +60,16 @@ class CsvColumnHash(FileBaseTransform):
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self.check_file_existence(files)
 
-        for fi, fo in super().io_files(files):
-            df = pandas.read_csv(fi, dtype=str, encoding=self._encoding,)
-            for c in self._columns:
-                df[c] = df[c].apply(self._stringToHash)
+        super().io_files(files, func=self.convert)
 
-            df.to_csv(
-                fo, encoding=self._encoding, index=False,
-            )
+    def convert(self, fi, fo):
+        df = pandas.read_csv(fi, dtype=str, encoding=self._encoding,)
+        for c in self._columns:
+            df[c] = df[c].apply(self._stringToHash)
+
+        df.to_csv(
+            fo, encoding=self._encoding, index=False,
+        )
 
 
 class CsvColumnExtract(FileBaseTransform):
@@ -102,17 +103,18 @@ class CsvColumnExtract(FileBaseTransform):
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self.check_file_existence(files)
 
-        for fi, fo in super().io_files(files):
-            if self._columns:
-                Csv.extract_columns_with_names(fi, fo, self._columns)
-            elif self._column_numbers:
-                if isinstance(self._column_numbers, int) is True:
-                    remain_column_numbers = []
-                    remain_column_numbers.append(self._column_numbers)
-                else:
-                    column_numbers = self._column_numbers.split(",")
-                    remain_column_numbers = [int(n) for n in column_numbers]
-                Csv.extract_columns_with_numbers(fi, fo, remain_column_numbers)
+        super().io_files(files, func=self.convert)
+
+    def convert(self, fi, fo):
+        if self._columns:
+            Csv.extract_columns_with_names(fi, fo, self._columns)
+        elif self._column_numbers:
+            if isinstance(self._column_numbers, int) is True:
+                remain_column_numbers = [self._column_numbers]
+            else:
+                column_numbers = self._column_numbers.split(",")
+                remain_column_numbers = [int(n) for n in column_numbers]
+            Csv.extract_columns_with_numbers(fi, fo, remain_column_numbers)
 
 
 class CsvValueExtract(FileBaseTransform):
@@ -191,21 +193,23 @@ class CsvColumnConcat(FileBaseTransform):
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self.check_file_existence(files)
 
-        for fi, fo in super().io_files(files):
-            df = pandas.read_csv(fi, dtype=str, encoding=self._encoding,)
+        super().io_files(files, func=self.convert)
 
-            dest_str = None
-            for c in self._columns:
-                if dest_str is None:
-                    dest_str = df[c].astype(str)
-                else:
-                    dest_str = dest_str + self._sep + df[c].astype(str)
-                df = df.drop(columns=[c])
-            df[self._dest_column_name] = dest_str
+    def convert(self, fi, fo):
+        df = pandas.read_csv(fi, dtype=str, encoding=self._encoding,)
 
-            df.to_csv(
-                fo, encoding=self._encoding, index=False,
-            )
+        dest_str = None
+        for c in self._columns:
+            if dest_str is None:
+                dest_str = df[c].astype(str)
+            else:
+                dest_str = dest_str + self._sep + df[c].astype(str)
+            df = df.drop(columns=[c])
+        df[self._dest_column_name] = dest_str
+
+        df.to_csv(
+            fo, encoding=self._encoding, index=False,
+        )
 
 
 class CsvMergeExclusive(FileBaseTransform):
@@ -250,30 +254,32 @@ class CsvMergeExclusive(FileBaseTransform):
             os.path.basename(self._target_compare_path))
         self.check_file_existence(target)
 
-        df_target = pandas.read_csv(self._target_compare_path)
-        if self._target_column not in df_target:
+        self.df_target = pandas.read_csv(self._target_compare_path)
+        if self._target_column not in self.df_target:
             raise KeyError(
                 "Target Compare file does not exist target column [%s]." %
                 self._target_column)
 
-        df_target_list = df_target[self._target_column].values.tolist()
+        self.df_target_list = self.df_target[self._target_column].values.tolist()
 
-        for fi, fo in super().io_files(files):
-            df = pandas.read_csv(fi)
-            try:
-                df[self._src_column].values.tolist()
-            except KeyError:
-                raise KeyError(
-                    "Src file does not exist target column [%s]." %
-                    self._target_column)
+        super().io_files(files, func=self.convert)
 
-            df = df[~df[self._src_column].isin(df_target_list)]
+    def convert(self, fi, fo):
+        df = pandas.read_csv(fi)
+        try:
+            df[self._src_column].values.tolist()
+        except KeyError:
+            raise KeyError(
+                "Src file does not exist target column [%s]." %
+                self._target_column)
 
-            df.to_csv(
-                fo,
-                encoding=self._encoding,
-                index=False,
-            )
+        df = df[~df[self._src_column].isin(self.df_target_list)]
+
+        df.to_csv(
+            fo,
+            encoding=self._encoding,
+            index=False,
+        )
 
 
 class ColumnLengthAdjust(FileBaseTransform):
@@ -299,6 +305,9 @@ class ColumnLengthAdjust(FileBaseTransform):
 
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self.check_file_existence(files)
+
+        super().io_writers(files, encoding=self._encoding)
+
         for fi, fo in super().io_writers(files, encoding=self._encoding):
             reader = csv.DictReader(fi)
             writer = csv.DictWriter(fo, reader.fieldnames)
@@ -408,18 +417,21 @@ class CsvColumnSelect(FileBaseTransform):
         if len(files) == 0:
             raise FileNotFound("No files are found.")
         self._logger.info("Files found %s" % files)
-        for fi, fo in super().io_files(files):
-            df = pandas.read_csv(fi, dtype=str, encoding=self._encoding)
-            if set(self._column_order) - set(df.columns.values):
-                raise InvalidParameter(
-                    "column_order define not included target file's column : %s"
-                    % (set(self._column_order) - set(df.columns.values)))
-            df = df.loc[:, self._column_order]
-            df.to_csv(
-                fo,
-                encoding=self._encoding,
-                index=False,
-            )
+
+        super().io_files(files, func=self.convert)
+
+    def convert(self, fi, fo):
+        df = pandas.read_csv(fi, dtype=str, encoding=self._encoding)
+        if set(self._column_order) - set(df.columns.values):
+            raise InvalidParameter(
+                "column_order define not included target file's column : %s"
+                % (set(self._column_order) - set(df.columns.values)))
+        df = df.loc[:, self._column_order]
+        df.to_csv(
+            fo,
+            encoding=self._encoding,
+            index=False,
+        )
 
 
 class CsvConcat(FileBaseTransform):
@@ -477,7 +489,7 @@ class CsvConcat(FileBaseTransform):
         )
 
 
-class CsvConvert(FileBaseTransform, ExceptionHandler):
+class CsvConvert(FileBaseTransform):
     """
     Change csv format
     """
@@ -532,42 +544,41 @@ class CsvConvert(FileBaseTransform, ExceptionHandler):
         if self._dest_dir:
             os.makedirs(self._dest_dir, exist_ok=True)
 
-        files = super().get_target_files(self._src_dir, self._src_pattern)
-        self.check_file_existence(files)
-
         if self._after_format is None:
             self._after_format = self._before_format
+
         if self._after_enc is None:
             self._after_enc = self._before_enc
 
-        for fi, fo in super().io_files(files, ext=self._after_format):
-            try:
-                with open(fi, mode="rt", encoding=self._before_enc) as i:
-                    reader = csv.reader(
-                        i,
-                        delimiter=Csv.delimiter_convert(self._before_format),
-                        quoting=Csv.quote_convert(self._reader_quote)
-                    )
-                    with open(fo, mode="wt", newline="", encoding=self._after_enc) as o:
-                        writer = csv.writer(
-                            o,
-                            delimiter=Csv.delimiter_convert(self._after_format),
-                            quoting=Csv.quote_convert(self._quote),
-                            lineterminator=Csv.newline_convert(self._after_nl),
-                        )
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+        self.check_file_existence(files)
 
-                        for i, line in enumerate(reader):
-                            if i == 0:
-                                if self._headers_existence is False:
-                                    continue
-                                writer.writerow(self._replace_headers(line))
-                            else:
-                                writer.writerow(line)
-            except Exception as e:
-                if self._force_continue is True:
-                    self.handle_error(e, fi)
-                else:
-                    raise e
+        super().io_files(files,
+                         ext=self._after_format,
+                         func=self.convert)
+
+    def convert(self, fi, fo):
+        with open(fi, mode="rt", encoding=self._before_enc) as i:
+            reader = csv.reader(
+                i,
+                delimiter=Csv.delimiter_convert(self._before_format),
+                quoting=Csv.quote_convert(self._reader_quote)
+            )
+            with open(fo, mode="wt", newline="", encoding=self._after_enc) as o:
+                writer = csv.writer(
+                    o,
+                    delimiter=Csv.delimiter_convert(self._after_format),
+                    quoting=Csv.quote_convert(self._quote),
+                    lineterminator=Csv.newline_convert(self._after_nl),
+                )
+
+                for i, line in enumerate(reader):
+                    if i == 0:
+                        if self._headers_existence is False:
+                            continue
+                        writer.writerow(self._replace_headers(line))
+                    else:
+                        writer.writerow(line)
 
     def _replace_headers(self, old_headers):
         """
@@ -667,10 +678,12 @@ class CsvToJsonl(FileBaseTransform):
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self.check_file_existence(files)
 
-        for fi, fo in super().io_files(files, ext="jsonl"):
-            with open(fi, mode="r", encoding=self._encoding, newline="") as i, jsonlines.open(
-                fo, mode="w"
-            ) as writer:
-                reader = csv.DictReader(i)
-                for row in reader:
-                    writer.write(row)
+        super().io_files(files, ext="jsonl", func=self.convert)
+
+    def convert(self, fi, fo):
+        with open(fi, mode="r", encoding=self._encoding, newline="") as i, jsonlines.open(
+            fo, mode="w"
+        ) as writer:
+            reader = csv.DictReader(i)
+            for row in reader:
+                writer.write(row)
