@@ -51,26 +51,27 @@ class JsonlToCsvBase(FileBaseTransform):
 
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self.check_file_existence(files)
+        super().io_files(files, ext="csv", func=self.convert)
 
-        for fi, fo in super().io_files(files, ext="csv"):
-            writer = None
-            with jsonlines.open(fi) as reader, open(
-                    fo, mode="w", encoding=self._encoding, newline=""
-            ) as f:
-                for row in reader:
-                    new_rows = self.convert_row(row)
-                    if not new_rows:
-                        continue
-                    if not writer:
-                        writer = csv.DictWriter(
-                            f,
-                            new_rows[0].keys(),
-                            quoting=Csv.quote_convert(self._quote),
-                            lineterminator=Csv.newline_convert(self._after_nl),
-                            escapechar=self._escape_char
-                        )
-                        writer.writeheader()
-                    writer.writerows(new_rows)
+    def convert(self, fi, fo):
+        writer = None
+        with jsonlines.open(fi) as reader, open(
+                fo, mode="w", encoding=self._encoding, newline=""
+        ) as f:
+            for row in reader:
+                new_rows = self.convert_row(row)
+                if not new_rows:
+                    continue
+                if not writer:
+                    writer = csv.DictWriter(
+                        f,
+                        new_rows[0].keys(),
+                        quoting=Csv.quote_convert(self._quote),
+                        lineterminator=Csv.newline_convert(self._after_nl),
+                        escapechar=self._escape_char
+                    )
+                    writer.writeheader()
+                writer.writerows(new_rows)
 
 
 class JsonlToCsv(JsonlToCsvBase):
