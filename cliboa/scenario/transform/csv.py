@@ -141,21 +141,22 @@ class CsvValueExtract(FileBaseTransform):
 
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self.check_file_existence(files)
+        super().io_files(files, func=self.convert)
 
-        for fi, fo in super().io_files(files):
-            with open(fi, mode="rt") as i:
-                reader = csv.DictReader(i)
-                with open(fo, mode="wt") as o:
-                    writer = csv.DictWriter(o, reader.fieldnames)
-                    writer.writeheader()
-                    for line in reader:
-                        for column, regex_pattern in self._column_regex_pattern.items():
-                            if re.search(regex_pattern, line[column]):
-                                line[column] = re.search(
-                                    regex_pattern, line[column]).group()
-                            else:
-                                line[column] = ''
-                        writer.writerow(dict(line))
+    def convert(self, fi, fo):
+        with open(fi, mode="rt") as i:
+            reader = csv.DictReader(i)
+            with open(fo, mode="wt") as o:
+                writer = csv.DictWriter(o, reader.fieldnames)
+                writer.writeheader()
+                for line in reader:
+                    for column, regex_pattern in self._column_regex_pattern.items():
+                        if re.search(regex_pattern, line[column]):
+                            line[column] = re.search(
+                                regex_pattern, line[column]).group()
+                        else:
+                            line[column] = ''
+                    writer.writerow(dict(line))
 
 
 class CsvColumnConcat(FileBaseTransform):
