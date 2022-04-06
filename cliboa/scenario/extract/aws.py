@@ -17,6 +17,7 @@ import re
 from cliboa.adapter.aws import S3Adapter
 from cliboa.scenario.aws import BaseS3
 from cliboa.scenario.validator import EssentialParameters
+from cliboa.util.constant import StepStatus
 
 
 class S3Download(BaseS3):
@@ -62,3 +63,47 @@ class S3Download(BaseS3):
                     continue
                 dest_path = os.path.join(self._dest_dir, filename)
                 client.download_file(self._bucket, path, dest_path)
+
+
+class S3FileExistsCheck(BaseS3):
+    """
+    File check in S3
+    """
+
+    def __init__(self):
+        super().__init__()
+        self._prefix = ""
+        self._delimiter = ""
+        self._src_pattern = None
+
+    def prefix(self, prefix):
+        self._prefix = prefix
+
+    def delimiter(self, delimiter):
+        self._delimiter = delimiter
+
+    def src_pattern(self, src_pattern):
+        self._src_pattern = src_pattern
+
+    def execute(self, *args):
+        super().execute()
+
+        valid = EssentialParameters(self.__class__.__name__, [self._src_pattern])
+        valid()
+
+        adapter = S3Adapter(self._access_key, self._secret_key, self._profile)
+
+        p = adapter.get_client().get_paginator("list_objects")
+        for page in p.paginate(Bucket=self._bucket, Delimiter=self._delimiter, Prefix=self._prefix):
+            for c in page.get("Contents", []):
+                filename = os.path.basename(c.get("Key"))
+                rec = re.compile(self._src_pattern)
+                if not rec.fullmatch(filename):
+                    continue
+                # The file exist
+                self._logger.info("File was found in S3. After process will be processed")
+                return None
+
+        # The file does not exist
+        self._logger.info("File not found in S3. After process will not be processed")
+        return StepStatus.SUCCESSFUL_TERMINATION
