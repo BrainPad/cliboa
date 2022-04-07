@@ -20,6 +20,7 @@ from cliboa.adapter.gcp import BigQueryAdapter, FireStoreAdapter, GcsAdapter
 from cliboa.scenario.gcp import BaseBigQuery, BaseFirestore, BaseGcs
 from cliboa.scenario.validator import EssentialParameters
 from cliboa.util.cache import ObjectStore
+from cliboa.util.constant import StepStatus
 from cliboa.util.exception import InvalidParameter
 from cliboa.util.gcp import BigQuery
 from cliboa.util.string import StringUtil
@@ -251,3 +252,46 @@ class FirestoreDocumentDownload(BaseFirestore):
 
         with open(os.path.join(self._dest_dir, doc.id), mode="wt") as f:
             f.write(json.dumps(doc.to_dict()))
+
+
+class GcsFileExistsCheck(BaseGcs):
+    """
+    File check in GCS
+    """
+
+    def __init__(self):
+        super().__init__()
+        self._prefix = None
+        self._delimiter = None
+        self._src_pattern = None
+
+    def prefix(self, prefix):
+        self._prefix = prefix
+
+    def delimiter(self, delimiter):
+        self._delimiter = delimiter
+
+    def src_pattern(self, src_pattern):
+        self._src_pattern = src_pattern
+
+    def execute(self, *args):
+        super().execute()
+
+        valid = EssentialParameters(self.__class__.__name__, [self._src_pattern])
+        valid()
+
+        client = GcsAdapter().get_client(credentials=self.get_credentials())
+        dl_files = []
+
+        for blob in client.list_blobs(
+                client.bucket(self._bucket), prefix=self._prefix, delimiter=self._delimiter):
+            r = re.compile(self._src_pattern)
+            if not r.fullmatch(blob.name):
+                continue
+            dl_files.append(blob.name)
+
+        if len(dl_files) == 0:
+            self._logger.info("File not found in GCS. After process will not be processed")
+            return StepStatus.SUCCESSFUL_TERMINATION
+
+        self._logger.info("File was found in GCS. After process will be processed")
