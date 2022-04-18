@@ -33,6 +33,9 @@ jobs:
           else
             echo "black does not support python${{ matrix.python_versions }}"
           fi
+      - name: check isort
+        run: |
+          pipenv run isort --check
       - name: execute unittest and instrument coverage
         run: |
           pipenv run coverage
