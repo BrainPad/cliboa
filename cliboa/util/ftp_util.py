@@ -32,7 +32,7 @@ class FtpUtil(object):
         Raises:
             IOError: ftplib failure
         """
-        return (list_file_func, {"dir": dir, "dest": dest, "pattern": pattern,})
+        return (list_file_func, {"dir": dir, "dest": dest, "pattern": pattern})
 
     def clear_files(self, dir, pattern):
         """
@@ -49,7 +49,7 @@ class FtpUtil(object):
         Raises:
             IOError: failed to remove
         """
-        return (list_file_func, {"dir": dir, "pattern": pattern,})
+        return (list_file_func, {"dir": dir, "pattern": pattern})
 
     def remove_specific_file(self, dir, fname):
         """
@@ -66,7 +66,7 @@ class FtpUtil(object):
         Raises:
             IOError: failed to remove
         """
-        return (remove_specific_file_func, {"dir": dir, "fname": fname,})
+        return (remove_specific_file_func, {"dir": dir, "fname": fname})
 
     def file_mdtm(self, dir, unixtime=False):
         """
@@ -88,7 +88,7 @@ class FtpUtil(object):
         Raises:
             IOError: ftplib failure
         """
-        return (file_mdtm_func, {"dir": dir, "unixtime": unixtime,})
+        return (file_mdtm_func, {"dir": dir, "unixtime": unixtime})
 
 
 def list_file_func(**kwargs):

@@ -381,7 +381,7 @@ class TestYamlScenarioManager(BaseCliboaTest):
                 {
                     "step": "sample_step",
                     "class": "SampleStep",
-                    "arguments": {"memo": "foo_{{ env.CLIBOA_TEST_ENV }}_bar",},
+                    "arguments": {"memo": "foo_{{ env.CLIBOA_TEST_ENV }}_bar"},
                 }
             ]
         }

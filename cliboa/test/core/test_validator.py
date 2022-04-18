@@ -282,8 +282,8 @@ class TestValidators(object):
                 "parallel_with_config": {
                     "config": {"multi_process_count": 2},
                     "steps": [
-                        {"step": "test step 1", "class": "SampleClass",},
-                        {"step": "test step 2", "class": "SampleClass",},
+                        {"step": "test step 1", "class": "SampleClass"},
+                        {"step": "test step 2", "class": "SampleClass"},
                     ],
                 }
             }
@@ -328,8 +328,8 @@ class TestValidators(object):
             {
                 "parallel_with_config": {
                     "steps": [
-                        {"step": "test step 1", "class": "SampleClass",},
-                        {"step": "test step 2", "class": "SampleClass",},
+                        {"step": "test step 1", "class": "SampleClass"},
+                        {"step": "test step 2", "class": "SampleClass"},
                     ],
                 }
             }
@@ -338,7 +338,7 @@ class TestValidators(object):
             valid_instance = EssentialKeys(test_yaml)
             valid_instance()
         assert (
-            "scenario.yml is invalid. 'config:' key does not exist, or 'config:' value does not exist."
+            "scenario.yml is invalid. 'config:' key does not exist, or 'config:' value does not exist."   # noqa
             in str(excinfo.value)
         )  # noqa
 
@@ -347,12 +347,12 @@ class TestValidators(object):
         If block starts with "parallel_with_config"
         all steps under the "parallel_with_config" requires both "step" and "class"
         """
-        test_yaml = [{"parallel_with_config": {"config": {"multi_process_count": 2},}}]
+        test_yaml = [{"parallel_with_config": {"config": {"multi_process_count": 2}}}]
         with pytest.raises(ScenarioFileInvalid) as excinfo:
             valid_instance = EssentialKeys(test_yaml)
             valid_instance()
         assert (
-            "scenario.yml is invalid. 'steps:' key does not exist, or 'steps:' value does not exist."
+            "scenario.yml is invalid. 'steps:' key does not exist, or 'steps:' value does not exist."  # noqa
             in str(excinfo.value)
         )  # noqa
 
@@ -366,8 +366,8 @@ class TestValidators(object):
                 "parallel_with_config": {
                     "config": {"multi_process_count": 2},
                     "steps": [
-                        {"step": "test step 1", "class": "SampleClass",},
-                        {"class": "SampleClass",},
+                        {"step": "test step 1", "class": "SampleClass"},
+                        {"class": "SampleClass"},
                     ],
                 }
             }
