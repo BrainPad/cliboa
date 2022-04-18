@@ -12,7 +12,6 @@
 # all copies or substantial portions of the Software.
 #
 import os
-
 from datetime import datetime
 
 

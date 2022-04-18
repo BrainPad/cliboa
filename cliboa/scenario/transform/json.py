@@ -11,8 +11,9 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-from abc import abstractmethod
 import csv
+from abc import abstractmethod
+
 import jsonlines
 
 from cliboa.core.validator import EssentialParameters

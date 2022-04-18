@@ -11,13 +11,14 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import requests
-
 from abc import ABC, abstractmethod
+from time import sleep
+
+import requests
+from requests.exceptions import HTTPError
+
 from cliboa.scenario.validator import EssentialParameters
 from cliboa.util.lisboa_log import LisboaLog
-from requests.exceptions import HTTPError
-from time import sleep
 
 
 class FormAuth(object):

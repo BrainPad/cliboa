@@ -22,10 +22,7 @@ from cliboa.core.file_parser import JsonScenarioParser, YamlScenarioParser
 from cliboa.core.listener import StepStatusListener
 from cliboa.core.scenario_queue import ScenarioQueue
 from cliboa.core.step_queue import StepQueue
-from cliboa.core.validator import (
-    ProjectDirectoryExistence,
-    ScenarioFileExistence,
-)
+from cliboa.core.validator import ProjectDirectoryExistence, ScenarioFileExistence
 from cliboa.scenario import *  # noqa
 from cliboa.util.cache import StepArgument
 from cliboa.util.class_util import ClassUtil

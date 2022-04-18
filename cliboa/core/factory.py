@@ -11,11 +11,12 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+from importlib import import_module
+
 from cliboa.core.manager import JsonScenarioManager, YamlScenarioManager  # noqa
 from cliboa.core.strategy import MultiProcExecutor, MultiProcWithConfigExecutor, SingleProcExecutor
 from cliboa.util.class_util import ClassUtil
 from cliboa.util.parallel_with_config import ParallelWithConfig
-from importlib import import_module
 
 
 class ScenarioManagerFactory(object):

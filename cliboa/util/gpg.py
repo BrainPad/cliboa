@@ -1,6 +1,8 @@
-import gnupg
 import logging
 import os
+
+import gnupg
+
 from cliboa.util.exception import CliboaException
 
 

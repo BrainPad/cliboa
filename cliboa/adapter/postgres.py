@@ -1,5 +1,4 @@
 import psycopg2
-
 from cliboa.adapter.rdbms import RdbmsSupport
 from psycopg2.extras import execute_values
 
