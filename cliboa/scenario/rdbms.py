@@ -177,7 +177,8 @@ class BaseRdbmsWrite(BaseRdbms):
         for file in files:
             with self.get_adaptor() as adaptor:
                 tuples = rdbmsUtil.csv_as_params(
-                    file, chunk_size=self._chunk_size, encoding=self._encoding)
+                    file, chunk_size=self._chunk_size, encoding=self._encoding
+                )
                 self._logger.info("tuples: %s" % tuples)
                 for params in tuples:
                     self._logger.info("params: %s" % params)

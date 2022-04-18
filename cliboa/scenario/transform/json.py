@@ -25,6 +25,7 @@ class JsonlToCsvBase(FileBaseTransform):
     """
     Base class of jsonlines transform to csv.
     """
+
     def __init__(self):
         super().__init__()
         self._quote = "QUOTE_MINIMAL"
@@ -45,9 +46,7 @@ class JsonlToCsvBase(FileBaseTransform):
         pass
 
     def execute(self, *args):
-        valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir, self._src_pattern]
-        )
+        valid = EssentialParameters(self.__class__.__name__, [self._src_dir, self._src_pattern])
         valid()
 
         files = super().get_target_files(self._src_dir, self._src_pattern)
@@ -57,7 +56,7 @@ class JsonlToCsvBase(FileBaseTransform):
     def convert(self, fi, fo):
         writer = None
         with jsonlines.open(fi) as reader, open(
-                fo, mode="w", encoding=self._encoding, newline=""
+            fo, mode="w", encoding=self._encoding, newline=""
         ) as f:
             for row in reader:
                 new_rows = self.convert_row(row)
@@ -69,7 +68,7 @@ class JsonlToCsvBase(FileBaseTransform):
                         new_rows[0].keys(),
                         quoting=Csv.quote_convert(self._quote),
                         lineterminator=Csv.newline_convert(self._after_nl),
-                        escapechar=self._escape_char
+                        escapechar=self._escape_char,
                     )
                     writer.writeheader()
                 writer.writerows(new_rows)
@@ -79,6 +78,7 @@ class JsonlToCsv(JsonlToCsvBase):
     """
     Transform jsonlines to csv.
     """
+
     def execute(self, *args):
         super().execute()
 

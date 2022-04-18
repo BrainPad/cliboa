@@ -118,6 +118,7 @@ class CsvValueExtract(FileBaseTransform):
     """
     Extract a specific column from a CSV file and then replace it with a regular expression.
     """
+
     def __init__(self):
         super().__init__()
         self._column_regex_pattern = None
@@ -127,10 +128,8 @@ class CsvValueExtract(FileBaseTransform):
 
     def execute(self, *args):
         valid = EssentialParameters(
-            self.__class__.__name__, [
-                self._src_dir,
-                self._src_pattern,
-                self._column_regex_pattern])
+            self.__class__.__name__, [self._src_dir, self._src_pattern, self._column_regex_pattern]
+        )
         valid()
 
         if self._dest_dir:
@@ -149,10 +148,9 @@ class CsvValueExtract(FileBaseTransform):
                 for line in reader:
                     for column, regex_pattern in self._column_regex_pattern.items():
                         if re.search(regex_pattern, line[column]):
-                            line[column] = re.search(
-                                regex_pattern, line[column]).group()
+                            line[column] = re.search(regex_pattern, line[column]).group()
                         else:
-                            line[column] = ''
+                            line[column] = ""
                     writer.writerow(dict(line))
 
 
@@ -233,11 +231,14 @@ class CsvMergeExclusive(FileBaseTransform):
 
     def execute(self, *args):
         valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir,
-                                      self._src_pattern,
-                                      self._src_column,
-                                      self._target_compare_path,
-                                      self._target_column]
+            self.__class__.__name__,
+            [
+                self._src_dir,
+                self._src_pattern,
+                self._src_column,
+                self._target_compare_path,
+                self._target_column,
+            ],
         )
         valid()
 
@@ -248,15 +249,15 @@ class CsvMergeExclusive(FileBaseTransform):
         self.check_file_existence(files)
 
         target = super().get_target_files(
-            os.path.dirname(self._target_compare_path),
-            os.path.basename(self._target_compare_path))
+            os.path.dirname(self._target_compare_path), os.path.basename(self._target_compare_path)
+        )
         self.check_file_existence(target)
 
         self.df_target = pandas.read_csv(self._target_compare_path)
         if self._target_column not in self.df_target:
             raise KeyError(
-                "Target Compare file does not exist target column [%s]." %
-                self._target_column)
+                "Target Compare file does not exist target column [%s]." % self._target_column
+            )
 
         self.df_target_list = self.df_target[self._target_column].values.tolist()
 
@@ -267,16 +268,12 @@ class CsvMergeExclusive(FileBaseTransform):
         try:
             df[self._src_column].values.tolist()
         except KeyError:
-            raise KeyError(
-                "Src file does not exist target column [%s]." %
-                self._target_column)
+            raise KeyError("Src file does not exist target column [%s]." % self._target_column)
 
         df = df[~df[self._src_column].isin(self.df_target_list)]
 
         df.to_csv(
-            fo,
-            encoding=self._encoding,
-            index=False,
+            fo, encoding=self._encoding, index=False,
         )
 
 
@@ -392,6 +389,7 @@ class CsvColumnSelect(FileBaseTransform):
     """
     Select columns in Csv file in specified order
     """
+
     def __init__(self):
         super().__init__()
         self._column_order = None
@@ -402,9 +400,7 @@ class CsvColumnSelect(FileBaseTransform):
     def execute(self, *args):
         # essential parameters check
         valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir,
-                                      self._src_pattern,
-                                      self._column_order]
+            self.__class__.__name__, [self._src_dir, self._src_pattern, self._column_order]
         )
         valid()
 
@@ -423,12 +419,11 @@ class CsvColumnSelect(FileBaseTransform):
         if set(self._column_order) - set(df.columns.values):
             raise InvalidParameter(
                 "column_order define not included target file's column : %s"
-                % (set(self._column_order) - set(df.columns.values)))
+                % (set(self._column_order) - set(df.columns.values))
+            )
         df = df.loc[:, self._column_order]
         df.to_csv(
-            fo,
-            encoding=self._encoding,
-            index=False,
+            fo, encoding=self._encoding, index=False,
         )
 
 
@@ -551,16 +546,14 @@ class CsvConvert(FileBaseTransform):
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self.check_file_existence(files)
 
-        super().io_files(files,
-                         ext=self._after_format,
-                         func=self.convert)
+        super().io_files(files, ext=self._after_format, func=self.convert)
 
     def convert(self, fi, fo):
         with open(fi, mode="rt", encoding=self._before_enc) as i:
             reader = csv.reader(
                 i,
                 delimiter=Csv.delimiter_convert(self._before_format),
-                quoting=Csv.quote_convert(self._reader_quote)
+                quoting=Csv.quote_convert(self._reader_quote),
             )
             with open(fo, mode="wt", newline="", encoding=self._after_enc) as o:
                 writer = csv.writer(

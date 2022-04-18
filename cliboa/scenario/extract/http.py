@@ -68,7 +68,8 @@ class HttpDownload(HttpExtract):
         if self._src_pattern:
             # Deprecated URL must be a specific string, does not have to be a pattern of regex.
             self._logger.warning(
-                "Deprecated URL must be a specific string, does not have to be a pattern of regex.")
+                "Deprecated URL must be a specific string, does not have to be a pattern of regex."
+            )
             valid = EssentialParameters(
                 self.__class__.__name__, [self._src_url, self._src_pattern, self._dest_dir]
             )

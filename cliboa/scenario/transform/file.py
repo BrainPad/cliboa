@@ -218,7 +218,8 @@ class FileDecompress(FileBaseTransform):
                     pwd = self._password
                 with zipfile.ZipFile(f) as zp:
                     zp.extractall(
-                        self._dest_dir if self._dest_dir is not None else self._src_dir, pwd=pwd),
+                        self._dest_dir if self._dest_dir is not None else self._src_dir, pwd=pwd
+                    ),
             elif ext == ".tar":
                 self._logger.info("Decompress tar file %s" % f)
                 with tarfile.open(f, "r:*") as tf:
@@ -512,9 +513,7 @@ class FileRename(FileBaseTransform):
             if self._regex_pattern and self._rep_str:
                 nameonly = re.sub(self._regex_pattern, self._rep_str, nameonly)
             elif self._regex_pattern:
-                raise InvalidParameter(
-                    "The converted string is not defined in yaml file: dest_str"
-                )
+                raise InvalidParameter("The converted string is not defined in yaml file: dest_str")
             elif self._rep_str:
                 raise InvalidParameter(
                     "The conversion pattern is not defined in yaml file: regex_pattern"

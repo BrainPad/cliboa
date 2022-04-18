@@ -89,14 +89,7 @@ class Download(Http):
     VALID_HTTP_STATUS = 200
 
     def __init__(
-            self,
-            url,
-            dest_path,
-            timeout,
-            retry_cnt=2,
-            retry_intvl_sec=10,
-            query_string=None,
-            **params
+        self, url, dest_path, timeout, retry_cnt=2, retry_intvl_sec=10, query_string=None, **params
     ):
         # params is the **kwargs argument of request.get()
         super().__init__(url, dest_path, timeout, retry_cnt, retry_intvl_sec, params)

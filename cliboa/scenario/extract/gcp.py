@@ -76,9 +76,7 @@ class BigQueryRead(BaseBigQuery):
         self._logger.info("Save data to on memory")
 
         client = BigQueryAdapter().get_client(
-            credentials=self.get_credentials(),
-            project=self._project_id,
-            location=self._location,
+            credentials=self.get_credentials(), project=self._project_id, location=self._location,
         )
 
         query = "SELECT * FROM %s.%s" % (self._dataset, self._tblname)

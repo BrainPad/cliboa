@@ -92,5 +92,5 @@ class BaseSftp(BaseStep):
             passphrase=self._passphrase,
             timeout=self._timeout,
             retryTimes=self._retry_count,
-            port=self._port
+            port=self._port,
         )

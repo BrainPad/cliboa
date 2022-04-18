@@ -2,7 +2,6 @@ import csv
 
 
 class Rdbms_Util(object):
-
     def select_sql(self, tblname):
         """
         Create select sql.

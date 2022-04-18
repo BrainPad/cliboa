@@ -263,9 +263,7 @@ class BigQueryCopy(BaseBigQuery):
 
         # Client Setup
         gbq_client = BigQueryAdapter().get_client(
-            credentials=self.get_credentials(),
-            project=self._project_id,
-            location=self._location,
+            credentials=self.get_credentials(), project=self._project_id, location=self._location,
         )
 
         # Create Copy Job
