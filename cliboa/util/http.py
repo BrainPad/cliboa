@@ -57,7 +57,8 @@ class FormAuth(object):
 
     def execute(self, *args):
         valid = EssentialParameters(
-            self.__class__.__name__, [self._form_url, self._form_id, self._form_password],
+            self.__class__.__name__,
+            [self._form_url, self._form_id, self._form_password],
         )
         valid()
 

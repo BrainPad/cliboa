@@ -41,14 +41,17 @@ class FtpDownload(FtpExtract):
     def execute(self, *args):
         # essential parameters check
         valid = EssentialParameters(
-            self.__class__.__name__, [self._host, self._user, self._src_dir, self._src_pattern],
+            self.__class__.__name__,
+            [self._host, self._user, self._src_dir, self._src_pattern],
         )
         valid()
 
         os.makedirs(self._dest_dir, exist_ok=True)
 
         obj = FtpUtil().list_files(
-            dir=self._src_dir, dest=self._dest_dir, pattern=re.compile(self._src_pattern),
+            dir=self._src_dir,
+            dest=self._dest_dir,
+            pattern=re.compile(self._src_pattern),
         )
 
         adaptor = super().get_adaptor()
@@ -86,7 +89,10 @@ class FtpDownloadFileDelete(FtpExtract):
 
             adaptor = super().get_adaptor()
             for file in files:
-                obj = FtpUtil().remove_specific_file(dir=self._src_dir, fname=file,)
+                obj = FtpUtil().remove_specific_file(
+                    dir=self._src_dir,
+                    fname=file,
+                )
                 adaptor.execute(obj)
                 self._logger.info("%s is successfully deleted." % file)
         else:

@@ -63,7 +63,10 @@ class Csv(object):
 
     @staticmethod
     def extract_columns_with_names(
-        input_file, output_file, remain_column_names, enc="utf-8",
+        input_file,
+        output_file,
+        remain_column_names,
+        enc="utf-8",
     ):
         """
         Extract only the necessary columns from a CSV file and output a new CSV

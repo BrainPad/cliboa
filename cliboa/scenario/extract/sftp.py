@@ -45,7 +45,8 @@ class SftpDownload(SftpExtract):
     def execute(self, *args):
         # essential parameters check
         valid = EssentialParameters(
-            self.__class__.__name__, [self._host, self._user, self._src_dir, self._src_pattern],
+            self.__class__.__name__,
+            [self._host, self._user, self._src_dir, self._src_pattern],
         )
         valid()
 
@@ -83,11 +84,15 @@ class SftpDelete(SftpExtract):
     def execute(self, *args):
         # essential parameters check
         valid = EssentialParameters(
-            self.__class__.__name__, [self._host, self._user, self._src_dir, self._src_pattern],
+            self.__class__.__name__,
+            [self._host, self._user, self._src_dir, self._src_pattern],
         )
         valid()
 
-        obj = Sftp().clear_files(dir=self._src_dir, pattern=re.compile(self._src_pattern),)
+        obj = Sftp().clear_files(
+            dir=self._src_dir,
+            pattern=re.compile(self._src_pattern),
+        )
 
         adaptor = super().get_adaptor()
         adaptor.execute(obj)
@@ -121,13 +126,17 @@ class SftpDownloadFileDelete(SftpExtract):
 
             endfile_suffix = super().get_step_argument("endfile_suffix")
             for file in files:
-                obj = Sftp().remove_specific_file(dir=self._src_dir, fname=file,)
+                obj = Sftp().remove_specific_file(
+                    dir=self._src_dir,
+                    fname=file,
+                )
                 adaptor.execute(obj)
                 self._logger.info("%s is successfully deleted." % file)
 
                 if endfile_suffix:
                     obj = Sftp().remove_specific_file(
-                        dir=self._src_dir, fname=file + endfile_suffix,
+                        dir=self._src_dir,
+                        fname=file + endfile_suffix,
                     )
                     self._logger.info("%s is successfully deleted." % (file + endfile_suffix))
         else:
@@ -149,7 +158,8 @@ class SftpFileExistsCheck(SftpExtract):
     def execute(self, *args):
         # essential parameters check
         valid = EssentialParameters(
-            self.__class__.__name__, [self._host, self._user, self._src_dir, self._src_pattern],
+            self.__class__.__name__,
+            [self._host, self._user, self._src_dir, self._src_pattern],
         )
         valid()
 

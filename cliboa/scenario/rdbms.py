@@ -50,7 +50,8 @@ class BaseRdbms(BaseStep):
 
     def execute(self, *args):
         valid = EssentialParameters(
-            self.__class__.__name__, [self._host, self._dbname, self._user, self._password],
+            self.__class__.__name__,
+            [self._host, self._dbname, self._user, self._password],
         )
         valid()
 

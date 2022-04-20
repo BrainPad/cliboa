@@ -139,10 +139,14 @@ class CliboAdmin(object):
             "3.9": "Pipfile.above39",
         }
         pipfile_path = os.path.join(
-            cliboa_install_path, "cliboa/template", py_major_ver_and_pipfile[py_major_ver],
+            cliboa_install_path,
+            "cliboa/template",
+            py_major_ver_and_pipfile[py_major_ver],
         )
         requirements_path = os.path.join(
-            cliboa_install_path, "cliboa/template", py_major_ver_and_requirements[py_major_ver],
+            cliboa_install_path,
+            "cliboa/template",
+            py_major_ver_and_requirements[py_major_ver],
         )
         return pipfile_path, requirements_path
 

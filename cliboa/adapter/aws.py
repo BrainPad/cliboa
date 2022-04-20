@@ -40,7 +40,9 @@ class S3Adapter(object):
             return Session(profile_name=self._profile).client("s3")
         elif self._access_key and self._secret_key:
             return boto3.client(
-                "s3", aws_access_key_id=self._access_key, aws_secret_access_key=self._secret_key,
+                "s3",
+                aws_access_key_id=self._access_key,
+                aws_secret_access_key=self._secret_key,
             )
         else:
             return boto3.client("s3")
@@ -53,7 +55,8 @@ class S3Adapter(object):
             return Session(profile_name=self._profile).resource("s3")
         elif self._access_key and self._secret_key:
             session = Session(
-                aws_access_key_id=self._access_key, aws_secret_access_key=self._secret_key,
+                aws_access_key_id=self._access_key,
+                aws_secret_access_key=self._secret_key,
             )
             return session.resource("s3")
         else:

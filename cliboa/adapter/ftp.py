@@ -27,7 +27,14 @@ class FtpAdapter(object):
     RETRY_SEC = 10
 
     def __init__(
-        self, host, user, password, timeout=TIMEOUT_SEC, retryTimes=3, port=21, tls=False,
+        self,
+        host,
+        user,
+        password,
+        timeout=TIMEOUT_SEC,
+        retryTimes=3,
+        port=21,
+        tls=False,
     ):
         """
         Must set whether password or key

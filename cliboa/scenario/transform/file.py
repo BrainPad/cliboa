@@ -287,7 +287,9 @@ class FileCompress(FileBaseTransform):
             if self._format == "zip":
                 self._logger.info("Compress file %s to zip." % f)
                 with zipfile.ZipFile(
-                    os.path.join(dir, (os.path.basename(f) + ".zip")), "w", zipfile.ZIP_DEFLATED,
+                    os.path.join(dir, (os.path.basename(f) + ".zip")),
+                    "w",
+                    zipfile.ZIP_DEFLATED,
                 ) as o:
                     o.write(f, arcname=os.path.basename(f))
             elif self._format in ("gz", "gzip"):
@@ -398,7 +400,8 @@ class FileDivide(FileBaseTransform):
 
     def execute(self, *args):
         valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir, self._src_pattern, self._divide_rows],
+            self.__class__.__name__,
+            [self._src_dir, self._src_pattern, self._divide_rows],
         )
         valid()
 
@@ -563,7 +566,11 @@ class FileConvert(FileBaseTransform):
 
     def convert(self, fi, fo):
         File().convert_encoding(
-            fi, fo, self._encoding_from, self._encoding_to, self._errors,
+            fi,
+            fo,
+            self._encoding_from,
+            self._encoding_to,
+            self._errors,
         )
 
         self._logger.info("Encoded file %s" % fi)
@@ -587,7 +594,8 @@ class FileArchive(FileBaseTransform):
 
     def execute(self, *args):
         valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir, self._src_pattern, self._format],
+            self.__class__.__name__,
+            [self._src_dir, self._src_pattern, self._format],
         )
         valid()
 

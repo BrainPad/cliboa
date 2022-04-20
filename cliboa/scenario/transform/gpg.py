@@ -167,7 +167,10 @@ class GpgDecrypt(GpgBase):
                     else os.path.join(self._src_dir, os.path.basename(root))
                 )
                 gpg.decrypt(
-                    file, dest_path, passphrase=self._passphrase, always_trust=self._always_trust,
+                    file,
+                    dest_path,
+                    passphrase=self._passphrase,
+                    always_trust=self._always_trust,
                 )
             else:
                 self._logger.warning("Extention was not gpg. %s" % file)

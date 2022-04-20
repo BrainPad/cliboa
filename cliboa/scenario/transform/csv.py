@@ -47,7 +47,8 @@ class CsvColumnHash(FileBaseTransform):
 
     def execute(self, *args):
         valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir, self._src_pattern, self._columns],
+            self.__class__.__name__,
+            [self._src_dir, self._src_pattern, self._columns],
         )
         valid()
 
@@ -60,12 +61,18 @@ class CsvColumnHash(FileBaseTransform):
         super().io_files(files, func=self.convert)
 
     def convert(self, fi, fo):
-        df = pandas.read_csv(fi, dtype=str, encoding=self._encoding,)
+        df = pandas.read_csv(
+            fi,
+            dtype=str,
+            encoding=self._encoding,
+        )
         for c in self._columns:
             df[c] = df[c].apply(self._stringToHash)
 
         df.to_csv(
-            fo, encoding=self._encoding, index=False,
+            fo,
+            encoding=self._encoding,
+            index=False,
         )
 
 
@@ -176,7 +183,8 @@ class CsvColumnConcat(FileBaseTransform):
 
     def execute(self, *args):
         valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir, self._src_pattern, self._dest_column_name],
+            self.__class__.__name__,
+            [self._src_dir, self._src_pattern, self._dest_column_name],
         )
         valid()
 
@@ -192,7 +200,11 @@ class CsvColumnConcat(FileBaseTransform):
         super().io_files(files, func=self.convert)
 
     def convert(self, fi, fo):
-        df = pandas.read_csv(fi, dtype=str, encoding=self._encoding,)
+        df = pandas.read_csv(
+            fi,
+            dtype=str,
+            encoding=self._encoding,
+        )
 
         dest_str = None
         for c in self._columns:
@@ -204,7 +216,9 @@ class CsvColumnConcat(FileBaseTransform):
         df[self._dest_column_name] = dest_str
 
         df.to_csv(
-            fo, encoding=self._encoding, index=False,
+            fo,
+            encoding=self._encoding,
+            index=False,
         )
 
 
@@ -273,7 +287,9 @@ class CsvMergeExclusive(FileBaseTransform):
         df = df[~df[self._src_column].isin(self.df_target_list)]
 
         df.to_csv(
-            fo, encoding=self._encoding, index=False,
+            fo,
+            encoding=self._encoding,
+            index=False,
         )
 
 
@@ -291,7 +307,8 @@ class ColumnLengthAdjust(FileBaseTransform):
 
     def execute(self, *args):
         valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir, self._src_pattern, self._adjust],
+            self.__class__.__name__,
+            [self._src_dir, self._src_pattern, self._adjust],
         )
         valid()
 
@@ -369,10 +386,14 @@ class CsvMerge(FileBaseTransform):
 
         self._logger.info("Merge %s and %s." % (target1_files[0], target2_files[0]))
         df1 = pandas.read_csv(
-            os.path.join(self._src_dir, target1_files[0]), dtype=str, encoding=self._encoding,
+            os.path.join(self._src_dir, target1_files[0]),
+            dtype=str,
+            encoding=self._encoding,
         )
         df2 = pandas.read_csv(
-            os.path.join(self._src_dir, target2_files[0]), dtype=str, encoding=self._encoding,
+            os.path.join(self._src_dir, target2_files[0]),
+            dtype=str,
+            encoding=self._encoding,
         )
         df = pandas.merge(df1, df2)
         if "Unnamed: 0" in df.index:
@@ -381,7 +402,9 @@ class CsvMerge(FileBaseTransform):
         dest_name = self._dest_name
 
         df.to_csv(
-            os.path.join(self._dest_dir, dest_name), encoding=self._encoding, index=False,
+            os.path.join(self._dest_dir, dest_name),
+            encoding=self._encoding,
+            index=False,
         )
 
 
@@ -423,7 +446,9 @@ class CsvColumnSelect(FileBaseTransform):
             )
         df = df.loc[:, self._column_order]
         df.to_csv(
-            fo, encoding=self._encoding, index=False,
+            fo,
+            encoding=self._encoding,
+            index=False,
         )
 
 
@@ -469,16 +494,26 @@ class CsvConcat(FileBaseTransform):
             self._logger.warning("Two or more input files are required.")
 
         file = files.pop(0)
-        df1 = pandas.read_csv(file, dtype=str, encoding=self._encoding,)
+        df1 = pandas.read_csv(
+            file,
+            dtype=str,
+            encoding=self._encoding,
+        )
 
         for file in files:
-            df2 = pandas.read_csv(file, dtype=str, encoding=self._encoding,)
+            df2 = pandas.read_csv(
+                file,
+                dtype=str,
+                encoding=self._encoding,
+            )
             df1 = pandas.concat([df1, df2])
 
         dest_name = self._dest_name
 
         df1.to_csv(
-            os.path.join(self._dest_dir, dest_name), encoding=self._encoding, index=False,
+            os.path.join(self._dest_dir, dest_name),
+            encoding=self._encoding,
+            index=False,
         )
 
 
