@@ -39,7 +39,7 @@ from .transform.csv import (
     CsvMerge,
     CsvSort,
     CsvToJsonl,
-    CsvValueExtract
+    CsvValueExtract,
 )
 from .transform.file import (
     DateFormatConvert,
@@ -49,7 +49,7 @@ from .transform.file import (
     FileConvert,
     FileDecompress,
     FileDivide,
-    FileRename
+    FileRename,
 )
 from .transform.gpg import GpgDecrypt, GpgEncrypt, GpgGenerateKey
 from .transform.json import JsonlToCsv, JsonlToCsvBase

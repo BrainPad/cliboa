@@ -20,10 +20,10 @@ import tarfile
 import zipfile
 from glob import glob
 
+import pyminizip
 import pytest
 import xlsxwriter
 
-import pyminizip
 from cliboa.conf import env
 from cliboa.scenario.transform.file import (
     DateFormatConvert,
@@ -34,7 +34,7 @@ from cliboa.scenario.transform.file import (
     FileConvert,
     FileDecompress,
     FileDivide,
-    FileRename
+    FileRename,
 )
 from cliboa.test import BaseCliboaTest
 from cliboa.util.exception import CliboaException, FileNotFound, InvalidParameter

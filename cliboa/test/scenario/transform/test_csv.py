@@ -32,7 +32,7 @@ from cliboa.scenario.transform.csv import (
     CsvMergeExclusive,
     CsvSort,
     CsvToJsonl,
-    CsvValueExtract
+    CsvValueExtract,
 )
 from cliboa.test import BaseCliboaTest
 from cliboa.util.exception import InvalidCount, InvalidParameter

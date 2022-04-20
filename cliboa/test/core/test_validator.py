@@ -26,7 +26,7 @@ from cliboa.core.validator import (
     ScenarioJsonKey,
     ScenarioJsonType,
     ScenarioYamlKey,
-    ScenarioYamlType
+    ScenarioYamlType,
 )
 from cliboa.util.exception import DirStructureInvalid, FileNotFound, ScenarioFileInvalid
 
@@ -338,7 +338,7 @@ class TestValidators(object):
             valid_instance = EssentialKeys(test_yaml)
             valid_instance()
         assert (
-            "scenario.yml is invalid. 'config:' key does not exist, or 'config:' value does not exist."   # noqa
+            "scenario.yml is invalid. 'config:' key does not exist, or 'config:' value does not exist."  # noqa
             in str(excinfo.value)
         )  # noqa
 

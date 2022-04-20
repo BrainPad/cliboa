@@ -23,7 +23,7 @@ from cliboa.core.validator import (
     ScenarioJsonKey,
     ScenarioJsonType,
     ScenarioYamlKey,
-    ScenarioYamlType
+    ScenarioYamlType,
 )
 from cliboa.util.lisboa_log import LisboaLog
 
