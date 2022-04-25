@@ -12,9 +12,10 @@
 # all copies or substantial portions of the Software.
 #
 import os
-import pytest
 import shutil
 import sys
+
+import pytest
 
 from cliboa.conf import env
 from cliboa.test import BaseCliboaTest

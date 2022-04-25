@@ -28,15 +28,14 @@ jobs:
           pipenv run flake8 .
       - name: check black format
         run: |
-          if [ ${{ matrix.python_versions }} -ne 3.5 ]; then
-            pipenv run black --check .
-          else
-            echo "black does not support python${{ matrix.python_versions }}"
-          fi
+          pipenv run black --check .
+      - name: check isort
+        run: |
+          pipenv run isort --check
       - name: execute unittest and instrument coverage
         run: |
           pipenv run coverage
-      - name: Uupload coverage to codecov
+      - name: Upload coverage to codecov
         uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

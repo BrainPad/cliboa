@@ -22,10 +22,7 @@ from cliboa.core.file_parser import JsonScenarioParser, YamlScenarioParser
 from cliboa.core.listener import StepStatusListener
 from cliboa.core.scenario_queue import ScenarioQueue
 from cliboa.core.step_queue import StepQueue
-from cliboa.core.validator import (
-    ProjectDirectoryExistence,
-    ScenarioFileExistence,
-)
+from cliboa.core.validator import ProjectDirectoryExistence, ScenarioFileExistence
 from cliboa.scenario import *  # noqa
 from cliboa.util.cache import StepArgument
 from cliboa.util.class_util import ClassUtil
@@ -182,7 +179,9 @@ class ScenarioManager(object):
                 Helper.set_property(instance, arg, s_dict.get(arg))
 
         Helper.set_property(
-            instance, "logger", LisboaLog.get_logger(instance.__class__.__name__),
+            instance,
+            "logger",
+            LisboaLog.get_logger(instance.__class__.__name__),
         )
 
         return instance

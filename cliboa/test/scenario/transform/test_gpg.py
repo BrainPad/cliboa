@@ -15,7 +15,7 @@ import os
 import shutil
 
 from cliboa.conf import env
-from cliboa.scenario.transform.gpg import GpgEncrypt, GpgDecrypt
+from cliboa.scenario.transform.gpg import GpgDecrypt, GpgEncrypt
 from cliboa.test import BaseCliboaTest
 from cliboa.util.gpg import Gpg
 from cliboa.util.helper import Helper

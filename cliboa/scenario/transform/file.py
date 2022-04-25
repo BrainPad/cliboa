@@ -27,11 +27,7 @@ from cliboa.core.validator import EssentialParameters
 from cliboa.scenario.base import BaseStep
 from cliboa.scenario.extras import ExceptionHandler
 from cliboa.util.date import DateUtil
-from cliboa.util.exception import (
-    CliboaException,
-    FileNotFound,
-    InvalidParameter,
-)
+from cliboa.util.exception import CliboaException, FileNotFound, InvalidParameter
 from cliboa.util.file import File
 
 
@@ -222,7 +218,8 @@ class FileDecompress(FileBaseTransform):
                     pwd = self._password
                 with zipfile.ZipFile(f) as zp:
                     zp.extractall(
-                        self._dest_dir if self._dest_dir is not None else self._src_dir, pwd=pwd),
+                        self._dest_dir if self._dest_dir is not None else self._src_dir, pwd=pwd
+                    ),
             elif ext == ".tar":
                 self._logger.info("Decompress tar file %s" % f)
                 with tarfile.open(f, "r:*") as tf:
@@ -290,7 +287,9 @@ class FileCompress(FileBaseTransform):
             if self._format == "zip":
                 self._logger.info("Compress file %s to zip." % f)
                 with zipfile.ZipFile(
-                    os.path.join(dir, (os.path.basename(f) + ".zip")), "w", zipfile.ZIP_DEFLATED,
+                    os.path.join(dir, (os.path.basename(f) + ".zip")),
+                    "w",
+                    zipfile.ZIP_DEFLATED,
                 ) as o:
                     o.write(f, arcname=os.path.basename(f))
             elif self._format in ("gz", "gzip"):
@@ -401,7 +400,8 @@ class FileDivide(FileBaseTransform):
 
     def execute(self, *args):
         valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir, self._src_pattern, self._divide_rows],
+            self.__class__.__name__,
+            [self._src_dir, self._src_pattern, self._divide_rows],
         )
         valid()
 
@@ -516,9 +516,7 @@ class FileRename(FileBaseTransform):
             if self._regex_pattern and self._rep_str:
                 nameonly = re.sub(self._regex_pattern, self._rep_str, nameonly)
             elif self._regex_pattern:
-                raise InvalidParameter(
-                    "The converted string is not defined in yaml file: dest_str"
-                )
+                raise InvalidParameter("The converted string is not defined in yaml file: dest_str")
             elif self._rep_str:
                 raise InvalidParameter(
                     "The conversion pattern is not defined in yaml file: regex_pattern"
@@ -568,7 +566,11 @@ class FileConvert(FileBaseTransform):
 
     def convert(self, fi, fo):
         File().convert_encoding(
-            fi, fo, self._encoding_from, self._encoding_to, self._errors,
+            fi,
+            fo,
+            self._encoding_from,
+            self._encoding_to,
+            self._errors,
         )
 
         self._logger.info("Encoded file %s" % fi)
@@ -592,7 +594,8 @@ class FileArchive(FileBaseTransform):
 
     def execute(self, *args):
         valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir, self._src_pattern, self._format],
+            self.__class__.__name__,
+            [self._src_dir, self._src_pattern, self._format],
         )
         valid()
 

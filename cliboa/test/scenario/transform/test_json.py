@@ -14,15 +14,13 @@
 import csv
 import json
 import os
-import pytest
 import shutil
-
 from glob import glob
+
+import pytest
+
 from cliboa.conf import env
-from cliboa.scenario.transform.json import (
-    JsonlToCsvBase,
-    JsonlToCsv
-)
+from cliboa.scenario.transform.json import JsonlToCsv, JsonlToCsvBase
 from cliboa.test import BaseCliboaTest
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
@@ -43,8 +41,8 @@ class TestJsonTransform(BaseCliboaTest):
         mode = "a" if os.path.exists(path) else "w"
         with open(path, mode=mode, encoding="utf-8") as file:
             for d in data:
-                json.dump(d, file, separators=(',', ':'))
-                file.write('\n')
+                json.dump(d, file, separators=(",", ":"))
+                file.write("\n")
 
 
 class TestJsonlToCsvBase(TestJsonTransform):
@@ -89,11 +87,12 @@ class TestJsonlToCsv(TestJsonTransform):
         # create test jsonl
         data = [
             {"id": "123456789", "name": "A", "age": "25", "value": []},
-            {"id": "1234567890",
-             "name": "B",
-             "age": "30",
-             "value": [{"key": "test_key", "value": 999},
-                       {"key": 'test"01"', "value": "true"}]},
+            {
+                "id": "1234567890",
+                "name": "B",
+                "age": "30",
+                "value": [{"key": "test_key", "value": 999}, {"key": 'test"01"', "value": "true"}],
+            },
         ]
         self._create_jsonl(data, "test_1.json")
         self._create_jsonl(data, "test_2.json")
@@ -124,18 +123,20 @@ class TestJsonlToCsv(TestJsonTransform):
                         self.assertEqual(
                             "[{'key': 'test_key', 'value': 999}, \
                              {'key': 'test\"01\"', 'value': 'true'}]",
-                            row.get("value"))
+                            row.get("value"),
+                        )
                         assert row.endswith("\r\n")
 
     def test_execute_ok_2(self):
         # create test jsonl
         data = [
             {"id": "123456789", "name": "A", "age": "25", "value": []},
-            {"id": "1234567890",
-             "name": "B",
-             "age": "30",
-             "value": [{"key": "test,_key", "value": 999},
-                       {"key": 'test"01"', "value": "true"}]},
+            {
+                "id": "1234567890",
+                "name": "B",
+                "age": "30",
+                "value": [{"key": "test,_key", "value": 999}, {"key": 'test"01"', "value": "true"}],
+            },
         ]
         self._create_jsonl(data, "test_1.json")
         self._create_jsonl(data, "test_2.json")
@@ -168,7 +169,8 @@ class TestJsonlToCsv(TestJsonTransform):
                         self.assertEqual(
                             "[{'key': 'test,_key', 'value': 999}, \
                              {'key': 'test\"01\"', 'value': 'true'}]",
-                            row.get("value"))
+                            row.get("value"),
+                        )
 
     def test_execute_ok_3(self):
         # create test jsonl
@@ -197,11 +199,12 @@ class TestJsonlToCsv(TestJsonTransform):
         # create test jsonl
         data = [
             {"id": "123456789", "name": "A", "age": "25"},
-            {"id": "1234567890",
-             "name": "B",
-             "age": "30",
-             "value": [{"key": "test_key", "value": 999},
-                       {"key": 'test"01"', "value": "true"}]},
+            {
+                "id": "1234567890",
+                "name": "B",
+                "age": "30",
+                "value": [{"key": "test_key", "value": 999}, {"key": 'test"01"', "value": "true"}],
+            },
         ]
         self._create_jsonl(data, "test_1.json")
         self._create_jsonl(data, "test_2.json")

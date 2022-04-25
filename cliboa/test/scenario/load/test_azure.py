@@ -48,7 +48,9 @@ class TestAzureBlobUpload(object):
         Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
         # use Postman echo
         Helper.set_property(
-            instance, "account_url", "https://testtesttest.blob.core.windows.example/",
+            instance,
+            "account_url",
+            "https://testtesttest.blob.core.windows.example/",
         )
         Helper.set_property(instance, "account_access_key", "dummy")
         Helper.set_property(instance, "container_name", "test")

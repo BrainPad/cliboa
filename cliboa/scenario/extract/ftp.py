@@ -41,7 +41,8 @@ class FtpDownload(FtpExtract):
     def execute(self, *args):
         # essential parameters check
         valid = EssentialParameters(
-            self.__class__.__name__, [self._host, self._user, self._src_dir, self._src_pattern],
+            self.__class__.__name__,
+            [self._host, self._user, self._src_dir, self._src_pattern],
         )
         valid()
 

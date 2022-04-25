@@ -33,6 +33,7 @@ class GcsAdapter(object):
     """
     Gcp Adaptor
     """
+
     def get_client(self, credentials):
         credentials_info = ServiceAccount().auth(credentials)
         return (
@@ -46,6 +47,7 @@ class BigQueryAdapter(object):
     """
     BigQuery Adaptor
     """
+
     def get_client(self, credentials, project=None, location=None):
         credentials_info = ServiceAccount().auth(credentials)
         return (
@@ -63,6 +65,7 @@ class FireStoreAdapter(object):
     """
     FireStore Adaptor
     """
+
     def get_client(credentials):
         credentials_info = ServiceAccount().auth(credentials)
         return (
