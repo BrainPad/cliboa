@@ -13,11 +13,7 @@
 #
 import os
 
-from cliboa.util.exception import (
-    DirStructureInvalid,
-    FileNotFound,
-    ScenarioFileInvalid,
-)
+from cliboa.util.exception import DirStructureInvalid, FileNotFound, ScenarioFileInvalid
 
 
 class ValidatorChain(object):

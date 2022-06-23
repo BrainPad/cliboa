@@ -13,11 +13,12 @@
 #
 import tempfile
 
+from mock import patch
+
 from cliboa.adapter.aws import S3Adapter
 from cliboa.scenario.extract.aws import S3Download
 from cliboa.test import BaseCliboaTest
 from cliboa.util.helper import Helper
-from mock import patch
 
 
 class TestS3Download(BaseCliboaTest):

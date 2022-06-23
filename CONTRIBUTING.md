@@ -25,7 +25,7 @@ $ git push origin new-feature
 5. Create new pull request to https://github.com/BrainPad/cliboa, master branch
 
 
-## Workflow for BrainPad Developers
+## Workflow for Developers
 ### Development at usual work
 Use <a href="https://guides.github.com/introduction/flow/">github flow</a>
 
@@ -36,13 +36,3 @@ Use <a href="https://guides.github.com/introduction/flow/">github flow</a>
 3. Push to the branch
 4. Create new pull request to master branch
 
-
-## Workflow for All Developers According to Roadmap
-Prepare the branch by each versions before development
-
-![](/img/cliboa_roadmap_flow.png)
-
-1. Create development branch from version branch
-2. Commit your changes
-3. Push to the branch
-4. Create new pull request to version branch

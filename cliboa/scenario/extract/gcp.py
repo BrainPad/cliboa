@@ -93,7 +93,10 @@ class BigQueryRead(BaseBigQuery):
         os.makedirs(self._dest_dir, exist_ok=True)
 
         ymd_hms = datetime.now().strftime("%Y%m%d%H%M%S%f")
-        path = "%s-%s" % (StringUtil().random_str(self._RANDOM_STR_LENGTH), ymd_hms,)
+        path = "%s-%s" % (
+            StringUtil().random_str(self._RANDOM_STR_LENGTH),
+            ymd_hms,
+        )
         prefix = "%s/%s/%s" % (self._dataset, self._tblname, path)
 
         gbq_client = BigQueryAdapter().get_client(credentials=self.get_credentials())
@@ -121,7 +124,12 @@ class BigQueryRead(BaseBigQuery):
         comp_format_and_ext = {"GZIP": ".gz"}
         comp_ext = comp_format_and_ext.get(str(BigQuery.get_compression_type()))
         if self._filename:
-            dest_gcs = "gs://%s/%s/%s%s" % (self._bucket, prefix, self._filename, comp_ext,)
+            dest_gcs = "gs://%s/%s/%s%s" % (
+                self._bucket,
+                prefix,
+                self._filename,
+                comp_ext,
+            )
         else:
             dest_gcs = "gs://%s/%s/*%s%s" % (self._bucket, prefix, ext, comp_ext)
 

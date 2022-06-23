@@ -17,7 +17,6 @@ import stat
 
 
 class Sftp(object):
-
     def list_files(self, dir, dest, pattern, endfile_suffix=None, ignore_empty_file=False):
         """
         Fetch all the files in specified directory
@@ -44,7 +43,7 @@ class Sftp(object):
                 "pattern": pattern,
                 "endfile_suffix": endfile_suffix,
                 "ignore_empty_file": ignore_empty_file,
-            }
+            },
         )
 
     def clear_files(self, dir, pattern):
@@ -62,13 +61,7 @@ class Sftp(object):
         Raises:
             IOError: failed to remove
         """
-        return (
-            clear_file_func,
-            {
-                "dir": dir,
-                "pattern": pattern,
-            }
-        )
+        return (clear_file_func, {"dir": dir, "pattern": pattern})
 
     def remove_specific_file(self, dir, fname):
         """
@@ -85,13 +78,7 @@ class Sftp(object):
         Raises:
             IOError: failed to remove
         """
-        return (
-            remove_specific_file_func,
-            {
-                "dir": dir,
-                "fname": fname,
-            }
-        )
+        return (remove_specific_file_func, {"dir": dir, "fname": fname})
 
     def get_specific_file(self, src, dest):
         """
@@ -108,13 +95,7 @@ class Sftp(object):
         Raises:
             IOError: failed to get data
         """
-        return (
-            get_specific_file_func,
-            {
-                "src": src,
-                "dest": dest,
-            }
-        )
+        return (get_specific_file_func, {"src": src, "dest": dest})
 
     def put_file(self, src, dest, endfile_suffix=None):
         """
@@ -136,14 +117,7 @@ class Sftp(object):
         Raises:
             IOError: failed to upload
         """
-        return (
-            put_file_func,
-            {
-                "src": src,
-                "dest": dest,
-                "endfile_suffix": endfile_suffix,
-            }
-        )
+        return (put_file_func, {"src": src, "dest": dest, "endfile_suffix": endfile_suffix})
 
     def file_exists_check(self, dir, pattern, ignore_empty_file=False):
         """
@@ -164,11 +138,7 @@ class Sftp(object):
         """
         return (
             file_exists_check_func,
-            {
-                "dir": dir,
-                "pattern": pattern,
-                "ignore_empty_file": ignore_empty_file,
-            }
+            {"dir": dir, "pattern": pattern, "ignore_empty_file": ignore_empty_file},
         )
 
 

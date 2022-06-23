@@ -1,7 +1,7 @@
 import psycopg2
+from psycopg2.extras import execute_values
 
 from cliboa.adapter.rdbms import RdbmsSupport
-from psycopg2.extras import execute_values
 
 
 class PostgresqlAdaptor(RdbmsSupport):

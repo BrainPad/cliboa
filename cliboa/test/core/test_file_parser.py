@@ -337,9 +337,7 @@ class TestYamlScenarioParser(BaseCliboaTest):
             "scenario": [
                 {
                     "parallel_with_config": {
-                        "config": {
-                            "multi_process_count": 5
-                        },
+                        "config": {"multi_process_count": 5},
                         "steps": [
                             {
                                 "arguments": {"retry_count": 10},
@@ -692,9 +690,7 @@ class TestJsonScenarioParser(BaseCliboaTest):
             "scenario": [
                 {
                     "parallel_with_config": {
-                        "config": {
-                            "multi_process_count": 5
-                        },
+                        "config": {"multi_process_count": 5},
                         "steps": [
                             {
                                 "arguments": {"retry_count": 10},

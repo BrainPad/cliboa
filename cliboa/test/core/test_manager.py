@@ -111,35 +111,25 @@ class TestYamlScenarioManager(BaseCliboaTest):
         """
         pj_yaml_dict = {
             "scenario": [
-                {
-                    "multi_process_count": 3
-                },
-                {
-                    "force_continue": True
-                },
+                {"multi_process_count": 3},
+                {"force_continue": True},
                 {
                     "parallel_with_config": {
-                        "config": {
-                            "multi_process_count": 3
-                        },
+                        "config": {"multi_process_count": 3},
                         "steps": [
                             {
                                 "step": "sample_step_1",
                                 "class": "SampleStep",
-                                "arguments": {
-                                    "retry_count": 1
-                                },
+                                "arguments": {"retry_count": 1},
                             },
                             {
                                 "step": "sample_step_2",
                                 "class": "SampleStep",
-                                "arguments": {
-                                    "retry_count": 2
-                                },
-                            }
-                        ]
+                                "arguments": {"retry_count": 2},
+                            },
+                        ],
                     }
-                }
+                },
             ]
         }
         self._create_scenario_file(pj_yaml_dict)
@@ -391,9 +381,7 @@ class TestYamlScenarioManager(BaseCliboaTest):
                 {
                     "step": "sample_step",
                     "class": "SampleStep",
-                    "arguments": {
-                        "memo": "foo_{{ env.CLIBOA_TEST_ENV }}_bar",
-                    },
+                    "arguments": {"memo": "foo_{{ env.CLIBOA_TEST_ENV }}_bar"},
                 }
             ]
         }

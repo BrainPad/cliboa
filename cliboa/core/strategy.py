@@ -103,6 +103,7 @@ class MultiProcWithConfigExecutor(MultiProcExecutor):
     """
     Execute steps in queue in multi process with given config
     """
+
     def __init__(self, obj):
         super().__init__(obj)
         self._step = obj[0].steps
@@ -111,10 +112,7 @@ class MultiProcWithConfigExecutor(MultiProcExecutor):
             self._multi_proc_cnt = obj[0].config["multi_process_count"]
 
     def execute_steps(self, args):
-        self._logger.info(
-            "Multi process start. Execute step count=%s."
-            % self._multi_proc_cnt
-        )
+        self._logger.info("Multi process start. Execute step count=%s." % self._multi_proc_cnt)
         install_mp_handler()
         packed = [cloudpickle.dumps(step) for step in self._step]
 
