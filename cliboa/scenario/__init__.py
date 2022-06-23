@@ -20,7 +20,7 @@ from .extract.gcp import (
     FirestoreDocumentDownload,
     GcsDownload,
     GcsDownloadFileDelete,
-    GcsFileExistsCheck
+    GcsFileExistsCheck,
 )
 from .extract.http import HttpDownload, HttpDownloadViaBasicAuth
 from .extract.mysql import MysqlRead

@@ -290,9 +290,9 @@ class GcsFileExistsCheck(BaseGcs):
 
         client = GcsAdapter().get_client(credentials=self.get_credentials())
         dl_files = []
+        bucket = client.bucket(super().get_step_argument("bucket"))
 
-        for blob in client.list_blobs(
-                client.bucket(self._bucket), prefix=self._prefix, delimiter=self._delimiter):
+        for blob in client.list_blobs(bucket, prefix=self._prefix, delimiter=self._delimiter):
             r = re.compile(self._src_pattern)
             if not r.fullmatch(blob.name):
                 continue
