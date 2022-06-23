@@ -50,7 +50,8 @@ class BaseRdbms(BaseStep):
 
     def execute(self, *args):
         valid = EssentialParameters(
-            self.__class__.__name__, [self._host, self._dbname, self._user, self._password],
+            self.__class__.__name__,
+            [self._host, self._dbname, self._user, self._password],
         )
         valid()
 
@@ -177,7 +178,8 @@ class BaseRdbmsWrite(BaseRdbms):
         for file in files:
             with self.get_adaptor() as adaptor:
                 tuples = rdbmsUtil.csv_as_params(
-                    file, chunk_size=self._chunk_size, encoding=self._encoding)
+                    file, chunk_size=self._chunk_size, encoding=self._encoding
+                )
                 self._logger.info("tuples: %s" % tuples)
                 for params in tuples:
                     self._logger.info("params: %s" % params)

@@ -12,19 +12,19 @@
 # all copies or substantial portions of the Software.
 #
 import csv
-import jsonlines
 import os
 import shutil
+from glob import glob
+
+import jsonlines
 import pytest
 
-from glob import glob
 from cliboa.conf import env
 from cliboa.scenario.transform.csv import (
-    CsvColumnHash,
+    ColumnLengthAdjust,
     CsvColumnConcat,
     CsvColumnExtract,
-    CsvValueExtract,
-    ColumnLengthAdjust,
+    CsvColumnHash,
     CsvColumnSelect,
     CsvConcat,
     CsvConvert,
@@ -32,6 +32,7 @@ from cliboa.scenario.transform.csv import (
     CsvMergeExclusive,
     CsvSort,
     CsvToJsonl,
+    CsvValueExtract,
 )
 from cliboa.test import BaseCliboaTest
 from cliboa.util.exception import InvalidCount, InvalidParameter
@@ -256,9 +257,7 @@ class TestCsvColumnExtract(TestCsvTransform):
 class TestCsvValueExtract(TestCsvTransform):
     def test_execute_ok(self):
         # create test csv
-        test_csv_data = [["key", "data", "name"],
-                         ["1", "spam1", "SPAM1"],
-                         ["2", "spam2", "SPAM2"]]
+        test_csv_data = [["key", "data", "name"], ["1", "spam1", "SPAM1"], ["2", "spam2", "SPAM2"]]
         self._create_csv(test_csv_data)
 
         # set the essential attributes
@@ -267,7 +266,7 @@ class TestCsvValueExtract(TestCsvTransform):
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
-        Helper.set_property(instance, "column_regex_pattern", {'data': '[0-9]'})
+        Helper.set_property(instance, "column_regex_pattern", {"data": "[0-9]"})
 
         instance.execute()
         output_file = os.path.join(self._data_dir, "test.csv")
@@ -275,24 +274,20 @@ class TestCsvValueExtract(TestCsvTransform):
             reader = csv.reader(o)
             for i, row in enumerate(reader):
                 if i == 0:
-                    self.assertEqual(
-                        ["key", "data", "name"],
-                        row)
+                    self.assertEqual(["key", "data", "name"], row)
                 if i == 1:
-                    self.assertEqual(
-                        ["1", "1", "SPAM1"],
-                        row)
+                    self.assertEqual(["1", "1", "SPAM1"], row)
                 if i == 2:
-                    self.assertEqual(
-                        ["2", "2", "SPAM2"],
-                        row)
+                    self.assertEqual(["2", "2", "SPAM2"], row)
 
     def test_execute_ok_with_target_multiple_column(self):
         # create test csv
-        test_csv_data = [["key", "data", "name"],
-                         ["1", "spam1", "SPAM1"],
-                         ["2", "spam2", "SPAM2"],
-                         ["3", "spam", "SPAM3"]]
+        test_csv_data = [
+            ["key", "data", "name"],
+            ["1", "spam1", "SPAM1"],
+            ["2", "spam2", "SPAM2"],
+            ["3", "spam", "SPAM3"],
+        ]
         self._create_csv(test_csv_data)
 
         # set the essential attributes
@@ -301,7 +296,7 @@ class TestCsvValueExtract(TestCsvTransform):
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
-        Helper.set_property(instance, "column_regex_pattern", {'data': '[0-9]', 'name': '[A-Z]*'})
+        Helper.set_property(instance, "column_regex_pattern", {"data": "[0-9]", "name": "[A-Z]*"})
 
         instance.execute()
         output_file = os.path.join(self._data_dir, "test.csv")
@@ -309,26 +304,17 @@ class TestCsvValueExtract(TestCsvTransform):
             reader = csv.reader(o)
             for i, row in enumerate(reader):
                 if i == 0:
-                    self.assertEqual(
-                        ["key", "data", "name"],
-                        row)
+                    self.assertEqual(["key", "data", "name"], row)
                 if i == 1:
-                    self.assertEqual(
-                        ["1", "1", "SPAM"],
-                        row)
+                    self.assertEqual(["1", "1", "SPAM"], row)
                 if i == 2:
-                    self.assertEqual(
-                        ["2", "2", "SPAM"],
-                        row)
+                    self.assertEqual(["2", "2", "SPAM"], row)
                 if i == 3:
-                    self.assertEqual(
-                        ["3", "", "SPAM"],
-                        row)
+                    self.assertEqual(["3", "", "SPAM"], row)
 
     def test_execute_ok_when_not_match(self):
         # create test csv
-        test_csv_data = [["key", "data", "name"],
-                         ["1", "spam", "SPAM1"]]
+        test_csv_data = [["key", "data", "name"], ["1", "spam", "SPAM1"]]
         self._create_csv(test_csv_data)
 
         # set the essential attributes
@@ -337,7 +323,7 @@ class TestCsvValueExtract(TestCsvTransform):
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
-        Helper.set_property(instance, "column_regex_pattern", {'data': '[0-9]'})
+        Helper.set_property(instance, "column_regex_pattern", {"data": "[0-9]"})
 
         instance.execute()
         output_file = os.path.join(self._data_dir, "test.csv")
@@ -345,24 +331,18 @@ class TestCsvValueExtract(TestCsvTransform):
             reader = csv.reader(o)
             for i, row in enumerate(reader):
                 if i == 0:
-                    self.assertEqual(
-                        ["key", "data", "name"],
-                        row)
+                    self.assertEqual(["key", "data", "name"], row)
                 if i == 1:
-                    self.assertEqual(
-                        ["1", "", "SPAM1"],
-                        row)
+                    self.assertEqual(["1", "", "SPAM1"], row)
 
 
 class TestCsvColumnSelect(TestCsvTransform):
     def test_execute_ok(self):
         # create test csv
-        test_csv_data = [["key", "data", "name"],
-                         ["1", "spam1", "SPAM1"],
-                         ["2", "spam2", "SPAM2"]]
+        test_csv_data = [["key", "data", "name"], ["1", "spam1", "SPAM1"], ["2", "spam2", "SPAM2"]]
         self._create_csv(test_csv_data)
 
-        column_order = ['name', 'key', 'data']
+        column_order = ["name", "key", "data"]
 
         # set the essential attributes
         instance = CsvColumnSelect()
@@ -377,26 +357,18 @@ class TestCsvColumnSelect(TestCsvTransform):
             reader = csv.reader(o)
             for i, row in enumerate(reader):
                 if i == 0:
-                    self.assertEqual(
-                        ["name", "key", "data"],
-                        row)
+                    self.assertEqual(["name", "key", "data"], row)
                 if i == 1:
-                    self.assertEqual(
-                        ["SPAM1", "1", "spam1"],
-                        row)
+                    self.assertEqual(["SPAM1", "1", "spam1"], row)
                 if i == 2:
-                    self.assertEqual(
-                        ["SPAM2", "2", "spam2"],
-                        row)
+                    self.assertEqual(["SPAM2", "2", "spam2"], row)
 
     def test_execute_ok_define_part_of_src_columns(self):
         # create test csv
-        test_csv_data = [["key", "data", "name"],
-                         ["1", "spam1", "SPAM1"],
-                         ["2", "spam2", "SPAM2"]]
+        test_csv_data = [["key", "data", "name"], ["1", "spam1", "SPAM1"], ["2", "spam2", "SPAM2"]]
         self._create_csv(test_csv_data)
 
-        column_order = ['name', 'key']
+        column_order = ["name", "key"]
 
         # set the essential attributes
         instance = CsvColumnSelect()
@@ -411,26 +383,18 @@ class TestCsvColumnSelect(TestCsvTransform):
             reader = csv.reader(o)
             for i, row in enumerate(reader):
                 if i == 0:
-                    self.assertEqual(
-                        ["name", "key"],
-                        row)
+                    self.assertEqual(["name", "key"], row)
                 if i == 1:
-                    self.assertEqual(
-                        ["SPAM1", "1"],
-                        row)
+                    self.assertEqual(["SPAM1", "1"], row)
                 if i == 2:
-                    self.assertEqual(
-                        ["SPAM2", "2"],
-                        row)
+                    self.assertEqual(["SPAM2", "2"], row)
 
     def test_execute_ng_define_not_included_column(self):
         # create test csv
-        test_csv_data = [["key", "data", "name"],
-                         ["1", "spam1", "SPAM1"],
-                         ["2", "spam2", "SPAM2"]]
+        test_csv_data = [["key", "data", "name"], ["1", "spam1", "SPAM1"], ["2", "spam2", "SPAM2"]]
         self._create_csv(test_csv_data)
 
-        column_order = ['name', 'key', 'data', 'dummy']
+        column_order = ["name", "key", "data", "dummy"]
 
         # set the essential attributes
         instance = CsvColumnSelect()
@@ -441,9 +405,9 @@ class TestCsvColumnSelect(TestCsvTransform):
         Helper.set_property(instance, "column_order", column_order)
         with pytest.raises(InvalidParameter) as execinfo:
             instance.execute()
-        assert \
-            "column_order define not included target file's column : {'dummy'}"\
-            == str(execinfo.value)
+        assert "column_order define not included target file's column : {'dummy'}" == str(
+            execinfo.value
+        )
 
 
 class TestCsvColumnConcat(TestCsvTransform):
@@ -588,8 +552,9 @@ class TestCsvMergeExclusive(TestCsvTransform):
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "src_column", "key")
-        Helper.set_property(instance, "target_compare_path",
-                            os.path.join(self._data_dir, "alter.csv"))
+        Helper.set_property(
+            instance, "target_compare_path", os.path.join(self._data_dir, "alter.csv")
+        )
         Helper.set_property(instance, "target_column", "id")
 
         instance.execute()
@@ -616,8 +581,9 @@ class TestCsvMergeExclusive(TestCsvTransform):
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "src_column", "key")
-        Helper.set_property(instance, "target_compare_path",
-                            os.path.join(self._data_dir, "alter.csv"))
+        Helper.set_property(
+            instance, "target_compare_path", os.path.join(self._data_dir, "alter.csv")
+        )
         Helper.set_property(instance, "target_column", "id")
 
         instance.execute()
@@ -648,8 +614,9 @@ class TestCsvMergeExclusive(TestCsvTransform):
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "src_column", "dummy")
-        Helper.set_property(instance, "target_compare_path",
-                            os.path.join(self._data_dir, "alter.csv"))
+        Helper.set_property(
+            instance, "target_compare_path", os.path.join(self._data_dir, "alter.csv")
+        )
         Helper.set_property(instance, "target_column", "id")
 
         with pytest.raises(Exception) as e:
@@ -669,14 +636,14 @@ class TestCsvMergeExclusive(TestCsvTransform):
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "src_column", "key")
-        Helper.set_property(instance, "target_compare_path",
-                            os.path.join(self._data_dir, "alter.csv"))
+        Helper.set_property(
+            instance, "target_compare_path", os.path.join(self._data_dir, "alter.csv")
+        )
         Helper.set_property(instance, "target_column", "dummy")
 
         with pytest.raises(KeyError) as e:
             instance.execute()
-        assert "'Target Compare file does not exist target column [dummy].'" \
-               == str(e.value)
+        assert "'Target Compare file does not exist target column [dummy].'" == str(e.value)
 
 
 class TestColumnLengthAdjust(TestCsvTransform):

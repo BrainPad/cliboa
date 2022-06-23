@@ -12,15 +12,16 @@
 # all copies or substantial portions of the Software.
 #
 import os
-import pytest
 import shutil
+
+import pytest
+from requests.exceptions import HTTPError
 
 from cliboa.conf import env
 from cliboa.scenario.extract.http import HttpDownload, HttpDownloadViaBasicAuth
 from cliboa.test import BaseCliboaTest
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
-from requests.exceptions import HTTPError
 
 
 class TestHttpDownload(object):

@@ -15,14 +15,15 @@ import bz2
 import csv
 import gzip
 import os
-import pyminizip
-import pytest
 import shutil
 import tarfile
-import xlsxwriter
 import zipfile
-
 from glob import glob
+
+import pyminizip
+import pytest
+import xlsxwriter
+
 from cliboa.conf import env
 from cliboa.scenario.transform.file import (
     DateFormatConvert,
@@ -36,11 +37,7 @@ from cliboa.scenario.transform.file import (
     FileRename,
 )
 from cliboa.test import BaseCliboaTest
-from cliboa.util.exception import (
-    CliboaException,
-    FileNotFound,
-    InvalidParameter,
-)
+from cliboa.util.exception import CliboaException, FileNotFound, InvalidParameter
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
 
@@ -251,11 +248,7 @@ class TestFileDecompress(TestFileTransform):
         files = self._create_files()
         for file in files:
             pyminizip.compress(
-                file,
-                "",
-                self._data_dir + "/" + os.path.basename(file) + ".zip",
-                pwd,
-                0
+                file, "", self._data_dir + "/" + os.path.basename(file) + ".zip", pwd, 0
             )
         instance = FileDecompress()
         Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
@@ -751,9 +744,7 @@ class TestFileRename(TestFileTransform):
         Helper.set_property(instance, "regex_pattern", "test1")
         with pytest.raises(InvalidParameter) as execinfo:
             instance.execute()
-        assert \
-            "The converted string is not defined in yaml file: dest_str" \
-            == str(execinfo.value)
+        assert "The converted string is not defined in yaml file: dest_str" == str(execinfo.value)
 
     def test_execute_ng_2(self):
         self._create_files()
@@ -767,9 +758,9 @@ class TestFileRename(TestFileTransform):
         Helper.set_property(instance, "rep_str", "test1")
         with pytest.raises(InvalidParameter) as execinfo:
             instance.execute()
-        assert \
-            "The conversion pattern is not defined in yaml file: regex_pattern" \
-            == str(execinfo.value)
+        assert "The conversion pattern is not defined in yaml file: regex_pattern" == str(
+            execinfo.value
+        )
 
 
 class TestFileConvert(TestFileTransform):

@@ -13,6 +13,7 @@
 #
 import csv
 import os
+
 import pytest
 
 from cliboa.adapter.sqlite import SqliteAdapter

@@ -11,10 +11,11 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+from unittest.mock import patch
+
 from cliboa.adapter.gcp import BigQueryAdapter
 from cliboa.scenario.load.gcp import BigQueryCopy
 from cliboa.util.helper import Helper
-from unittest.mock import patch
 
 
 class TestBigQueryCopy(object):

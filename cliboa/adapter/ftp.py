@@ -12,10 +12,10 @@
 # all copies or substantial portions of the Software.
 #
 import errno
-
-from cliboa.util.lisboa_log import LisboaLog
 from ftplib import FTP, FTP_TLS
 from time import sleep
+
+from cliboa.util.lisboa_log import LisboaLog
 
 
 class FtpAdapter(object):
