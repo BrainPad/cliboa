@@ -12,7 +12,7 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-from .extract.aws import S3Download, S3FileExistsCheck
+from .extract.aws import S3Download, S3DownloadFileDelete, S3FileExistsCheck
 from .extract.azure import AzureBlobDownload
 from .extract.ftp import FtpDownload, FtpDownloadFileDelete
 from .extract.gcp import (
