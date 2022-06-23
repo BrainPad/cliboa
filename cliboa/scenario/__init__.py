@@ -52,5 +52,5 @@ from .transform.file import (
     FileRename,
 )
 from .transform.gpg import GpgDecrypt, GpgEncrypt, GpgGenerateKey
-from .transform.json import JsonlToCsv, JsonlToCsvBase
+from .transform.json import JsonlAddKeyValue, JsonlToCsv, JsonlToCsvBase
 from .transform.system import ExecuteShellScript
