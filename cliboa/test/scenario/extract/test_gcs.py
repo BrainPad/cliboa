@@ -12,12 +12,12 @@
 # all copies or substantial portions of the Software.
 #
 
+from mock import patch
+
 from cliboa.adapter.gcp import GcsAdapter
 from cliboa.scenario.extract.gcp import GcsFileExistsCheck
 from cliboa.test import BaseCliboaTest
 from cliboa.util.helper import Helper
-from mock import patch
-
 from cliboa.util.lisboa_log import LisboaLog
 
 
