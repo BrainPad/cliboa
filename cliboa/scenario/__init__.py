@@ -14,7 +14,7 @@
 #
 from .extract.aws import (
     S3Download,
-    S3FileExistsCheck
+    S3FileExistsCheck,
 )
 from .extract.azure import AzureBlobDownload
 from .extract.ftp import FtpDownload, FtpDownloadFileDelete
