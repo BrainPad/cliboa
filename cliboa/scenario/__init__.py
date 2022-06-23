@@ -12,7 +12,7 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-from .extract.aws import S3Download
+from .extract.aws import S3Download, S3FileExistsCheck
 from .extract.azure import AzureBlobDownload
 from .extract.ftp import FtpDownload, FtpDownloadFileDelete
 from .extract.gcp import BigQueryRead, FirestoreDocumentDownload, GcsDownload, GcsDownloadFileDelete
@@ -52,5 +52,5 @@ from .transform.file import (
     FileRename,
 )
 from .transform.gpg import GpgDecrypt, GpgEncrypt, GpgGenerateKey
-from .transform.json import JsonlToCsv, JsonlToCsvBase
+from .transform.json import JsonlAddKeyValue, JsonlToCsv, JsonlToCsvBase
 from .transform.system import ExecuteShellScript

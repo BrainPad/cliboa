@@ -12,13 +12,16 @@
 # all copies or substantial portions of the Software.
 #
 import csv
+import os
 from abc import abstractmethod
 
 import jsonlines
+import pandas
 
 from cliboa.core.validator import EssentialParameters
 from cliboa.scenario.transform.file import FileBaseTransform
 from cliboa.util.csv import Csv
+from cliboa.util.exception import InvalidParameter
 
 
 class JsonlToCsvBase(FileBaseTransform):
@@ -84,3 +87,39 @@ class JsonlToCsv(JsonlToCsvBase):
 
     def convert_row(self, row):
         return [row]
+
+
+class JsonlAddKeyValue(FileBaseTransform):
+    """
+    Insert key value to jsonlines.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self._pairs = {}
+
+    def pairs(self, pairs):
+        self._pairs = pairs
+
+    def execute(self, *args):
+        valid = EssentialParameters(
+            self.__class__.__name__, [self._src_dir, self._src_pattern, self._pairs]
+        )
+        valid()
+
+        if self._dest_dir:
+            os.makedirs(self._dest_dir, exist_ok=True)
+
+        if not isinstance(self._pairs, dict):
+            raise InvalidParameter("argument 'pairs' only allow dict format.")
+
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+        self.check_file_existence(files)
+        super().io_files(files, func=self.convert)
+
+    def convert(self, fi, fo):
+        with open(fi) as fi, open(fo, mode="w") as fo:
+            df = pandas.read_json(fi, orient="records", lines=True)
+            for key, value in self._pairs.items():
+                df[key] = value
+            df.to_json(fo, orient="records", lines=True)
