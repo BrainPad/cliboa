@@ -20,6 +20,6 @@ Files check via S3.
   arguments:
     region: asia-northeast1
     bucket: s3_test
-    prefix: test
+    prefix: test_prefix
     src_pattern: test_(.*)_.csv
 ```
