@@ -15,7 +15,13 @@
 from .extract.aws import S3Download, S3FileExistsCheck
 from .extract.azure import AzureBlobDownload
 from .extract.ftp import FtpDownload, FtpDownloadFileDelete
-from .extract.gcp import BigQueryRead, FirestoreDocumentDownload, GcsDownload, GcsDownloadFileDelete
+from .extract.gcp import (
+    BigQueryRead,
+    FirestoreDocumentDownload,
+    GcsDownload,
+    GcsDownloadFileDelete,
+    GcsFileExistsCheck,
+)
 from .extract.http import HttpDownload, HttpDownloadViaBasicAuth
 from .extract.mysql import MysqlRead
 from .extract.postgres import PostgresqlRead
