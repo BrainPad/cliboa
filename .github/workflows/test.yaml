@@ -38,9 +38,9 @@ jobs:
       - name: check layer dependency
         run: |
           if [ ${{ matrix.python_versions }} -ne 3.6 ]; then
+            echo "import-linter does not support python${{ matrix.python_versions }}"
+          else
             cd cliboa
             pipenv run lint-imports
-          else
-            echo "import-linter does not support python${{ matrix.python_versions }}"
           fi
 
