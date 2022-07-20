@@ -1,0 +1,16 @@
+[importlinter]
+root_packages =
+    adapter
+    core
+    scenario
+    util
+
+[importlinter:contract:1]
+name = layered architecture contract
+type = layers
+layers =
+    core
+    scenario
+    adapter
+    util
+include_external_packages = True
