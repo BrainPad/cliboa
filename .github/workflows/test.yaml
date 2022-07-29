@@ -35,7 +35,12 @@ jobs:
       - name: execute unittest and instrument coverage
         run: |
           pipenv run coverage
-      - name: Upload coverage to codecov
-        uses: codecov/codecov-action@v1
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+      - name: check layer dependency
+        run: |
+          if [ ${{ matrix.python_versions }} = 3.6 ]; then
+            echo "import-linter does not support python${{ matrix.python_versions }}"
+          else
+            cd cliboa
+            pipenv run lint-imports
+          fi
+
