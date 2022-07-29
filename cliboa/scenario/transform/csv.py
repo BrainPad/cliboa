@@ -85,12 +85,16 @@ class CsvColumnExtract(FileBaseTransform):
         super().__init__()
         self._columns = None
         self._column_numbers = None
+        self._do_delete = False
 
     def columns(self, columns):
         self._columns = columns
 
     def column_numbers(self, column_numbers):
         self._column_numbers = column_numbers
+
+    def do_delete(self, do_delete):
+        self._do_delete = do_delete
 
     def execute(self, *args):
         valid = EssentialParameters(self.__class__.__name__, [self._src_dir, self._src_pattern])
@@ -110,15 +114,31 @@ class CsvColumnExtract(FileBaseTransform):
         super().io_files(files, func=self.convert)
 
     def convert(self, fi, fo):
-        if self._columns:
-            Csv.extract_columns_with_names(fi, fo, self._columns)
-        elif self._column_numbers:
-            if isinstance(self._column_numbers, int) is True:
-                remain_column_numbers = [self._column_numbers]
-            else:
-                column_numbers = self._column_numbers.split(",")
-                remain_column_numbers = [int(n) for n in column_numbers]
-            Csv.extract_columns_with_numbers(fi, fo, remain_column_numbers)
+        if self._do_delete:
+            df = pandas.read_csv(
+                fi,
+                dtype=str,
+                encoding=self._encoding,
+            )
+            if self._columns:
+                df = df.drop(self._columns, axis=1)
+            elif self._column_numbers:
+                df = df.drop(df.columns[list(map(int, self._column_numbers.split(",")))], axis=1)
+            df.to_csv(
+                fo,
+                encoding=self._encoding,
+                index=False,
+            )
+        else:
+            if self._columns:
+                Csv.extract_columns_with_names(fi, fo, self._columns)
+            elif self._column_numbers:
+                if isinstance(self._column_numbers, int) is True:
+                    remain_column_numbers = [self._column_numbers]
+                else:
+                    column_numbers = self._column_numbers.split(",")
+                    remain_column_numbers = [int(n) for n in column_numbers]
+                Csv.extract_columns_with_numbers(fi, fo, remain_column_numbers)
 
 
 class CsvValueExtract(FileBaseTransform):
