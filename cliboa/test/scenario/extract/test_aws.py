@@ -16,7 +16,7 @@ import tempfile
 from mock import patch
 
 from cliboa.adapter.aws import S3Adapter
-from cliboa.scenario.extract.aws import S3Download, S3FileExistsCheck
+from cliboa.scenario.extract.aws import S3Delete, S3Download, S3FileExistsCheck
 from cliboa.test import BaseCliboaTest
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
@@ -38,6 +38,22 @@ class TestS3Download(BaseCliboaTest):
             instance.execute()
 
             assert m_get_object.call_args_list == []
+
+
+class TestS3Delete(BaseCliboaTest):
+    @patch.object(S3Adapter, "get_client")
+    def test_execute_ok(self, m_get_client):
+        m_get_object = m_get_client.return_value.get_object
+        m_pagenate = m_get_client.return_value.get_paginator.return_value.paginate
+        m_contents = [{"Contents": [{"Key": "spam"}]}]
+        m_pagenate.return_value = m_contents
+
+        instance = S3Delete()
+        Helper.set_property(instance, "bucket", "spam")
+        Helper.set_property(instance, "src_pattern", "spam")
+        instance.execute()
+
+        assert m_get_object.call_args_list == []
 
 
 class TestS3FileExistsCheck(BaseCliboaTest):
