@@ -62,60 +62,6 @@ class Csv(object):
         return convert_type.get(string.upper())
 
     @staticmethod
-    def extract_columns_with_names(
-        input_file,
-        output_file,
-        remain_column_names,
-        enc="utf-8",
-    ):
-        """
-        Extract only the necessary columns from a CSV file and output a new CSV
-
-        Args:
-            input_file: Input csv file name
-            output_file: Output csv file name
-            remain_column_names: Columns which remain
-            enc: Encoding
-        """
-        with open(input_file, mode="r", encoding=enc) as in_f, open(
-            output_file, mode="w", encoding=enc
-        ) as out_f:
-            reader = csv.DictReader(in_f)
-            writer = csv.writer(out_f)
-            writer.writerow(remain_column_names)
-            for row in reader:
-                contents = []
-                for c in remain_column_names:
-                    contents.append(row[c])
-                writer.writerow(contents)
-            out_f.flush()
-
-    @staticmethod
-    def extract_columns_with_numbers(input_file, output_file, remain_column_numbers, enc="utf-8"):
-        """
-        Extract only the necessary columns from a CSV file and output a new CSV
-
-        Args:
-            input_file: Input csv file name
-            output_file: Output csv file name
-            remain_column_numbers: Column numbers which remain
-            enc: Encoding
-        """
-        with open(input_file, mode="r", encoding=enc) as in_f, open(
-            output_file, mode="w", encoding=enc
-        ) as out_f:
-            reader = csv.reader(in_f)
-            writer = csv.writer(out_f)
-            for i, row in enumerate(reader):
-                contents = []
-                for j, r in enumerate(row):
-                    if (j + 1) not in remain_column_numbers:
-                        continue
-                    contents.append(r)
-                writer.writerow(contents)
-            out_f.flush()
-
-    @staticmethod
     def get_column_names(src, enc="utf-8"):
         """
         Returns csv column names
