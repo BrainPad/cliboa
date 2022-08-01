@@ -253,6 +253,58 @@ class TestCsvColumnExtract(TestCsvTransform):
                 ]
         assert rows == len(test_csv_data)
 
+    def test_execute_ok_with_column_names_deletion(self):
+        # create test csv
+        test_csv_data = [["key", "data", "name"], ["1", "spam1", "SPAM1"], ["2", "spam2", "SPAM2"]]
+        self._create_csv(test_csv_data)
+        deletion_columns = ["data"]
+
+        # set the essential attributes
+        instance = CsvColumnExtract()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "do_delete", True)
+        Helper.set_property(instance, "columns", deletion_columns)
+
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            for i, row in enumerate(reader):
+                if i == 0:
+                    self.assertEqual(["key", "name"], row)
+                if i == 1:
+                    self.assertEqual(["1", "SPAM1"], row)
+                if i == 2:
+                    self.assertEqual(["2", "SPAM2"], row)
+
+    def test_execute_ok_with_column_numbers_deletion(self):
+        # create test csv
+        test_csv_data = [["key", "data", "name"], ["1", "spam1", "SPAM1"], ["2", "spam2", "SPAM2"]]
+        self._create_csv(test_csv_data)
+        deletion_columns = "1,2"
+
+        # set the essential attributes
+        instance = CsvColumnExtract()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "do_delete", True)
+        Helper.set_property(instance, "column_numbers", deletion_columns)
+
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            for i, row in enumerate(reader):
+                if i == 0:
+                    self.assertEqual(["key"], row)
+                if i == 1:
+                    self.assertEqual(["1"], row)
+                if i == 2:
+                    self.assertEqual(["2"], row)
+
 
 class TestCsvValueExtract(TestCsvTransform):
     def test_execute_ok(self):
