@@ -23,6 +23,7 @@ from cliboa.conf import env
 from cliboa.scenario.transform.csv import (
     ColumnLengthAdjust,
     CsvColumnConcat,
+    CsvColumnDelete,
     CsvColumnExtract,
     CsvColumnHash,
     CsvColumnSelect,
@@ -253,57 +254,131 @@ class TestCsvColumnExtract(TestCsvTransform):
                 ]
         assert rows == len(test_csv_data)
 
-    def test_execute_ok_with_column_names_deletion(self):
-        # create test csv
-        test_csv_data = [["key", "data", "name"], ["1", "spam1", "SPAM1"], ["2", "spam2", "SPAM2"]]
-        self._create_csv(test_csv_data)
-        deletion_columns = ["data"]
 
+class TestCsvColumnDelete(TestCsvTransform):
+    def test_execute_ok_drop_column(self):
+        # create test csv
+        test_csv_data = [
+            ["col_1", "col_2", "col_3"],
+            ["1", "spam1", "SPAM1"],
+            ["2", "spam2", "SPAM2"],
+        ]
+        self._create_csv(test_csv_data)
         # set the essential attributes
-        instance = CsvColumnExtract()
+        instance = CsvColumnDelete()
         Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
-        Helper.set_property(instance, "do_delete", True)
-        Helper.set_property(instance, "columns", deletion_columns)
-
+        regex_pattern = "^.*_2$"
+        Helper.set_property(instance, "regex_pattern", regex_pattern)
         instance.execute()
         output_file = os.path.join(self._data_dir, "test.csv")
         with open(output_file, "r") as o:
             reader = csv.reader(o)
             for i, row in enumerate(reader):
                 if i == 0:
-                    self.assertEqual(["key", "name"], row)
+                    self.assertEqual(["col_1", "col_3"], row)
                 if i == 1:
                     self.assertEqual(["1", "SPAM1"], row)
                 if i == 2:
                     self.assertEqual(["2", "SPAM2"], row)
 
-    def test_execute_ok_with_column_numbers_deletion(self):
+    def test_execute_ok_without_drop_column(self):
         # create test csv
-        test_csv_data = [["key", "data", "name"], ["1", "spam1", "SPAM1"], ["2", "spam2", "SPAM2"]]
+        test_csv_data = [
+            ["col_1", "col_2", "col_3"],
+            ["1", "spam1", "SPAM1"],
+            ["2", "spam2", "SPAM2"],
+        ]
         self._create_csv(test_csv_data)
-        deletion_columns = "1,2"
-
         # set the essential attributes
-        instance = CsvColumnExtract()
+        instance = CsvColumnDelete()
         Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
-        Helper.set_property(instance, "do_delete", True)
-        Helper.set_property(instance, "column_numbers", deletion_columns)
-
+        regex_pattern = "^target_.*$"
+        Helper.set_property(instance, "regex_pattern", regex_pattern)
         instance.execute()
         output_file = os.path.join(self._data_dir, "test.csv")
         with open(output_file, "r") as o:
             reader = csv.reader(o)
             for i, row in enumerate(reader):
                 if i == 0:
-                    self.assertEqual(["key"], row)
+                    self.assertEqual(["col_1", "col_2", "col_3"], row)
                 if i == 1:
-                    self.assertEqual(["1"], row)
+                    self.assertEqual(["1", "spam1", "SPAM1"], row)
                 if i == 2:
-                    self.assertEqual(["2"], row)
+                    self.assertEqual(["2", "spam2", "SPAM2"], row)
+
+    def test_execute_ok_drop_all_columns(self):
+        # create test csv
+        test_csv_data = [
+            ["col_1", "col_2", "col_3"],
+            ["1", "spam1", "SPAM1"],
+            ["2", "spam2", "SPAM2"],
+        ]
+        self._create_csv(test_csv_data)
+        # set the essential attributes
+        instance = CsvColumnDelete()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        regex_pattern = "^.*$"
+        Helper.set_property(instance, "regex_pattern", regex_pattern)
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        raws = 0
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            for i, row in enumerate(reader):
+                if i == 0:
+                    self.assertEqual([], row)
+                    raws += 1
+            self.assertEqual(1, raws)
+
+    def test_execute_ok_drop_columns_with_remaining_NaN_columns(self):
+        # create test csv
+        test_csv_data = [
+            ["col_1", "col_2", "col_3"],
+            ["1", "", "SPAM1"],
+            ["2", "", ""],
+        ]
+        self._create_csv(test_csv_data)
+        # set the essential attributes
+        instance = CsvColumnDelete()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        regex_pattern = "^.*_1$"
+        Helper.set_property(instance, "regex_pattern", regex_pattern)
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            for i, row in enumerate(reader):
+                if i == 0:
+                    self.assertEqual(["col_2", "col_3"], row)
+                if i == 1:
+                    self.assertEqual(["", "SPAM1"], row)
+                if i == 2:
+                    self.assertEqual(["", ""], row)
+
+    def test_execute_ng(self):
+        # create test csv
+        test_csv_data = [
+            ["col_1", "col_2", "col_3"],
+            ["1", "spam1", "SPAM1"],
+            ["2", "spam2", "SPAM2"],
+        ]
+        self._create_csv(test_csv_data)
+        # set the essential attributes
+        instance = CsvColumnDelete()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        with pytest.raises(Exception) as e:
+            instance.execute()
+        assert "'regex_pattern' is essential." == str(e.value)
 
 
 class TestCsvValueExtract(TestCsvTransform):
