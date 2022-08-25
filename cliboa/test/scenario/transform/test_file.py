@@ -732,6 +732,48 @@ class TestFileRename(TestFileTransform):
         assert os.path.exists(os.path.join(self._data_dir, "PRE-dummy3-SUF.csv"))
         assert os.path.exists(os.path.join(self._data_dir, "PRE-test2-SUF.csv"))
 
+    def test_execute_ok_8(self):
+        self._create_files()
+
+        instance = FileRename()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
+        Helper.set_property(instance, "regex_pattern", "")
+        Helper.set_property(instance, "rep_str", "")
+        instance.execute()
+
+        assert os.path.exists(os.path.join(self._data_dir, "test1.txt"))
+        assert os.path.exists(os.path.join(self._data_dir, "test2.txt"))
+
+    def test_execute_ok_9(self):
+        self._create_files()
+
+        instance = FileRename()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
+        Helper.set_property(instance, "regex_pattern", "t")
+        Helper.set_property(instance, "rep_str", "")
+        instance.execute()
+
+        assert os.path.exists(os.path.join(self._data_dir, "es1.txt"))
+        assert os.path.exists(os.path.join(self._data_dir, "es2.txt"))
+
+    def test_execute_ok_10(self):
+        self._create_files()
+
+        instance = FileRename()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
+        Helper.set_property(instance, "regex_pattern", "")
+        Helper.set_property(instance, "rep_str", "a")
+        instance.execute()
+
+        assert os.path.exists(os.path.join(self._data_dir, "ataeasata1a.txt"))
+        assert os.path.exists(os.path.join(self._data_dir, "ataeasata2a.txt"))
+
     def test_execute_ng_1(self):
         self._create_files()
 
