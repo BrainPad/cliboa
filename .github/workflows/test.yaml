@@ -33,7 +33,7 @@ jobs:
           poetry run isort --check
       - name: execute unittest and instrument coverage
         run: |
-          poetry run coverage
+          poetry run pytest --cov cliboa --cov-report term-missing --cov-report=xml
       - name: check layer dependency
         run: |
           if [ ${{ matrix.python_versions }} = 3.6 ]; then
