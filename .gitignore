@@ -31,3 +31,4 @@ dist/
 logs/
 Pipfile
 Pipfile.lock
+pyproject.toml
