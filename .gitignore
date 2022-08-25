@@ -32,3 +32,4 @@ logs/
 Pipfile
 Pipfile.lock
 pyproject.toml
+poetry.lock
