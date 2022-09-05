@@ -816,9 +816,7 @@ class TestFileRename(TestFileTransform):
         Helper.set_property(instance, "regex_pattern", "")
         with pytest.raises(InvalidParameter) as execinfo:
             instance.execute()
-        assert "The converted string is not defined in yaml file: dest_str" == str(
-            execinfo.value
-        )
+        assert "The converted string is not defined in yaml file: dest_str" == str(execinfo.value)
 
     def test_execute_ng_4(self):
         self._create_files()
