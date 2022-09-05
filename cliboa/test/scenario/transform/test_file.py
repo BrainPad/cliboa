@@ -804,6 +804,38 @@ class TestFileRename(TestFileTransform):
             execinfo.value
         )
 
+    def test_execute_ng_3(self):
+        self._create_files()
+
+        instance = FileRename()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
+        Helper.set_property(instance, "prefix", "PRE-")
+        Helper.set_property(instance, "suffix", "-SUF")
+        Helper.set_property(instance, "regex_pattern", "")
+        with pytest.raises(InvalidParameter) as execinfo:
+            instance.execute()
+        assert "The converted string is not defined in yaml file: dest_str" == str(
+            execinfo.value
+        )
+
+    def test_execute_ng_4(self):
+        self._create_files()
+
+        instance = FileRename()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
+        Helper.set_property(instance, "prefix", "PRE-")
+        Helper.set_property(instance, "suffix", "-SUF")
+        Helper.set_property(instance, "rep_str", "")
+        with pytest.raises(InvalidParameter) as execinfo:
+            instance.execute()
+        assert "The conversion pattern is not defined in yaml file: regex_pattern" == str(
+            execinfo.value
+        )
+
 
 class TestFileConvert(TestFileTransform):
     def test_execute(self):

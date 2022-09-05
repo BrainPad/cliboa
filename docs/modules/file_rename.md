@@ -4,8 +4,8 @@ Renaming files with adding either prefix or suffix.
 # Parameters
 |Parameters|Explanation|Required|Default|Remarks|
 |----------|-----------|--------|-------|-------|
-|src_dir|Path of the directory which target files are placed.|Yes|`""`||
-|src_pattern|Regex which is to find target files.|Yes|`""`||
+|src_dir|Path of the directory which target files are placed.|Yes|None||
+|src_pattern|Regex which is to find target files.|Yes|None||
 |prefix|Prefix for new file name|No|`""`||
 |suffix|Suffix for new file name|No|`""`||
 |regex_pattern|Pattern when conversion.|No|None|Fails if both regex_pattern and dest_str are not defined.|
