@@ -470,8 +470,8 @@ class FileRename(FileBaseTransform):
         super().__init__()
         self._prefix = ""
         self._suffix = ""
-        self._regex_pattern = ""
-        self._rep_str = ""
+        self._regex_pattern = None
+        self._rep_str = None
         self._ext = ""
 
     def prefix(self, prefix):
@@ -513,11 +513,11 @@ class FileRename(FileBaseTransform):
                 nameonly = basename
                 extension = ""
 
-            if self._regex_pattern and self._rep_str:
+            if self._regex_pattern is not None and self._rep_str is not None:
                 nameonly = re.sub(self._regex_pattern, self._rep_str, nameonly)
-            elif self._regex_pattern:
+            elif self._regex_pattern is not None:
                 raise InvalidParameter("The converted string is not defined in yaml file: dest_str")
-            elif self._rep_str:
+            elif self._rep_str is not None:
                 raise InvalidParameter(
                     "The conversion pattern is not defined in yaml file: regex_pattern"
                 )
