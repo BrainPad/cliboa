@@ -32,18 +32,29 @@ from cliboa.util.string import StringUtil
 
 class CsvColumnHash(FileBaseTransform):
     """
-    Hash(SHA256) specific columns from csv file.
+    Hash(SHA256, SHA512, MD5) specific columns from csv file.
     """
 
     def __init__(self):
         super().__init__()
         self._columns = []
+        self._hash_pattern = "sha256"
 
     def columns(self, columns):
         self._columns = columns
 
+    def hash_pattern(self, hash_pattern):
+        self._hash_pattern = hash_pattern
+
     def _stringToHash(self, string):
-        return hashlib.sha256(string.encode()).hexdigest()
+        if self._hash_pattern == "sha256":
+            return hashlib.sha256(string.encode()).hexdigest()
+        elif self._hash_pattern == "sha512":
+            return hashlib.sha512(string.encode()).hexdigest()
+        elif self._hash_pattern == "md5":
+            return hashlib.md5(string.encode()).hexdigest()
+        else:
+            raise InvalidParameter("%s is unsupported hash pattern." % self._hash_pattern)
 
     def execute(self, *args):
         valid = EssentialParameters(

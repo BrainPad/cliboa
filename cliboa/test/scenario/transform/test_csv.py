@@ -61,7 +61,7 @@ class TestCsvTransform(BaseCliboaTest):
 
 
 class TestCsvColumnHash(TestCsvTransform):
-    def test_execute_ok(self):
+    def test_execute_ok_default_hash_pattern_sha256(self):
         # create test csv
         test_csv_data = [["id", "name", "passwd"], ["1", "spam", "spam1234"]]
         self._create_csv(test_csv_data)
@@ -72,6 +72,30 @@ class TestCsvColumnHash(TestCsvTransform):
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "columns", ["passwd"])
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        rows = 1
+        with open(output_file, "r") as o:
+            reader = csv.DictReader(o)
+            for r in reader:
+                rows += 1
+                assert "ec77022924e329f8e01deab92a4092ed8b7ec2365f1e719ac4e9686744341d95" == r.get(
+                    "passwd"
+                )
+        assert rows == len(test_csv_data)
+
+    def test_execute_ok_sha256(self):
+        # create test csv
+        test_csv_data = [["id", "name", "passwd"], ["1", "spam", "spam1234"]]
+        self._create_csv(test_csv_data)
+
+        # set the essential attributes
+        instance = CsvColumnHash()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "columns", ["passwd"])
+        Helper.set_property(instance, "hash_pattern", "sha256")
         instance.execute()
         output_file = os.path.join(self._data_dir, "test.csv")
         rows = 1
@@ -139,6 +163,69 @@ class TestCsvColumnHash(TestCsvTransform):
                     "passwd"
                 )
         assert rows == len(test_csv_data)
+
+    def test_execute_ok_sha512(self):
+        # create test csv
+        test_csv_data = [["id", "name", "passwd"], ["1", "spam", "spam1234"]]
+        self._create_csv(test_csv_data)
+
+        # set the essential attributes
+        instance = CsvColumnHash()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "columns", ["passwd"])
+        Helper.set_property(instance, "hash_pattern", "sha512")
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        rows = 1
+        with open(output_file, "r") as o:
+            reader = csv.DictReader(o)
+            for r in reader:
+                rows += 1
+                assert (
+                    "242a1ca3540c3a7e9bdd69ec029a7a60153466de5b6ac191c0aedef7507d7d1418bd3ce7fbcab8d002fd66ad38e1176c849393a5ce42995b69a13dc108988827"  # noqa
+                    == r.get("passwd")
+                )
+        assert rows == len(test_csv_data)
+
+    def test_execute_ok_md5(self):
+        # create test csv
+        test_csv_data = [["id", "name", "passwd"], ["1", "spam", "spam1234"]]
+        self._create_csv(test_csv_data)
+
+        # set the essential attributes
+        instance = CsvColumnHash()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "columns", ["passwd"])
+        Helper.set_property(instance, "hash_pattern", "md5")
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        rows = 1
+        with open(output_file, "r") as o:
+            reader = csv.DictReader(o)
+            for r in reader:
+                rows += 1
+                assert "f238c973c6912f6a7e8f2b32d1314d55" == r.get("passwd")
+        assert rows == len(test_csv_data)
+
+    def test_execute_ng(self):
+        # create test csv
+        test_csv_data = [["id", "name", "passwd"], ["1", "spam", "spam1234"]]
+        self._create_csv(test_csv_data)
+
+        # set the essential attributes
+        instance = CsvColumnHash()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "columns", ["passwd"])
+        Helper.set_property(instance, "hash_pattern", "dummy")
+        with pytest.raises(Exception) as e:
+            instance.execute()
+        assert "dummy is unsupported hash pattern." == str(e.value)
 
 
 class TestCsvColumnExtract(TestCsvTransform):

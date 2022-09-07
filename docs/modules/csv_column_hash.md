@@ -1,5 +1,5 @@
 # CsvColumnHash
-Hash columns of a csv file with SHA256
+Hash columns of a csv file with SHA256, SHA512, MD5
 
 # Parameters
 |Parameters|Explanation|Required|Default|Remarks|
@@ -8,7 +8,8 @@ Hash columns of a csv file with SHA256
 |src_pattern|Regex which is to find target files.|Yes|None||
 |dest_dir|Path of the directory which is for output files.|No|None||
 |encoding|Character encoding when read and write|No|utf-8||
-|columns|Csv column names which hash with SHA256|Yes|None||
+|columns|Csv column names which hash|Yes|None||
+|hash_pattern|Hash method that can be specified.|No|sha256|sha256, sha512, md5 can be selected.|
 |nonfile_error|Whether an error is thrown when files are not found in src_dir.|No|False||
 
 # Examples
@@ -22,6 +23,7 @@ scenario:
     dest_dir: /out
     columns:
       - passwd
+    hash_pattern: sha256
 
 Input: /in/test.csv
 id, name, passwd
