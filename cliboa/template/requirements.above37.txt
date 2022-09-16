@@ -44,7 +44,7 @@ msrest==0.6.21
 multiprocessing-logging==0.3.1
 mypy-extensions==0.4.3
 numpy==1.21.4; python_version < '3.10' and platform_machine != 'aarch64' and platform_machine != 'arm64'
-oauthlib==3.1.1; python_version >= '3.6'
+oauthlib==3.2.1; python_version >= '3.6'
 openpyxl==3.0.9
 packaging==21.3; python_version >= '3.6'
 pandas-gbq==0.16.0
