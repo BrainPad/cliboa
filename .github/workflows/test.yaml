@@ -21,7 +21,7 @@ jobs:
           py_version=${{ matrix.python_versions }}
           pyproject_toml_version=${py_version//./}
           cp cliboa/template/pyproject.above"$pyproject_toml_version".toml pyproject.toml
-          poetry install
+          poetry install --no-update
       - name: execute flake8
         run: |
           poetry run flake8 .
