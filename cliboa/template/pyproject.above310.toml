@@ -5,7 +5,7 @@ description = ""
 authors = ["Tomoki Maeda"]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = ">=3.10, <3.11"
 boto3 = "==1.20.16"
 requests = "==2.26.0"
 cloudpickle = "==2.0.0"
