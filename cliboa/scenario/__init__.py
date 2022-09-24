@@ -38,6 +38,7 @@ from .sqlite import SqliteQueryExecute
 from .transform.csv import (
     ColumnLengthAdjust,
     CsvColumnConcat,
+    CsvColumnDelete,
     CsvColumnExtract,
     CsvColumnHash,
     CsvConcat,
