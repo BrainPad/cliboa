@@ -44,6 +44,7 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
     ],
     packages=[
         "cliboa",
@@ -71,10 +72,6 @@ setup(
             "pyproject.above37.toml",
             "pyproject.above38.toml",
             "pyproject.above39.toml",
-            "requirements.above36.txt",
-            "requirements.above37.txt",
-            "requirements.above38.txt",
-            "requirements.above39.txt",
         ],
     },
     python_requires=">=3.6",

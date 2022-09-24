@@ -73,7 +73,7 @@ Directory tree which was created aforementioned commands is as below.
 
 ```
 sample
-├── Pipfile
+├── pyproject.toml
 ├── bin
 │   └── clibomanager.py
 ├── cliboa
@@ -90,7 +90,6 @@ sample
 │   └── simple-etl
 │       ├── scenario
 │       └── scenario.yml
-└── requirements.txt
 ```
 
 ## Install PyPI packages

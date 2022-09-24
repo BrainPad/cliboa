@@ -118,7 +118,7 @@ class CliboAdmin(object):
 
     def _get_pipfile_and_pyproject_toml_path(self, cliboa_install_path):
         """
-        Get path of requirements.txt and Pipfile for current python version
+        Get path of pyproject.toml and Pipfile for current python version
         """
         py_ver_info = sys.version
         py_ver_info = py_ver_info.split(" ")
@@ -129,6 +129,7 @@ class CliboAdmin(object):
             "3.7": "pyproject.above37.toml",
             "3.8": "pyproject.above38.toml",
             "3.9": "pyproject.above39.toml",
+            "3.10": "pyproject.above310.toml",
         }
         py_major_ver_and_pipfile = {
             "3.5": "Pipfile.above35",
@@ -136,6 +137,7 @@ class CliboAdmin(object):
             "3.7": "Pipfile.above37",
             "3.8": "Pipfile.above38",
             "3.9": "Pipfile.above39",
+            "3.10": "Pipfile.above310",
         }
         pipfile_path = os.path.join(
             cliboa_install_path,
