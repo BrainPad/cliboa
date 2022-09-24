@@ -246,10 +246,9 @@ class TestFileDecompress(TestFileTransform):
     def test_zip_with_pwd(self):
         pwd = "testpass"
         files = self._create_files()
-        for file in files:
-            pyminizip.compress(
-                file, "", self._data_dir + "/" + os.path.basename(file) + ".zip", pwd, 0
-            )
+        for f in files:
+            zipfile = self._data_dir + "/" + os.path.basename(f) + ".zip"
+            pyminizip.compress(f, "", zipfile, pwd, 0)
         instance = FileDecompress()
         Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
