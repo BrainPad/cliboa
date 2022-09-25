@@ -20,7 +20,6 @@ import tarfile
 import zipfile
 from glob import glob
 
-import pyminizip
 import pytest
 import xlsxwriter
 
