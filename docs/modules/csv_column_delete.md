@@ -8,6 +8,7 @@ Delete specific columns from csv files.
 |src_pattern|Regex which is to find target files.|Yes|None||
 |dest_dir|Path of the directory which is for output files.|No|None||
 |regex_pattern|Column and regular expression pair.|Yes|None||
+|nonfile_error|Whether an error is thrown when files are not found in src_dir.|No|False||
 
 # Example
 ```

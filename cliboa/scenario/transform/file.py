@@ -49,8 +49,8 @@ class FileBaseTransform(BaseStep, ExceptionHandler):
 
     def __init__(self):
         super().__init__()
-        self._src_dir = ""
-        self._src_pattern = ""
+        self._src_dir = None
+        self._src_pattern = None
         self._dest_dir = None
         self._dest_name = None
         self._encoding = "utf-8"

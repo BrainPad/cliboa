@@ -7,6 +7,7 @@ Select columns in Csv file in specified order
 |src_dir|Path of the directory which target files are placed.|Yes|None||
 |src_pattern|Regex which is to find target files.|Yes|None||
 |dest_dir|Path of the directory which is for output files.|No|None||
+|encoding|Character encoding when read and write|No|utf-8||
 |column_order|Column order after update.|Yes|column_order is have to define target files columns.|
 
 # Example1
