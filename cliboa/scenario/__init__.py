@@ -41,6 +41,7 @@ from .transform.csv import (
     CsvColumnDelete,
     CsvColumnExtract,
     CsvColumnHash,
+    CsvColumnReplace,
     CsvConcat,
     CsvConvert,
     CsvMerge,
