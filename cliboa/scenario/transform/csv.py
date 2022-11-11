@@ -759,3 +759,49 @@ class CsvToJsonl(FileBaseTransform):
             reader = csv.DictReader(i)
             for row in reader:
                 writer.write(row)
+
+
+class CsvColumnCopy(FileBaseTransform):
+    """
+    Copy column data (new or overwrite)
+    """
+
+    def __init__(self):
+        super().__init__()
+        self._src_column = None
+        self._dest_column = None
+
+    def src_column(self, src_column):
+        self._src_column = src_column
+
+    def dest_column(self, dest_column):
+        self._dest_column = dest_column
+
+    def execute(self, *args):
+        valid = EssentialParameters(
+            self.__class__.__name__,
+            [self._src_dir, self._src_pattern, self._dest_dir, self._src_column, self._dest_column],
+        )
+        valid()
+
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+        self.check_file_existence(files)
+
+        super().io_files(files, func=self.convert)
+
+    def convert(self, fi, fo):
+        df = pandas.read_csv(
+            fi,
+            dtype=str,
+            encoding=self._encoding,
+        )
+        if self._src_column not in df:
+            raise KeyError("Copy source column does not exist in file. [%s]" % self._src_column)
+
+        df[self._dest_column] = df[self._src_column]
+
+        df.to_csv(
+            fo,
+            encoding=self._encoding,
+            index=False,
+        )
