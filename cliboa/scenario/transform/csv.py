@@ -181,7 +181,8 @@ class CsvValueExtract(FileBaseTransform):
 
     def execute(self, *args):
         valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir, self._src_pattern, self._column_regex_pattern]
+            self.__class__.__name__,
+            [self._src_dir, self._src_pattern, self._column_regex_pattern],
         )
         valid()
 
@@ -309,7 +310,8 @@ class CsvMergeExclusive(FileBaseTransform):
         self.check_file_existence(files)
 
         target = super().get_target_files(
-            os.path.dirname(self._target_compare_path), os.path.basename(self._target_compare_path)
+            os.path.dirname(self._target_compare_path),
+            os.path.basename(self._target_compare_path),
         )
         self.check_file_existence(target)
 
@@ -469,7 +471,8 @@ class CsvColumnSelect(FileBaseTransform):
     def execute(self, *args):
         # essential parameters check
         valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir, self._src_pattern, self._column_order]
+            self.__class__.__name__,
+            [self._src_dir, self._src_pattern, self._column_order],
         )
         valid()
 
@@ -799,6 +802,68 @@ class CsvColumnCopy(FileBaseTransform):
             raise KeyError("Copy source column does not exist in file. [%s]" % self._src_column)
 
         df[self._dest_column] = df[self._src_column]
+
+        df.to_csv(
+            fo,
+            encoding=self._encoding,
+            index=False,
+        )
+
+
+class CsvColumnReplace(FileBaseTransform):
+    """
+    Replace matching regular expression values for a specific column from a csv file.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self._column = None
+        self._regex_pattern = None
+        self._rep_str = None
+        self._regex_compile = None
+
+    def column(self, column):
+        self._column = column
+
+    def regex_pattern(self, regex_pattern):
+        self._regex_pattern = regex_pattern
+
+    def rep_str(self, rep_str):
+        self._rep_str = rep_str
+
+    def _replace_string(self, string):
+        return self._regex_compile.sub(self._rep_str, string)
+
+    def execute(self, *args):
+        valid = EssentialParameters(
+            self.__class__.__name__,
+            [self._src_dir, self._src_pattern, self._column],
+        )
+        valid()
+
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+        self.check_file_existence(files)
+
+        if self._rep_str is None:
+            raise InvalidParameter("The converted string is not defined in yaml file: rep_str")
+        if self._regex_pattern is None:
+            raise InvalidParameter(
+                "The conversion pattern is not defined in yaml file: regex_pattern"
+            )
+        self._regex_compile = re.compile(self._regex_pattern)
+
+        super().io_files(files, func=self.convert)
+
+    def convert(self, fi, fo):
+        df = pandas.read_csv(
+            fi,
+            dtype=str,
+            encoding=self._encoding,
+        )
+        if self._column not in df:
+            raise KeyError("Replace source column does not exist in file. [%s]" % self._column)
+
+        df[self._column] = df[self._column].apply(self._replace_string)
 
         df.to_csv(
             fo,
