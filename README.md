@@ -49,10 +49,10 @@ See [CONTRIBUTING.md](/CONTRIBUTING.md)
 Available on macOS and any Linux distributions, like Debian, Ubuntu, CentOS, REL, or etc.
 
 ## Install cliboa
-python version 3.6 or later and pipenv are required. In the environemnt which pip can be used, execute as below.
+python version 3.7 or later and poetry are required. In the environemnt which pip can be used, execute as below.
 
 ```
-sudo pip3 install pipenv
+sudo pip3 install poetry
 sudo pip3 install cliboa
 ```
 
@@ -73,7 +73,7 @@ Directory tree which was created aforementioned commands is as below.
 
 ```
 sample
-├── Pipfile
+├── pyproject.toml
 ├── bin
 │   └── clibomanager.py
 ├── cliboa
@@ -90,18 +90,12 @@ sample
 │   └── simple-etl
 │       ├── scenario
 │       └── scenario.yml
-└── requirements.txt
 ```
 
 ## Install PyPI packages
 ```
 $ cd sample
-$ pipenv install --dev
-```
-or
-```
-$ cd sample
-$ sudo pip3 install -r requirements.txt
+$ poetry install
 ```
 
 ## Write a Scenario of ETL Processing
@@ -118,12 +112,7 @@ To make the above scenario available, set a local machine as a sftp server accor
 After wrote scenario.yml and set the environment, execute a scenario by as below command.
 ```
 cd sample
-pipenv run python3 bin/clibomanager.py simple-etl
-```
-or
-```
-cd sample
-python3 bin/clibomanager.py simple-etl
+poetry run python3 bin/clibomanager.py simple-etl
 ```
 
 # YAML Configuration

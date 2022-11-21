@@ -52,4 +52,4 @@ RUN cd /usr/local/Python-3.9.6 && \
     make altinstall
 
 # Install essential module
-RUN pip3 install pipenv
+RUN pip3 install poetry

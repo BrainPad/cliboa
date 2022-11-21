@@ -38,9 +38,11 @@ from .sqlite import SqliteQueryExecute
 from .transform.csv import (
     ColumnLengthAdjust,
     CsvColumnConcat,
+    CsvColumnCopy,
     CsvColumnDelete,
     CsvColumnExtract,
     CsvColumnHash,
+    CsvColumnReplace,
     CsvConcat,
     CsvConvert,
     CsvMerge,
