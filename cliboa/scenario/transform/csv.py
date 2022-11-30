@@ -61,19 +61,28 @@ class CsvColumnHash(FileBaseTransform):
         super().io_files(files, func=self.convert)
 
     def convert(self, fi, fo):
-        df = pandas.read_csv(
+        _chunk_size_handling(self._read_csv_func, fi, fo)
+
+    def _read_csv_func(self, chunksize, fi, fo):
+        # Used in _chunk_size_handling
+        first_write = True
+        tfr = pandas.read_csv(
             fi,
             dtype=str,
             encoding=self._encoding,
+            chunksize=chunksize,
         )
-        for c in self._columns:
-            df[c] = df[c].apply(self._stringToHash)
-
-        df.to_csv(
-            fo,
-            encoding=self._encoding,
-            index=False,
-        )
+        for df in tfr:
+            for c in self._columns:
+                df[c] = df[c].apply(self._stringToHash)
+            df.to_csv(
+                fo,
+                encoding=self._encoding,
+                header=True if first_write else False,
+                index=False,
+                mode="w" if first_write else "a",
+            )
+            first_write = False
 
 
 class CsvColumnExtract(FileBaseTransform):
@@ -146,25 +155,33 @@ class CsvColumnDelete(FileBaseTransform):
         super().io_files(files, func=self.convert)
 
     def convert(self, fi, fo):
-        df = pandas.read_csv(
+        _chunk_size_handling(self._read_csv_func, fi, fo)
+
+    def _read_csv_func(self, chunksize, fi, fo):
+        # Used in _chunk_size_handling
+        first_write = True
+        tfr = pandas.read_csv(
             fi,
             dtype=str,
             encoding=self._encoding,
+            chunksize=chunksize,
         )
         pattern = re.compile(self._regex_pattern)
-        for column in df.columns.values:
-            if pattern.fullmatch(column):
-                df = df.drop(column, axis=1)
-
-        # output an empty file when all columns are deleted
-        if df.empty:
-            df = df.dropna(how="all")
-
-        df.to_csv(
-            fo,
-            encoding=self._encoding,
-            index=False,
-        )
+        for df in tfr:
+            for column in df.columns.values:
+                if pattern.fullmatch(column):
+                    df = df.drop(column, axis=1)
+                # output an empty file when all columns are deleted
+                if df.empty:
+                    df = df.dropna(how="all")
+            df.to_csv(
+                fo,
+                encoding=self._encoding,
+                header=True if first_write else False,
+                index=False,
+                mode="w" if first_write else "a",
+            )
+            first_write = False
 
 
 class CsvValueExtract(FileBaseTransform):
@@ -247,26 +264,34 @@ class CsvColumnConcat(FileBaseTransform):
         super().io_files(files, func=self.convert)
 
     def convert(self, fi, fo):
-        df = pandas.read_csv(
+        _chunk_size_handling(self._read_csv_func, fi, fo)
+
+    def _read_csv_func(self, chunksize, fi, fo):
+        # Used in _chunk_size_handling
+        first_write = True
+        tfr = pandas.read_csv(
             fi,
             dtype=str,
             encoding=self._encoding,
+            chunksize=chunksize,
         )
-
         dest_str = None
-        for c in self._columns:
-            if dest_str is None:
-                dest_str = df[c].astype(str)
-            else:
-                dest_str = dest_str + self._sep + df[c].astype(str)
-            df = df.drop(columns=[c])
-        df[self._dest_column_name] = dest_str
-
-        df.to_csv(
-            fo,
-            encoding=self._encoding,
-            index=False,
-        )
+        for df in tfr:
+            for c in self._columns:
+                if dest_str is None:
+                    dest_str = df[c].astype(str)
+                else:
+                    dest_str = dest_str + self._sep + df[c].astype(str)
+                df = df.drop(columns=[c])
+            df[self._dest_column_name] = dest_str
+            df.to_csv(
+                fo,
+                encoding=self._encoding,
+                header=True if first_write else False,
+                index=False,
+                mode="w" if first_write else "a",
+            )
+            first_write = False
 
 
 class CsvMergeExclusive(FileBaseTransform):
@@ -315,30 +340,40 @@ class CsvMergeExclusive(FileBaseTransform):
         )
         self.check_file_existence(target)
 
-        self.df_target = pandas.read_csv(self._target_compare_path)
-        if self._target_column not in self.df_target:
+        header = pandas.read_csv(self._target_compare_path).head(1)
+        if self._target_column not in header:
             raise KeyError(
                 "Target Compare file does not exist target column [%s]." % self._target_column
             )
 
-        self.df_target_list = self.df_target[self._target_column].values.tolist()
+        df_target = pandas.read_csv(self._target_compare_path, usecols=[self._target_column])
+        self.df_target_list = df_target[self._target_column].values.tolist()
 
         super().io_files(files, func=self.convert)
 
     def convert(self, fi, fo):
-        df = pandas.read_csv(fi)
+        header = pandas.read_csv(fi).head(1)
         try:
-            df[self._src_column].values.tolist()
+            header[self._src_column].values.tolist()
         except KeyError:
             raise KeyError("Src file does not exist target column [%s]." % self._target_column)
 
-        df = df[~df[self._src_column].isin(self.df_target_list)]
+        _chunk_size_handling(self._read_csv_func, fi, fo)
 
-        df.to_csv(
-            fo,
-            encoding=self._encoding,
-            index=False,
-        )
+    def _read_csv_func(self, chunksize, fi, fo):
+        # Used in _chunk_size_handling
+        first_write = True
+        tfr = pandas.read_csv(fi, chunksize=chunksize)
+        for df in tfr:
+            df = df[~df[self._src_column].isin(self.df_target_list)]
+            df.to_csv(
+                fo,
+                encoding=self._encoding,
+                header=True if first_write else False,
+                index=False,
+                mode="w" if first_write else "a",
+            )
+            first_write = False
 
 
 class ColumnLengthAdjust(FileBaseTransform):
@@ -433,27 +468,41 @@ class CsvMerge(FileBaseTransform):
             raise InvalidCount("Input files must be only one.")
 
         self._logger.info("Merge %s and %s." % (target1_files[0], target2_files[0]))
-        df1 = pandas.read_csv(
+
+        _chunk_size_handling(self._read_csv_func, target1_files, target2_files)
+
+    def _read_csv_func(self, chunksize, target1_files, target2_files):
+        # Used in _chunk_size_handling
+        first_write = True
+        tfr1 = pandas.read_csv(
             os.path.join(self._src_dir, target1_files[0]),
             dtype=str,
             encoding=self._encoding,
+            chunksize=chunksize,
         )
-        df2 = pandas.read_csv(
+        for df in tfr1:
+            df.to_csv(
+                os.path.join(self._dest_dir, self._dest_name),
+                encoding=self._encoding,
+                header=True if first_write else False,
+                index=False,
+                mode="w" if first_write else "a",
+            )
+            first_write = False
+        tfr2 = pandas.read_csv(
             os.path.join(self._src_dir, target2_files[0]),
             dtype=str,
             encoding=self._encoding,
+            chunksize=chunksize,
         )
-        df = pandas.merge(df1, df2)
-        if "Unnamed: 0" in df.index:
-            del df["Unnamed: 0"]
-
-        dest_name = self._dest_name
-
-        df.to_csv(
-            os.path.join(self._dest_dir, dest_name),
-            encoding=self._encoding,
-            index=False,
-        )
+        for df in tfr2:
+            df.to_csv(
+                os.path.join(self._dest_dir, self._dest_name),
+                encoding=self._encoding,
+                header=False,
+                index=False,
+                mode="a",
+            )
 
 
 class CsvColumnSelect(FileBaseTransform):
@@ -487,18 +536,32 @@ class CsvColumnSelect(FileBaseTransform):
         super().io_files(files, func=self.convert)
 
     def convert(self, fi, fo):
-        df = pandas.read_csv(fi, dtype=str, encoding=self._encoding)
-        if set(self._column_order) - set(df.columns.values):
-            raise InvalidParameter(
-                "column_order define not included target file's column : %s"
-                % (set(self._column_order) - set(df.columns.values))
-            )
-        df = df.loc[:, self._column_order]
-        df.to_csv(
-            fo,
+        _chunk_size_handling(self._read_csv_func, fi, fo)
+
+    def _read_csv_func(self, chunksize, fi, fo):
+        # Used in _chunk_size_handling
+        first_write = True
+        tfr = pandas.read_csv(
+            fi,
+            dtype=str,
             encoding=self._encoding,
-            index=False,
+            chunksize=chunksize,
         )
+        for df in tfr:
+            if set(self._column_order) - set(df.columns.values):
+                raise InvalidParameter(
+                    "column_order define not included target file's column : %s"
+                    % (set(self._column_order) - set(df.columns.values))
+                )
+            df = df.loc[:, self._column_order]
+            df.to_csv(
+                fo,
+                encoding=self._encoding,
+                header=True if first_write else False,
+                index=False,
+                mode="w" if first_write else "a",
+            )
+            first_write = False
 
 
 class CsvConcat(FileBaseTransform):
@@ -542,28 +605,27 @@ class CsvConcat(FileBaseTransform):
         elif len(files) == 1:
             self._logger.warning("Two or more input files are required.")
 
-        file = files.pop(0)
-        df1 = pandas.read_csv(
-            file,
-            dtype=str,
-            encoding=self._encoding,
-        )
+        _chunk_size_handling(self._read_csv_func, files)
 
+    def _read_csv_func(self, chunksize, files):
+        # Used in _chunk_size_handling
+        first_write = True
         for file in files:
-            df2 = pandas.read_csv(
+            tfr = pandas.read_csv(
                 file,
                 dtype=str,
                 encoding=self._encoding,
+                chunksize=chunksize,
             )
-            df1 = pandas.concat([df1, df2])
-
-        dest_name = self._dest_name
-
-        df1.to_csv(
-            os.path.join(self._dest_dir, dest_name),
-            encoding=self._encoding,
-            index=False,
-        )
+            for df in tfr:
+                df.to_csv(
+                    os.path.join(self._dest_dir, self._dest_name),
+                    encoding=self._encoding,
+                    header=True if first_write else False,
+                    index=False,
+                    mode="w" if first_write else "a",
+                )
+                first_write = False
 
 
 class CsvConvert(FileBaseTransform):
@@ -793,21 +855,32 @@ class CsvColumnCopy(FileBaseTransform):
         super().io_files(files, func=self.convert)
 
     def convert(self, fi, fo):
-        df = pandas.read_csv(
+        header = pandas.read_csv(fi).head(1)
+        if self._src_column not in header:
+            raise KeyError("Copy source column does not exist in file. [%s]" % self._src_column)
+
+        _chunk_size_handling(self._read_csv_func, fi, fo)
+
+    def _read_csv_func(self, chunksize, fi, fo):
+        # Used in _chunk_size_handling
+        first_write = True
+        tfr = pandas.read_csv(
             fi,
             dtype=str,
             encoding=self._encoding,
+            chunksize=chunksize,
         )
-        if self._src_column not in df:
-            raise KeyError("Copy source column does not exist in file. [%s]" % self._src_column)
 
-        df[self._dest_column] = df[self._src_column]
-
-        df.to_csv(
-            fo,
-            encoding=self._encoding,
-            index=False,
-        )
+        for df in tfr:
+            df[self._dest_column] = df[self._src_column]
+            df.to_csv(
+                fo,
+                encoding=self._encoding,
+                header=True if first_write else False,
+                index=False,
+                mode="w" if first_write else "a",
+            )
+            first_write = False
 
 
 class CsvColumnReplace(FileBaseTransform):
@@ -855,18 +928,44 @@ class CsvColumnReplace(FileBaseTransform):
         super().io_files(files, func=self.convert)
 
     def convert(self, fi, fo):
-        df = pandas.read_csv(
+        header = pandas.read_csv(fi).head(1)
+        if self._column not in header:
+            raise KeyError("Replace source column does not exist in file. [%s]" % self._column)
+
+        _chunk_size_handling(self._read_csv_func, fi, fo)
+
+    def _read_csv_func(self, chunksize, fi, fo):
+        # Used in _chunk_size_handling
+        first_write = True
+        tfr = pandas.read_csv(
             fi,
             dtype=str,
             encoding=self._encoding,
+            chunksize=chunksize,
         )
-        if self._column not in df:
-            raise KeyError("Replace source column does not exist in file. [%s]" % self._column)
 
-        df[self._column] = df[self._column].apply(self._replace_string)
+        for df in tfr:
+            df[self._column] = df[self._column].apply(self._replace_string)
+            df.to_csv(
+                fo,
+                header=True if first_write else False,
+                encoding=self._encoding,
+                index=False,
+                mode="w" if first_write else "a",
+            )
+            first_write = False
 
-        df.to_csv(
-            fo,
-            encoding=self._encoding,
-            index=False,
-        )
+
+def _chunk_size_handling(read_csv_func, *args, **kwd):
+    """
+    Processing to avoid memory errors in pandas's read_csv.
+    """
+    chunksize = 1024 * 1024
+    while 0 < chunksize:
+        try:
+            read_csv_func(chunksize, *args, **kwd)
+            break
+        except MemoryError as error:
+            if chunksize <= 1:
+                raise error
+            chunksize //= 2

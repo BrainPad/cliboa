@@ -30,7 +30,7 @@ id, name
 1, one
 2, two
 
-Input: /in/test1.csv
+Input: /in/test2.csv
 id, name
 3, three
 4, four
