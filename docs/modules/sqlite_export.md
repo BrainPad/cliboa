@@ -10,6 +10,7 @@ Export a table data to csv.
 |encoding|Encoding|No|utf-8||
 |order|orders of exporting data|No|[]|Define db column names if orders are required|
 |no_duplicate|Remove duplicate records|No|False|If true is set, get data with "select distinct"|
+|vacuum|Vacuum is performed after query processing is finished.|No|False||
 
 # Examples
 ```

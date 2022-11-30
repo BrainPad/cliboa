@@ -9,10 +9,10 @@ Download files from S3.
 |secret_key|AWS secret key|No|None||
 |profile|Profile name|No|None|Section name of ~/.aws/config|
 |bucket|S3 bucket name|Yes|None||
-|prefix|Folder prefix used to filter blobs|No|None||
-|delimiter|Delimiter, used with prefix to emulate hierarchy|No|/||
+|prefix|Folder prefix used to filter blobs|No|`""`||
+|delimiter|Delimiter, used with prefix to emulate hierarchy|No|`""`||
 |src_pattern|File pattern of source to download. Regexp is available|Yes|None||
-|dest_dir|Destination directory to download|No|None||
+|dest_dir|Destination directory to download|No|`"."`||
 
 # Examples
 ```

@@ -12,6 +12,7 @@ Read content from csv files and insert them into sqlite table.
 |index|Index array|No|[]||
 |refresh|Drop table in advance if True.<br />If False, use existence table.|No|True||
 |force_insert|If True, plural csv files with different format is allowed to insert.<br />Raise error if False.|No|False|If columns are different between csv files, missing columns will be created to sqlite table automatically, but values are empty|
+|vacuum|Vacuum is performed after query processing is finished.|No|False||
 
 # Examples
 ```

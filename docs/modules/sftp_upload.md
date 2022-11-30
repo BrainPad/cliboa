@@ -16,6 +16,7 @@ Upload a file via SFTP.
 |endfile_suffix|Places file with original file name + ".endfile_suffix" when upload completed.|No|None||
 |timeout|Timeout period of sftp connection. Unit is second.|No|30||
 |retry_count|retry count of sftp connection.|No|3||
+|quit|True or False flag for quitting cliboa process when source files do not exist.|No|False||
 |ignore_empty_file|If True, size zero files are not be uploaded|No|False||
 
 # Examples
