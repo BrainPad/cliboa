@@ -19,7 +19,7 @@ import sys
 import pytest
 import yaml
 
-from cliboa.client import CommandArgumentParser, ScenarioRunner
+from cliboa.interface import CommandArgumentParser, ScenarioRunner
 from cliboa.conf import env
 from cliboa.test import BaseCliboaTest
 from cliboa.util.exception import FileNotFound
@@ -129,6 +129,6 @@ class TestScenarioRunner(BaseCliboaTest):
 
     def test_run_ng(self):
         with pytest.raises(FileNotFound):
-            from cliboa.client import run
+            from cliboa.interface import run
 
             run()

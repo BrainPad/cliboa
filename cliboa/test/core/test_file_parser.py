@@ -19,7 +19,7 @@ import sys
 import pytest
 import yaml
 
-from cliboa.client import CommandArgumentParser
+from cliboa.interface import CommandArgumentParser
 from cliboa.conf import env
 from cliboa.core.file_parser import JsonScenarioParser, YamlScenarioParser
 from cliboa.test import BaseCliboaTest

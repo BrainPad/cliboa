@@ -13,7 +13,7 @@
 #
 import sys
 
-from cliboa.client import CommandArgumentParser
+from cliboa.interface import CommandArgumentParser
 from cliboa.core.scenario_queue import ScenarioQueue
 from cliboa.core.step_queue import StepQueue
 from cliboa.core.strategy import MultiProcExecutor, MultiProcWithConfigExecutor, SingleProcExecutor

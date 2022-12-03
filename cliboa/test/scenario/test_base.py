@@ -16,7 +16,7 @@ import shutil
 import sys
 from unittest import TestCase
 
-from cliboa.client import CommandArgumentParser, ScenarioRunner
+from cliboa.interface import CommandArgumentParser, ScenarioRunner
 from cliboa.conf import env
 from cliboa.scenario.sample_step import SampleCustomStep
 from cliboa.util.helper import Helper

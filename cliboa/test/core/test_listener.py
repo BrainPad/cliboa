@@ -17,7 +17,7 @@ import unittest
 from contextlib import ExitStack
 from unittest.mock import patch
 
-from cliboa.client import CommandArgumentParser
+from cliboa.interface import CommandArgumentParser
 from cliboa.conf import env
 from cliboa.core.listener import ScenarioStatusListener, StepListener, StepStatusListener
 from cliboa.core.strategy import SingleProcExecutor, StepExecutor

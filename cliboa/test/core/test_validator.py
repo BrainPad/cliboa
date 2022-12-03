@@ -17,7 +17,7 @@ import sys
 
 import pytest
 
-from cliboa.client import CommandArgumentParser
+from cliboa.interface import CommandArgumentParser
 from cliboa.conf import env
 from cliboa.core.validator import (
     EssentialKeys,

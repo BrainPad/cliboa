@@ -13,7 +13,7 @@
 #
 import sys
 
-from cliboa.client import CommandArgumentParser
+from cliboa.interface import CommandArgumentParser
 from cliboa.core.scenario_queue import ScenarioQueue
 from cliboa.core.worker import ScenarioWorker
 from cliboa.scenario.sample_step import SampleStep
