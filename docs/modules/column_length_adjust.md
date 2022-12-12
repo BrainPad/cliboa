@@ -7,7 +7,7 @@ Adjust columns of a csv or a tsv file to the specified length.
 |src_dir|Path of the directory which target files are placed.|Yes|None||
 |src_pattern|Regex which is to find target files.|Yes|None||
 |dest_path|Destination path after convert|No|None|Deprecated.|
-|dest_dir|Path of the directory which is for output files.|No|None||
+|dest_dir|Path of the directory which is for output files.|No|None|If this parameter is not set, the file is created in the same directory as the processing file. If a non-existent directory path is specified, the directory is automatically created.|
 |encoding|Character encoding when read and write|No|utf-8||
 |adjust|Specify columns and lengths to adjust like 'column: length'|Yes|None||
 |nonfile_error|Whether an error is thrown when files are not found in src_dir.|No|False||

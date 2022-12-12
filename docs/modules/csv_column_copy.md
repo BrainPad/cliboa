@@ -6,7 +6,7 @@ Copy column data (new or overwrite).
 |----------|-----------|--------|-------|-------|
 |src_dir|Path of the directory which target files are placed.|Yes|None||
 |src_pattern|Regex which is to find target files.|Yes|None||
-|dest_dir|Path of the directory which is for output files.|No|None||
+|dest_dir|Path of the directory which is for output files.|No|None|If this parameter is not set, the file is created in the same directory as the processing file. If a non-existent directory path is specified, the directory is automatically created.|
 |encoding|Character encoding when read and write.|No|utf-8||
 |src_column|Copy source column|Yes|None||
 |dest_column|Destination column|Yes|None|Overwrite columns if they already exist.|

@@ -6,7 +6,7 @@ This class allows you to sort large csv that doesn't fit in memory.
 |----------|-----------|--------|-------|-------|
 |src_dir|Path of the directory which target files are placed.|Yes|None||
 |src_pattern|Regex which is to find target files.|Yes|None||
-|dest_dir|Path of the directory which is for output files.|No|None||
+|dest_dir|Path of the directory which is for output files.|Yes|None|If a non-existent directory path is specified, the directory is automatically created.|
 |encoding|Character encoding of csv files|No|utf-8||
 |order|Csv column names to sort|Yes|[]|Add "desc" to the column name if reverse orders are required|
 |quote|quoting for csv file|No|QUOTE_MINIMAL| One of the followings [QUOTE_ALL, QUOTE_MINIMAL, QUOTE_NONNUMERIC, QUOTE_NONE]|

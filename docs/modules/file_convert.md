@@ -6,7 +6,7 @@ Convert file encoding.
 |----------|-----------|--------|-------|-------|
 |src_dir|Path of the directory which target files are placed.|Yes|None||
 |src_pattern|Regex which is to find target files.|Yes|None||
-|dest_dir|Path of the directory which is for output files.|No|None||
+|dest_dir|Path of the directory which is for output files.|No|None|If this parameter is not set, the file is created in the same directory as the processing file. If a non-existent directory path is specified, the directory is automatically created.|
 |encoding_from|Encoding before convert|Yes|None||
 |encoding_to|Encoding after converted|Yes|None||
 |errors|How encoding and decoding errors are to be handled|No|None|One of the following is allowed [“strict“, “replace“, “backslashreplace“, “ignore“]|

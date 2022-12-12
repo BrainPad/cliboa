@@ -83,6 +83,8 @@ class GpgGenerateKey(GpgBase):
         valid = EssentialParameters(self.__class__.__name__, [self._dest_dir, self._name_email])
         valid()
 
+        os.makedirs(self._dest_dir, exist_ok=True)
+
         Gpg(self._gnupghome).generate_key(
             self._dest_dir,
             name_real=self._name_real,
@@ -122,11 +124,11 @@ class GpgEncrypt(GpgBase):
             self.key_import(gpg, key_files, self._trust_level)
 
         for file in files:
-            dest_path = (
-                os.path.join(self._dest_dir, os.path.basename(file))
-                if self._dest_dir is not None
-                else os.path.join(self._src_dir, os.path.basename(file))
-            )
+            if self._dest_dir is not None:
+                os.makedirs(self._dest_dir, exist_ok=True)
+                dest_path = os.path.join(self._dest_dir, os.path.basename(file))
+            else:
+                dest_path = os.path.join(self._src_dir, os.path.basename(file))
             gpg.encrypt(
                 file,
                 dest_path,
@@ -161,11 +163,11 @@ class GpgDecrypt(GpgBase):
         for file in files:
             root, ext = os.path.splitext(file)
             if ext == ".gpg":
-                dest_path = (
-                    os.path.join(self._dest_dir, os.path.basename(root))
-                    if self._dest_dir is not None
-                    else os.path.join(self._src_dir, os.path.basename(root))
-                )
+                if self._dest_dir is not None:
+                    os.makedirs(self._dest_dir, exist_ok=True)
+                    dest_path = os.path.join(self._dest_dir, os.path.basename(root))
+                else:
+                    dest_path = os.path.join(self._src_dir, os.path.basename(root))
                 gpg.decrypt(
                     file,
                     dest_path,

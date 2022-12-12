@@ -63,6 +63,8 @@ class S3Download(BaseS3):
                 rec = re.compile(self._src_pattern)
                 if not rec.fullmatch(filename):
                     continue
+                if self._dest_dir:
+                    os.makedirs(self._dest_dir, exist_ok=True)
                 dest_path = os.path.join(self._dest_dir, filename)
                 client.download_file(self._bucket, path, dest_path)
                 keys.append(path)

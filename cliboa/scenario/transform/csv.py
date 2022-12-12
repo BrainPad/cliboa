@@ -52,9 +52,6 @@ class CsvColumnHash(FileBaseTransform):
         )
         valid()
 
-        if self._dest_dir:
-            os.makedirs(self._dest_dir, exist_ok=True)
-
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self.check_file_existence(files)
 
@@ -104,9 +101,6 @@ class CsvColumnExtract(FileBaseTransform):
     def execute(self, *args):
         valid = EssentialParameters(self.__class__.__name__, [self._src_dir, self._src_pattern])
         valid()
-
-        if self._dest_dir:
-            os.makedirs(self._dest_dir, exist_ok=True)
 
         if not self._columns and not self._column_numbers:
             raise InvalidParameter("Specifying either 'column' or 'column_numbers' is essential.")
@@ -203,9 +197,6 @@ class CsvValueExtract(FileBaseTransform):
         )
         valid()
 
-        if self._dest_dir:
-            os.makedirs(self._dest_dir, exist_ok=True)
-
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self.check_file_existence(files)
         super().io_files(files, func=self.convert)
@@ -251,9 +242,6 @@ class CsvColumnConcat(FileBaseTransform):
             [self._src_dir, self._src_pattern, self._dest_column_name],
         )
         valid()
-
-        if self._dest_dir:
-            os.makedirs(self._dest_dir, exist_ok=True)
 
         if len(self._columns) < 2 or type(self._columns) is not list:
             raise InvalidParameter("'columns' must 2 or more lengths")
@@ -328,9 +316,6 @@ class CsvMergeExclusive(FileBaseTransform):
         )
         valid()
 
-        if self._dest_dir:
-            os.makedirs(self._dest_dir, exist_ok=True)
-
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self.check_file_existence(files)
 
@@ -395,9 +380,6 @@ class ColumnLengthAdjust(FileBaseTransform):
         )
         valid()
 
-        if self._dest_dir:
-            os.makedirs(self._dest_dir, exist_ok=True)
-
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self.check_file_existence(files)
 
@@ -447,8 +429,7 @@ class CsvMerge(FileBaseTransform):
         )
         valid()
 
-        if self._dest_dir:
-            os.makedirs(self._dest_dir, exist_ok=True)
+        os.makedirs(self._dest_dir, exist_ok=True)
 
         target1_files = File().get_target_files(self._src_dir, self._src1_pattern)
         target2_files = File().get_target_files(self._src_dir, self._src2_pattern)
@@ -525,9 +506,6 @@ class CsvColumnSelect(FileBaseTransform):
         )
         valid()
 
-        if self._dest_dir:
-            os.makedirs(self._dest_dir, exist_ok=True)
-
         files = File().get_target_files(self._src_dir, self._src_pattern)
         if len(files) == 0:
             raise FileNotFound("No files are found.")
@@ -583,8 +561,7 @@ class CsvConcat(FileBaseTransform):
         )
         valid()
 
-        if self._dest_dir:
-            os.makedirs(self._dest_dir, exist_ok=True)
+        os.makedirs(self._dest_dir, exist_ok=True)
 
         if not self._src_pattern and not self._src_filenames:
             raise InvalidParameter(
@@ -680,9 +657,6 @@ class CsvConvert(FileBaseTransform):
         )
         valid()
 
-        if self._dest_dir:
-            os.makedirs(self._dest_dir, exist_ok=True)
-
         if self._after_format is None:
             self._after_format = self._before_format
 
@@ -765,8 +739,7 @@ class CsvSort(FileBaseTransform):
         )
         valid()
 
-        if self._dest_dir:
-            os.makedirs(self._dest_dir, exist_ok=True)
+        os.makedirs(self._dest_dir, exist_ok=True)
 
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self.check_file_existence(files)
@@ -808,9 +781,6 @@ class CsvToJsonl(FileBaseTransform):
         # essential parameters check
         valid = EssentialParameters(self.__class__.__name__, [self._src_dir, self._src_pattern])
         valid()
-
-        if self._dest_dir:
-            os.makedirs(self._dest_dir, exist_ok=True)
 
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self.check_file_existence(files)

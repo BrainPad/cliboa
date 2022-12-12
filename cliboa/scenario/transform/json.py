@@ -12,7 +12,6 @@
 # all copies or substantial portions of the Software.
 #
 import csv
-import os
 from abc import abstractmethod
 
 import jsonlines
@@ -106,9 +105,6 @@ class JsonlAddKeyValue(FileBaseTransform):
             self.__class__.__name__, [self._src_dir, self._src_pattern, self._pairs]
         )
         valid()
-
-        if self._dest_dir:
-            os.makedirs(self._dest_dir, exist_ok=True)
 
         if not isinstance(self._pairs, dict):
             raise InvalidParameter("argument 'pairs' only allow dict format.")

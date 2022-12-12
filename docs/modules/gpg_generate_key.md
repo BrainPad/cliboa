@@ -6,7 +6,7 @@ Generate public and private keys for gpg.
 |----------|-----------|--------|-------|-------|
 |gnupghome|Home directory of gnupg|Yes|None||
 |passphrase||No|None||
-|dest_dir|Directory to output key files|Yes|None||
+|dest_dir|Directory to output key files|Yes|None|If a non-existent directory path is specified, the directory is automatically created.|
 |name_real|The real name of the user identity which is represented by the key.|No|None||
 |name_email|An email address for the user.|Yes|None||
 

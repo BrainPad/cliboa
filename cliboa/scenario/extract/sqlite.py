@@ -11,6 +11,8 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+import os
+
 from cliboa.scenario.sqlite import BaseSqlite
 from cliboa.scenario.validator import EssentialParameters
 
@@ -44,6 +46,10 @@ class SqliteExport(BaseSqlite):
 
         valid = EssentialParameters(self.__class__.__name__, [self._dest_path])
         valid()
+
+        dest_dir = os.path.dirname(self._dest_path)
+        if dest_dir:
+            os.makedirs(dest_dir, exist_ok=True)
 
         self._sqlite_adptr.connect(self._dbname)
         try:

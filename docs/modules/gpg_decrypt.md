@@ -8,7 +8,7 @@ Gpg decrypt.
 |passphrase||No|None||
 |src_dir|Directory that files exists|Yes|None||
 |src_pattern|File pattern|Yes|None||
-|dest_dir|Directory to output decrypted files|No|None|If not given, decrypted files are created with the same directory to src_dir|
+|dest_dir|Directory to output decrypted files|No|None|If not given, decrypted files are created with the same directory to src_dir. If a non-existent directory path is specified, the directory is automatically created.|
 |always_trust|Skip key validation and assume that used keys are always fully trusted.|No|False||
 |key_dir|Directory that rsa key files exists|No|None||
 |key_pattern|Rsa keys file pattern|No|None||
