@@ -61,10 +61,10 @@ class CsvColumnHash(FileBaseTransform):
         super().io_files(files, func=self.convert)
 
     def convert(self, fi, fo):
-        _chunk_size_handling(self._read_csv_func, fi, fo)
+        chunk_size_handling(self._read_csv_func, fi, fo)
 
     def _read_csv_func(self, chunksize, fi, fo):
-        # Used in _chunk_size_handling
+        # Used in chunk_size_handling
         first_write = True
         tfr = pandas.read_csv(
             fi,
@@ -155,10 +155,10 @@ class CsvColumnDelete(FileBaseTransform):
         super().io_files(files, func=self.convert)
 
     def convert(self, fi, fo):
-        _chunk_size_handling(self._read_csv_func, fi, fo)
+        chunk_size_handling(self._read_csv_func, fi, fo)
 
     def _read_csv_func(self, chunksize, fi, fo):
-        # Used in _chunk_size_handling
+        # Used in chunk_size_handling
         first_write = True
         tfr = pandas.read_csv(
             fi,
@@ -264,10 +264,10 @@ class CsvColumnConcat(FileBaseTransform):
         super().io_files(files, func=self.convert)
 
     def convert(self, fi, fo):
-        _chunk_size_handling(self._read_csv_func, fi, fo)
+        chunk_size_handling(self._read_csv_func, fi, fo)
 
     def _read_csv_func(self, chunksize, fi, fo):
-        # Used in _chunk_size_handling
+        # Used in chunk_size_handling
         first_write = True
         tfr = pandas.read_csv(
             fi,
@@ -358,10 +358,10 @@ class CsvMergeExclusive(FileBaseTransform):
         except KeyError:
             raise KeyError("Src file does not exist target column [%s]." % self._target_column)
 
-        _chunk_size_handling(self._read_csv_func, fi, fo)
+        chunk_size_handling(self._read_csv_func, fi, fo)
 
     def _read_csv_func(self, chunksize, fi, fo):
-        # Used in _chunk_size_handling
+        # Used in chunk_size_handling
         first_write = True
         tfr = pandas.read_csv(fi, chunksize=chunksize)
         for df in tfr:
@@ -469,10 +469,10 @@ class CsvMerge(FileBaseTransform):
 
         self._logger.info("Merge %s and %s." % (target1_files[0], target2_files[0]))
 
-        _chunk_size_handling(self._read_csv_func, target1_files, target2_files)
+        chunk_size_handling(self._read_csv_func, target1_files, target2_files)
 
     def _read_csv_func(self, chunksize, target1_files, target2_files):
-        # Used in _chunk_size_handling
+        # Used in chunk_size_handling
         first_write = True
         tfr1 = pandas.read_csv(
             os.path.join(self._src_dir, target1_files[0]),
@@ -536,10 +536,10 @@ class CsvColumnSelect(FileBaseTransform):
         super().io_files(files, func=self.convert)
 
     def convert(self, fi, fo):
-        _chunk_size_handling(self._read_csv_func, fi, fo)
+        chunk_size_handling(self._read_csv_func, fi, fo)
 
     def _read_csv_func(self, chunksize, fi, fo):
-        # Used in _chunk_size_handling
+        # Used in chunk_size_handling
         first_write = True
         tfr = pandas.read_csv(
             fi,
@@ -605,10 +605,10 @@ class CsvConcat(FileBaseTransform):
         elif len(files) == 1:
             self._logger.warning("Two or more input files are required.")
 
-        _chunk_size_handling(self._read_csv_func, files)
+        chunk_size_handling(self._read_csv_func, files)
 
     def _read_csv_func(self, chunksize, files):
-        # Used in _chunk_size_handling
+        # Used in chunk_size_handling
         first_write = True
         for file in files:
             tfr = pandas.read_csv(
@@ -859,10 +859,10 @@ class CsvColumnCopy(FileBaseTransform):
         if self._src_column not in header:
             raise KeyError("Copy source column does not exist in file. [%s]" % self._src_column)
 
-        _chunk_size_handling(self._read_csv_func, fi, fo)
+        chunk_size_handling(self._read_csv_func, fi, fo)
 
     def _read_csv_func(self, chunksize, fi, fo):
-        # Used in _chunk_size_handling
+        # Used in chunk_size_handling
         first_write = True
         tfr = pandas.read_csv(
             fi,
@@ -932,10 +932,10 @@ class CsvColumnReplace(FileBaseTransform):
         if self._column not in header:
             raise KeyError("Replace source column does not exist in file. [%s]" % self._column)
 
-        _chunk_size_handling(self._read_csv_func, fi, fo)
+        chunk_size_handling(self._read_csv_func, fi, fo)
 
     def _read_csv_func(self, chunksize, fi, fo):
-        # Used in _chunk_size_handling
+        # Used in chunk_size_handling
         first_write = True
         tfr = pandas.read_csv(
             fi,
@@ -956,9 +956,10 @@ class CsvColumnReplace(FileBaseTransform):
             first_write = False
 
 
-def _chunk_size_handling(read_csv_func, *args, **kwd):
+def chunk_size_handling(read_csv_func, *args, **kwd):
     """
     Processing to avoid memory errors in pandas's read_csv.
+    Use this function when you want to do the same handling when extending cliboa.
     """
     chunksize = 1024 * 1024
     while 0 < chunksize:
