@@ -7,7 +7,7 @@ Concat specific columns from csv file.
 |----------|-----------|--------|-------|-------|
 |src_dir|Path of the directory which target files are placed.|Yes|None||
 |src_pattern|Regex which is to find target files.|Yes|None||
-|dest_dir|Path of the directory which is for output files.|No|None||
+|dest_dir|Path of the directory which is for output files.|No|None|If this parameter is not set, the file is created in the same directory as the processing file. If a non-existent directory path is specified, the directory is automatically created.|
 |encoding|Character encoding when read and write|No|utf-8||
 |columns|target of columns to concat|Yes|None||
 |dest_column_name|Output column name|Yes|None||

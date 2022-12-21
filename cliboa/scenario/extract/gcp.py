@@ -193,6 +193,8 @@ class GcsDownload(BaseGcs):
         valid = EssentialParameters(self.__class__.__name__, [self._src_pattern])
         valid()
 
+        os.makedirs(self._dest_dir, exist_ok=True)
+
         client = GcsAdapter().get_client(credentials=self.get_credentials())
         bucket = client.bucket(self._bucket)
         dl_files = []
@@ -253,6 +255,8 @@ class FirestoreDocumentDownload(BaseFirestore):
             self.__class__.__name__, [self._collection, self._document, self._dest_dir]
         )
         valid()
+
+        os.makedirs(self._dest_dir, exist_ok=True)
 
         client = FireStoreAdapter().get_client(self.get_credentials())
         ref = client.document(self._collection, self._document)

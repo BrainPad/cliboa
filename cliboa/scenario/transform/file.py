@@ -41,6 +41,7 @@ class FileBaseTransform(BaseStep, ExceptionHandler):
     (original input files will be changed to the transformed files).
     If you would not like to remove the original files,
     give a path to the "dest_dir" for output directory.
+    (If a non-existent directory path is specified, the directory is automatically created.)
 
     Note:
     Output files are not always be the same name with the input file names.
@@ -107,6 +108,7 @@ class FileBaseTransform(BaseStep, ExceptionHandler):
             output_name = name
 
         if self._dest_dir:
+            os.makedirs(self._dest_dir, exist_ok=True)
             output_dir = self._dest_dir
         else:
             output_dir = root
@@ -241,11 +243,11 @@ class FileDecompress(FileBaseTransform):
             elif ext == ".gz":
                 self._logger.info("Decompress gz file %s" % f)
                 dcom_name = os.path.splitext(os.path.basename(f))[0]
-                decom_path = (
-                    os.path.join(self._dest_dir, dcom_name)
-                    if self._dest_dir is not None
-                    else os.path.join(self._src_dir, dcom_name)
-                )
+                if self._dest_dir:
+                    os.makedirs(self._dest_dir, exist_ok=True)
+                    decom_path = os.path.join(self._dest_dir, dcom_name)
+                else:
+                    decom_path = os.path.join(self._src_dir, dcom_name)
                 with gzip.open(f, "rb") as i, open(decom_path, "wb") as o:
                     while True:
                         buf = i.read(self._chunk_size)
@@ -282,7 +284,11 @@ class FileCompress(FileBaseTransform):
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self.check_file_existence(files)
 
-        dir = self._dest_dir if self._dest_dir is not None else self._src_dir
+        if self._dest_dir:
+            os.makedirs(self._dest_dir, exist_ok=True)
+            dir = self._dest_dir
+        else:
+            dir = self._src_dir
         for f in files:
             if self._format == "zip":
                 self._logger.info("Compress file %s to zip." % f)
@@ -430,10 +436,15 @@ class FileDivide(FileBaseTransform):
             row = self._ifile_reader(file)
             newfilename = px + nameonly + ".%s" + ext
 
+            if self._dest_dir:
+                os.makedirs(self._dest_dir, exist_ok=True)
+                dest_dir = self._dest_dir
+            else:
+                dest_dir = self._src_dir
             has_left = True
             index = 1
             while has_left:
-                ofile_path = os.path.join(self._dest_dir, newfilename % str(index))
+                ofile_path = os.path.join(dest_dir, newfilename % str(index))
                 has_left = self._ofile_generator(ofile_path, row)
                 index = index + 1
 
@@ -602,7 +613,11 @@ class FileArchive(FileBaseTransform):
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self.check_file_existence(files)
 
-        dir = self._dest_dir if self._dest_dir is not None else self._src_dir
+        if self._dest_dir:
+            os.makedirs(self._dest_dir, exist_ok=True)
+            dir = self._dest_dir
+        else:
+            dir = self._src_dir
 
         valid = EssentialParameters(self.__class__.__name__, [self._dest_name])
         valid()

@@ -12,7 +12,7 @@ Download files from GCS.
 |prefix|Folder prefix used to filter blobs|No|None||
 |delimiter|Delimiter, used with prefix to emulate hierarchy|No|None||
 |src_pattern|File pattern of source to download. Regexp is available|Yes|None||
-|dest_dir|Destination directory to download|No|`"."`||
+|dest_dir|Destination directory to download|No|`"."`|If a non-existent directory path is specified, the directory is automatically created.|
 
 # Examples
 ```

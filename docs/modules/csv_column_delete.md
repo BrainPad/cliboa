@@ -6,7 +6,7 @@ Delete specific columns from csv files.
 |----------|-----------|--------|-------|-------|
 |src_dir|Path of the directory which target files are placed.|Yes|None||
 |src_pattern|Regex which is to find target files.|Yes|None||
-|dest_dir|Path of the directory which is for output files.|No|None||
+|dest_dir|Path of the directory which is for output files.|No|None|If this parameter is not set, the file is created in the same directory as the processing file. If a non-existent directory path is specified, the directory is automatically created.|
 |regex_pattern|Column and regular expression pair.|Yes|None||
 |nonfile_error|Whether an error is thrown when files are not found in src_dir.|No|False||
 

@@ -9,7 +9,7 @@ Encrypted file names will be the same name with original file names with ".gpg" 
 |passphrase||No|None||
 |src_dir|Directory that files exists|Yes|None||
 |src_pattern|File pattern|Yes|None||
-|dest_dir|Directory to output encrypted files|No|None|If not given, encrypted files are created with the same directory to src_dir|
+|dest_dir|Directory to output encrypted files|No|None|If not given, encrypted files are created with the same directory to src_dir. If a non-existent directory path is specified, the directory is automatically created.|
 |recipients|Recipients who can encrypt files|Yes|[]||
 |always_trust|Skip key validation and assume that used keys are always fully trusted.|No|False||
 |key_dir|Directory that rsa key files exists|No|None||
