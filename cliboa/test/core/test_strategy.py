@@ -13,10 +13,10 @@
 #
 import sys
 
-from cliboa.interface import CommandArgumentParser
 from cliboa.core.scenario_queue import ScenarioQueue
 from cliboa.core.step_queue import StepQueue
 from cliboa.core.strategy import MultiProcExecutor, MultiProcWithConfigExecutor, SingleProcExecutor
+from cliboa.interface import CommandArgumentParser
 from cliboa.scenario.sample_step import SampleStep
 from cliboa.test import BaseCliboaTest
 from cliboa.util.exception import CliboaException, StepExecutionFailed

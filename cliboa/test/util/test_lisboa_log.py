@@ -15,8 +15,8 @@ import logging
 import os
 import sys
 
-from cliboa.interface import CommandArgumentParser
 from cliboa.conf import env
+from cliboa.interface import CommandArgumentParser
 from cliboa.util.lisboa_log import LisboaLog
 
 

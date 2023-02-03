@@ -19,8 +19,8 @@ import sys
 import pytest
 import yaml
 
-from cliboa.interface import CommandArgumentParser, ScenarioRunner
 from cliboa.conf import env
+from cliboa.interface import CommandArgumentParser, ScenarioRunner
 from cliboa.test import BaseCliboaTest
 from cliboa.util.exception import FileNotFound
 

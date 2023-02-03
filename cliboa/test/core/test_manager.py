@@ -20,10 +20,10 @@ from datetime import datetime, timedelta
 import pytest
 import yaml
 
-from cliboa.interface import CommandArgumentParser
 from cliboa.conf import env
 from cliboa.core.manager import JsonScenarioManager, YamlScenarioManager
 from cliboa.core.scenario_queue import ScenarioQueue
+from cliboa.interface import CommandArgumentParser
 from cliboa.test import BaseCliboaTest
 from cliboa.util.exception import ScenarioFileInvalid
 from cliboa.util.parallel_with_config import ParallelWithConfig
