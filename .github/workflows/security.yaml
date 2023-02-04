@@ -9,20 +9,21 @@ jobs:
       - uses: actions/checkout@v2
       - name: install git-secrets
         run: |
+          sudo ln -s "$(which echo)" /usr/local/bin/say
           git clone https://github.com/awslabs/git-secrets.git git-secrets
           cd git-secrets
           sudo make install
       - name: setup git-secrets
         run: |
           cd git-secrets
-          sudo git secrets --install
+          git secrets --install
 
           # add aws secrets
-          sudo git secrets --register-aws
+          git secrets --register-aws
 
           # add other secrets
-          sudo git secrets --add "password\s*=\s*\".+\""
-          sudo git secrets --add --allowed "password\s*=\"dummy.*\""
+          git secrets --add "password\s*=\s*\".+\""
+          git secrets --add --allowed "password\s*=\"dummy.*\""
       - name: check secrets
         run: |
           cd git-secrets
