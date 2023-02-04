@@ -11,18 +11,18 @@ jobs:
         run: |
           git clone https://github.com/awslabs/git-secrets.git git-secrets
           cd git-secrets
-          make install
+          sudo make install
       - name: setup git-secrets
         run: |
           cd git-secrets
-          git secrets --install
+          sudo git secrets --install
 
           # add aws secrets
-          git secrets --register-aws
+          sudo git secrets --register-aws
 
           # add other secrets
-          git secrets --add "password\s*=\s*\".+\""
-          git secrets --add --allowed "password\s*=\"dummy.*\""
+          sudo git secrets --add "password\s*=\s*\".+\""
+          sudo git secrets --add --allowed "password\s*=\"dummy.*\""
       - name: check secrets
         run: |
           cd git-secrets
