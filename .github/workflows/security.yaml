@@ -15,6 +15,7 @@ jobs:
           sudo make install
       - name: setup git-secrets
         run: |
+          cd git-secrets
           git secrets --install
 
           # add aws secrets
