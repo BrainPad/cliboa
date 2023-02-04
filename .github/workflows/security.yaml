@@ -26,6 +26,7 @@ jobs:
           git secrets --add --allowed "password\s*=\"dummy.*\""
       - name: check secrets
         run: |
+          cd git-secrets
           # list rules
           git secrets --list
           # check
