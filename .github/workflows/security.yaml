@@ -11,7 +11,7 @@ jobs:
         run: |
           git clone https://github.com/awslabs/git-secrets.git git-secrets
           cd git-secrets
-          sudo make install
+          make install
       - name: setup git-secrets
         run: |
           cd git-secrets
