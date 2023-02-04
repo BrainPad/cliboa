@@ -14,6 +14,7 @@ jobs:
           sudo make install
       - name: setup git-secrets
         run: |
+          cd git-secrets
           git secrets --install
 
           # add aws secrets
@@ -24,6 +25,7 @@ jobs:
           git secrets --add --allowed "password\s*=\"dummy.*\""
       - name: check secrets
         run: |
+          cd git-secrets
           # list rules
           git secrets --list
           # check
