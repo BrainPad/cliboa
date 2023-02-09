@@ -16,10 +16,10 @@ import sys
 
 import pytest
 
-from cliboa.client import CommandArgumentParser
 from cliboa.core.factory import CustomInstanceFactory, ScenarioManagerFactory, StepExecutorFactory
 from cliboa.core.manager import JsonScenarioManager, YamlScenarioManager
 from cliboa.core.strategy import MultiProcExecutor, MultiProcWithConfigExecutor, SingleProcExecutor
+from cliboa.interface import CommandArgumentParser
 from cliboa.test import BaseCliboaTest
 from cliboa.util.parallel_with_config import ParallelWithConfig
 

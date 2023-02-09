@@ -17,7 +17,6 @@ import sys
 
 import pytest
 
-from cliboa.client import CommandArgumentParser
 from cliboa.conf import env
 from cliboa.core.validator import (
     EssentialKeys,
@@ -28,6 +27,7 @@ from cliboa.core.validator import (
     ScenarioYamlKey,
     ScenarioYamlType,
 )
+from cliboa.interface import CommandArgumentParser
 from cliboa.util.exception import DirStructureInvalid, FileNotFound, ScenarioFileInvalid
 
 
