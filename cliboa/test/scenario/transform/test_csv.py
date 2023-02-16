@@ -1095,6 +1095,39 @@ class TestCsvConcat(TestCsvTransform):
             ["c2", "spam"],
         ]
 
+    def test_execute_ok4(self):
+        # create test file
+        csv_list1 = [["key", "data"], ["c1", "d1"], ["c2", "d2"]]
+        self._create_csv(csv_list1, fname="test1.csv")
+
+        csv_list2 = [["data", "key"], ["d3", "c3"], ["d4", "c4"]]
+        self._create_csv(csv_list2, fname="test2.csv")
+
+        csv_list3 = [["key", "body"], ["c5", "body5"], ["c6", "body6"]]
+        self._create_csv(csv_list3, fname="test3.csv")
+
+        # set the essential attributes
+        instance = CsvConcat()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "dest_name", "test.csv")
+        instance.execute()
+
+        with open(os.path.join(self._data_dir, "test.csv")) as t:
+            reader = csv.reader(t)
+            concatenated_list = [row for row in reader]
+        assert concatenated_list == [
+            ["key", "data", "body"],
+            ["c1", "d1", ""],
+            ["c2", "d2", ""],
+            ["c3", "d3", ""],
+            ["c4", "d4", ""],
+            ["c5", "", "body5"],
+            ["c6", "", "body6"],
+        ]
+
     def test_excute_ng_multiple_target(self):
         with pytest.raises(InvalidParameter) as execinfo:
             # set the essential attributes

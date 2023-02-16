@@ -325,7 +325,7 @@ class CsvMergeExclusive(FileBaseTransform):
         )
         self.check_file_existence(target)
 
-        header = pandas.read_csv(self._target_compare_path).head(1)
+        header = pandas.read_csv(self._target_compare_path, nrows=0)
         if self._target_column not in header:
             raise KeyError(
                 "Target Compare file does not exist target column [%s]." % self._target_column
@@ -337,7 +337,7 @@ class CsvMergeExclusive(FileBaseTransform):
         super().io_files(files, func=self.convert)
 
     def convert(self, fi, fo):
-        header = pandas.read_csv(fi).head(1)
+        header = pandas.read_csv(fi, dtype=str, encoding=self._encoding, nrows=0)
         try:
             header[self._src_column].values.tolist()
         except KeyError:
@@ -582,9 +582,20 @@ class CsvConcat(FileBaseTransform):
         elif len(files) == 1:
             self._logger.warning("Two or more input files are required.")
 
-        chunk_size_handling(self._read_csv_func, files)
+        # Create output headers to conform to the concat specification.
+        file_1 = files[0]
+        output_header = pandas.read_csv(file_1, dtype=str, encoding=self._encoding, nrows=0)
+        for file in files[1:]:
+            output_header = pandas.concat(
+                [
+                    output_header,
+                    pandas.read_csv(file, dtype=str, encoding=self._encoding, nrows=0),
+                ]
+            )
 
-    def _read_csv_func(self, chunksize, files):
+        chunk_size_handling(self._read_csv_func, files, output_header)
+
+    def _read_csv_func(self, chunksize, files, output_header):
         # Used in chunk_size_handling
         first_write = True
         for file in files:
@@ -595,6 +606,8 @@ class CsvConcat(FileBaseTransform):
                 chunksize=chunksize,
             )
             for df in tfr:
+                # Change the header order to the one you plan to output.
+                df = pandas.concat([output_header, df])
                 df.to_csv(
                     os.path.join(self._dest_dir, self._dest_name),
                     encoding=self._encoding,
@@ -825,7 +838,7 @@ class CsvColumnCopy(FileBaseTransform):
         super().io_files(files, func=self.convert)
 
     def convert(self, fi, fo):
-        header = pandas.read_csv(fi).head(1)
+        header = pandas.read_csv(fi, dtype=str, encoding=self._encoding, nrows=0)
         if self._src_column not in header:
             raise KeyError("Copy source column does not exist in file. [%s]" % self._src_column)
 
@@ -898,7 +911,7 @@ class CsvColumnReplace(FileBaseTransform):
         super().io_files(files, func=self.convert)
 
     def convert(self, fi, fo):
-        header = pandas.read_csv(fi).head(1)
+        header = pandas.read_csv(fi, dtype=str, encoding=self._encoding, nrows=0)
         if self._column not in header:
             raise KeyError("Replace source column does not exist in file. [%s]" % self._column)
 
