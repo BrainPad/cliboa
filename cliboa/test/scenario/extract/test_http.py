@@ -70,7 +70,7 @@ class TestDownloadViaBasicAuth(BaseCliboaTest):
             f.close()
         finally:
             shutil.rmtree(self._data_dir)
-        assert '{"authenticated":true}' in result
+        assert '{\n  "authenticated": true\n}' in result
 
     def test_execute_ng(self):
         instance = HttpDownloadViaBasicAuth()
