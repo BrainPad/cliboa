@@ -200,7 +200,7 @@ class GcsDownload(BaseGcs):
         dl_files = []
         for blob in client.list_blobs(bucket, prefix=self._prefix, delimiter=self._delimiter):
             r = re.compile(self._src_pattern)
-            if not r.fullmatch(blob.name):
+            if not r.fullmatch(os.path.basename(blob.name)):
                 continue
             dl_files.append(blob.name)
             blob.download_to_filename(os.path.join(self._dest_dir, os.path.basename(blob.name)))
@@ -298,7 +298,7 @@ class GcsFileExistsCheck(BaseGcs):
 
         for blob in client.list_blobs(bucket, prefix=self._prefix, delimiter=self._delimiter):
             r = re.compile(self._src_pattern)
-            if not r.fullmatch(blob.name):
+            if not r.fullmatch(os.path.basename(blob.name)):
                 continue
             dl_files.append(blob.name)
 
