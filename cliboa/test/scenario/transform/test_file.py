@@ -371,6 +371,7 @@ class TestFileCompress(TestFileTransform):
         Helper.set_property(instance, "src_pattern", r"test.*\.txt")
         Helper.set_property(instance, "dest_dir", self._out_dir)
         Helper.set_property(instance, "format", "gz")
+        Helper.set_property(instance, "chunk_size", 1024)
         instance.execute()
 
         compressed_file_1 = os.path.join(self._out_dir, "test1.txt.gz")
@@ -407,6 +408,7 @@ class TestFileCompress(TestFileTransform):
         Helper.set_property(instance, "src_pattern", r"test.*\.txt")
         Helper.set_property(instance, "dest_dir", self._out_dir)
         Helper.set_property(instance, "format", "bz2")
+        Helper.set_property(instance, "chunk_size", 1024)
         instance.execute()
 
         compressed_file_1 = os.path.join(self._out_dir, "test1.txt.bz2")
