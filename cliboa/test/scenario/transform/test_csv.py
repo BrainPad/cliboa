@@ -1191,7 +1191,7 @@ class TestCsvConvert(TestCsvTransform):
                 line = t.readline()
                 idx += 1
 
-    def test_add_header(self):
+    def test_exist_header(self):
         # create test file
         csv_list = [["key", "data"], ["1", "spam"], ["2", "spam"], ["3", "spam"]]
         test_csv = self._create_csv(csv_list)
@@ -1208,6 +1208,34 @@ class TestCsvConvert(TestCsvTransform):
             reader = csv.reader(t)
             line = next(reader)
         assert line == ["key", "data"]
+
+    def test_add_header(self):
+        # create test csv
+        test_csv_data = [
+            ["1", "spam1", "SPAM1"],
+            ["2", "spam2", "SPAM2"],
+        ]
+        self._create_csv(test_csv_data)
+
+        # set the essential attributes
+        instance = CsvConvert()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "add_headers", ["key", "data", "name"])
+
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            for i, row in enumerate(reader):
+                if i == 0:
+                    self.assertEqual(["key", "data", "name"], row)
+                if i == 1:
+                    self.assertEqual(["1", "spam1", "SPAM1"], row)
+                if i == 2:
+                    self.assertEqual(["2", "spam2", "SPAM2"], row)
 
     def test_delete_header(self):
         # create test file
