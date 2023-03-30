@@ -266,7 +266,7 @@ class FileCompress(FileBaseTransform):
     def __init__(self):
         super().__init__()
         self._format = None
-        self._chunk_size = None
+        self._chunk_size = 1048576
 
     def format(self, format):
         self._format = format.lower()
@@ -277,7 +277,8 @@ class FileCompress(FileBaseTransform):
     def execute(self, *args):
         # essential parameters check
         valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir, self._src_pattern, self._format]
+            self.__class__.__name__,
+            [self._src_dir, self._src_pattern, self._format],
         )
         valid()
 
