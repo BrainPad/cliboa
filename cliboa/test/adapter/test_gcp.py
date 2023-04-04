@@ -17,46 +17,44 @@ import pytest
 from google.cloud import bigquery, storage
 
 from cliboa.adapter.gcp import BigQueryAdapter, GcsAdapter, ServiceAccount
-from cliboa.util.gcp import BigQuery
 
 
 class TestServiceAccount(TestCase):
-    @pytest.mark.skip(reason="service account connection is necessary")
     def test_auth_no_credentials(self):
-        assert ServiceAccount.auth(None) is None
+        assert ServiceAccount().auth(None) is None
 
 
-class TestBigQuery(TestCase):
+class TestBigQueryAdapter(TestCase):
     @pytest.mark.skip(reason="bigquery connection is necessary")
     def test_get_bigquery_client_no_credentials(self):
         assert BigQueryAdapter.get_client() == bigquery.Client()
 
     def test_get_extract_job_config_with_header(self):
         self.assertTrue(
-            isinstance(BigQuery.get_extract_job_config(), type(bigquery.ExtractJobConfig()))
+            isinstance(BigQueryAdapter.get_extract_job_config(), type(bigquery.ExtractJobConfig()))
         )
 
     def test_get_extract_job_config_with_no_header(self):
         self.assertTrue(
             isinstance(
-                BigQuery.get_extract_job_config(print_header=False),
+                BigQueryAdapter.get_extract_job_config(print_header=False),
                 type(bigquery.ExtractJobConfig(print_header=False)),
             ),
         )
 
     def test_get_query_job_config(self):
         self.assertTrue(
-            isinstance(BigQuery.get_query_job_config(), type(bigquery.QueryJobConfig()))
+            isinstance(BigQueryAdapter.get_query_job_config(), type(bigquery.QueryJobConfig()))
         )
 
     def test_get_comporession_type(self):
-        assert BigQuery.get_compression_type() == "GZIP"
+        assert BigQueryAdapter.get_compression_type() == "GZIP"
 
     def test_get_destination_format_csv(self):
-        assert BigQuery.get_destination_format(".csv") == "CSV"
+        assert BigQueryAdapter.get_destination_format(".csv") == "CSV"
 
     def test_get_destination_format_json(self):
-        assert BigQuery.get_destination_format(".json") == "NEWLINE_DELIMITED_JSON"
+        assert BigQueryAdapter.get_destination_format(".json") == "NEWLINE_DELIMITED_JSON"
 
 
 class TestGcs(object):
