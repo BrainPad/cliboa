@@ -56,6 +56,7 @@ from .transform.file import (
     FileArchive,
     FileCompress,
     FileConvert,
+    FileCopy,
     FileDecompress,
     FileDivide,
     FileRename,
