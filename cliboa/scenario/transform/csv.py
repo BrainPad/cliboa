@@ -947,6 +947,42 @@ class CsvColumnReplace(FileBaseTransform):
             first_write = False
 
 
+class CsvDuplicateRowDelete(FileBaseTransform):
+    def __init__(self):
+        super().__init__()
+        self._delimiter = ","
+
+    def delimiter(self, delimiter):
+        self._delimiter = delimiter
+
+    def execute(self, *args):
+        # essential parameters check
+        valid = EssentialParameters(
+            self.__class__.__name__,
+            [self._src_dir, self._src_pattern],
+        )
+        valid()
+
+        os.makedirs(self._dest_dir, exist_ok=True)
+
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+
+        self.check_file_existence(files)
+        super().io_files(files, func=self.convert)
+
+    def convert(self, fi, fo):
+        with open(fi, "r") as i:
+            reader = csv.reader(i, delimiter=self._delimiter)
+            result = []
+            for li in reader:
+                if li not in result:
+                    result.append(li)
+            with open(fo, "w", newline="") as o:
+                writer = csv.writer(o, delimiter=self._delimiter)
+                for w in result:
+                    writer.writerow(w)
+
+
 def chunk_size_handling(read_csv_func, *args, **kwd):
     """
     Processing to avoid memory errors in pandas's read_csv.
