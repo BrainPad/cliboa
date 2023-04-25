@@ -627,12 +627,13 @@ class CsvConvert(FileBaseTransform):
         super().__init__()
         self._headers = []
         self._headers_existence = True
+        self._add_headers = None
         self._before_format = "csv"
         self._before_enc = self._encoding
         self._after_format = None
         self._after_enc = None
         self._after_nl = "LF"
-        self._reader_quote = "QUOTE_NONE"
+        self._reader_quote = "QUOTE_MINIMAL"
         self._quote = "QUOTE_MINIMAL"
 
     def headers(self, headers):
@@ -640,6 +641,9 @@ class CsvConvert(FileBaseTransform):
 
     def headers_existence(self, headers_existence):
         self._headers_existence = headers_existence
+
+    def add_headers(self, add_headers):
+        self._add_headers = add_headers
 
     def before_format(self, before_format):
         self._before_format = before_format
@@ -700,7 +704,11 @@ class CsvConvert(FileBaseTransform):
                     if i == 0:
                         if self._headers_existence is False:
                             continue
-                        writer.writerow(self._replace_headers(line))
+                        if self._add_headers:
+                            writer.writerow(self._add_headers)
+                            writer.writerow(line)
+                        else:
+                            writer.writerow(self._replace_headers(line))
                     else:
                         writer.writerow(line)
 
