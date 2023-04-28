@@ -11,9 +11,9 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+from cliboa.adapter import Csv
 from cliboa.scenario.sqlite import SqliteTransaction
 from cliboa.scenario.validator import EssentialParameters
-from cliboa.adapter import Csv
 from cliboa.util.exception import CliboaException, FileNotFound
 
 
