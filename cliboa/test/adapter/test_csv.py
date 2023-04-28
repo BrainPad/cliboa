@@ -15,7 +15,7 @@ import csv
 import os
 import shutil
 
-from cliboa.adapter import Csv
+from cliboa.adapter.csv import Csv
 from cliboa.conf import env
 
 

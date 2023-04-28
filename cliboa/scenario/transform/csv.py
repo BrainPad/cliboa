@@ -21,7 +21,7 @@ from datetime import datetime
 import jsonlines
 import pandas
 
-from cliboa.adapter import Csv
+from cliboa.adapter.csv import Csv
 from cliboa.adapter.sqlite import SqliteAdapter
 from cliboa.core.validator import EssentialParameters
 from cliboa.scenario.transform.file import FileBaseTransform
