@@ -13,7 +13,7 @@
 #
 from cliboa.scenario.sqlite import SqliteTransaction
 from cliboa.scenario.validator import EssentialParameters
-from cliboa.util.adapter import Csv
+from cliboa.adapter import Csv
 from cliboa.util.exception import CliboaException, FileNotFound
 
 

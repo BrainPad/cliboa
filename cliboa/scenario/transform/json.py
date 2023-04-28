@@ -19,7 +19,7 @@ import pandas
 
 from cliboa.core.validator import EssentialParameters
 from cliboa.scenario.transform.file import FileBaseTransform
-from cliboa.util.adapter import Csv
+from cliboa.adapter import Csv
 from cliboa.util.exception import InvalidParameter
 
 
