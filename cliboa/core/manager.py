@@ -11,7 +11,6 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import json
 import os
 import re
 import subprocess
@@ -64,6 +63,7 @@ class ScenarioManager(object):
             self._cmn_scenario_file = (
                 os.path.join(env.COMMON_DIR, env.SCENARIO_FILE_NAME) + "." + cmd_args.format
             )
+        self._replace_vars_pattern = re.compile(r"{{(.*?)}}")
 
     def create_scenario_queue(self):
         # validation
@@ -168,7 +168,9 @@ class ScenarioManager(object):
         values = {}
         if cls_attrs_dict:
             cls_attrs_dict, with_vars = self._split_class_vars(cls_attrs_dict)
-            ret = self._set_values(instance, cls_attrs_dict, with_vars)
+            ret = self._replace_arguments(cls_attrs_dict, with_vars)
+            for dict_k, dict_v in ret.items():
+                Helper.set_property(instance, dict_k, dict_v)
             values.update(ret)
 
         base_args = ["step", "symbol", "parallel", "listeners"]
@@ -206,29 +208,32 @@ class ScenarioManager(object):
             del arguments["with_vars"]
         return arguments, with_vars
 
-    def _set_values(self, instance, arguments, with_vars):
+    def _replace_arguments(self, arguments, with_vars):
         """
-        Set parameters to the instance.
+        Nested replacement of argments.
 
-        Args:
-            instance (class): instance
+        First args:
             arguments (dict): Arguments of steps
             with_vars (dict): with_vars parameter
 
         Returns:
-            dict: Dictionary of arguments which was set
+            dict: Dictionary of arguments which was replaced.
         """
-        pattern = re.compile(r"{{(.*?)}}")
-        values = {}
-        for yaml_k, yaml_v in arguments.items():
-            js = json.dumps(yaml_v)
-            matches = pattern.findall(js)
+        if isinstance(arguments, dict):
+            return {
+                dict_k: self._replace_arguments(dict_v, with_vars)
+                for dict_k, dict_v in arguments.items()
+            }
+        elif isinstance(arguments, list):
+            return [self._replace_arguments(list_v, with_vars) for list_v in arguments]
+        elif isinstance(arguments, str):
+            matches = self._replace_vars_pattern.findall(arguments)
             for match in matches:
                 var_name = match.strip()
                 if not var_name:
                     raise InvalidParameter("Alternative argument was empty.")
                 if var_name.startswith("env."):
-                    js = self._replace_envs(js, var_name)
+                    arguments = self._replace_envs(arguments, var_name)
                 else:
                     cmd = with_vars[var_name]
                     if not cmd:
@@ -236,11 +241,10 @@ class ScenarioManager(object):
                             "scenario file is invalid. 'with_vars' definition against %s does not exist."  # noqa
                             % var_name
                         )
-                    js = self._replace_vars(js, var_name, cmd)
-                yaml_v = json.loads(js)
-            Helper.set_property(instance, yaml_k, yaml_v)
-            values[yaml_k] = yaml_v
-        return values
+                    arguments = self._replace_vars(arguments, var_name, cmd)
+            return arguments
+        else:
+            return arguments
 
     def _replace_vars(self, yaml_v, var_name, cmd):
         """
