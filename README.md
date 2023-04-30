@@ -29,13 +29,13 @@ black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-squ
 
 # Introduction
 ## What is cliboa
-cliboa is an application framework which can implement ETL(ELT) processing. It eases the implementation of ETL(ELT) processing. In this case, ETL(ELT) Processing means the processings like fetch, transform and transfer of data between various databases, storages, and other services.
+cliboa is an application framework which can implement ETL(ELT) pipeline. It eases the implementation of ETL(ELT) pipeline. In this case, ETL(ELT) pipeline means the processings like fetch, transform and transfer of data between various databases, storages, and other services.
 ![](/img/cliboa_brief.png)
 
 ## Features
 - Python based framework.
 - ETL(ELT) processing is executable by YAML based configuration.
-- Additional modules for ETL(ELT) processing can be implemented by only a few steps if default modules not enough.
+- Additional modules for ETL(ELT) pipeline can be implemented by only a few steps if default modules not enough.
 
 # Manual
 See [MANUAL.md](/MANUAL.md)
@@ -49,10 +49,10 @@ See [CONTRIBUTING.md](/CONTRIBUTING.md)
 Available on macOS and any Linux distributions, like Debian, Ubuntu, CentOS, REL, or etc.
 
 ## Install cliboa
-python version 3.5 or later and pipenv are required. In the environemnt which pip can be used, execute as below.
+python version 3.7 or later and poetry are required. In the environemnt which pip can be used, execute as below.
 
 ```
-sudo pip3 install pipenv
+sudo pip3 install poetry
 sudo pip3 install cliboa
 ```
 
@@ -73,7 +73,7 @@ Directory tree which was created aforementioned commands is as below.
 
 ```
 sample
-├── Pipfile
+├── pyproject.toml
 ├── bin
 │   └── clibomanager.py
 ├── cliboa
@@ -90,18 +90,12 @@ sample
 │   └── simple-etl
 │       ├── scenario
 │       └── scenario.yml
-└── requirements.txt
 ```
 
 ## Install PyPI packages
 ```
 $ cd sample
-$ pipenv install --dev
-```
-or
-```
-$ cd sample
-$ sudo pip3 install -r requirements.txt
+$ poetry install
 ```
 
 ## Write a Scenario of ETL Processing
@@ -118,12 +112,7 @@ To make the above scenario available, set a local machine as a sftp server accor
 After wrote scenario.yml and set the environment, execute a scenario by as below command.
 ```
 cd sample
-pipenv run python3 bin/clibomanager.py simple-etl
-```
-or
-```
-cd sample
-python3 bin/clibomanager.py simple-etl
+poetry run python3 bin/clibomanager.py simple-etl
 ```
 
 # YAML Configuration

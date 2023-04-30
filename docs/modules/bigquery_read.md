@@ -13,7 +13,7 @@
 |tblname|BigQuery table name to insert|Yes|None||
 |key|the key of cache|No|None|If specified, load data saved to on-memory. Specifying either key or bucket is essential.|
 |bucket|Bucket of GCS to save a temporal data|No|None|If specified, load data saved to a file via GCS. Specifying either key or bucket is essential.|
-|dest_dir|Destination directory to download the file|No|None|If bucket is specified, dest_dir is essential as well.|
+|dest_dir|Destination directory to download the file|No|None|If bucket is specified, dest_dir is essential as well. If a non-existent directory path is specified, the directory is automatically created.|
 |query|Raw query to execute against table|No|None||
 |filename|File name to save data fetch from BigQuery. Specifying extension is essential.|No|None||
 

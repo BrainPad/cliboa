@@ -1,5 +1,5 @@
 #
-# Copyright 2019 BrainPad Inc. All Rights Reserved.
+# Copyright BrainPad Inc. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -15,8 +15,8 @@ import logging
 import os
 import sys
 
-from cliboa.client import CommandArgumentParser
 from cliboa.conf import env
+from cliboa.interface import CommandArgumentParser
 from cliboa.util.lisboa_log import LisboaLog
 
 

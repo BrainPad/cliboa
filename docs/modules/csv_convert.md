@@ -7,9 +7,10 @@ Plural files can be converted at the same time, but format of all files must be 
 |----------|-----------|--------|-------|-------|
 |src_dir|Path of the directory which target files are placed.|Yes|None||
 |src_pattern|Regex which is to find target files.|Yes|None||
-|dest_dir|Path of the directory which is for output files.|No|None||
-|headers|List of column names which is to be renamed|No|None|Dict of list ex. [{before_column_name1: after_column_name1}, {before_column_name2: after_column_name2}]|
-|headers_option|Whether to write header at the first row|No|True|When headers_option is False, the header is not output even if headers is input|
+|dest_dir|Path of the directory which is for output files.|No|None|If this parameter is not set, the file is created in the same directory as the processing file. If a non-existent directory path is specified, the directory is automatically created.|
+|headers|List of column names which is to be renamed|No|None|Dict of list ex. [{before_column_name1: after_column_name1}, {before_column_name2: after_column_name2}]. Headers option is enabled when headers_existence is True and add_headers is not specified.|
+|headers_existence|Whether to write header at the first row|No|True|When headers_existence is False, the header is not output even if headers or add_headers is input|
+|add_headers|Describe the headers you want to add in list format.|No|None|Thia parameter works when headers_existence is true. Items in headers are also ignored.|
 |before_format|File extension before convert|Yes|None|"csv" or "tsv"|
 |before_enc|File encoding before convert|Yes|utf-8||
 |after_format|File extension after converted|No|Same with before_format|"csv" or "tsv"|

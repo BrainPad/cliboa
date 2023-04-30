@@ -12,6 +12,7 @@
 # all copies or substantial portions of the Software.
 #
 import csv
+import os
 
 from cliboa.core.validator import EssentialParameters
 from cliboa.scenario.base import BaseStep
@@ -50,7 +51,8 @@ class BaseRdbms(BaseStep):
 
     def execute(self, *args):
         valid = EssentialParameters(
-            self.__class__.__name__, [self._host, self._dbname, self._user, self._password],
+            self.__class__.__name__,
+            [self._host, self._dbname, self._user, self._password],
         )
         valid()
 
@@ -86,6 +88,10 @@ class BaseRdbmsRead(BaseRdbms):
 
         if (self._query and self._tblname) or (not self._query and not self._tblname):
             raise InvalidParameter("Either query or tblname is required.")
+
+        dest_dir = os.path.dirname(self._dest_path)
+        if dest_dir:
+            os.makedirs(dest_dir, exist_ok=True)
 
         with self.get_adaptor() as adaptor:
             with open(self._dest_path, mode="w", encoding=self._encoding, newline="") as f:
@@ -177,7 +183,8 @@ class BaseRdbmsWrite(BaseRdbms):
         for file in files:
             with self.get_adaptor() as adaptor:
                 tuples = rdbmsUtil.csv_as_params(
-                    file, chunk_size=self._chunk_size, encoding=self._encoding)
+                    file, chunk_size=self._chunk_size, encoding=self._encoding
+                )
                 self._logger.info("tuples: %s" % tuples)
                 for params in tuples:
                     self._logger.info("params: %s" % params)

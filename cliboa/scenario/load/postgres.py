@@ -20,5 +20,4 @@ class PostgresqlWrite(BaseRdbmsWrite):
         super().__init__()
 
     def get_adaptor(self):
-        return PostgresqlAdaptor(
-            self._host, self._user, self._password, self._dbname, self._port)
+        return PostgresqlAdaptor(self._host, self._user, self._password, self._dbname, self._port)

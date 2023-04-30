@@ -12,7 +12,7 @@ Download a file via SFTP.
 |port|Port number of a sftp server|No|22||
 |src_dir|Directory of source to download|Yes|None||
 |src_pattern|File pattern of source to download. Regexp is available.|Yes|None||
-|dest_dir|Destination directory to download.|No|None|
+|dest_dir|Destination directory to download.|No|`"."`|If a non-existent directory path is specified, the directory is automatically created.|
 |timeout|Timeout period of sftp connection. Unit is seconds.|No|30||
 |retry_count|Retry count of sftp connection.|No|3||
 |quit|True or False flag for quitting cliboa process when source files do not exist.|No|False||

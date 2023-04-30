@@ -13,7 +13,7 @@ Read csv files and import them into Mysql.
 |src_pattern|Regex which is to find target files.|Yes|None||
 |tblname|Table name to be imported|Yes|None||
 |encoding|Character encoding of csv files|No|UTF-8||
-|chunk_size|Number of records to be imported at once|100||
+|chunk_size|Number of records to be imported at once|No|100||
 
 
 # Examples

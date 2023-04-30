@@ -11,7 +11,7 @@ Upload files to GCS.
 |bucket|GCS bucket name|Yes|None||
 |src_dir|Directory of source to upload|Yes|None||
 |src_pattern|File pattern of source to upload. Regexp is available|Yes|None||
-|dest_dir|Destination directory to upload|No|None||
+|dest_dir|Destination directory to upload|No|`""`||
 
 # Examples
 ```
@@ -22,7 +22,7 @@ Upload files to GCS.
     location: asia-northeast1
     credentials:
       file: /root/gcp_credential.json
-    bucker: gcs-test-bucket
+    bucket: gcs-test-bucket
     src_dir: /root
     src_pattern: test_(.*)_.csv
     dest_dir: /tmp
@@ -38,7 +38,7 @@ Upload files to GCS.
           "type": "service_account",
           ...
         }
-    bucker: gcs-test-bucket
+    bucket: gcs-test-bucket
     src_dir: /root
     src_pattern: test_(.*)_.csv
     dest_dir: /tmp

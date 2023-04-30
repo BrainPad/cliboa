@@ -17,7 +17,6 @@ import sys
 
 import pytest
 
-from cliboa.client import CommandArgumentParser
 from cliboa.conf import env
 from cliboa.core.validator import (
     EssentialKeys,
@@ -26,8 +25,9 @@ from cliboa.core.validator import (
     ScenarioJsonKey,
     ScenarioJsonType,
     ScenarioYamlKey,
-    ScenarioYamlType
+    ScenarioYamlType,
 )
+from cliboa.interface import CommandArgumentParser
 from cliboa.util.exception import DirStructureInvalid, FileNotFound, ScenarioFileInvalid
 
 
@@ -280,18 +280,10 @@ class TestValidators(object):
         test_yaml = [
             {
                 "parallel_with_config": {
-                    "config": {
-                        "multi_process_count": 2
-                    },
+                    "config": {"multi_process_count": 2},
                     "steps": [
-                        {
-                            "step": "test step 1",
-                            "class": "SampleClass",
-                        },
-                        {
-                            "step": "test step 2",
-                            "class": "SampleClass",
-                        },
+                        {"step": "test step 1", "class": "SampleClass"},
+                        {"step": "test step 2", "class": "SampleClass"},
                     ],
                 }
             }
@@ -336,14 +328,8 @@ class TestValidators(object):
             {
                 "parallel_with_config": {
                     "steps": [
-                        {
-                            "step": "test step 1",
-                            "class": "SampleClass",
-                        },
-                        {
-                            "step": "test step 2",
-                            "class": "SampleClass",
-                        },
+                        {"step": "test step 1", "class": "SampleClass"},
+                        {"step": "test step 2", "class": "SampleClass"},
                     ],
                 }
             }
@@ -351,26 +337,24 @@ class TestValidators(object):
         with pytest.raises(ScenarioFileInvalid) as excinfo:
             valid_instance = EssentialKeys(test_yaml)
             valid_instance()
-        assert "scenario.yml is invalid. 'config:' key does not exist, or 'config:' value does not exist." in str(excinfo.value) # noqa
+        assert (
+            "scenario.yml is invalid. 'config:' key does not exist, or 'config:' value does not exist."  # noqa
+            in str(excinfo.value)
+        )  # noqa
 
     def test_essential_keys_ng_4(self):
         """
         If block starts with "parallel_with_config"
         all steps under the "parallel_with_config" requires both "step" and "class"
         """
-        test_yaml = [
-            {
-                "parallel_with_config": {
-                    "config": {
-                        "multi_process_count": 2
-                    },
-                }
-            }
-        ]
+        test_yaml = [{"parallel_with_config": {"config": {"multi_process_count": 2}}}]
         with pytest.raises(ScenarioFileInvalid) as excinfo:
             valid_instance = EssentialKeys(test_yaml)
             valid_instance()
-        assert "scenario.yml is invalid. 'steps:' key does not exist, or 'steps:' value does not exist." in str(excinfo.value) # noqa
+        assert (
+            "scenario.yml is invalid. 'steps:' key does not exist, or 'steps:' value does not exist."  # noqa
+            in str(excinfo.value)
+        )  # noqa
 
     def test_essential_keys_ng_5(self):
         """
@@ -380,17 +364,10 @@ class TestValidators(object):
         test_yaml = [
             {
                 "parallel_with_config": {
-                    "config": {
-                        "multi_process_count": 2
-                    },
+                    "config": {"multi_process_count": 2},
                     "steps": [
-                        {
-                            "step": "test step 1",
-                            "class": "SampleClass",
-                        },
-                        {
-                            "class": "SampleClass",
-                        },
+                        {"step": "test step 1", "class": "SampleClass"},
+                        {"class": "SampleClass"},
                     ],
                 }
             }

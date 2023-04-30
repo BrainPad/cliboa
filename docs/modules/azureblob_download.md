@@ -9,10 +9,10 @@ Download files from Azure Blob Storage.
 | account_url        | Azure account URL                                       | No       | None    |         |
 | account_access_key | Azure access key                                        | No       | None    |         |
 | connection_string  | Connection string (overrides above two parameters)      | No       | None    |         |
-| container_name     | Blob container name                                     | Yes      |         |         |
-| prefix             | Folder prefix used to filter blobs                      | No       | None    |         |
-| src_pattern        | File pattern of source to download. Regexp is available | Yes      |         |         |
-| dest_dir           | Destination directory to download                       | Yes      |         |         |
+| container_name     | Blob container name                                     | Yes      | None    |         |
+| prefix             | Folder prefix used to filter blobs                      | No       | ""      |         |
+| src_pattern        | File pattern of source to download. Regexp is available | Yes      | None    |         |
+| dest_dir           | Destination directory to download                       | Yes      | None    |If a non-existent directory path is specified, the directory is automatically created.|
 
 `account_url` is the URL to the Azure blob storage account and can be optionally authenticated with a SAS token. `account_access_key` can be a SAS token string or an account shared access key (optional). Instead of them, a [connection string](https://docs.microsoft.com/en-us/azure/storage/common/storage-configure-connection-string) can be also specified.
 

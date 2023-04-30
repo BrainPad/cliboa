@@ -22,7 +22,7 @@ if __name__ == "__main__":
     sys.path.append(os.getcwd())
     os.environ.setdefault("CLIBOA_ENV", "common.environment")
     try:
-        from cliboa.client import run
+        from cliboa.interface import run
 
         run()
     except Exception as e:

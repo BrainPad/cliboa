@@ -112,7 +112,11 @@ class SqliteAdapter(object):
         columns = ",".join(self.escape_columns(column_def))
         holders = "?" * len(column_def)
         insert_sql = "REPLACE INTO" if is_replace_into else "INSERT INTO"
-        sql = insert_sql + " %s (%s) VALUES (%s)" % (tblname, columns, ",".join(list(holders)),)
+        sql = insert_sql + " %s (%s) VALUES (%s)" % (
+            tblname,
+            columns,
+            ",".join(list(holders)),
+        )
         self._logger.debug("sql: %s" % sql)
         values = []
         for row in insert_rows:

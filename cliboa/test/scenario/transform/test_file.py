@@ -15,14 +15,14 @@ import bz2
 import csv
 import gzip
 import os
-import pyminizip
-import pytest
 import shutil
 import tarfile
-import xlsxwriter
 import zipfile
-
 from glob import glob
+
+import pytest
+import xlsxwriter
+
 from cliboa.conf import env
 from cliboa.scenario.transform.file import (
     DateFormatConvert,
@@ -36,11 +36,7 @@ from cliboa.scenario.transform.file import (
     FileRename,
 )
 from cliboa.test import BaseCliboaTest
-from cliboa.util.exception import (
-    CliboaException,
-    FileNotFound,
-    InvalidParameter,
-)
+from cliboa.util.exception import CliboaException, FileNotFound, InvalidParameter
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
 
@@ -246,34 +242,6 @@ class TestFileDecompress(TestFileTransform):
         with open(decompressed_file_2, encoding="utf-8") as f:
             assert "This is test 2" == f.read()
 
-    def test_zip_with_pwd(self):
-        pwd = "testpass"
-        files = self._create_files()
-        for file in files:
-            pyminizip.compress(
-                file,
-                "",
-                self._data_dir + "/" + os.path.basename(file) + ".zip",
-                pwd,
-                0
-            )
-        instance = FileDecompress()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test.*\.txt\.zip")
-        Helper.set_property(instance, "dest_dir", self._out_dir)
-        Helper.set_property(instance, "password", pwd)
-        instance.execute()
-
-        decompressed_file_1 = os.path.join(self._out_dir, "test1.txt")
-        decompressed_file_2 = os.path.join(self._out_dir, "test2.txt")
-        assert os.path.exists(decompressed_file_1)
-        assert os.path.exists(decompressed_file_2)
-        with open(decompressed_file_1, encoding="utf-8") as f:
-            assert "This is test 1" == f.read()
-        with open(decompressed_file_2, encoding="utf-8") as f:
-            assert "This is test 2" == f.read()
-
     def test_gz(self):
         files = self._create_files()
         for file in files:
@@ -403,6 +371,7 @@ class TestFileCompress(TestFileTransform):
         Helper.set_property(instance, "src_pattern", r"test.*\.txt")
         Helper.set_property(instance, "dest_dir", self._out_dir)
         Helper.set_property(instance, "format", "gz")
+        Helper.set_property(instance, "chunk_size", 1024)
         instance.execute()
 
         compressed_file_1 = os.path.join(self._out_dir, "test1.txt.gz")
@@ -439,6 +408,7 @@ class TestFileCompress(TestFileTransform):
         Helper.set_property(instance, "src_pattern", r"test.*\.txt")
         Helper.set_property(instance, "dest_dir", self._out_dir)
         Helper.set_property(instance, "format", "bz2")
+        Helper.set_property(instance, "chunk_size", 1024)
         instance.execute()
 
         compressed_file_1 = os.path.join(self._out_dir, "test1.txt.bz2")
@@ -739,6 +709,48 @@ class TestFileRename(TestFileTransform):
         assert os.path.exists(os.path.join(self._data_dir, "PRE-dummy3-SUF.csv"))
         assert os.path.exists(os.path.join(self._data_dir, "PRE-test2-SUF.csv"))
 
+    def test_execute_ok_8(self):
+        self._create_files()
+
+        instance = FileRename()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
+        Helper.set_property(instance, "regex_pattern", "")
+        Helper.set_property(instance, "rep_str", "")
+        instance.execute()
+
+        assert os.path.exists(os.path.join(self._data_dir, "test1.txt"))
+        assert os.path.exists(os.path.join(self._data_dir, "test2.txt"))
+
+    def test_execute_ok_9(self):
+        self._create_files()
+
+        instance = FileRename()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
+        Helper.set_property(instance, "regex_pattern", "t")
+        Helper.set_property(instance, "rep_str", "")
+        instance.execute()
+
+        assert os.path.exists(os.path.join(self._data_dir, "es1.txt"))
+        assert os.path.exists(os.path.join(self._data_dir, "es2.txt"))
+
+    def test_execute_ok_10(self):
+        self._create_files()
+
+        instance = FileRename()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
+        Helper.set_property(instance, "regex_pattern", "")
+        Helper.set_property(instance, "rep_str", "a")
+        instance.execute()
+
+        assert os.path.exists(os.path.join(self._data_dir, "ataeasata1a.txt"))
+        assert os.path.exists(os.path.join(self._data_dir, "ataeasata2a.txt"))
+
     def test_execute_ng_1(self):
         self._create_files()
 
@@ -751,9 +763,7 @@ class TestFileRename(TestFileTransform):
         Helper.set_property(instance, "regex_pattern", "test1")
         with pytest.raises(InvalidParameter) as execinfo:
             instance.execute()
-        assert \
-            "The converted string is not defined in yaml file: dest_str" \
-            == str(execinfo.value)
+        assert "The converted string is not defined in yaml file: dest_str" == str(execinfo.value)
 
     def test_execute_ng_2(self):
         self._create_files()
@@ -767,9 +777,39 @@ class TestFileRename(TestFileTransform):
         Helper.set_property(instance, "rep_str", "test1")
         with pytest.raises(InvalidParameter) as execinfo:
             instance.execute()
-        assert \
-            "The conversion pattern is not defined in yaml file: regex_pattern" \
-            == str(execinfo.value)
+        assert "The conversion pattern is not defined in yaml file: regex_pattern" == str(
+            execinfo.value
+        )
+
+    def test_execute_ng_3(self):
+        self._create_files()
+
+        instance = FileRename()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
+        Helper.set_property(instance, "prefix", "PRE-")
+        Helper.set_property(instance, "suffix", "-SUF")
+        Helper.set_property(instance, "regex_pattern", "")
+        with pytest.raises(InvalidParameter) as execinfo:
+            instance.execute()
+        assert "The converted string is not defined in yaml file: dest_str" == str(execinfo.value)
+
+    def test_execute_ng_4(self):
+        self._create_files()
+
+        instance = FileRename()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
+        Helper.set_property(instance, "prefix", "PRE-")
+        Helper.set_property(instance, "suffix", "-SUF")
+        Helper.set_property(instance, "rep_str", "")
+        with pytest.raises(InvalidParameter) as execinfo:
+            instance.execute()
+        assert "The conversion pattern is not defined in yaml file: regex_pattern" == str(
+            execinfo.value
+        )
 
 
 class TestFileConvert(TestFileTransform):

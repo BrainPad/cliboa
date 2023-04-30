@@ -25,8 +25,8 @@ class ExecuteShellScript(BaseStep):
 
     def __init__(self):
         super().__init__()
-        self._command = ""
-        self._work_dir = ""
+        self._command = None
+        self._work_dir = "./"
 
     def command(self, command):
         self._command = command
@@ -36,7 +36,10 @@ class ExecuteShellScript(BaseStep):
 
     def execute(self, *args):
         # essential parameters check
-        valid = EssentialParameters(self.__class__.__name__, [self._command],)
+        valid = EssentialParameters(
+            self.__class__.__name__,
+            [self._command],
+        )
         valid()
 
         # Setting Up Directory

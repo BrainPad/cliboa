@@ -2,9 +2,9 @@
 # -*- coding utf-8 -*-
 
 import sys
+import time
 
 import pexpect
-import time
 
 args = sys.argv
 pypi_username = args[1]

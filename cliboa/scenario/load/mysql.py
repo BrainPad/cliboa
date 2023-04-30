@@ -20,5 +20,4 @@ class MysqlWrite(BaseRdbmsWrite):
         super().__init__()
 
     def get_adaptor(self):
-        return MysqlAdaptor(
-            self._host, self._user, self._password, self._dbname, self._port)
+        return MysqlAdaptor(self._host, self._user, self._password, self._dbname, self._port)

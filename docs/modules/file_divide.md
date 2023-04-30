@@ -10,7 +10,7 @@ Ex. foo.txt -> [ foo.1.txt, foo.2.txt, foo.3.txt ... ]
 |----------|-----------|--------|-------|-------|
 |src_dir|Path of the directory which target files are placed.|Yes|None||
 |src_pattern|Regex which is to find target files.|Yes|None||
-|dest_dir|Path of the directory which is for output files.|No|None||s
+|dest_dir|Path of the directory which is for output files.|No|None|If this parameter is not set, the file is created in the same directory as the processing file. If a non-existent directory path is specified, the directory is automatically created.|
 |divide_rows|Number of the rows of individual files after divided|Yes|None||
 |header|Whether if header is added to the divided files|No|False|If True, Original file's header will be added to the all divided files.|
 |encoding|Character encoding|No|utf-8|||

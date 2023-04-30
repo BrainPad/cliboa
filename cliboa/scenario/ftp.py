@@ -11,8 +11,8 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-from cliboa.scenario.base import BaseStep
 from cliboa.adapter.ftp import FtpAdapter
+from cliboa.scenario.base import BaseStep
 
 
 class BaseFtp(BaseStep):

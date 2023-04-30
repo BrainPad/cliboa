@@ -13,4 +13,4 @@
 #
 from collections import namedtuple
 
-ParallelWithConfig = namedtuple("ParallelWithConfig", ['steps', 'config'])
+ParallelWithConfig = namedtuple("ParallelWithConfig", ["steps", "config"])

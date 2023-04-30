@@ -20,8 +20,8 @@ from cliboa.adapter.gcp import BigQueryAdapter, FireStoreAdapter, GcsAdapter
 from cliboa.scenario.gcp import BaseBigQuery, BaseFirestore, BaseGcs
 from cliboa.scenario.validator import EssentialParameters
 from cliboa.util.cache import ObjectStore
+from cliboa.util.constant import StepStatus
 from cliboa.util.exception import InvalidParameter
-from cliboa.util.gcp import BigQuery
 from cliboa.util.string import StringUtil
 
 
@@ -92,7 +92,10 @@ class BigQueryRead(BaseBigQuery):
         os.makedirs(self._dest_dir, exist_ok=True)
 
         ymd_hms = datetime.now().strftime("%Y%m%d%H%M%S%f")
-        path = "%s-%s" % (StringUtil().random_str(self._RANDOM_STR_LENGTH), ymd_hms,)
+        path = "%s-%s" % (
+            StringUtil().random_str(self._RANDOM_STR_LENGTH),
+            ymd_hms,
+        )
         prefix = "%s/%s/%s" % (self._dataset, self._tblname, path)
 
         gbq_client = BigQueryAdapter().get_client(credentials=self.get_credentials())
@@ -107,28 +110,33 @@ class BigQueryRead(BaseBigQuery):
         gcs_bucket = gcs_client.bucket(self._bucket)
 
         # extract job config settings
-        ext_job_config = BigQuery.get_extract_job_config()
-        ext_job_config.compression = BigQuery.get_compression_type()
+        ext_job_config = BigQueryAdapter.get_extract_job_config()
+        ext_job_config.compression = BigQueryAdapter.get_compression_type()
         ext = ".csv"
         if self._filename:
             _, ext = os.path.splitext(self._filename)
             support_ext = [".csv", ".json"]
             if ext not in support_ext:
                 raise InvalidParameter("%s is not supported as filename." % ext)
-        ext_job_config.destination_format = BigQuery.get_destination_format(ext)
+        ext_job_config.destination_format = BigQueryAdapter.get_destination_format(ext)
 
         comp_format_and_ext = {"GZIP": ".gz"}
-        comp_ext = comp_format_and_ext.get(str(BigQuery.get_compression_type()))
+        comp_ext = comp_format_and_ext.get(str(BigQueryAdapter.get_compression_type()))
         if self._filename:
-            dest_gcs = "gs://%s/%s/%s%s" % (self._bucket, prefix, self._filename, comp_ext,)
+            dest_gcs = "gs://%s/%s/%s%s" % (
+                self._bucket,
+                prefix,
+                self._filename,
+                comp_ext,
+            )
         else:
             dest_gcs = "gs://%s/%s/*%s%s" % (self._bucket, prefix, ext, comp_ext)
 
         # Execute query.
         if self._query:
-            query_job_config = BigQuery.get_query_job_config()
+            query_job_config = BigQueryAdapter.get_query_job_config()
             query_job_config.destination = table_ref
-            query_job_config.write_disposition = BigQuery.get_write_disposition()
+            query_job_config.write_disposition = BigQueryAdapter.get_write_disposition()
             query_job = gbq_client.query(
                 self._query, location=self._location, job_config=query_job_config
             )
@@ -184,12 +192,14 @@ class GcsDownload(BaseGcs):
         valid = EssentialParameters(self.__class__.__name__, [self._src_pattern])
         valid()
 
+        os.makedirs(self._dest_dir, exist_ok=True)
+
         client = GcsAdapter().get_client(credentials=self.get_credentials())
         bucket = client.bucket(self._bucket)
         dl_files = []
         for blob in client.list_blobs(bucket, prefix=self._prefix, delimiter=self._delimiter):
             r = re.compile(self._src_pattern)
-            if not r.fullmatch(blob.name):
+            if not r.fullmatch(os.path.basename(blob.name)):
                 continue
             dl_files.append(blob.name)
             blob.download_to_filename(os.path.join(self._dest_dir, os.path.basename(blob.name)))
@@ -245,9 +255,54 @@ class FirestoreDocumentDownload(BaseFirestore):
         )
         valid()
 
+        os.makedirs(self._dest_dir, exist_ok=True)
+
         client = FireStoreAdapter().get_client(self.get_credentials())
         ref = client.document(self._collection, self._document)
         doc = ref.get()
 
         with open(os.path.join(self._dest_dir, doc.id), mode="wt") as f:
             f.write(json.dumps(doc.to_dict()))
+
+
+class GcsFileExistsCheck(BaseGcs):
+    """
+    File check in GCS
+    """
+
+    def __init__(self):
+        super().__init__()
+        self._prefix = None
+        self._delimiter = None
+        self._src_pattern = None
+
+    def prefix(self, prefix):
+        self._prefix = prefix
+
+    def delimiter(self, delimiter):
+        self._delimiter = delimiter
+
+    def src_pattern(self, src_pattern):
+        self._src_pattern = src_pattern
+
+    def execute(self, *args):
+        super().execute()
+
+        valid = EssentialParameters(self.__class__.__name__, [self._src_pattern])
+        valid()
+
+        client = GcsAdapter().get_client(credentials=self.get_credentials())
+        dl_files = []
+        bucket = client.bucket(super().get_step_argument("bucket"))
+
+        for blob in client.list_blobs(bucket, prefix=self._prefix, delimiter=self._delimiter):
+            r = re.compile(self._src_pattern)
+            if not r.fullmatch(os.path.basename(blob.name)):
+                continue
+            dl_files.append(blob.name)
+
+        if len(dl_files) == 0:
+            self._logger.info("File not found in GCS. After process will not be processed")
+            return StepStatus.SUCCESSFUL_TERMINATION
+
+        self._logger.info("File was found in GCS. After process will be processed")

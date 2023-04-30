@@ -11,19 +11,23 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-from abc import abstractmethod
 import csv
+from abc import abstractmethod
+
 import jsonlines
+import pandas
 
 from cliboa.core.validator import EssentialParameters
 from cliboa.scenario.transform.file import FileBaseTransform
 from cliboa.util.csv import Csv
+from cliboa.util.exception import InvalidParameter
 
 
 class JsonlToCsvBase(FileBaseTransform):
     """
     Base class of jsonlines transform to csv.
     """
+
     def __init__(self):
         super().__init__()
         self._quote = "QUOTE_MINIMAL"
@@ -44,9 +48,7 @@ class JsonlToCsvBase(FileBaseTransform):
         pass
 
     def execute(self, *args):
-        valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir, self._src_pattern]
-        )
+        valid = EssentialParameters(self.__class__.__name__, [self._src_dir, self._src_pattern])
         valid()
 
         files = super().get_target_files(self._src_dir, self._src_pattern)
@@ -56,7 +58,7 @@ class JsonlToCsvBase(FileBaseTransform):
     def convert(self, fi, fo):
         writer = None
         with jsonlines.open(fi) as reader, open(
-                fo, mode="w", encoding=self._encoding, newline=""
+            fo, mode="w", encoding=self._encoding, newline=""
         ) as f:
             for row in reader:
                 new_rows = self.convert_row(row)
@@ -68,7 +70,7 @@ class JsonlToCsvBase(FileBaseTransform):
                         new_rows[0].keys(),
                         quoting=Csv.quote_convert(self._quote),
                         lineterminator=Csv.newline_convert(self._after_nl),
-                        escapechar=self._escape_char
+                        escapechar=self._escape_char,
                     )
                     writer.writeheader()
                 writer.writerows(new_rows)
@@ -78,8 +80,42 @@ class JsonlToCsv(JsonlToCsvBase):
     """
     Transform jsonlines to csv.
     """
+
     def execute(self, *args):
         super().execute()
 
     def convert_row(self, row):
         return [row]
+
+
+class JsonlAddKeyValue(FileBaseTransform):
+    """
+    Insert key value to jsonlines.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self._pairs = {}
+
+    def pairs(self, pairs):
+        self._pairs = pairs
+
+    def execute(self, *args):
+        valid = EssentialParameters(
+            self.__class__.__name__, [self._src_dir, self._src_pattern, self._pairs]
+        )
+        valid()
+
+        if not isinstance(self._pairs, dict):
+            raise InvalidParameter("argument 'pairs' only allow dict format.")
+
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+        self.check_file_existence(files)
+        super().io_files(files, func=self.convert)
+
+    def convert(self, fi, fo):
+        with open(fi) as fi, open(fo, mode="w") as fo:
+            df = pandas.read_json(fi, orient="records", lines=True)
+            for key, value in self._pairs.items():
+                df[key] = value
+            df.to_json(fo, orient="records", lines=True)

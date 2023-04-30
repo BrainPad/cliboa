@@ -11,13 +11,14 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import requests
-
 from abc import ABC, abstractmethod
+from time import sleep
+
+import requests
+from requests.exceptions import HTTPError
+
 from cliboa.scenario.validator import EssentialParameters
 from cliboa.util.lisboa_log import LisboaLog
-from requests.exceptions import HTTPError
-from time import sleep
 
 
 class FormAuth(object):
@@ -56,7 +57,8 @@ class FormAuth(object):
 
     def execute(self, *args):
         valid = EssentialParameters(
-            self.__class__.__name__, [self._form_url, self._form_id, self._form_password],
+            self.__class__.__name__,
+            [self._form_url, self._form_id, self._form_password],
         )
         valid()
 
@@ -88,14 +90,7 @@ class Download(Http):
     VALID_HTTP_STATUS = 200
 
     def __init__(
-            self,
-            url,
-            dest_path,
-            timeout,
-            retry_cnt=2,
-            retry_intvl_sec=10,
-            query_string=None,
-            **params
+        self, url, dest_path, timeout, retry_cnt=2, retry_intvl_sec=10, query_string=None, **params
     ):
         # params is the **kwargs argument of request.get()
         super().__init__(url, dest_path, timeout, retry_cnt, retry_intvl_sec, params)

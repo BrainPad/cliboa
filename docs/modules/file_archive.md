@@ -6,7 +6,7 @@ Create an archive object(zip, tar)
 |----------|-----------|--------|-------|-------|
 |src_dir|Path of the directory which target files are placed.|Yes|None||
 |src_pattern|Regex which is to find target files.|Yes|None||
-|dest_dir|Path of the directory which is for output files.|No|None||
+|dest_dir|Path of the directory which is for output files.|No|None|If this parameter is not set, the file is created in the same directory as the processing file. If a non-existent directory path is specified, the directory is automatically created.|
 |dest_name|Output file name|Yes|None||
 |format|Archive type|Yes|None|One of the followings are allowed [zip, tar]|
 |create_dir|Whether create the same directory name for the root path|No|False||

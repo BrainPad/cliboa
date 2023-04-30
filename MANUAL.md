@@ -34,7 +34,7 @@ Create 'sample' directory as an executable environment of cliboa.
 $ cliboadmin init sample
 $ tree sample
 sample
-|-- Pipfile
+|-- pyproject.toml
 |-- bin
 |   `-- clibomanager.py
 |-- cliboa
@@ -59,7 +59,7 @@ $ cliboadmin create simple-etl
 A project for ETL scenario is created.
 $ tree .
 .
-|-- Pipfile
+|-- pyproject.toml
 |-- bin
 |   `-- clibomanager.py
 |-- cliboa

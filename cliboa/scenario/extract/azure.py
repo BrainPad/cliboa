@@ -57,6 +57,8 @@ class AzureBlobDownload(BaseAzureBlob):
             rec = re.compile(self._src_pattern)
             if not rec.fullmatch(filename):
                 continue
+            if self._dest_dir:
+                os.makedirs(self._dest_dir, exist_ok=True)
             dest_path = os.path.join(self._dest_dir, os.path.basename(filename))
             blob_client = service.get_blob_client(container=self._container_name, blob=filename)
 

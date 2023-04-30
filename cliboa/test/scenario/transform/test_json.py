@@ -14,16 +14,15 @@
 import csv
 import json
 import os
-import pytest
 import shutil
-
 from glob import glob
+
+import pytest
+
 from cliboa.conf import env
-from cliboa.scenario.transform.json import (
-    JsonlToCsvBase,
-    JsonlToCsv
-)
+from cliboa.scenario.transform.json import JsonlAddKeyValue, JsonlToCsv, JsonlToCsvBase
 from cliboa.test import BaseCliboaTest
+from cliboa.util.exception import InvalidParameter
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
 
@@ -43,8 +42,8 @@ class TestJsonTransform(BaseCliboaTest):
         mode = "a" if os.path.exists(path) else "w"
         with open(path, mode=mode, encoding="utf-8") as file:
             for d in data:
-                json.dump(d, file, separators=(',', ':'))
-                file.write('\n')
+                json.dump(d, file, separators=(",", ":"))
+                file.write("\n")
 
 
 class TestJsonlToCsvBase(TestJsonTransform):
@@ -89,11 +88,12 @@ class TestJsonlToCsv(TestJsonTransform):
         # create test jsonl
         data = [
             {"id": "123456789", "name": "A", "age": "25", "value": []},
-            {"id": "1234567890",
-             "name": "B",
-             "age": "30",
-             "value": [{"key": "test_key", "value": 999},
-                       {"key": 'test"01"', "value": "true"}]},
+            {
+                "id": "1234567890",
+                "name": "B",
+                "age": "30",
+                "value": [{"key": "test_key", "value": 999}, {"key": 'test"01"', "value": "true"}],
+            },
         ]
         self._create_jsonl(data, "test_1.json")
         self._create_jsonl(data, "test_2.json")
@@ -124,18 +124,20 @@ class TestJsonlToCsv(TestJsonTransform):
                         self.assertEqual(
                             "[{'key': 'test_key', 'value': 999}, \
                              {'key': 'test\"01\"', 'value': 'true'}]",
-                            row.get("value"))
+                            row.get("value"),
+                        )
                         assert row.endswith("\r\n")
 
     def test_execute_ok_2(self):
         # create test jsonl
         data = [
             {"id": "123456789", "name": "A", "age": "25", "value": []},
-            {"id": "1234567890",
-             "name": "B",
-             "age": "30",
-             "value": [{"key": "test,_key", "value": 999},
-                       {"key": 'test"01"', "value": "true"}]},
+            {
+                "id": "1234567890",
+                "name": "B",
+                "age": "30",
+                "value": [{"key": "test,_key", "value": 999}, {"key": 'test"01"', "value": "true"}],
+            },
         ]
         self._create_jsonl(data, "test_1.json")
         self._create_jsonl(data, "test_2.json")
@@ -168,7 +170,8 @@ class TestJsonlToCsv(TestJsonTransform):
                         self.assertEqual(
                             "[{'key': 'test,_key', 'value': 999}, \
                              {'key': 'test\"01\"', 'value': 'true'}]",
-                            row.get("value"))
+                            row.get("value"),
+                        )
 
     def test_execute_ok_3(self):
         # create test jsonl
@@ -197,11 +200,12 @@ class TestJsonlToCsv(TestJsonTransform):
         # create test jsonl
         data = [
             {"id": "123456789", "name": "A", "age": "25"},
-            {"id": "1234567890",
-             "name": "B",
-             "age": "30",
-             "value": [{"key": "test_key", "value": 999},
-                       {"key": 'test"01"', "value": "true"}]},
+            {
+                "id": "1234567890",
+                "name": "B",
+                "age": "30",
+                "value": [{"key": "test_key", "value": 999}, {"key": 'test"01"', "value": "true"}],
+            },
         ]
         self._create_jsonl(data, "test_1.json")
         self._create_jsonl(data, "test_2.json")
@@ -215,3 +219,144 @@ class TestJsonlToCsv(TestJsonTransform):
         with pytest.raises(ValueError) as e:
             instance.execute()
         assert "dict contains fields not in fieldnames: 'value'" == str(e.value)
+
+
+class TestJsonlAddKeyValue(TestJsonTransform):
+    def test_execute_ok_1(self):
+        # create test jsonl
+        data = [
+            {"id": "123456789", "name": "A", "age": "25"},
+            {
+                "id": "1234567890",
+                "name": "B",
+                "age": "30",
+                "value": [{"key": "test_key", "value": 999}, {"key": 'test"01"', "value": "true"}],
+            },
+        ]
+        self._create_jsonl(data, "test_1.json")
+        self._create_jsonl(data, "test_2.json")
+
+        # set the essential attributes
+        instance = JsonlAddKeyValue()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.*.json")
+        Helper.set_property(instance, "dest_dir", self._result_dir)
+        Helper.set_property(instance, "pairs", {"number": 1})
+        instance.execute()
+        files = glob(os.path.join(self._result_dir, "*.json"))
+        assert 2 == len(files)
+        for file in files:
+            with open(file, mode="r") as f:
+                lines = f.readlines()
+                s = []
+                for line in lines:
+                    s.append(json.loads(line))
+                self.assertEqual(123456789, s[0].get("id"))
+                self.assertEqual(1234567890, s[1].get("id"))
+                self.assertEqual("A", s[0].get("name"))
+                self.assertEqual("B", s[1].get("name"))
+                self.assertEqual(25, s[0].get("age"))
+                self.assertEqual(30, s[1].get("age"))
+                self.assertIsNone(s[0].get("value"))
+                self.assertEqual(
+                    [{"key": "test_key", "value": 999}, {"key": 'test"01"', "value": "true"}],
+                    s[1].get("value"),
+                )
+                self.assertEqual(1, s[0].get("number"))
+                self.assertEqual(1, s[1].get("number"))
+
+    def test_execute_ok_2(self):
+        # create test jsonl
+        data = [
+            {"id": "123456789", "name": "A", "age": "25"},
+            {
+                "id": "1234567890",
+                "name": "B",
+                "age": "30",
+                "value": [{"key": "test_key", "value": 999}, {"key": 'test"01"', "value": "true"}],
+            },
+        ]
+        self._create_jsonl(data, "test_1.json")
+        self._create_jsonl(data, "test_2.json")
+
+        # set the essential attributes
+        instance = JsonlAddKeyValue()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.*.json")
+        Helper.set_property(instance, "dest_dir", self._result_dir)
+        Helper.set_property(instance, "pairs", {"number": 1, "data": "first"})
+        instance.execute()
+        files = glob(os.path.join(self._result_dir, "*.json"))
+        assert 2 == len(files)
+        for file in files:
+            with open(file, mode="r") as f:
+                lines = f.readlines()
+                s = []
+                for line in lines:
+                    s.append(json.loads(line))
+                self.assertEqual(123456789, s[0].get("id"))
+                self.assertEqual(1234567890, s[1].get("id"))
+                self.assertEqual("A", s[0].get("name"))
+                self.assertEqual("B", s[1].get("name"))
+                self.assertEqual(25, s[0].get("age"))
+                self.assertEqual(30, s[1].get("age"))
+                self.assertIsNone(s[0].get("value"))
+                self.assertEqual(
+                    [{"key": "test_key", "value": 999}, {"key": 'test"01"', "value": "true"}],
+                    s[1].get("value"),
+                )
+                self.assertEqual(1, s[0].get("number"))
+                self.assertEqual(1, s[1].get("number"))
+                self.assertEqual("first", s[0].get("data"))
+                self.assertEqual("first", s[1].get("data"))
+
+    def test_execute_ng_without_pairs(self):
+        # create test jsonl
+        data = [
+            {"id": "123456789", "name": "A", "age": "25"},
+            {
+                "id": "1234567890",
+                "name": "B",
+                "age": "30",
+                "value": [{"key": "test_key", "value": 999}, {"key": 'test"01"', "value": "true"}],
+            },
+        ]
+        self._create_jsonl(data, "test_1.json")
+        self._create_jsonl(data, "test_2.json")
+
+        # set the essential attributes
+        instance = JsonlAddKeyValue()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.*.json")
+        Helper.set_property(instance, "dest_dir", self._result_dir)
+        with pytest.raises(Exception) as e:
+            instance.execute()
+        assert "The essential parameter is not specified in JsonlAddKeyValue." == str(e.value)
+
+    def test_execute_ng_pairs_not_dict(self):
+        # create test jsonl
+        data = [
+            {"id": "123456789", "name": "A", "age": "25"},
+            {
+                "id": "1234567890",
+                "name": "B",
+                "age": "30",
+                "value": [{"key": "test_key", "value": 999}, {"key": 'test"01"', "value": "true"}],
+            },
+        ]
+        self._create_jsonl(data, "test_1.json")
+        self._create_jsonl(data, "test_2.json")
+
+        # set the essential attributes
+        instance = JsonlAddKeyValue()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.*.json")
+        Helper.set_property(instance, "dest_dir", self._result_dir)
+        Helper.set_property(instance, "pairs", "dummy")
+        with pytest.raises(InvalidParameter) as e:
+            instance.execute()
+        assert "argument 'pairs' only allow dict format." == str(e.value)

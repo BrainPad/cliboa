@@ -12,8 +12,8 @@
 # all copies or substantial portions of the Software.
 #
 
-from cliboa.scenario.base import BaseStep
 from cliboa.adapter.sftp import SftpAdapter
+from cliboa.scenario.base import BaseStep
 
 
 class BaseSftp(BaseStep):
@@ -92,5 +92,5 @@ class BaseSftp(BaseStep):
             passphrase=self._passphrase,
             timeout=self._timeout,
             retryTimes=self._retry_count,
-            port=self._port
+            port=self._port,
         )

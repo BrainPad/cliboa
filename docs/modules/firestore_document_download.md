@@ -10,7 +10,7 @@ Download a document from Firestore.
 |credentials.content|A dictionary containing service account info in Google format|No|None||
 |collection|Collection name|Yes|None||
 |document|Document name|Yes|None||
-|dest_dir|Destination directory to download the file|Yes|None||
+|dest_dir|Destination directory to download the file|Yes|None|If a non-existent directory path is specified, the directory is automatically created.|
 
 # Examples
 ```
