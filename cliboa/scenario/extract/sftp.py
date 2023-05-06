@@ -14,11 +14,11 @@
 import os
 import re
 
+from cliboa.adapter.sftp import SftpAdapter
 from cliboa.scenario.sftp import BaseSftp
 from cliboa.scenario.validator import EssentialParameters
 from cliboa.util.cache import ObjectStore
 from cliboa.util.constant import StepStatus
-from cliboa.util.sftp import Sftp
 
 
 class SftpExtract(BaseSftp):
@@ -52,7 +52,7 @@ class SftpDownload(SftpExtract):
 
         os.makedirs(self._dest_dir, exist_ok=True)
 
-        obj = Sftp().list_files(
+        obj = SftpAdapter().list_files(
             dir=self._src_dir,
             dest=self._dest_dir,
             pattern=re.compile(self._src_pattern),
@@ -89,7 +89,7 @@ class SftpDelete(SftpExtract):
         )
         valid()
 
-        obj = Sftp().clear_files(
+        obj = SftpAdapter().clear_files(
             dir=self._src_dir,
             pattern=re.compile(self._src_pattern),
         )
@@ -126,7 +126,7 @@ class SftpDownloadFileDelete(SftpExtract):
 
             endfile_suffix = super().get_step_argument("endfile_suffix")
             for file in files:
-                obj = Sftp().remove_specific_file(
+                obj = SftpAdapter().remove_specific_file(
                     dir=self._src_dir,
                     fname=file,
                 )
@@ -134,7 +134,7 @@ class SftpDownloadFileDelete(SftpExtract):
                 self._logger.info("%s is successfully deleted." % file)
 
                 if endfile_suffix:
-                    obj = Sftp().remove_specific_file(
+                    obj = SftpAdapter().remove_specific_file(
                         dir=self._src_dir,
                         fname=file + endfile_suffix,
                     )
@@ -163,7 +163,7 @@ class SftpFileExistsCheck(SftpExtract):
         )
         valid()
 
-        obj = Sftp().file_exists_check(
+        obj = SftpAdapter().file_exists_check(
             dir=self._src_dir,
             pattern=re.compile(self._src_pattern),
             ignore_empty_file=self._ignore_empty_file,
