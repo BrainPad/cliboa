@@ -52,7 +52,9 @@ class SftpDownload(SftpExtract):
 
         os.makedirs(self._dest_dir, exist_ok=True)
 
-        obj = SftpAdapter().list_files(
+        obj = SftpAdapter(
+            host=self._host, user=self._user, password=self._password, key=self._key
+        ).list_files(
             dir=self._src_dir,
             dest=self._dest_dir,
             pattern=re.compile(self._src_pattern),
@@ -163,7 +165,9 @@ class SftpFileExistsCheck(SftpExtract):
         )
         valid()
 
-        obj = SftpAdapter().file_exists_check(
+        obj = SftpAdapter(
+            host=self._host, user=self._user, password=self._password, key=self._key
+        ).file_exists_check(
             dir=self._src_dir,
             pattern=re.compile(self._src_pattern),
             ignore_empty_file=self._ignore_empty_file,
