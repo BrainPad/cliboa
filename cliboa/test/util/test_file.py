@@ -17,8 +17,8 @@ import shutil
 
 import pytest
 
-from cliboa.adapter.file import File
 from cliboa.conf import env
+from cliboa.util.file import File
 
 
 class TestFile(object):
