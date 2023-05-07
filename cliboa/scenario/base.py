@@ -17,10 +17,10 @@ import re
 import tempfile
 from abc import abstractmethod
 
+from cliboa.adapter.file import File
 from cliboa.conf import env
 from cliboa.util.cache import StepArgument
 from cliboa.util.exception import FileNotFound, InvalidParameter
-from cliboa.util.file import File
 
 
 class BaseStep(object):

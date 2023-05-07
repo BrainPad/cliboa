@@ -21,12 +21,12 @@ from datetime import datetime
 import jsonlines
 import pandas
 
+from cliboa.adapter.file import File
 from cliboa.adapter.sqlite import SqliteAdapter
 from cliboa.core.validator import EssentialParameters
 from cliboa.scenario.transform.file import FileBaseTransform
 from cliboa.util.csv import Csv
 from cliboa.util.exception import FileNotFound, InvalidCount, InvalidParameter
-from cliboa.util.file import File
 from cliboa.util.string import StringUtil
 
 
