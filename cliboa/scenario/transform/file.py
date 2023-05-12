@@ -389,6 +389,30 @@ class ExcelConvert(FileBaseTransform):
         df.to_csv(fo, encoding=self._encoding)
 
 
+class FileCopy(FileBaseTransform):
+    """
+    Copy the file
+    """
+
+    def __init__(self):
+        super().__init__()
+
+    def execute(self, *args):
+        valid = EssentialParameters(
+            self.__class__.__name__,
+            [self._src_dir, self._src_pattern, self._dest_dir],
+        )
+        valid()
+
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+        self.check_file_existence(files)
+
+        os.makedirs(self._dest_dir, exist_ok=True)
+
+        for file in files:
+            shutil.copy(file, self._dest_dir)
+
+
 class FileDivide(FileBaseTransform):
     """
     Divide a file to plural files
