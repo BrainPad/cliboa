@@ -18,8 +18,7 @@ from cliboa.scenario.ftp import BaseFtp
 from cliboa.scenario.validator import EssentialParameters
 from cliboa.util.cache import ObjectStore
 from cliboa.util.constant import StepStatus
-from cliboa.util.ftp_util import FtpUtil
-
+from cliboa.adapter.ftp import FtpAdapter
 
 class FtpExtract(BaseFtp):
     def __init__(self):
@@ -48,7 +47,7 @@ class FtpDownload(FtpExtract):
 
         os.makedirs(self._dest_dir, exist_ok=True)
 
-        obj = FtpUtil().list_files(
+        obj = FtpAdapter().list_files(
             dir=self._src_dir,
             dest=self._dest_dir,
             pattern=re.compile(self._src_pattern),
@@ -89,7 +88,7 @@ class FtpDownloadFileDelete(FtpExtract):
 
             adaptor = super().get_adaptor()
             for file in files:
-                obj = FtpUtil().remove_specific_file(
+                obj = FtpAdapter().remove_specific_file(
                     dir=self._src_dir,
                     fname=file,
                 )
