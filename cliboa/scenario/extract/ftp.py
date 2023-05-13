@@ -14,11 +14,12 @@
 import os
 import re
 
+from cliboa.adapter.ftp import FtpAdapter
 from cliboa.scenario.ftp import BaseFtp
 from cliboa.scenario.validator import EssentialParameters
 from cliboa.util.cache import ObjectStore
 from cliboa.util.constant import StepStatus
-from cliboa.adapter.ftp import FtpAdapter
+
 
 class FtpExtract(BaseFtp):
     def __init__(self):
