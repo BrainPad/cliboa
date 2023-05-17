@@ -31,6 +31,7 @@ from cliboa.scenario.transform.csv import (
     CsvColumnSelect,
     CsvConcat,
     CsvConvert,
+    CsvDuplicateRowDelete,
     CsvMerge,
     CsvMergeExclusive,
     CsvSort,
@@ -1273,6 +1274,168 @@ class TestCsvConvert(TestCsvTransform):
             reader = csv.reader(t)
             line = next(reader)
         assert line == ["1", "spam"]
+
+
+class TestCsvDuplicateRowDelete(TestCsvTransform):
+    def test_execute_ok(self):
+        # create test csv
+        test_csv_data = [
+            ["col_1"],
+            ["1"],
+            ["1"],
+            ["2"],
+        ]
+        self._create_csv(test_csv_data)
+        self._create_csv(test_csv_data, fname="test2.csv")
+
+        # set the essential attributes
+        instance = CsvDuplicateRowDelete()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            record_count = 0
+            for i, row in enumerate(reader):
+                if i == 0:
+                    self.assertEqual(["col_1"], row)
+                if i == 1:
+                    self.assertEqual(["1"], row)
+                if i == 2:
+                    self.assertEqual(["2"], row)
+                record_count += 1
+            assert record_count == 3
+
+    def test_execute_ok_2(self):
+        # create test csv
+        test_csv_data = [
+            ["col_1", "col_2", "col_3"],
+            ["1", "", "SPAM1"],
+            ["1", "", "SPAM1"],
+            ["2", "", ""],
+        ]
+        self._create_csv(test_csv_data)
+
+        # set the essential attributes
+        instance = CsvDuplicateRowDelete()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            record_count = 0
+            for i, row in enumerate(reader):
+                if i == 0:
+                    self.assertEqual(["col_1", "col_2", "col_3"], row)
+                if i == 1:
+                    self.assertEqual(["1", "", "SPAM1"], row)
+                if i == 2:
+                    self.assertEqual(["2", "", ""], row)
+                record_count += 1
+            assert record_count == 3
+
+    def test_execute_ok_3(self):
+        # create test csv
+        test_csv_data = [
+            ["col_1", "col_2", "col_3"],
+            ["1", "", "SPAM1"],
+            ["1", "", "SPAM1"],
+            ["2", "", ""],
+        ]
+        self._create_csv(test_csv_data, fname="test1.csv")
+        self._create_csv(test_csv_data, fname="test2.csv")
+
+        # set the essential attributes
+        instance = CsvDuplicateRowDelete()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        instance.execute()
+        files = glob(os.path.join(self._result_dir, "test*.csv"))
+        for file in files:
+            with open(file, mode="r", encoding="utf-8") as f:
+                reader = csv.DictReader(f)
+                record_count = 0
+                for i, row in enumerate(reader):
+                    if i == 0:
+                        self.assertEqual(["col_1", "col_2", "col_3"], row)
+                    if i == 1:
+                        self.assertEqual(["1", "", "SPAM1"], row)
+                    if i == 2:
+                        self.assertEqual(["2", "", ""], row)
+                    record_count += 1
+                assert record_count == 3
+
+    def test_execute_ok_4(self):
+        # create test csv
+        test_csv_data = [
+            ["1", "", "SPAM1"],
+            ["1", "", "SPAM1"],
+            ["2", "", ""],
+        ]
+        self._create_csv(test_csv_data)
+
+        # set the essential attributes
+        instance = CsvDuplicateRowDelete()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            record_count = 0
+            for i, row in enumerate(reader):
+                if i == 0:
+                    self.assertEqual(["1", "", "SPAM1"], row)
+                if i == 1:
+                    self.assertEqual(["2", "", ""], row)
+                record_count += 1
+            assert record_count == 2
+
+    def test_execute_ok_5(self):
+        # create test tsv
+        test_tsv_data = [
+            ["col_1", "col_2", "col_3"],
+            ["1", "", "SPAM1"],
+            ["1", "", "SPAM1"],
+            ["2", "", ""],
+        ]
+        fpath = os.path.join(self._data_dir, "test.tsv")
+        with open(fpath, mode="w") as f:
+            writer = csv.writer(f, quoting=csv.QUOTE_ALL, delimiter="\t")
+            for r in test_tsv_data:
+                writer.writerow(r)
+
+        # set the essential attributes
+        instance = CsvDuplicateRowDelete()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.tsv")
+        Helper.set_property(instance, "delimiter", "\t")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.tsv")
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            record_count = 0
+            for i, row in enumerate(reader):
+                if i == 0:
+                    self.assertEqual(["col_1\tcol_2\tcol_3"], row)
+                if i == 1:
+                    self.assertEqual(["1\t\tSPAM1"], row)
+                if i == 2:
+                    self.assertEqual(["2\t\t"], row)
+                record_count += 1
+            assert record_count == 3
 
 
 class TestCsvSort(TestCsvTransform):
