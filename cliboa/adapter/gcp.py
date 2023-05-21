@@ -60,6 +60,38 @@ class BigQueryAdapter(object):
             else bigquery.Client()
         )
 
+    @staticmethod
+    def get_extract_job_config(print_header=True):
+        return bigquery.ExtractJobConfig(print_header=print_header)
+
+    @staticmethod
+    def get_query_job_config():
+        return bigquery.QueryJobConfig()
+
+    @staticmethod
+    def get_write_disposition():
+        return bigquery.WriteDisposition.WRITE_TRUNCATE
+
+    @staticmethod
+    def get_compression_type():
+        """
+        Output compression type
+        """
+        return bigquery.Compression.GZIP
+
+    @classmethod
+    def get_destination_format(cls, ext):
+        """
+        Output file format
+        Args:
+            ext: destination file extention
+        """
+        format_and_dest_format = {
+            ".csv": bigquery.DestinationFormat.CSV,
+            ".json": bigquery.DestinationFormat.NEWLINE_DELIMITED_JSON,
+        }
+        return format_and_dest_format.get(ext)
+
 
 class FireStoreAdapter(object):
     """

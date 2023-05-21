@@ -297,10 +297,42 @@ class TestYamlScenarioManager(BaseCliboaTest):
             elif k == "two":
                 assert v == "foo_%s.csv" % yesterday
 
+    def test_create_scenario_queue_ok_with_vars_datetime(self):
+        """
+        Valid scenario.yml with {{ vars }}
+        """
+        now_datetime = datetime.now()
+        pj_yaml_dict = {
+            "scenario": [
+                {
+                    "step": "sample_step",
+                    "class": "SampleStep",
+                    "arguments": {
+                        "memo": now_datetime,
+                        "with_vars": {
+                            "today": "date '+%Y%m%d'",
+                            "yesterday": "date '+%Y%m%d' --date='1 day ago'",
+                        },
+                    },
+                }
+            ]
+        }
+        self._create_scenario_file(pj_yaml_dict)
+
+        manager = YamlScenarioManager(self._cmd_args)
+        manager.create_scenario_queue()
+        instances = ScenarioQueue.step_queue.pop()
+        instance = instances[0]
+
+        assert instance._step == "sample_step"
+        assert type(instance._memo) == datetime
+        assert instance._memo == now_datetime
+
     def test_create_scenario_queue_ok_with_vars_complicated(self):
         """
         Valid scenario.yml with {{ vars }}
         """
+        now_datetime = datetime.now()
         pj_yaml_dict = {
             "scenario": [
                 {
@@ -310,6 +342,7 @@ class TestYamlScenarioManager(BaseCliboaTest):
                         "memo": [
                             {"one": "foo_{{ today }}.csv", "two": "foo_{{ yesterday }}.csv"},
                             {"one": "foo_{{ today }}.txt", "two": "foo_{{ yesterday }}.txt"},
+                            {"now_time": now_datetime},
                         ],
                         "with_vars": {
                             "today": "date '+%Y%m%d'",
@@ -330,7 +363,7 @@ class TestYamlScenarioManager(BaseCliboaTest):
         yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
         assert instance._step == "sample_step"
         assert type(instance._memo) == list
-        assert len(instance._memo) == 2
+        assert len(instance._memo) == 3
         for i, row in enumerate(instance._memo):
             if i == 0:
                 ext = "csv"
@@ -341,6 +374,8 @@ class TestYamlScenarioManager(BaseCliboaTest):
                     assert v == "foo_%s.%s" % (today, ext)
                 elif k == "two":
                     assert v == "foo_%s.%s" % (yesterday, ext)
+                elif k == "now_time":
+                    assert v == now_datetime
 
     def test_create_scenario_queue_ng(self):
         """

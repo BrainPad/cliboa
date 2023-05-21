@@ -3,7 +3,7 @@ import os
 import pytest
 from requests.exceptions import HTTPError
 
-from cliboa.util.http import Download, FormAuth
+from cliboa.util.http import Download, FormAuth, Remove, Update, Upload
 
 
 class TestHttp(object):
@@ -49,6 +49,98 @@ class TestDownload(object):
         retry_cnt = 1
         retry_intvl_sec = 1
         d = Download(url, self._dest_path, timeout, retry_cnt, retry_intvl_sec)
+        with pytest.raises(HTTPError) as execinfo:
+            d.execute()
+        assert "Http request failed." in str(execinfo.value)
+
+
+class TestUpload(object):
+    def setup_method(self, method):
+        self._dest_path = "/tmp/test.result"
+
+    def test_execute_ok(self):
+        # use Postman echo
+        url = "https://postman-echo.com/post"
+        timeout = 10
+        retry_cnt = 3
+        payload = {"key": "value"}
+        headers = {"content-type": "application/json"}
+        d = Upload(url, self._dest_path, timeout, retry_cnt, data=payload, headers=headers)
+        d.execute()
+        f = open("/tmp/test.result", "r")
+        result = f.read()
+        f.close()
+        os.remove(self._dest_path)
+        assert "postman-echo.com" in result
+
+    def test_execute_ng(self):
+        # use url which does not exist
+        url = "https://spam.com/post"
+        timeout = 1
+        retry_cnt = 1
+        retry_intvl_sec = 1
+        payload = {"key": "value"}
+        d = Upload(url, self._dest_path, timeout, retry_cnt, retry_intvl_sec, data=payload)
+        with pytest.raises(HTTPError) as execinfo:
+            d.execute()
+        assert "Http request failed." in str(execinfo.value)
+
+
+class TestUpdate(object):
+    def setup_method(self, method):
+        self._dest_path = "/tmp/test.result"
+
+    def test_execute_ok(self):
+        # use Postman echo
+        url = "https://postman-echo.com/put"
+        timeout = 10
+        retry_cnt = 3
+        payload = {"key": "value"}
+        d = Update(url, self._dest_path, timeout, retry_cnt, data=payload)
+        d.execute()
+        f = open("/tmp/test.result", "r")
+        result = f.read()
+        f.close()
+        os.remove(self._dest_path)
+        assert "postman-echo.com" in result
+
+    def test_execute_ng(self):
+        # use url which does not exist
+        url = "https://spam.com/put"
+        timeout = 1
+        retry_cnt = 1
+        retry_intvl_sec = 1
+        payload = {"key": "value"}
+        d = Update(url, self._dest_path, timeout, retry_cnt, retry_intvl_sec, data=payload)
+        with pytest.raises(HTTPError) as execinfo:
+            d.execute()
+        assert "Http request failed." in str(execinfo.value)
+
+
+class TestDelete(object):
+    def setup_method(self, method):
+        self._dest_path = "/tmp/test.result"
+
+    def test_execute_ok(self):
+        # use Postman echo
+        url = "https://postman-echo.com/delete"
+        timeout = 10
+        retry_cnt = 3
+        d = Remove(url, self._dest_path, timeout, retry_cnt)
+        d.execute()
+        f = open("/tmp/test.result", "r")
+        result = f.read()
+        f.close()
+        os.remove(self._dest_path)
+        assert "postman-echo.com" in result
+
+    def test_execute_ng(self):
+        # use url which does not exist
+        url = "https://spam.com/delete"
+        timeout = 1
+        retry_cnt = 1
+        retry_intvl_sec = 1
+        d = Remove(url, self._dest_path, timeout, retry_cnt, retry_intvl_sec)
         with pytest.raises(HTTPError) as execinfo:
             d.execute()
         assert "Http request failed." in str(execinfo.value)

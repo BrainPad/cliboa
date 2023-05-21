@@ -81,7 +81,7 @@ class TestBase(TestCase):
 
     def test_source_path_reader_with_path(self):
         try:
-            os.makedirs(self._data_dir)
+            os.makedirs(self._data_dir, exist_ok=True)
             dummy_pass = os.path.join(self._data_dir, "id_rsa")
             with open(dummy_pass, "w") as f:
                 f.write("test")

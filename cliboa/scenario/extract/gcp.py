@@ -22,7 +22,6 @@ from cliboa.scenario.validator import EssentialParameters
 from cliboa.util.cache import ObjectStore
 from cliboa.util.constant import StepStatus
 from cliboa.util.exception import InvalidParameter
-from cliboa.util.gcp import BigQuery
 from cliboa.util.string import StringUtil
 
 
@@ -111,18 +110,18 @@ class BigQueryRead(BaseBigQuery):
         gcs_bucket = gcs_client.bucket(self._bucket)
 
         # extract job config settings
-        ext_job_config = BigQuery.get_extract_job_config()
-        ext_job_config.compression = BigQuery.get_compression_type()
+        ext_job_config = BigQueryAdapter.get_extract_job_config()
+        ext_job_config.compression = BigQueryAdapter.get_compression_type()
         ext = ".csv"
         if self._filename:
             _, ext = os.path.splitext(self._filename)
             support_ext = [".csv", ".json"]
             if ext not in support_ext:
                 raise InvalidParameter("%s is not supported as filename." % ext)
-        ext_job_config.destination_format = BigQuery.get_destination_format(ext)
+        ext_job_config.destination_format = BigQueryAdapter.get_destination_format(ext)
 
         comp_format_and_ext = {"GZIP": ".gz"}
-        comp_ext = comp_format_and_ext.get(str(BigQuery.get_compression_type()))
+        comp_ext = comp_format_and_ext.get(str(BigQueryAdapter.get_compression_type()))
         if self._filename:
             dest_gcs = "gs://%s/%s/%s%s" % (
                 self._bucket,
@@ -135,9 +134,9 @@ class BigQueryRead(BaseBigQuery):
 
         # Execute query.
         if self._query:
-            query_job_config = BigQuery.get_query_job_config()
+            query_job_config = BigQueryAdapter.get_query_job_config()
             query_job_config.destination = table_ref
-            query_job_config.write_disposition = BigQuery.get_write_disposition()
+            query_job_config.write_disposition = BigQueryAdapter.get_write_disposition()
             query_job = gbq_client.query(
                 self._query, location=self._location, job_config=query_job_config
             )
