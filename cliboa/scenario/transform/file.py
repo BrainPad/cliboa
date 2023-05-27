@@ -23,12 +23,12 @@ import zipfile
 
 import pandas
 
+from cliboa.adapter.file import File
 from cliboa.core.validator import EssentialParameters
 from cliboa.scenario.base import BaseStep
 from cliboa.scenario.extras import ExceptionHandler
 from cliboa.util.date import DateUtil
 from cliboa.util.exception import CliboaException, FileNotFound, InvalidParameter
-from cliboa.util.file import File
 
 
 class FileBaseTransform(BaseStep, ExceptionHandler):
@@ -387,6 +387,30 @@ class ExcelConvert(FileBaseTransform):
         self._logger.info("Convert %s to %s" % (fi, fo))
         df = pandas.read_excel(fi)
         df.to_csv(fo, encoding=self._encoding)
+
+
+class FileCopy(FileBaseTransform):
+    """
+    Copy the file
+    """
+
+    def __init__(self):
+        super().__init__()
+
+    def execute(self, *args):
+        valid = EssentialParameters(
+            self.__class__.__name__,
+            [self._src_dir, self._src_pattern, self._dest_dir],
+        )
+        valid()
+
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+        self.check_file_existence(files)
+
+        os.makedirs(self._dest_dir, exist_ok=True)
+
+        for file in files:
+            shutil.copy(file, self._dest_dir)
 
 
 class FileDivide(FileBaseTransform):

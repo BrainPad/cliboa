@@ -31,6 +31,7 @@ from cliboa.scenario.transform.file import (
     FileBaseTransform,
     FileCompress,
     FileConvert,
+    FileCopy,
     FileDecompress,
     FileDivide,
     FileRename,
@@ -480,6 +481,65 @@ class TestExcelConvert(TestFileTransform):
 
         exists_csv = glob(os.path.join(self._data_dir, "test.csv"))
         assert "test.csv" in exists_csv[0]
+
+
+class TestFileCopy(TestFileTransform):
+    def test_execute_ok(self):
+        self._create_files()
+
+        instance = FileCopy()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
+        Helper.set_property(instance, "dest_dir", self._out_dir)
+        instance.execute()
+
+        assert os.path.exists(os.path.join(self._data_dir, "test1.txt"))
+        assert os.path.exists(os.path.join(self._out_dir, "test1.txt"))
+
+        assert os.path.exists(os.path.join(self._data_dir, "test2.txt"))
+        assert os.path.exists(os.path.join(self._out_dir, "test2.txt"))
+
+        with open(os.path.join(self._out_dir, "test1.txt"), encoding="utf-8") as f:
+            assert "This is test 1" == f.read()
+        with open(os.path.join(self._out_dir, "test2.txt"), encoding="utf-8") as f:
+            assert "This is test 2" == f.read()
+
+    def test_execute_ok_2(self):
+        files = self._create_files()
+        for file in files:
+            root, name = os.path.split(file)
+            os.rename(file, os.path.join(root, name + ".12345"))
+
+        instance = FileCopy()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
+        Helper.set_property(instance, "src_pattern", r"test.*")
+        Helper.set_property(instance, "dest_dir", self._out_dir)
+        instance.execute()
+
+        assert os.path.exists(os.path.join(self._data_dir, "test1.txt.12345"))
+        assert os.path.exists(os.path.join(self._out_dir, "test1.txt.12345"))
+
+        assert os.path.exists(os.path.join(self._data_dir, "test2.txt.12345"))
+        assert os.path.exists(os.path.join(self._out_dir, "test2.txt.12345"))
+
+        with open(os.path.join(self._out_dir, "test1.txt.12345"), encoding="utf-8") as f:
+            assert "This is test 1" == f.read()
+        with open(os.path.join(self._out_dir, "test2.txt.12345"), encoding="utf-8") as f:
+            assert "This is test 2" == f.read()
+
+    def test_execute_ng(self):
+        self._create_files()
+
+        instance = FileCopy()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
+        with pytest.raises(Exception) as e:
+            instance.execute()
+        assert "The essential parameter is not specified in FileCopy." == str(e.value)
 
 
 class TestFileDivide(TestFileTransform):

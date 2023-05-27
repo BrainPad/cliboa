@@ -64,6 +64,8 @@ class HttpDownload(HttpExtract):
 
     def execute(self, *args):
         os.makedirs(self._dest_dir, exist_ok=True)
+        # This module is deprecated. Use HttpGet module.
+        self._logger.warning("This module is deprecated. Use HttpGet module.")
 
         if self._src_pattern:
             # Deprecated URL must be a specific string, does not have to be a pattern of regex.

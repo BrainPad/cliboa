@@ -21,12 +21,12 @@ from datetime import datetime
 import jsonlines
 import pandas
 
+from cliboa.adapter.file import File
 from cliboa.adapter.sqlite import SqliteAdapter
 from cliboa.core.validator import EssentialParameters
 from cliboa.scenario.transform.file import FileBaseTransform
 from cliboa.util.csv import Csv
 from cliboa.util.exception import FileNotFound, InvalidCount, InvalidParameter
-from cliboa.util.file import File
 from cliboa.util.string import StringUtil
 
 
@@ -945,6 +945,42 @@ class CsvColumnReplace(FileBaseTransform):
                 mode="w" if first_write else "a",
             )
             first_write = False
+
+
+class CsvDuplicateRowDelete(FileBaseTransform):
+    def __init__(self):
+        super().__init__()
+        self._delimiter = ","
+
+    def delimiter(self, delimiter):
+        self._delimiter = delimiter
+
+    def execute(self, *args):
+        # essential parameters check
+        valid = EssentialParameters(
+            self.__class__.__name__,
+            [self._src_dir, self._src_pattern],
+        )
+        valid()
+
+        os.makedirs(self._dest_dir, exist_ok=True)
+
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+
+        self.check_file_existence(files)
+        super().io_files(files, func=self.convert)
+
+    def convert(self, fi, fo):
+        with open(fi, "r") as i:
+            reader = csv.reader(i, delimiter=self._delimiter)
+            result = []
+            for li in reader:
+                if li not in result:
+                    result.append(li)
+            with open(fo, "w", newline="") as o:
+                writer = csv.writer(o, delimiter=self._delimiter)
+                for w in result:
+                    writer.writerow(w)
 
 
 def chunk_size_handling(read_csv_func, *args, **kwd):

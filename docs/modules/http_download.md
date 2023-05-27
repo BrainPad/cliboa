@@ -1,5 +1,6 @@
 # HttpDownload
 Download a file via HTTP.
+This module is deprecated. Use HttpGet module.
 
 # Parameters
 |Parameters|Explanation|Required|Default|Remarks|
