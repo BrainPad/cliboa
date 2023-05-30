@@ -45,8 +45,6 @@ class TestAzureBlobDownload(object):
         blob_client.download_blob.return_value.readinto = lambda s: s.write(b"foo")
 
         try:
-            os.makedirs(self._data_dir)
-
             # Act
             instance = AzureBlobDownload()
             Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))

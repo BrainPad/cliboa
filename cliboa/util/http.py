@@ -11,6 +11,7 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+import json
 from abc import ABC, abstractmethod
 from time import sleep
 
@@ -144,7 +145,12 @@ class Upload(Http):
 
     def request(self):
         self._logger.info("Http POST url: %s" % self._url)
-        return requests.post(self._url, timeout=self._timeout, **self._params)
+        return requests.post(
+            self._url,
+            timeout=self._timeout,
+            headers=self._params["headers"],
+            data=json.dumps(self._params["data"]),
+        )
 
 
 class Update(Http):
@@ -161,7 +167,12 @@ class Update(Http):
 
     def request(self):
         self._logger.info("Http PUT url: %s" % self._url)
-        return requests.put(self._url, timeout=self._timeout, **self._params)
+        return requests.put(
+            self._url,
+            timeout=self._timeout,
+            headers=self._params["headers"],
+            data=json.dumps(self._params["data"]),
+        )
 
 
 class Remove(Http):
