@@ -22,7 +22,7 @@ from .extract.gcp import (
     GcsDownloadFileDelete,
     GcsFileExistsCheck,
 )
-from .extract.http import HttpDownload, HttpDownloadViaBasicAuth
+from .extract.http import HttpDownload, HttpDownloadViaBasicAuth, HttpGet
 from .extract.mysql import MysqlRead
 from .extract.postgres import PostgresqlRead
 from .extract.sftp import SftpDelete, SftpDownload, SftpDownloadFileDelete, SftpFileExistsCheck
@@ -30,6 +30,7 @@ from .extract.sqlite import SqliteExport
 from .load.aws import S3Upload
 from .load.azure import AzureBlobUpload
 from .load.gcp import BigQueryCopy, BigQueryWrite, FirestoreDocumentCreate, GcsUpload
+from .load.http import HttpDelete, HttpPost
 from .load.mysql import MysqlWrite
 from .load.postgres import PostgresqlWrite
 from .load.sftp import SftpUpload
