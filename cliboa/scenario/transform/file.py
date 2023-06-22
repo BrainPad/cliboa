@@ -229,11 +229,11 @@ class FileDecompress(FileBaseTransform):
             elif ext == ".bz2":
                 self._logger.info("Decompress bz2 file %s" % f)
                 dcom_name = os.path.splitext(os.path.basename(f))[0]
-                decom_path = (
-                    os.path.join(self._dest_dir, dcom_name)
-                    if self._dest_dir is not None
-                    else os.path.join(self._src_dir, dcom_name)
-                )
+                if self._dest_dir:
+                    os.makedirs(self._dest_dir, exist_ok=True)
+                    decom_path = os.path.join(self._dest_dir, dcom_name)
+                else:
+                    decom_path = os.path.join(self._src_dir, dcom_name)
                 with bz2.open(f, mode="rb") as i, open(decom_path, mode="wb") as o:
                     while True:
                         buf = i.read(self._chunk_size)
