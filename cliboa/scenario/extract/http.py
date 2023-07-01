@@ -17,10 +17,12 @@ from requests.auth import HTTPBasicAuth
 
 from cliboa.adapter.http import Download
 from cliboa.scenario.base import BaseStep
+from cliboa.scenario.http import HttpBase
 from cliboa.scenario.validator import EssentialParameters
 
 
 class HttpExtract(BaseStep):
+    # This module is deprecated. Use HttpBase module.
     def __init__(self):
         super().__init__()
         self._src_url = None
@@ -119,3 +121,34 @@ class HttpDownloadViaBasicAuth(HttpDownload):
 
     def get_params(self):
         return {"auth": HTTPBasicAuth(self._user, self._password)}
+
+
+class HttpGet(HttpBase):
+    def __init__(self):
+        super().__init__()
+
+    def execute(self, *args):
+        os.makedirs(self._dest_dir, exist_ok=True)
+
+        if self._basic_auth:
+            valid = EssentialParameters(
+                self.__class__.__name__,
+                [self._src_url, self._dest_dir, self._dest_name, self._user, self._password],
+            )
+        else:
+            valid = EssentialParameters(
+                self.__class__.__name__, [self._src_url, self._dest_dir, self._dest_name]
+            )
+        valid()
+        url = self._src_url
+        dest_path = os.path.join(self._dest_dir, self._dest_name)
+
+        d = Download(
+            url,
+            dest_path,
+            self._timeout,
+            self._retry_count,
+            self._retry_intvl_sec,
+            **super().get_params(),
+        )
+        d.execute()

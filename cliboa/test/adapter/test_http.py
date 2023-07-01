@@ -80,7 +80,10 @@ class TestUpload(object):
         retry_cnt = 1
         retry_intvl_sec = 1
         payload = {"key": "value"}
-        d = Upload(url, self._dest_path, timeout, retry_cnt, retry_intvl_sec, data=payload)
+        headers = {"content-type": "application/json"}
+        d = Upload(
+            url, self._dest_path, timeout, retry_cnt, retry_intvl_sec, data=payload, headers=headers
+        )
         with pytest.raises(HTTPError) as execinfo:
             d.execute()
         assert "Http request failed." in str(execinfo.value)
@@ -96,7 +99,8 @@ class TestUpdate(object):
         timeout = 10
         retry_cnt = 3
         payload = {"key": "value"}
-        d = Update(url, self._dest_path, timeout, retry_cnt, data=payload)
+        headers = {"content-type": "application/json"}
+        d = Update(url, self._dest_path, timeout, retry_cnt, data=payload, headers=headers)
         d.execute()
         f = open("/tmp/test.result", "r")
         result = f.read()
@@ -111,7 +115,10 @@ class TestUpdate(object):
         retry_cnt = 1
         retry_intvl_sec = 1
         payload = {"key": "value"}
-        d = Update(url, self._dest_path, timeout, retry_cnt, retry_intvl_sec, data=payload)
+        headers = {"content-type": "application/json"}
+        d = Update(
+            url, self._dest_path, timeout, retry_cnt, retry_intvl_sec, data=payload, headers=headers
+        )
         with pytest.raises(HTTPError) as execinfo:
             d.execute()
         assert "Http request failed." in str(execinfo.value)
