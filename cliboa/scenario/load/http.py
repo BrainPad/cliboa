@@ -15,7 +15,6 @@ import os
 from abc import ABC, abstractmethod
 from time import sleep
 
-
 import requests
 from requests.auth import HTTPBasicAuth
 from requests.exceptions import HTTPError
