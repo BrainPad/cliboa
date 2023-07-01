@@ -11,211 +11,17 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import os
+import json
 from abc import ABC, abstractmethod
 from time import sleep
 
 import requests
-from requests.auth import HTTPBasicAuth
 from requests.exceptions import HTTPError
 
-from cliboa.adapter.http import Download, Remove, Update, Upload
-from cliboa.scenario.base import BaseStep
 from cliboa.scenario.validator import EssentialParameters
 from cliboa.util.lisboa_log import LisboaLog
 
 VALID_HTTP_STATUS = 200
-
-
-class HttpBase(BaseStep):
-    def __init__(self):
-        super().__init__()
-        self._src_url = None
-        self._dest_dir = None
-        self._dest_name = None
-        self._timeout = 30
-        self._retry_count = 3
-        self._retry_intvl_sec = 10
-        self._basic_auth = False
-        self._user = None
-        self._password = None
-
-    def src_url(self, src_url):
-        self._src_url = src_url
-
-    def dest_dir(self, dest_dir):
-        self._dest_dir = dest_dir
-
-    def dest_name(self, dest_name):
-        self._dest_name = dest_name
-
-    def timeout(self, timeout):
-        self._timeout = timeout
-
-    def retry_count(self, retry_count):
-        self._retry_count = retry_count
-
-    def retry_intvl_sec(self, retry_intvl_sec):
-        self._retry_intvl_sec = retry_intvl_sec
-
-    def basic_auth(self, basic_auth):
-        self._basic_auth = basic_auth
-
-    def user(self, user):
-        self._user = user
-
-    def password(self, password):
-        self._password = password
-
-    def execute(self, *args):
-        pass
-
-    def get_params(self):
-        if self._basic_auth:
-            return {"auth": HTTPBasicAuth(self._user, self._password)}
-        return {}
-
-
-class HttpGet(HttpBase):
-    def __init__(self):
-        super().__init__()
-
-    def execute(self, *args):
-        os.makedirs(self._dest_dir, exist_ok=True)
-
-        if self._basic_auth:
-            valid = EssentialParameters(
-                self.__class__.__name__,
-                [self._src_url, self._dest_dir, self._dest_name, self._user, self._password],
-            )
-        else:
-            valid = EssentialParameters(
-                self.__class__.__name__, [self._src_url, self._dest_dir, self._dest_name]
-            )
-        valid()
-        url = self._src_url
-        dest_path = os.path.join(self._dest_dir, self._dest_name)
-
-        d = Download(
-            url,
-            dest_path,
-            self._timeout,
-            self._retry_count,
-            self._retry_intvl_sec,
-            **super().get_params(),
-        )
-        d.execute()
-
-
-class HttpPost(HttpBase):
-    def __init__(self):
-        super().__init__()
-        self._payload = {}
-        self._headers = {"accept": "application/json", "Content-Type": "application/json"}
-
-    def payload(self, payload):
-        self._payload = payload
-
-    def headers(self, headers):
-        self._headers = headers
-
-    def execute(self, *args):
-        os.makedirs(self._dest_dir, exist_ok=True)
-
-        if self._basic_auth:
-            valid = EssentialParameters(
-                self.__class__.__name__,
-                [self._src_url, self._dest_dir, self._dest_name, self._user, self._password],
-            )
-        else:
-            valid = EssentialParameters(
-                self.__class__.__name__, [self._src_url, self._dest_dir, self._dest_name]
-            )
-        valid()
-        url = self._src_url
-        dest_path = os.path.join(self._dest_dir, self._dest_name)
-
-        u = Upload(
-            url,
-            dest_path,
-            self._timeout,
-            self._retry_count,
-            self._retry_intvl_sec,
-            data=self._payload,
-            headers=self._headers,
-        )
-        u.execute()
-
-
-class HttpPut(HttpBase):
-    def __init__(self):
-        super().__init__()
-        self._payload = {}
-        self._headers = {"accept": "application/json", "Content-Type": "application/json"}
-
-    def payload(self, payload):
-        self._payload = payload
-
-    def headers(self, headers):
-        self._headers = headers
-
-    def execute(self, *args):
-        os.makedirs(self._dest_dir, exist_ok=True)
-
-        if self._basic_auth:
-            valid = EssentialParameters(
-                self.__class__.__name__,
-                [self._src_url, self._dest_dir, self._dest_name, self._user, self._password],
-            )
-        else:
-            valid = EssentialParameters(
-                self.__class__.__name__, [self._src_url, self._dest_dir, self._dest_name]
-            )
-        valid()
-        url = self._src_url
-        dest_path = os.path.join(self._dest_dir, self._dest_name)
-
-        u = Update(
-            url,
-            dest_path,
-            self._timeout,
-            self._retry_count,
-            self._retry_intvl_sec,
-            data=self._payload,
-            headers=self._headers,
-        )
-        u.execute()
-
-
-class HttpDelete(HttpBase):
-    def __init__(self):
-        super().__init__()
-
-    def execute(self, *args):
-        os.makedirs(self._dest_dir, exist_ok=True)
-
-        if self._basic_auth:
-            valid = EssentialParameters(
-                self.__class__.__name__,
-                [self._src_url, self._dest_dir, self._dest_name, self._user, self._password],
-            )
-        else:
-            valid = EssentialParameters(
-                self.__class__.__name__, [self._src_url, self._dest_dir, self._dest_name]
-            )
-        valid()
-        url = self._src_url
-        dest_path = os.path.join(self._dest_dir, self._dest_name)
-
-        r = Remove(
-            url,
-            dest_path,
-            self._timeout,
-            self._retry_count,
-            self._retry_intvl_sec,
-            **super().get_params(),
-        )
-        r.execute()
 
 
 class FormAuth(object):
@@ -339,7 +145,12 @@ class Upload(Http):
 
     def request(self):
         self._logger.info("Http POST url: %s" % self._url)
-        return requests.post(self._url, timeout=self._timeout, **self._params)
+        return requests.post(
+            self._url,
+            timeout=self._timeout,
+            headers=self._params["headers"],
+            data=json.dumps(self._params["data"]),
+        )
 
 
 class Update(Http):
@@ -356,7 +167,12 @@ class Update(Http):
 
     def request(self):
         self._logger.info("Http PUT url: %s" % self._url)
-        return requests.put(self._url, timeout=self._timeout, **self._params)
+        return requests.put(
+            self._url,
+            timeout=self._timeout,
+            headers=self._params["headers"],
+            data=json.dumps(self._params["data"]),
+        )
 
 
 class Remove(Http):
