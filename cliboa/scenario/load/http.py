@@ -13,9 +13,9 @@
 #
 import os
 
+from cliboa.adapter.http import Remove, Update, Upload
 from cliboa.scenario.http import HttpBase
 from cliboa.scenario.validator import EssentialParameters
-from cliboa.util.http import Remove, Update, Upload
 
 
 class HttpPost(HttpBase):
