@@ -3,7 +3,7 @@ import os
 import pytest
 from requests.exceptions import HTTPError
 
-from cliboa.util.http import Download, FormAuth, Remove, Update, Upload
+from cliboa.adapter.http import Download, FormAuth, Remove, Update, Upload
 
 
 class TestHttp(object):

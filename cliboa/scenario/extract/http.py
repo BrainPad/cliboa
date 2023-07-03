@@ -15,10 +15,10 @@ import os
 
 from requests.auth import HTTPBasicAuth
 
+from cliboa.adapter.http import Download
 from cliboa.scenario.base import BaseStep
 from cliboa.scenario.http import HttpBase
 from cliboa.scenario.validator import EssentialParameters
-from cliboa.util.http import Download
 
 
 class HttpExtract(BaseStep):
