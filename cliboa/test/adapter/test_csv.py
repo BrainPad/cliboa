@@ -15,8 +15,8 @@ import csv
 import os
 import shutil
 
+from cliboa.adapter.csv import Csv
 from cliboa.conf import env
-from cliboa.util.csv import Csv
 
 
 class TestCsv(object):
