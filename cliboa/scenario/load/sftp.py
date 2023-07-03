@@ -13,10 +13,10 @@
 #
 import os
 
+from cliboa.adapter.sftp import SftpAdapter
 from cliboa.core.validator import EssentialParameters
 from cliboa.scenario.sftp import BaseSftp
 from cliboa.util.constant import StepStatus
-from cliboa.util.sftp import Sftp
 
 
 class SftpBaseLoad(BaseSftp):
@@ -56,7 +56,9 @@ class SftpUpload(SftpBaseLoad):
                     self._logger.info("0 byte file will no be uploaded %s." % file)
                     continue
 
-                obj = Sftp().put_file(
+                obj = SftpAdapter(
+                    host=self._host, user=self._user, password=self._password, key=self._key
+                ).put_file(
                     src=file,
                     dest=os.path.join(self._dest_dir, os.path.basename(file)),
                     endfile_suffix=self._endfile_suffix,
