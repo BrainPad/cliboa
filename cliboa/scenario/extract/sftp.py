@@ -91,7 +91,14 @@ class SftpDelete(SftpExtract):
         )
         valid()
 
-        obj = SftpAdapter().clear_files(
+        obj = SftpAdapter(
+            host=self._host,
+            user=self._user,
+            password=self._password,
+            key=self._key,
+            timeout=self._timeout,
+            port=self._port,
+        ).clear_files(
             dir=self._src_dir,
             pattern=re.compile(self._src_pattern),
         )
@@ -128,7 +135,14 @@ class SftpDownloadFileDelete(SftpExtract):
 
             endfile_suffix = super().get_step_argument("endfile_suffix")
             for file in files:
-                obj = SftpAdapter().remove_specific_file(
+                obj = SftpAdapter(
+                    host=self._host,
+                    user=self._user,
+                    password=self._password,
+                    key=self._key,
+                    timeout=self._timeout,
+                    port=self._port,
+                ).remove_specific_file(
                     dir=self._src_dir,
                     fname=file,
                 )
@@ -136,7 +150,14 @@ class SftpDownloadFileDelete(SftpExtract):
                 self._logger.info("%s is successfully deleted." % file)
 
                 if endfile_suffix:
-                    obj = SftpAdapter().remove_specific_file(
+                    obj = SftpAdapter(
+                        host=self._host,
+                        user=self._user,
+                        password=self._password,
+                        key=self._key,
+                        timeout=self._timeout,
+                        port=self._port,
+                    ).remove_specific_file(
                         dir=self._src_dir,
                         fname=file + endfile_suffix,
                     )
