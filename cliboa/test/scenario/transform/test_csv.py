@@ -1275,6 +1275,26 @@ class TestCsvConvert(TestCsvTransform):
             line = next(reader)
         assert line == ["1", "spam"]
 
+    def test_escapechar(self):
+        # create test csv
+        file = os.path.join(self._data_dir, "test.csv")
+        with open(file, mode="w", encoding="utf-8") as i:
+            i.write('key,data\n1,spa#"m\n')
+
+        # set attributes
+        instance = CsvConvert()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "before_escapechar", "#")
+        Helper.set_property(instance, "after_escapechar", "\\")
+
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            self.assertEqual('key,data\n1,spa\\"m\n', o.read())
+
 
 class TestCsvDuplicateRowDelete(TestCsvTransform):
     def test_execute_ok(self):

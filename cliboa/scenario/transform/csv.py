@@ -630,9 +630,11 @@ class CsvConvert(FileBaseTransform):
         self._add_headers = None
         self._before_format = "csv"
         self._before_enc = self._encoding
+        self._before_escapechar = None
         self._after_format = None
         self._after_enc = None
         self._after_nl = "LF"
+        self._after_escapechar = None
         self._reader_quote = "QUOTE_MINIMAL"
         self._quote = "QUOTE_MINIMAL"
 
@@ -651,6 +653,9 @@ class CsvConvert(FileBaseTransform):
     def before_enc(self, before_enc):
         self._before_enc = before_enc
 
+    def before_escapechar(self, before_escapechar):
+        self._before_escapechar = before_escapechar
+
     def after_format(self, after_format):
         self._after_format = after_format
 
@@ -659,6 +664,9 @@ class CsvConvert(FileBaseTransform):
 
     def after_nl(self, after_nl):
         self._after_nl = after_nl
+
+    def after_escapechar(self, after_escapechar):
+        self._after_escapechar = after_escapechar
 
     def reader_quote(self, reader_quote):
         self._reader_quote = reader_quote
@@ -691,6 +699,8 @@ class CsvConvert(FileBaseTransform):
                 i,
                 delimiter=Csv.delimiter_convert(self._before_format),
                 quoting=Csv.quote_convert(self._reader_quote),
+                escapechar=self._before_escapechar,
+                doublequote=False if self._before_escapechar else True,
             )
             with open(fo, mode="wt", newline="", encoding=self._after_enc) as o:
                 writer = csv.writer(
@@ -698,6 +708,8 @@ class CsvConvert(FileBaseTransform):
                     delimiter=Csv.delimiter_convert(self._after_format),
                     quoting=Csv.quote_convert(self._quote),
                     lineterminator=Csv.newline_convert(self._after_nl),
+                    escapechar=self._after_escapechar,
+                    doublequote=False if self._after_escapechar else True,
                 )
 
                 for i, line in enumerate(reader):
