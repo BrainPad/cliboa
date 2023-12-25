@@ -995,6 +995,68 @@ class CsvDuplicateRowDelete(FileBaseTransform):
                     writer.writerow(w)
 
 
+class CsvRowDelete(FileBaseTransform):
+    def __init__(self):
+        super().__init__()
+        self._alter_path = None
+        self._src_key_column = None
+        self._alter_key_column = None
+        self._delimiter = ","
+        self._has_match = True
+
+    def alter_path(self, alter_path):
+        self._alter_path = alter_path
+
+    def src_key_column(self, src_key_column):
+        self._src_key_column = src_key_column
+
+    def alter_key_column(self, alter_key_column):
+        self._alter_key_column = alter_key_column
+
+    def delimiter(self, delimiter):
+        self._delimiter = delimiter
+
+    def has_match(self, has_match):
+        self._has_match = has_match
+
+    def execute(self, *args):
+        # essential parameters check
+        valid = EssentialParameters(
+            self.__class__.__name__,
+            [
+                self._src_dir,
+                self._src_pattern,
+                self._alter_path,
+                self._src_key_column,
+                self._alter_key_column,
+            ],
+        )
+        valid()
+
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+
+        self._logger.info("files is %s", files)
+        self.check_file_existence(files)
+        super().io_files(files, func=self.convert)
+
+    def convert(self, fi, fo):
+        s = set()
+        with open(self._alter_path, "r") as al:
+            alt_reader = csv.DictReader(al, delimiter=self._delimiter)
+            for alt_row in alt_reader:
+                s.add(alt_row[self._alter_key_column])
+        with open(fi, "r") as i:
+            reader = csv.DictReader(i, delimiter=self._delimiter)
+            with open(fo, "w", newline="") as o:
+                writer = csv.DictWriter(o, fieldnames=reader.fieldnames, delimiter=self._delimiter)
+                writer.writeheader()
+                for row in reader:
+                    if self._has_match is True and row[self._src_key_column] not in s:
+                        writer.writerow(row)
+                    elif self._has_match is False and row[self._src_key_column] in s:
+                        writer.writerow(row)
+
+
 def chunk_size_handling(read_csv_func, *args, **kwd):
     """
     Processing to avoid memory errors in pandas's read_csv.
