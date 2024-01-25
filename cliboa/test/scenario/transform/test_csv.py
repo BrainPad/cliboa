@@ -34,6 +34,7 @@ from cliboa.scenario.transform.csv import (
     CsvDuplicateRowDelete,
     CsvMerge,
     CsvMergeExclusive,
+    CsvRowDelete,
     CsvSort,
     CsvToJsonl,
     CsvValueExtract,
@@ -1456,6 +1457,239 @@ class TestCsvDuplicateRowDelete(TestCsvTransform):
                     self.assertEqual(["2\t\t"], row)
                 record_count += 1
             assert record_count == 3
+
+
+class TestCsvRowDelete(TestCsvTransform):
+    def test_execute_ok_match(self):
+        # create test csv
+        test_csv_data = [["id", "name"], ["1", "test"], ["2", "test2"]]
+        test_csv_data_2 = [["number", "address"], ["1", "test@aaa.com"], ["3", "test3@aaa.com"]]
+        self._create_csv(test_csv_data)
+        self._create_csv(test_csv_data_2, fname="alter.csv")
+
+        # set the essential attributes
+        instance = CsvRowDelete()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.csv")
+        Helper.set_property(instance, "alter_path", self._data_dir + "/" + "alter.csv")
+        Helper.set_property(instance, "src_key_column", "id")
+        Helper.set_property(instance, "alter_key_column", "number")
+        Helper.set_property(instance, "has_match", True)
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            record_count = 0
+            for i, row in enumerate(reader):
+                if i == 0:
+                    self.assertEqual(["id", "name"], row)
+                if i == 1:
+                    self.assertEqual(["2", "test2"], row)
+                record_count += 1
+            assert record_count == 2
+
+    def test_execute_ok_match_2(self):
+        # create test csv
+        test_csv_data = [["id", "name"], ["1", "test"], ["1", "testtest"]]
+        test_csv_data_2 = [["number", "address"], ["1", "test@aaa.com"], ["3", "testtest@aaa.com"]]
+        self._create_csv(test_csv_data)
+        self._create_csv(test_csv_data_2, fname="alter.csv")
+
+        # set the essential attributes
+        instance = CsvRowDelete()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.csv")
+        Helper.set_property(instance, "alter_path", self._data_dir + "/" + "alter.csv")
+        Helper.set_property(instance, "src_key_column", "id")
+        Helper.set_property(instance, "alter_key_column", "number")
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            record_count = 0
+            for i, row in enumerate(reader):
+                if i == 0:
+                    self.assertEqual(["id", "name"], row)
+                record_count += 1
+            assert record_count == 1
+
+    def test_execute_ok_match_3(self):
+        # create test csv
+        test_csv_data = [["id", "name"], ["1", "test"], ["2", "test2"]]
+        test_csv_data_2 = [["number", "address"], ["1", "test@aaa.com"], ["1", "testtest@aaa.com"]]
+        self._create_csv(test_csv_data)
+        self._create_csv(test_csv_data_2, fname="alter.csv")
+
+        # set the essential attributes
+        instance = CsvRowDelete()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.csv")
+        Helper.set_property(instance, "alter_path", self._data_dir + "/" + "alter.csv")
+        Helper.set_property(instance, "src_key_column", "id")
+        Helper.set_property(instance, "alter_key_column", "number")
+        Helper.set_property(instance, "has_match", True)
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            record_count = 0
+            for i, row in enumerate(reader):
+                if i == 0:
+                    self.assertEqual(["id", "name"], row)
+                if i == 1:
+                    self.assertEqual(["2", "test2"], row)
+                record_count += 1
+            assert record_count == 2
+
+    def test_execute_ok_match_4(self):
+        # create test csv
+        test_csv_data = [["id", "name"], ["1", "test"], ["2", "test2"]]
+        test_csv_data_2 = [["number", "address"], ["3", "test3@aaa.com"], ["4", "test4@aaa.com"]]
+        self._create_csv(test_csv_data)
+        self._create_csv(test_csv_data_2, fname="alter.csv")
+
+        # set the essential attributes
+        instance = CsvRowDelete()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.csv")
+        Helper.set_property(instance, "alter_path", self._data_dir + "/" + "alter.csv")
+        Helper.set_property(instance, "src_key_column", "id")
+        Helper.set_property(instance, "alter_key_column", "number")
+        Helper.set_property(instance, "has_match", True)
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            record_count = 0
+            for i, row in enumerate(reader):
+                if i == 0:
+                    self.assertEqual(["id", "name"], row)
+                if i == 1:
+                    self.assertEqual(["1", "test"], row)
+                if i == 2:
+                    self.assertEqual(["2", "test2"], row)
+                record_count += 1
+            assert record_count == 3
+
+    def test_execute_ok_unmatch(self):
+        # create test csv
+        test_csv_data = [["id", "name"], ["1", "test"], ["2", "test2"]]
+        test_csv_data_2 = [["number", "address"], ["1", "test@aaa.com"], ["3", "test3@aaa.com"]]
+        self._create_csv(test_csv_data)
+        self._create_csv(test_csv_data_2, fname="alter.csv")
+
+        # set the essential attributes
+        instance = CsvRowDelete()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.csv")
+        Helper.set_property(instance, "alter_path", self._data_dir + "/" + "alter.csv")
+        Helper.set_property(instance, "src_key_column", "id")
+        Helper.set_property(instance, "alter_key_column", "number")
+        Helper.set_property(instance, "has_match", False)
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            record_count = 0
+            for i, row in enumerate(reader):
+                if i == 0:
+                    self.assertEqual(["id", "name"], row)
+                if i == 1:
+                    self.assertEqual(["1", "test"], row)
+                record_count += 1
+            assert record_count == 2
+
+    def test_execute_ok_unmatch_2(self):
+        # create test csv
+        test_csv_data = [["id", "name"], ["1", "test"], ["1", "testtest"]]
+        test_csv_data_2 = [["number", "address"], ["1", "test@aaa.com"], ["3", "testtest@aaa.com"]]
+        self._create_csv(test_csv_data)
+        self._create_csv(test_csv_data_2, fname="alter.csv")
+
+        # set the essential attributes
+        instance = CsvRowDelete()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.csv")
+        Helper.set_property(instance, "alter_path", self._data_dir + "/" + "alter.csv")
+        Helper.set_property(instance, "src_key_column", "id")
+        Helper.set_property(instance, "alter_key_column", "number")
+        Helper.set_property(instance, "has_match", False)
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            record_count = 0
+            for i, row in enumerate(reader):
+                if i == 0:
+                    self.assertEqual(["id", "name"], row)
+                if i == 1:
+                    self.assertEqual(["1", "test"], row)
+                if i == 2:
+                    self.assertEqual(["1", "testtest"], row)
+                record_count += 1
+            assert record_count == 3
+
+    def test_execute_ok_unmatch_3(self):
+        # create test csv
+        test_csv_data = [["id", "name"], ["1", "test"], ["2", "test2"]]
+        test_csv_data_2 = [["number", "address"], ["1", "test@aaa.com"], ["1", "testtest@aaa.com"]]
+        self._create_csv(test_csv_data)
+        self._create_csv(test_csv_data_2, fname="alter.csv")
+
+        # set the essential attributes
+        instance = CsvRowDelete()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.csv")
+        Helper.set_property(instance, "alter_path", self._data_dir + "/" + "alter.csv")
+        Helper.set_property(instance, "src_key_column", "id")
+        Helper.set_property(instance, "alter_key_column", "number")
+        Helper.set_property(instance, "has_match", False)
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            record_count = 0
+            for i, row in enumerate(reader):
+                if i == 0:
+                    self.assertEqual(["id", "name"], row)
+                if i == 1:
+                    self.assertEqual(["1", "test"], row)
+                record_count += 1
+            assert record_count == 2
+
+    def test_execute_ok_unmatch_4(self):
+        # create test csv
+        test_csv_data = [["id", "name"], ["1", "test"], ["2", "test2"]]
+        test_csv_data_2 = [["number", "address"], ["3", "test3@aaa.com"], ["4", "test4@aaa.com"]]
+        self._create_csv(test_csv_data)
+        self._create_csv(test_csv_data_2, fname="alter.csv")
+
+        # set the essential attributes
+        instance = CsvRowDelete()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.csv")
+        Helper.set_property(instance, "alter_path", self._data_dir + "/" + "alter.csv")
+        Helper.set_property(instance, "src_key_column", "id")
+        Helper.set_property(instance, "alter_key_column", "number")
+        Helper.set_property(instance, "has_match", False)
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            record_count = 0
+            for i, row in enumerate(reader):
+                if i == 0:
+                    self.assertEqual(["id", "name"], row)
+                record_count += 1
+            assert record_count == 1
 
 
 class TestCsvSort(TestCsvTransform):
