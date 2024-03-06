@@ -68,6 +68,7 @@ class CsvColumnHash(FileBaseTransform):
             dtype=str,
             encoding=self._encoding,
             chunksize=chunksize,
+            na_filter=False,
         )
         for df in tfr:
             for c in self._columns:
@@ -159,6 +160,7 @@ class CsvColumnDelete(FileBaseTransform):
             dtype=str,
             encoding=self._encoding,
             chunksize=chunksize,
+            na_filter=False,
         )
         pattern = re.compile(self._regex_pattern)
         for df in tfr:
@@ -262,6 +264,7 @@ class CsvColumnConcat(FileBaseTransform):
             dtype=str,
             encoding=self._encoding,
             chunksize=chunksize,
+            na_filter=False,
         )
         dest_str = None
         for df in tfr:
@@ -348,7 +351,7 @@ class CsvMergeExclusive(FileBaseTransform):
     def _read_csv_func(self, chunksize, fi, fo):
         # Used in chunk_size_handling
         first_write = True
-        tfr = pandas.read_csv(fi, chunksize=chunksize)
+        tfr = pandas.read_csv(fi, chunksize=chunksize, na_filter=False)
         for df in tfr:
             df = df[~df[self._src_column].isin(self.df_target_list)]
             df.to_csv(
@@ -460,6 +463,7 @@ class CsvMerge(FileBaseTransform):
             dtype=str,
             encoding=self._encoding,
             chunksize=chunksize,
+            na_filter=False,
         )
         for df in tfr1:
             df.to_csv(
@@ -524,6 +528,7 @@ class CsvColumnSelect(FileBaseTransform):
             dtype=str,
             encoding=self._encoding,
             chunksize=chunksize,
+            na_filter=False,
         )
         for df in tfr:
             if set(self._column_order) - set(df.columns.values):
@@ -584,12 +589,16 @@ class CsvConcat(FileBaseTransform):
 
         # Create output headers to conform to the concat specification.
         file_1 = files[0]
-        output_header = pandas.read_csv(file_1, dtype=str, encoding=self._encoding, nrows=0)
+        output_header = pandas.read_csv(
+            file_1, dtype=str, encoding=self._encoding, nrows=0, na_filter=False
+        )
         for file in files[1:]:
             output_header = pandas.concat(
                 [
                     output_header,
-                    pandas.read_csv(file, dtype=str, encoding=self._encoding, nrows=0),
+                    pandas.read_csv(
+                        file, dtype=str, encoding=self._encoding, nrows=0, na_filter=False
+                    ),
                 ]
             )
 
@@ -604,6 +613,7 @@ class CsvConcat(FileBaseTransform):
                 dtype=str,
                 encoding=self._encoding,
                 chunksize=chunksize,
+                na_filter=False,
             )
             for df in tfr:
                 # Change the header order to the one you plan to output.
@@ -858,7 +868,13 @@ class CsvColumnCopy(FileBaseTransform):
         super().io_files(files, func=self.convert)
 
     def convert(self, fi, fo):
-        header = pandas.read_csv(fi, dtype=str, encoding=self._encoding, nrows=0)
+        header = pandas.read_csv(
+            fi,
+            dtype=str,
+            encoding=self._encoding,
+            nrows=0,
+            na_filter=False,
+        )
         if self._src_column not in header:
             raise KeyError("Copy source column does not exist in file. [%s]" % self._src_column)
 
@@ -872,6 +888,7 @@ class CsvColumnCopy(FileBaseTransform):
             dtype=str,
             encoding=self._encoding,
             chunksize=chunksize,
+            na_filter=False,
         )
 
         for df in tfr:
@@ -931,7 +948,7 @@ class CsvColumnReplace(FileBaseTransform):
         super().io_files(files, func=self.convert)
 
     def convert(self, fi, fo):
-        header = pandas.read_csv(fi, dtype=str, encoding=self._encoding, nrows=0)
+        header = pandas.read_csv(fi, dtype=str, encoding=self._encoding, nrows=0, na_filter=False)
         if self._column not in header:
             raise KeyError("Replace source column does not exist in file. [%s]" % self._column)
 
@@ -945,6 +962,7 @@ class CsvColumnReplace(FileBaseTransform):
             dtype=str,
             encoding=self._encoding,
             chunksize=chunksize,
+            na_filter=False,
         )
 
         for df in tfr:
