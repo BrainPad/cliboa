@@ -88,6 +88,29 @@ class TestCsvColumnHash(TestCsvTransform):
                 )
         assert rows == len(test_csv_data)
 
+    def test_execute_ok_with_na(self):
+        # create test csv
+        test_csv_data = [["id", "name", "passwd"], ["1", "na", "spam1234"]]
+        self._create_csv(test_csv_data)
+
+        # set the essential attributes
+        instance = CsvColumnHash()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "columns", ["passwd"])
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        rows = 1
+        with open(output_file, "r") as o:
+            reader = csv.DictReader(o)
+            for r in reader:
+                rows += 1
+                assert "ec77022924e329f8e01deab92a4092ed8b7ec2365f1e719ac4e9686744341d95" == r.get(
+                    "passwd"
+                )
+        assert rows == len(test_csv_data)
+
     def test_execute_ok_with_multiple_columns(self):
         # create test csv
         test_csv_data = [
@@ -286,6 +309,36 @@ class TestCsvColumnDelete(TestCsvTransform):
                     self.assertEqual(["1", "SPAM1"], row)
                 if i == 2:
                     self.assertEqual(["2", "SPAM2"], row)
+
+    def test_execute_ok_drop_column_with_na(self):
+        # create test csv
+        test_csv_data = [
+            ["col_1", "col_2", "col_3"],
+            ["1", "spam1", "SPAM1"],
+            ["2", "spam2", "SPAM2"],
+            ["3", "spam3", "NA"],
+        ]
+        self._create_csv(test_csv_data)
+        # set the essential attributes
+        instance = CsvColumnDelete()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        regex_pattern = "^.*_2$"
+        Helper.set_property(instance, "regex_pattern", regex_pattern)
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            for i, row in enumerate(reader):
+                if i == 0:
+                    self.assertEqual(["col_1", "col_3"], row)
+                if i == 1:
+                    self.assertEqual(["1", "SPAM1"], row)
+                if i == 2:
+                    self.assertEqual(["2", "SPAM2"], row)
+                if i == 3:
+                    self.assertEqual(["3", "NA"], row)
 
     def test_execute_ok_without_drop_column(self):
         # create test csv
@@ -502,6 +555,39 @@ class TestCsvColumnSelect(TestCsvTransform):
                 if i == 2:
                     self.assertEqual(["SPAM2", "2", "spam2"], row)
 
+    def test_execute_ok_with_na(self):
+        # create test csv
+        test_csv_data = [
+            ["key", "data", "name"],
+            ["1", "spam1", "SPAM1"],
+            ["2", "spam2", "SPAM2"],
+            ["3", "spam3", "NA"],
+        ]
+        self._create_csv(test_csv_data)
+
+        column_order = ["name", "key", "data"]
+
+        # set the essential attributes
+        instance = CsvColumnSelect()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "column_order", column_order)
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            for i, row in enumerate(reader):
+                if i == 0:
+                    self.assertEqual(["name", "key", "data"], row)
+                if i == 1:
+                    self.assertEqual(["SPAM1", "1", "spam1"], row)
+                if i == 2:
+                    self.assertEqual(["SPAM2", "2", "spam2"], row)
+                if i == 3:
+                    self.assertEqual(["NA", "3", "spam3"], row)
+
     def test_execute_ok_define_part_of_src_columns(self):
         # create test csv
         test_csv_data = [
@@ -562,6 +648,32 @@ class TestCsvColumnConcat(TestCsvTransform):
         # create test csv
         test_csv_data = [["key", "data"], ["1", "spam"]]
         concat_data = ["key_data", "1spam"]
+        self._create_csv(test_csv_data)
+
+        # set the essential attributes
+        instance = CsvColumnConcat()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        concat_columns = ["key", "data"]
+        Helper.set_property(instance, "columns", concat_columns)
+        Helper.set_property(instance, "dest_column_name", "key_data")
+
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        rows = 1
+        with open(output_file, "r") as o:
+            reader = csv.DictReader(o)
+            for r in reader:
+                rows += 1
+                assert r["key_data"] == concat_data[1]
+        assert rows == len(test_csv_data)
+
+    def test_execute_ok_with_na(self):
+        # create test csv
+        test_csv_data = [["key", "data"], ["1", "na"]]
+        concat_data = ["key_data", "1na"]
         self._create_csv(test_csv_data)
 
         # set the essential attributes
@@ -689,6 +801,35 @@ class TestCsvMergeExclusive(TestCsvTransform):
     def test_execute_ok(self):
         # create test csv
         test_src_csv_data = [["key", "data"], ["1", "spam1"], ["2", "spam2"]]
+        self._create_csv(test_src_csv_data, fname="test.csv")
+        test_target_csv_data = [["id", "name"], ["1", "first"], ["3", "third"]]
+        self._create_csv(test_target_csv_data, fname="alter.csv")
+
+        # set the essential attributes
+        instance = CsvMergeExclusive()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "src_column", "key")
+        Helper.set_property(
+            instance, "target_compare_path", os.path.join(self._data_dir, "alter.csv")
+        )
+        Helper.set_property(instance, "target_column", "id")
+
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        rows = 0
+        with open(output_file, "r") as o:
+            reader = csv.DictReader(o)
+            for r in reader:
+                rows += 1
+                assert r["key"] == test_src_csv_data[2][0]
+                assert r["data"] == test_src_csv_data[2][1]
+            assert rows == 1
+
+    def test_execute_ok_with_na(self):
+        # create test csv
+        test_src_csv_data = [["key", "data"], ["1", "spam1"], ["2", "NA"]]
         self._create_csv(test_src_csv_data, fname="test.csv")
         test_target_csv_data = [["id", "name"], ["1", "first"], ["3", "third"]]
         self._create_csv(test_target_csv_data, fname="alter.csv")
@@ -940,6 +1081,32 @@ class TestCsvMerge(TestCsvTransform):
         exists_csv = glob(os.path.join(self._data_dir, "test.csv"))
         assert "test.csv" in exists_csv[0]
 
+    def test_execute_ok_with_na(self):
+        # create test file
+        csv_list1 = [["key", "data"], ["1", "spam"], ["2", "spam"], ["3", "NA"]]
+        self._create_csv(csv_list1, fname="test1.csv")
+
+        csv_list2 = [
+            ["key", "address"],
+            ["1", "spam"],
+            ["2", "spam"],
+            ["3", "spam"],
+        ]
+        self._create_csv(csv_list2, fname="test2.csv")
+
+        # set the essential attributes
+        instance = CsvMerge()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src1_pattern", r"test1\.csv")
+        Helper.set_property(instance, "src2_pattern", r"test2\.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "dest_name", "test.csv")
+        instance.execute()
+
+        exists_csv = glob(os.path.join(self._data_dir, "test.csv"))
+        assert "test.csv" in exists_csv[0]
+
     def test_execute_ok_with_unnamed(self):
         # create test file
         csv_list1 = [["key", "data"], ["1", "spam"], ["2", "spam"], ["3", "spam"]]
@@ -1128,6 +1295,42 @@ class TestCsvConcat(TestCsvTransform):
             ["c4", "d4", ""],
             ["c5", "", "body5"],
             ["c6", "", "body6"],
+        ]
+
+    def test_execute_ok5(self):
+        # create test file
+        csv_list1 = [["key", "data"], ["c1", "001"], ["c2", "0.01"], ["c3", "spam"]]
+        self._create_csv(csv_list1, fname="test1.csv")
+
+        csv_list2 = [["key", "data"], ["d1", "1,23"], ["d2", "ABC"], ["d3", "spam"]]
+        self._create_csv(csv_list2, fname="test2.csv")
+
+        csv_list3 = [["key", "data"], ["c1", "000"], ["c2", "NA"], ["c3", "spam"]]
+        self._create_csv(csv_list3, fname="test3.csv")
+
+        # set the essential attributes
+        instance = CsvConcat()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_filenames", ["test1.csv", "test2.csv", "test3.csv"])
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "dest_name", "test.csv")
+        instance.execute()
+
+        with open(os.path.join(self._data_dir, "test.csv")) as t:
+            reader = csv.reader(t)
+            concatenated_list = [row for row in reader]
+        assert concatenated_list == [
+            ["key", "data"],
+            ["c1", "001"],
+            ["c2", "0.01"],
+            ["c3", "spam"],
+            ["d1", "1,23"],
+            ["d2", "ABC"],
+            ["d3", "spam"],
+            ["c1", "000"],
+            ["c2", "NA"],
+            ["c3", "spam"],
         ]
 
     def test_excute_ng_multiple_target(self):
@@ -1816,6 +2019,34 @@ class TestCsvColumnCopy(TestCsvTransform):
                 } == r
         assert rows == len(test_csv_data)
 
+    def test_creation_of_new_column_with_na(self):
+        # create test csv
+        test_csv_data = [["id", "name", "address"], ["1", "NA", "test@aaa.com"]]
+        self._create_csv(test_csv_data)
+
+        # set the essential attributes
+        instance = CsvColumnCopy()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "src_column", "name")
+        Helper.set_property(instance, "dest_column", "new_name")
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        rows = 1
+        with open(output_file, "r") as o:
+            reader = csv.DictReader(o)
+            for r in reader:
+                rows += 1
+                assert {
+                    "id": "1",
+                    "name": "NA",
+                    "address": "test@aaa.com",
+                    "new_name": "NA",
+                } == r
+        assert rows == len(test_csv_data)
+
     def test_column_override(self):
         # create test csv
         test_csv_data = [["id", "name", "address"], ["1", "test", "test@aaa.com"]]
@@ -1898,6 +2129,33 @@ class TestCsvColumnReplace(TestCsvTransform):
                 assert {
                     "id": "1",
                     "name": "test",
+                    "address": "test@xyz.com",
+                } == r
+        assert rows == len(test_csv_data)
+
+    def test_replace_column_ok_with_na(self):
+        # create test csv
+        test_csv_data = [["id", "name", "address"], ["1", "NA", "test@aaa.com"]]
+        self._create_csv(test_csv_data)
+
+        # set the essential attributes
+        instance = CsvColumnReplace()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "column", "address")
+        Helper.set_property(instance, "regex_pattern", "@aaa")
+        Helper.set_property(instance, "rep_str", "@xyz")
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        rows = 1
+        with open(output_file, "r") as o:
+            reader = csv.DictReader(o)
+            for r in reader:
+                rows += 1
+                assert {
+                    "id": "1",
+                    "name": "NA",
                     "address": "test@xyz.com",
                 } == r
         assert rows == len(test_csv_data)
