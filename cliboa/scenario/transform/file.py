@@ -509,6 +509,7 @@ class FileRename(FileBaseTransform):
         self._regex_pattern = None
         self._rep_str = None
         self._ext = ""
+        self._without_ext = True
 
     def prefix(self, prefix):
         self._prefix = prefix
@@ -525,6 +526,9 @@ class FileRename(FileBaseTransform):
     def ext(self, ext):
         self._ext = ext
 
+    def without_ext(self, without_ext):
+        self._without_ext = without_ext
+
     def execute(self, *args):
         # essential parameters check
         valid = EssentialParameters(self.__class__.__name__, [self._src_dir, self._src_pattern])
@@ -532,39 +536,51 @@ class FileRename(FileBaseTransform):
 
         files = super().get_target_files(self._src_dir, self._src_pattern)
         self.check_file_existence(files)
+        if self._rep_str is None and self._regex_pattern is not None:
+            raise InvalidParameter("Replace string is not defined in yaml file: rep_str")
+        if self._rep_str is not None and self._regex_pattern is None:
+            raise InvalidParameter(
+                "The conversion pattern is not defined in yaml file: regex_pattern"
+            )
 
         for file in files:
             dirname = os.path.dirname(file)
             basename = os.path.basename(file)
 
-            px = ""
-            if basename.startswith("."):
-                basename = basename[1:]
-                px = "."
-
-            if "." in basename:
-                nameonly, extension = basename.split(".", 1)
-                extension = "." + extension
-            else:
-                nameonly = basename
-                extension = ""
-
-            if self._regex_pattern is not None and self._rep_str is not None:
-                nameonly = re.sub(self._regex_pattern, self._rep_str, nameonly)
-            elif self._regex_pattern is not None:
-                raise InvalidParameter("The converted string is not defined in yaml file: dest_str")
-            elif self._rep_str is not None:
-                raise InvalidParameter(
-                    "The conversion pattern is not defined in yaml file: regex_pattern"
+            if self._without_ext is False:
+                if self._prefix != "" or self._suffix != "" or self._ext != "":
+                    raise InvalidParameter("Cannot be specified in without_ext mode")
+                self._replace(
+                    dirname,
+                    file,
+                    os.path.join(dirname, re.sub(self._regex_pattern, self._rep_str, basename)),
                 )
+            else:
+                px = ""
+                if basename.startswith("."):
+                    basename = basename[1:]
+                    px = "."
 
-            if self._ext:
-                extension = "." + self._ext
+                if "." in basename:
+                    nameonly, extension = basename.split(".", 1)
+                    extension = "." + extension
+                else:
+                    nameonly = basename
+                    extension = ""
 
-            newfilename = self._prefix + px + nameonly + self._suffix + extension
-            newfilepath = os.path.join(dirname, newfilename)
-            os.rename(file, newfilepath)
-            self._logger.info("File name changed %s -> %s" % (file, newfilepath))
+                if self._regex_pattern is not None and self._rep_str is not None:
+                    nameonly = re.sub(self._regex_pattern, self._rep_str, nameonly)
+
+                if self._ext:
+                    extension = "." + self._ext
+
+                newfilename = self._prefix + px + nameonly + self._suffix + extension
+                self._replace(dirname, file, newfilename)
+
+    def _replace(self, dirname, file, newfilename):
+        newfilepath = os.path.join(dirname, newfilename)
+        os.rename(file, newfilepath)
+        self._logger.info("File name changed %s -> %s" % (file, newfilepath))
 
 
 class FileConvert(FileBaseTransform):

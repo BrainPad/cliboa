@@ -811,6 +811,40 @@ class TestFileRename(TestFileTransform):
         assert os.path.exists(os.path.join(self._data_dir, "ataeasata1a.txt"))
         assert os.path.exists(os.path.join(self._data_dir, "ataeasata2a.txt"))
 
+    def test_execute_ok_11(self):
+        self._create_files()
+
+        instance = FileRename()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
+        Helper.set_property(instance, "regex_pattern", "test")
+        Helper.set_property(instance, "rep_str", "test_")
+        Helper.set_property(instance, "without_ext", False)
+        instance.execute()
+
+        assert os.path.exists(os.path.join(self._data_dir, "test_1.txt"))
+        assert os.path.exists(os.path.join(self._data_dir, "test_2.txt"))
+
+    def test_execute_ok_12(self):
+        self._create_files()
+        files = self._create_files()
+        for file in files:
+            root, name = os.path.split(file)
+            os.rename(file, os.path.join(root, name + ".12345"))
+
+        instance = FileRename()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.txt\.12345")
+        Helper.set_property(instance, "regex_pattern", ".txt")
+        Helper.set_property(instance, "rep_str", "_txt")
+        Helper.set_property(instance, "without_ext", False)
+        instance.execute()
+
+        assert os.path.exists(os.path.join(self._data_dir, "test1_txt.12345"))
+        assert os.path.exists(os.path.join(self._data_dir, "test2_txt.12345"))
+
     def test_execute_ng_1(self):
         self._create_files()
 
@@ -823,7 +857,7 @@ class TestFileRename(TestFileTransform):
         Helper.set_property(instance, "regex_pattern", "test1")
         with pytest.raises(InvalidParameter) as execinfo:
             instance.execute()
-        assert "The converted string is not defined in yaml file: dest_str" == str(execinfo.value)
+        assert "Replace string is not defined in yaml file: rep_str" == str(execinfo.value)
 
     def test_execute_ng_2(self):
         self._create_files()
@@ -853,7 +887,7 @@ class TestFileRename(TestFileTransform):
         Helper.set_property(instance, "regex_pattern", "")
         with pytest.raises(InvalidParameter) as execinfo:
             instance.execute()
-        assert "The converted string is not defined in yaml file: dest_str" == str(execinfo.value)
+        assert "Replace string is not defined in yaml file: rep_str" == str(execinfo.value)
 
     def test_execute_ng_4(self):
         self._create_files()
@@ -870,6 +904,45 @@ class TestFileRename(TestFileTransform):
         assert "The conversion pattern is not defined in yaml file: regex_pattern" == str(
             execinfo.value
         )
+
+    def test_execute_ng_5(self):
+        self._create_files()
+
+        instance = FileRename()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
+        Helper.set_property(instance, "prefix", "PRE-")
+        Helper.set_property(instance, "without_ext", False)
+        with pytest.raises(InvalidParameter) as execinfo:
+            instance.execute()
+        assert "Cannot be specified in without_ext mode" == str(execinfo.value)
+
+    def test_execute_ng_6(self):
+        self._create_files()
+
+        instance = FileRename()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
+        Helper.set_property(instance, "suffix", "-SUF")
+        Helper.set_property(instance, "without_ext", False)
+        with pytest.raises(InvalidParameter) as execinfo:
+            instance.execute()
+        assert "Cannot be specified in without_ext mode" == str(execinfo.value)
+
+    def test_execute_ng_7(self):
+        self._create_files()
+
+        instance = FileRename()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
+        Helper.set_property(instance, "ext", "csv")
+        Helper.set_property(instance, "without_ext", False)
+        with pytest.raises(InvalidParameter) as execinfo:
+            instance.execute()
+        assert "Cannot be specified in without_ext mode" == str(execinfo.value)
 
 
 class TestFileConvert(TestFileTransform):
