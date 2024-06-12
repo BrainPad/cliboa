@@ -653,6 +653,99 @@ class TestFileDivide(TestFileTransform):
                     else:
                         break
 
+    def test_execute_ok_5(self):
+        file1 = os.path.join(self._data_dir, "test.txt")
+        with open(file1, mode="w", encoding="utf-8") as f:
+            f.write("idx\n")
+            for i in range(100):
+                f.write("%s\n" % str(i))
+
+        instance = FileDivide()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test\.txt")
+        Helper.set_property(instance, "dest_dir", self._out_dir)
+        Helper.set_property(instance, "divide_rows", 10)
+        Helper.set_property(instance, "header", True)
+        Helper.set_property(instance, "suffix_pattern", "_%d")
+        instance.execute()
+
+        row_index = 0
+        for i in range(1, 11):
+            file = os.path.join(self._out_dir, "test_%s.txt" % i)
+            assert os.path.exists(file)
+            with open(file, "r", encoding="utf-8", newline="") as f:
+                line = f.readline()
+                assert line == "idx\n"
+                while line:
+                    line = f.readline()
+                    if line:
+                        assert str(row_index) == line.splitlines()[0]
+                        row_index += 1
+
+    def test_execute_ok_6(self):
+        file1 = os.path.join(self._data_dir, "test.txt")
+        with open(file1, mode="w", encoding="utf-8") as f:
+            f.write("idx\n")
+            for i in range(100):
+                f.write("%s\n" % str(i))
+
+        instance = FileDivide()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test\.txt")
+        Helper.set_property(instance, "dest_dir", self._out_dir)
+        Helper.set_property(instance, "divide_rows", 10)
+        Helper.set_property(instance, "header", True)
+        Helper.set_property(instance, "suffix_pattern", ".%02d")
+        instance.execute()
+
+        row_index = 0
+        for i in range(1, 11):
+            if i < 10:
+                file = os.path.join(self._out_dir, "test.0%s.txt" % i)
+            else:
+                file = os.path.join(self._out_dir, "test.%s.txt" % i)
+            assert os.path.exists(file)
+            with open(file, "r", encoding="utf-8", newline="") as f:
+                line = f.readline()
+                assert line == "idx\n"
+                while line:
+                    line = f.readline()
+                    if line:
+                        assert str(row_index) == line.splitlines()[0]
+                        row_index += 1
+
+    def test_execute_ok_7(self):
+        file1 = os.path.join(self._data_dir, "test.txt")
+        with open(file1, mode="w", encoding="utf-8") as f:
+            f.write("idx\n")
+            for i in range(100):
+                f.write("%s\n" % str(i))
+
+        instance = FileDivide()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test\.txt")
+        Helper.set_property(instance, "dest_dir", self._out_dir)
+        Helper.set_property(instance, "divide_rows", 1)
+        Helper.set_property(instance, "header", True)
+        Helper.set_property(instance, "suffix_pattern", ".%1d")
+        instance.execute()
+
+        row_index = 0
+        for i in range(1, 101):
+            file = os.path.join(self._out_dir, "test.%s.txt" % i)
+            assert os.path.exists(file)
+            with open(file, "r", encoding="utf-8", newline="") as f:
+                line = f.readline()
+                assert line == "idx\n"
+                while line:
+                    line = f.readline()
+                    if line:
+                        assert str(row_index) == line.splitlines()[0]
+                        row_index += 1
+
 
 class TestFileRename(TestFileTransform):
     def test_execute_ok(self):

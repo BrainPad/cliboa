@@ -422,12 +422,16 @@ class FileDivide(FileBaseTransform):
         super().__init__()
         self._divide_rows = None
         self._header = False
+        self._suffix_pattern = ".%d"
 
     def divide_rows(self, divide_rows):
         self._divide_rows = divide_rows
 
     def header(self, header):
         self._header = header
+
+    def suffix_pattern(self, suffix_pattern):
+        self._suffix_pattern = suffix_pattern
 
     def execute(self, *args):
         valid = EssentialParameters(
@@ -459,7 +463,7 @@ class FileDivide(FileBaseTransform):
                     self._header_row = i.readline()
 
             row = self._ifile_reader(file)
-            newfilename = px + nameonly + ".%s" + ext
+            newfilename = px + nameonly + self._suffix_pattern + ext
 
             if self._dest_dir:
                 os.makedirs(self._dest_dir, exist_ok=True)
@@ -469,7 +473,7 @@ class FileDivide(FileBaseTransform):
             has_left = True
             index = 1
             while has_left:
-                ofile_path = os.path.join(dest_dir, newfilename % str(index))
+                ofile_path = os.path.join(dest_dir, newfilename % index)
                 has_left = self._ofile_generator(ofile_path, row)
                 index = index + 1
 
