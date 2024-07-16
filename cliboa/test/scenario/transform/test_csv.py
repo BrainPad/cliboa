@@ -37,6 +37,7 @@ from cliboa.scenario.transform.csv import (
     CsvRowDelete,
     CsvSort,
     CsvToJsonl,
+    CsvTypeConvert,
     CsvValueExtract,
 )
 from cliboa.test import BaseCliboaTest
@@ -795,6 +796,199 @@ class TestCsvColumnConcat(TestCsvTransform):
         with pytest.raises(KeyError) as e:
             instance.execute()
         assert "'test'" == str(e.value)
+
+
+class TestCsvTypeConvert(TestCsvTransform):
+    def test_execute_ok_1(self):
+        # create test csv
+        test_csv_data = [["key", "data"], ["1", "SPAM1"], ["2", "SPAM2"]]
+        self._create_csv(test_csv_data)
+
+        # set the essential attributes
+        instance = CsvTypeConvert()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "column", ["key"])
+        Helper.set_property(instance, "type", "float")
+
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            for i, row in enumerate(reader):
+                if i == 0:
+                    self.assertEqual(["key", "data"], row)
+                if i == 1:
+                    self.assertEqual(["1.0", "SPAM1"], row)
+                if i == 2:
+                    self.assertEqual(["2.0", "SPAM2"], row)
+
+    def test_execute_ok_2(self):
+        # create test csv
+        test_csv_data = [["key", "data", "number"], ["1", "1", "1"], ["2", "2", "2"]]
+        self._create_csv(test_csv_data)
+
+        # set the essential attributes
+        instance = CsvTypeConvert()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "column", ["key", "number"])
+        Helper.set_property(instance, "type", "float")
+
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            for i, row in enumerate(reader):
+                if i == 0:
+                    self.assertEqual(["key", "data", "number"], row)
+                if i == 1:
+                    self.assertEqual(["1.0", "1", "1.0"], row)
+                if i == 2:
+                    self.assertEqual(["2.0", "2", "2.0"], row)
+
+    def test_execute_ok_3(self):
+        # create test csv
+        test_csv_data = [["key", "data", "number"], [1, "SPAM1", "1"], ["2", "SPAM2", 2]]
+        self._create_csv(test_csv_data)
+
+        # set the essential attributes
+        instance = CsvTypeConvert()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "column", ["key", "number"])
+        Helper.set_property(instance, "type", "str")
+
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            for i, row in enumerate(reader):
+                if i == 0:
+                    self.assertEqual(["key", "data", "number"], row)
+                if i == 1:
+                    self.assertEqual(["1", "SPAM1", "1"], row)
+                if i == 2:
+                    self.assertEqual(["2", "SPAM2", "2"], row)
+
+    def test_execute_ok_4(self):
+        # create test csv
+        test_csv_data = [
+            ["key", "data", "number"],
+            ["1.0", "SPAM1", "1.0"],
+            ["2.0", "SPAM2", "2.0"],
+        ]
+        self._create_csv(test_csv_data)
+
+        # set the essential attributes
+        instance = CsvTypeConvert()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "column", ["key", "number"])
+        Helper.set_property(instance, "type", "int")
+
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            for i, row in enumerate(reader):
+                if i == 0:
+                    self.assertEqual(["key", "data", "number"], row)
+                if i == 1:
+                    self.assertEqual(["1", "SPAM1", "1"], row)
+                if i == 2:
+                    self.assertEqual(["2", "SPAM2", "2"], row)
+
+    def test_execute_ok_5(self):
+        # create test csv
+        test_csv_data = [["key", "data", "number"], [1.0, "SPAM1", "1.0"], [2.0, "SPAM2", "2.0"]]
+        self._create_csv(test_csv_data)
+
+        # set the essential attributes
+        instance = CsvTypeConvert()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "column", ["key"])
+        Helper.set_property(instance, "type", "str")
+
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            for i, row in enumerate(reader):
+                if i == 0:
+                    self.assertEqual(["key", "data", "number"], row)
+                if i == 1:
+                    self.assertEqual(["1.0", "SPAM1", "1.0"], row)
+                if i == 2:
+                    self.assertEqual(["2.0", "SPAM2", "2.0"], row)
+
+    def test_execute_ok_6(self):
+        # create test csv
+        test_csv_data = [["key", "data", "number"], [1.0, "SPAM1", "1.0"], [2.0, "SPAM2", "2.0"]]
+        test_csv_data_2 = [["key", "data", "number"], [3.0, "SPAM3", "3.0"], [4.0, "SPAM4", "4.0"]]
+        self._create_csv(test_csv_data)
+        self._create_csv(test_csv_data_2, fname="test_2.csv")
+
+        # set the essential attributes
+        instance = CsvTypeConvert()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.*.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "column", ["key"])
+        Helper.set_property(instance, "type", "str")
+
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            for i, row in enumerate(reader):
+                if i == 0:
+                    self.assertEqual(["key", "data", "number"], row)
+                if i == 1:
+                    self.assertEqual(["1.0", "SPAM1", "1.0"], row)
+                if i == 2:
+                    self.assertEqual(["2.0", "SPAM2", "2.0"], row)
+
+        output_file = os.path.join(self._data_dir, "test_2.csv")
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            for i, row in enumerate(reader):
+                if i == 0:
+                    self.assertEqual(["key", "data", "number"], row)
+                if i == 1:
+                    self.assertEqual(["3.0", "SPAM3", "3.0"], row)
+                if i == 2:
+                    self.assertEqual(["4.0", "SPAM4", "4.0"], row)
+
+    def test_execute_ng(self):
+        # create test csv
+        test_csv_data = [["key", "data"], ["1", "SPAM1"], ["2", "SPAM2"]]
+        self._create_csv(test_csv_data)
+
+        # set the essential attributes
+        instance = CsvTypeConvert()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "column", ["key"])
+        Helper.set_property(instance, "type", "list")
+
+        with pytest.raises(Exception) as e:
+            instance.execute()
+        assert "Conversion to this type is not possible. list" == str(e.value)
 
 
 class TestCsvMergeExclusive(TestCsvTransform):

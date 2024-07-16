@@ -51,6 +51,7 @@ from .transform.csv import (
     CsvRowDelete,
     CsvSort,
     CsvToJsonl,
+    CsvTypeConvert,
     CsvValueExtract,
 )
 from .transform.file import (
