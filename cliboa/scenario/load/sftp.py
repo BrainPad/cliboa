@@ -33,12 +33,16 @@ class SftpUpload(SftpBaseLoad):
         super().__init__()
         self._quit = False
         self._ignore_empty_file = False
+        self._put_intermediation = "."
 
     def quit(self, quit):
         self._quit = quit
 
     def ignore_empty_file(self, ignore_empty_file):
         self._ignore_empty_file = ignore_empty_file
+
+    def put_intermediation(self, put_intermediation):
+        self._put_intermediation = put_intermediation
 
     def execute(self, *args):
         # essential parameters check
@@ -61,6 +65,7 @@ class SftpUpload(SftpBaseLoad):
                 ).put_file(
                     src=file,
                     dest=os.path.join(self._dest_dir, os.path.basename(file)),
+                    put_intermediation=self._put_intermediation,
                     endfile_suffix=self._endfile_suffix,
                 )
                 adaptor.execute(obj)

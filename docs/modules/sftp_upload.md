@@ -2,22 +2,23 @@
 Upload a file via SFTP.
 
 # Parameters
-|Parameters|Explanation|Required|Default|Remarks|
-|----------|-----------|--------|-------|-------|
-|host|Host name or IP address of a sftp server.|Yes|None||
-|user|User name for authentication|Yes|None||
-|password|Password for authentication|No|None|Either password or key is required|
-|key|Path to key for authentication|No|None||
-|passphrase|Used for decrypting key|No|None||
-|port|Port number of a sftp server|No|22||
-|src_dir|Directory of source to upload|Yes|None||
-|src_pattern|File pattern of source to upload. Regexp is available.|Yes|None||
-|dest_dir|Destination directory to upload.|No|None|
-|endfile_suffix|Places file with original file name + ".endfile_suffix" when upload completed.|No|None||
-|timeout|Timeout period of sftp connection. Unit is second.|No|30||
-|retry_count|retry count of sftp connection.|No|3||
-|quit|True or False flag for quitting cliboa process when source files do not exist.|No|False||
-|ignore_empty_file|If True, size zero files are not be uploaded|No|False||
+| Parameters         | Explanation                                                                    | Required | Default | Remarks                                                                 |
+|--------------------|--------------------------------------------------------------------------------|----------|---------|-------------------------------------------------------------------------|
+| host               | Host name or IP address of a sftp server.                                      | Yes      | None    |                                                                         |
+| user               | User name for authentication                                                   | Yes      | None    |                                                                         |
+| password           | Password for authentication                                                    | No       | None    | Either password or key is required                                      |
+| key                | Path to key for authentication                                                 | No       | None    |                                                                         |
+| passphrase         | Used for decrypting key                                                        | No       | None    |                                                                         |
+| port               | Port number of a sftp server                                                   | No       | 22      |                                                                         |
+| src_dir            | Directory of source to upload                                                  | Yes      | None    |                                                                         |
+| src_pattern        | File pattern of source to upload. Regexp is available.                         | Yes      | None    |                                                                         |
+| dest_dir           | Destination directory to upload.                                               | No       | None    |                                                                         |
+| endfile_suffix     | Places file with original file name + ".endfile_suffix" when upload completed. | No       | None    |                                                                         |
+| timeout            | Timeout period of sftp connection. Unit is second.                             | No       | 30      |                                                                         |
+| retry_count        | retry count of sftp connection.                                                | No       | 3       |                                                                         |
+| quit               | True or False flag for quitting cliboa process when source files do not exist. | No       | False   |                                                                         |
+| ignore_empty_file  | If True, size zero files are not be uploaded                                   | No       | False   |                                                                         |
+| put_intermediation | Specify prefix to be added to the intermediate file created when PUT file.     | No       | .       | If you do not want to create an intermediate file, define it as "None". |
 
 # Examples
 ```
