@@ -285,6 +285,73 @@ class CsvColumnConcat(FileBaseTransform):
             first_write = False
 
 
+class CsvTypeConvert(FileBaseTransform):
+    """
+    Convert the type of specific column in a csv file.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self._column = None
+        self._type = None
+
+    def column(self, column):
+        self._column = column
+
+    def type(self, type):
+        self._type = type
+
+    def execute(self, *args):
+        valid = EssentialParameters(
+            self.__class__.__name__,
+            [self._src_dir, self._src_pattern, self._dest_dir, self._column, self._type],
+        )
+        valid()
+
+        os.makedirs(self._dest_dir, exist_ok=True)
+
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+        self.check_file_existence(files)
+        self._logger.info("Files found %s" % files)
+        super().io_files(files, func=self.convert)
+
+    def convert(self, fi, fo):
+        chunk_size_handling(self._read_csv_func, fi, fo)
+
+    def _read_csv_func(self, chunksize, fi, fo):
+        first_write = True
+        tfr = pandas.read_csv(
+            fi,
+            dtype=object,
+            encoding=self._encoding,
+            chunksize=chunksize,
+            na_filter=False,
+        )
+        for df in tfr:
+            for column in self._column:
+                try:
+                    if self._type == "int":
+                        # When reading from csv, the following error occurs:
+                        # ValueError: invalid literal for int() with base 10
+                        # To avoid this, convert to float and then convert to int
+                        df[column] = df[column].astype("float")
+                        df[column] = df[column].astype("int")
+                    else:
+                        df[column] = df[column].astype(self._type)
+                except Exception:
+                    raise InvalidParameter(
+                        "Conversion to this type is not possible. %s" % self._type
+                    )
+            df.to_csv(
+                fo,
+                encoding=self._encoding,
+                header=True if first_write else False,
+                index=False,
+                mode="w" if first_write else "a",
+            )
+            first_write = False
+
+
 class CsvMergeExclusive(FileBaseTransform):
     """
     Compare specific columns each file.
