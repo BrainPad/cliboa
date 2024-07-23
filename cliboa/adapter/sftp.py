@@ -81,7 +81,6 @@ class SftpAdapter(object):
         return self._execute(obj[0], obj[1])
 
     def _execute(self, func, kwargs):
-
         if not func:
             raise ValueError("Function must not be empty.")
 
@@ -214,7 +213,7 @@ class SftpAdapter(object):
         """
         return (get_specific_file_func, {"src": src, "dest": dest})
 
-    def put_file(self, src, dest, endfile_suffix=None):
+    def put_file(self, src, dest, put_intermediation, endfile_suffix=None):
         """
         Upload file to sftp server
 
@@ -233,8 +232,17 @@ class SftpAdapter(object):
 
         Raises:
             IOError: failed to upload
+            :param put_intermediation:
         """
-        return (put_file_func, {"src": src, "dest": dest, "endfile_suffix": endfile_suffix})
+        return (
+            put_file_func,
+            {
+                "src": src,
+                "dest": dest,
+                "put_intermediation": put_intermediation,
+                "endfile_suffix": endfile_suffix,
+            },
+        )
 
     def file_exists_check(self, dir, pattern, ignore_empty_file=False):
         """
@@ -319,6 +327,8 @@ def put_file_func(**kwargs):
     '.' as prefix is added to the file name
     while uploading and then the prefix '.'
     will be removed (rename the file) when upload complete.
+    The function to add and remove the prefix can be disabled
+    by specifying "None" for "put_intermediation".
     """
     dirname = os.path.dirname(kwargs["dest"])
 
@@ -328,26 +338,6 @@ def put_file_func(**kwargs):
     except FileNotFoundError:
         kwargs["sftp"].mkdir(dirname)
 
-    tmp_dest = os.path.join(dirname, "." + os.path.basename(kwargs["dest"]))
-
-    _logger = logging.getLogger(__name__)
-
-    if _logger.isEnabledFor(logging.DEBUG):
-
-        def cb(sent, size):
-            _logger.debug("Transfer %s / %s" % (sent, size))
-
-        file_size = os.stat(kwargs["src"]).st_size
-        with open(kwargs["src"], "rb") as fl:
-            _logger.debug("Open src file")
-            with kwargs["sftp"].file(tmp_dest, "wb") as fr:
-                _logger.debug("Open dest file")
-                fr.set_pipelined(True)
-                _transfer_with_callback(reader=fl, writer=fr, file_size=file_size, callback=cb)
-            _logger.debug("End")
-    else:
-        kwargs["sftp"].put(kwargs["src"], tmp_dest)
-
     # Same file name is removed in advance, if exists
     try:
         f = kwargs["sftp"].stat(kwargs["dest"])
@@ -356,7 +346,14 @@ def put_file_func(**kwargs):
     except FileNotFoundError:
         pass
 
-    kwargs["sftp"].rename(tmp_dest, kwargs["dest"])
+    if kwargs["put_intermediation"] is None:
+        kwargs["sftp"].put(kwargs["src"], os.path.join(dirname, os.path.basename(kwargs["dest"])))
+    else:
+        tmp_dest = os.path.join(
+            dirname, kwargs["put_intermediation"] + os.path.basename(kwargs["dest"])
+        )
+        kwargs["sftp"].put(kwargs["src"], tmp_dest)
+        kwargs["sftp"].rename(tmp_dest, kwargs["dest"])
 
     endfile_suffix = kwargs["endfile_suffix"]
     if endfile_suffix is not None:
