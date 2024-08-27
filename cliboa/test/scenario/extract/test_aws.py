@@ -11,12 +11,15 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+import csv
+import json
+import os
 import tempfile
-
-from mock import patch
+from decimal import Decimal
+from unittest.mock import patch
 
 from cliboa.adapter.aws import S3Adapter
-from cliboa.scenario.extract.aws import S3Delete, S3Download, S3FileExistsCheck
+from cliboa.scenario.extract.aws import DynamoDBRead, S3Delete, S3Download, S3FileExistsCheck
 from cliboa.test import BaseCliboaTest
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
@@ -84,3 +87,166 @@ class TestS3FileExistsCheck(BaseCliboaTest):
         instance.execute()
         # 処理の正常終了を確認
         assert m_get_object.call_args_list == []
+
+
+class TestDynamoDBRead(BaseCliboaTest):
+    @patch("boto3.resource")
+    def test_execute_csv_with_nested_data(self, mock_boto_resource):
+        test_data = {
+            "Items": [
+                {
+                    "id": "1",
+                    "name": "Item 1",
+                    "details": {
+                        "value": Decimal("100"),
+                        "attributes": {"color": "red", "size": "large"},
+                    },
+                },
+                {
+                    "id": "2",
+                    "name": "Item 2",
+                    "details": {
+                        "value": Decimal("200"),
+                        "attributes": {"color": "blue", "size": "medium"},
+                    },
+                },
+            ],
+            "Count": 2,
+            "ScannedCount": 2,
+            "LastEvaluatedKey": None,
+        }
+        expected_csv = [
+            ["id", "name", "details"],
+            ["1", "Item 1", '{"value": 100, "attributes": {"color": "red", "size": "large"}}'],
+            ["2", "Item 2", '{"value": 200, "attributes": {"color": "blue", "size": "medium"}}'],
+        ]
+
+        self._run_test(mock_boto_resource, test_data, expected_csv, "csv")
+
+    @patch("boto3.resource")
+    def test_execute_csv_without_nested_data(self, mock_boto_resource):
+        test_data = {
+            "Items": [
+                {"id": "1", "name": "Item 1", "value": Decimal("100")},
+                {"id": "2", "name": "Item 2", "value": Decimal("200")},
+            ],
+            "Count": 2,
+            "ScannedCount": 2,
+            "LastEvaluatedKey": None,
+        }
+        expected_csv = [
+            ["id", "name", "value"],
+            ["1", "Item 1", "100"],
+            ["2", "Item 2", "200"],
+        ]
+
+        self._run_test(mock_boto_resource, test_data, expected_csv, "csv")
+
+    @patch("boto3.resource")
+    def test_execute_jsonl_with_nested_data(self, mock_boto_resource):
+        test_data = {
+            "Items": [
+                {
+                    "id": "1",
+                    "name": "Item 1",
+                    "details": {
+                        "value": Decimal("100"),
+                        "attributes": {"color": "red", "size": "large"},
+                    },
+                },
+                {
+                    "id": "2",
+                    "name": "Item 2",
+                    "details": {
+                        "value": Decimal("200"),
+                        "attributes": {"color": "blue", "size": "medium"},
+                    },
+                },
+            ],
+            "Count": 2,
+            "ScannedCount": 2,
+            "LastEvaluatedKey": None,
+        }
+        expected_jsonl = [
+            {
+                "id": "1",
+                "name": "Item 1",
+                "details": {"value": 100, "attributes": {"color": "red", "size": "large"}},
+            },
+            {
+                "id": "2",
+                "name": "Item 2",
+                "details": {"value": 200, "attributes": {"color": "blue", "size": "medium"}},
+            },
+        ]
+
+        self._run_test(mock_boto_resource, test_data, expected_jsonl, "jsonl")
+
+    @patch("boto3.resource")
+    def test_execute_jsonl_without_nested_data(self, mock_boto_resource):
+        test_data = {
+            "Items": [
+                {"id": "1", "name": "Item 1", "value": Decimal("100")},
+                {"id": "2", "name": "Item 2", "value": Decimal("200")},
+            ],
+            "Count": 2,
+            "ScannedCount": 2,
+            "LastEvaluatedKey": None,
+        }
+        expected_jsonl = [
+            {"id": "1", "name": "Item 1", "value": 100},
+            {"id": "2", "name": "Item 2", "value": 200},
+        ]
+
+        self._run_test(mock_boto_resource, test_data, expected_jsonl, "jsonl")
+
+    def _run_test(self, mock_boto_resource, test_data, expected_data, file_format):
+        mock_table = mock_boto_resource.return_value.Table.return_value
+        mock_table.scan.return_value = test_data
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            instance = DynamoDBRead()
+            Helper.set_property(instance, "table_name", "test_table")
+            Helper.set_property(instance, "file_name", f"output.{file_format}")
+            Helper.set_property(instance, "dest_dir", temp_dir)
+            Helper.set_property(instance, "file_format", file_format)
+            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "region", "us-east-1")
+            instance.execute()
+
+            output_file_path = os.path.join(temp_dir, instance._file_name)
+            assert os.path.exists(output_file_path)
+
+            if file_format == "csv":
+                self._verify_csv(output_file_path, expected_data)
+            else:  # jsonl
+                self._verify_jsonl(output_file_path, expected_data)
+
+    def _verify_csv(self, file_path, expected_data):
+        with open(file_path, "r", newline="") as csvfile:
+            reader = csv.reader(csvfile)
+            actual_data = list(reader)
+
+        assert len(actual_data) == len(
+            expected_data
+        ), f"期待される行数 {len(expected_data)} に対し、実際の行数は {len(actual_data)} です"
+
+        for expected_row, actual_row in zip(expected_data, actual_data):
+            assert len(expected_row) == len(
+                actual_row
+            ), f"列数が一致しません。期待値: {len(expected_row)}, 実際の値: {len(actual_row)}"
+            for expected_value, actual_value in zip(expected_row, actual_row):
+                assert str(actual_value) == str(
+                    expected_value
+                ), f"値が一致しません。期待値: {expected_value}, 実際の値: {actual_value}"
+
+    def _verify_jsonl(self, file_path, expected_data):
+        with open(file_path, "r") as jsonl_file:
+            actual_data = [json.loads(line) for line in jsonl_file]
+
+        assert len(actual_data) == len(
+            expected_data
+        ), f"Expected {len(expected_data)} items, got {len(actual_data)}"
+
+        for expected, actual in zip(expected_data, actual_data):
+            assert expected == actual, f"Data mismatch: expected {expected}, got {actual}"

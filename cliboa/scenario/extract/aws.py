@@ -11,14 +11,20 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+import csv
+import json
 import os
 import re
+from decimal import Decimal
+
+import boto3
 
 from cliboa.adapter.aws import S3Adapter
-from cliboa.scenario.aws import BaseS3
+from cliboa.scenario.aws import BaseAws, BaseS3
 from cliboa.scenario.validator import EssentialParameters
 from cliboa.util.cache import ObjectStore
 from cliboa.util.constant import StepStatus
+from cliboa.util.exception import InvalidParameter
 
 
 class S3Download(BaseS3):
@@ -189,3 +195,127 @@ class S3FileExistsCheck(BaseS3):
         # The file does not exist
         self._logger.info("File not found in S3. After process will not be processed")
         return StepStatus.SUCCESSFUL_TERMINATION
+
+
+class DynamoDBRead(BaseAws):
+    """
+    Download data from DynamoDB and save as a CSV or JSONL file
+    """
+
+    def __init__(self):
+        super().__init__()
+        self._table_name = None
+        self._dest_dir = "."
+        self._file_name = None
+        self._file_format = "csv"
+
+    def table_name(self, table_name):
+        self._table_name = table_name
+
+    def dest_dir(self, dest_dir):
+        self._dest_dir = dest_dir
+
+    def file_name(self, file_name):
+        self._file_name = file_name
+
+    def file_format(self, file_format):
+        if file_format not in ["csv", "jsonl"]:
+            raise InvalidParameter("file_format must be either 'csv' or 'jsonl'")
+        self._file_format = file_format
+
+    def execute(self, *args):
+        """
+        DynamoDBからデータをダウンロードし、指定されたフォーマットでファイルに保存します。
+        """
+        super().execute()
+
+        valid = EssentialParameters(self.__class__.__name__, [self._table_name, self._file_name])
+        valid()
+
+        os.makedirs(self._dest_dir, exist_ok=True)
+
+        dynamodb = boto3.resource(
+            "dynamodb",
+            aws_access_key_id=self._access_key,
+            aws_secret_access_key=self._secret_key,
+            region_name=self._region,
+        )
+        table = dynamodb.Table(self._table_name)
+
+        file_path = os.path.join(self._dest_dir, self._file_name)
+        if self._file_format == "jsonl":
+            self._write_jsonl(self._scan_table(table), file_path)
+        else:  # csv
+            self._write_csv(self._scan_table(table), file_path)
+
+        self._logger.info(f"Downloaded items from DynamoDB table {self._table_name} to {file_path}")
+
+    def _scan_table(self, table):
+        """
+        DynamoDBテーブルをスキャンし、全アイテムを取得するジェネレータ関数。
+
+        Args:
+            table (boto3.resources.factory.dynamodb.Table): スキャン対象のDynamoDBテーブル
+
+        Yields:
+            dict: テーブルの各アイテム
+        """
+        last_evaluated_key = None
+        while True:
+            if last_evaluated_key:
+                response = table.scan(ExclusiveStartKey=last_evaluated_key)
+            else:
+                response = table.scan()
+
+            for item in response["Items"]:
+                yield item
+
+            last_evaluated_key = response.get("LastEvaluatedKey")
+            if not last_evaluated_key:
+                break
+
+    def _write_jsonl(self, items, file_path):
+        """
+        アイテムをJSONL形式でファイルに書き込みます。
+        Args:
+            items (iterator): 書き込むアイテムのイテレータ
+            file_path (str): 書き込み先のファイルパス
+        """
+        with open(file_path, "w") as f:
+            for item in items:
+                json_item = json.dumps(
+                    item, default=self._json_serial, sort_keys=False, ensure_ascii=False
+                )
+                f.write(json_item + "\n")
+
+    def _json_serial(self, obj):
+        """
+        JSONシリアライズ関数
+        """
+        if isinstance(obj, Decimal):
+            return int(obj) if obj % 1 == 0 else float(obj)
+        return str(obj)
+
+    def _write_csv(self, items, file_path):
+        """
+        アイテムをCSV形式でファイルに書き込みます。
+
+        Args:
+            items (iterator): 書き込むアイテムのイテレータ
+            file_path (str): 書き込み先のファイルパス
+        """
+        with open(file_path, "w", newline="") as f:
+            writer = None
+            for item in items:
+                if writer is None:
+                    writer = csv.DictWriter(f, fieldnames=list(item.keys()))
+                    writer.writeheader()
+
+                for key, value in item.items():
+                    if isinstance(value, (dict, list)):
+                        # ネストされた属性値はJSON形式に変換
+                        item[key] = json.dumps(
+                            value, default=self._json_serial, sort_keys=False, ensure_ascii=False
+                        )
+
+                writer.writerow(item)
