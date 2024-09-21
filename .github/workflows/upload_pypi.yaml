@@ -42,8 +42,4 @@ jobs:
           PYPI_PASSWORD=`jq -r '.inputs.password' $GITHUB_EVENT_PATH`
           echo ::add-mask::$PYPI_USERNAME
           echo ::add-mask::$PYPI_PASSWORD
-          # fetch pypi token
-          PYPI_TOKEN=
-          echo ::add-mask::$PYPI_TOKE
-          # upload a package to pypi
-          sudo python3 -m twine upload --repository pypi dist/* -u "__token__" -p $PYPI_TOKEN
+          sudo python3 tools/script/deploy_to_pypi.py $PYPI_USERNAME $PYPI_PASSWORD "${{ github.event.inputs.is_test }}"
