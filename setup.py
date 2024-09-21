@@ -70,7 +70,7 @@ setup(
             "pyproject.above37.toml",
             "pyproject.above38.toml",
             "pyproject.above39.toml",
-            "pyproject.above310.toml"
+            "pyproject.above310.toml",
         ],
     },
     python_requires=">=3.6",
