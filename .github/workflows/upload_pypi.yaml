@@ -33,15 +33,15 @@ jobs:
           sudo python3 -m pip install twine
       - name: create pypi package
         run: |
-          # create a pypi package
+          # create package
           sudo python3 setup.py sdist bdist_wheel
       - name: upload to pypi
         run: |
           # upload to pypi
-          #PYPI_USERNAME=`jq -r '.inputs.username' $GITHUB_EVENT_PATH`
-          #PYPI_PASSWORD=`jq -r '.inputs.password' $GITHUB_EVENT_PATH`
-          #echo ::add-mask::$PYPI_USERNAME
-          #echo ::add-mask::$PYPI_PASSWORD
+          PYPI_USERNAME=`jq -r '.inputs.username' $GITHUB_EVENT_PATH`
+          PYPI_PASSWORD=`jq -r '.inputs.password' $GITHUB_EVENT_PATH`
+          echo ::add-mask::$PYPI_USERNAME
+          echo ::add-mask::$PYPI_PASSWORD
           # fetch pypi token
           PYPI_TOKEN=
           echo ::add-mask::$PYPI_TOKE
