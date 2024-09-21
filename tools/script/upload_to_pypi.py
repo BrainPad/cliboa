@@ -11,7 +11,8 @@ pypi_username = args[1]
 pypi_password = args[2]
 is_test = args[3]
 pypi_repository = "testpypi" if is_test else "pypi"
-upload_command = "python3 -m twine upload --repository " + pypi_repository + " dist/*"
+# upload_command = "python3 -m twine upload --repository " + pypi_repository + " dist/*"
+upload_command 
 proc = pexpect.spawn(upload_command, encoding="utf-8")
 proc.logfile = open("/tmp/debug", "w")  # debug
 proc.expect("Enter your username: ")

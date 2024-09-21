@@ -63,14 +63,14 @@ setup(
     package_data={
         "cliboa.conf": ["logging.conf", "cliboa.ini"],
         "cliboa.template": [
-            "Pipfile.above36",
             "Pipfile.above37",
             "Pipfile.above38",
             "Pipfile.above39",
-            "pyproject.above36.toml",
+            "Pipfile.above310",
             "pyproject.above37.toml",
             "pyproject.above38.toml",
             "pyproject.above39.toml",
+            "pyproject.above310.toml"
         ],
     },
     python_requires=">=3.6",
