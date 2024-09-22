@@ -73,6 +73,6 @@ setup(
             "pyproject.above310.toml",
         ],
     },
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     entry_points={"console_scripts": ["cliboadmin = cliboa.cli.cliboadmin:main"]},
 )
