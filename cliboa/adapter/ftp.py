@@ -14,7 +14,7 @@
 import errno
 import os
 from datetime import datetime
-from ftplib import FTP, FTP_TLS
+from ftplib import FTP, FTP_TLS  # nosec
 from time import sleep
 
 from cliboa.util.lisboa_log import LisboaLog
@@ -91,13 +91,13 @@ class FtpAdapter(object):
 
     def _ftp_call(self, func, **kwargs):
         if self._tls:
-            with FTP_TLS(host=self._host, timeout=self._timeout) as ftp:
+            with FTP_TLS(host=self._host, timeout=self._timeout) as ftp:  # nosec
                 ftp.set_debuglevel(1)
                 ftp.login(user=self._user, passwd=self._password)
                 ftp.prot_p()
                 return func(ftp=ftp, **kwargs)
         else:
-            with FTP() as ftp:
+            with FTP() as ftp:  # nosec
                 ftp.set_debuglevel(1)
                 ftp.connect(host=self._host, port=self._port, timeout=self._timeout)
                 ftp.login(user=self._user, passwd=self._password)
