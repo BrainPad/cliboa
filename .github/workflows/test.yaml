@@ -37,10 +37,5 @@ jobs:
           poetry run pytest --cov cliboa --cov-report term-missing --cov-report=xml
       - name: check layer dependency
         run: |
-          if [ ${{ matrix.python_versions }} = 3.6 ]; then
-            echo "import-linter does not support python${{ matrix.python_versions }}"
-          else
             cd cliboa
             poetry run lint-imports
-          fi
-

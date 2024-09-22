@@ -9,14 +9,12 @@ Check current python version and prepare appropriate Pipfile
 """
 py_major_version = "{}.{}".format(sys.version_info.major, sys.version_info.minor)
 py_major_version_and_pipfile = {
-    "3.6": "Pipfile.above36",
     "3.7": "Pipfile.above37",
     "3.8": "Pipfile.above38",
     "3.9": "Pipfile.above39",
     "3.10": "Pipfile.above310",
 }
 py_major_version_and_pyproject_toml = {
-    "3.6": "pyproject.above36.toml",
     "3.7": "pyproject.above37.toml",
     "3.8": "pyproject.above38.toml",
     "3.9": "pyproject.above39.toml",
