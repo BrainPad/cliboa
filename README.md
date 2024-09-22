@@ -1,7 +1,7 @@
 [![PyPI](https://img.shields.io/pypi/v/cliboa?style=flat-square)](https://pypi.org/project/cliboa)
 [![PyPI - Implementation](https://img.shields.io/pypi/implementation/cliboa?style=flat-square)](https://pypi.org/project/cliboa)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/cliboa?style=flat-square)](https://pypi.org/project/cliboa)
-[![GitHub Actions](https://github.com/BrainPad/cliboa/workflows/cliboa/badge.svg)](https://github.com/BrainPad/cliboa/actions)
+[![GitHub Actions](https://github.com/BrainPad/cliboa/actions/workflows/test.yaml/badge.svg)](https://github.com/BrainPad/cliboa/actions/workflows/test.yaml)
 [![Code Style:
 black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square)](https://github.com/psf/black)
 [![Contributions Welcome](https://img.shields.io/static/v1.svg?label=Contributions&message=Welcome&color=0059b3&style=flat-square)](https://github.com/BrainPad/cliboa/blob/master/CONTRIBUTING.md)
