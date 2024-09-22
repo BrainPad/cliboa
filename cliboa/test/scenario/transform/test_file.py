@@ -354,12 +354,12 @@ class TestFileCompress(TestFileTransform):
         assert os.path.exists(compressed_file_2)
 
         with zipfile.ZipFile(compressed_file_1) as zp:
-            zp.extractall(self._out_dir)
+            zp.extractall(self._out_dir)  # nosec
         with open(os.path.join(self._out_dir, "test1.txt"), encoding="utf-8") as f:
             assert "This is test 1" == f.read()
 
         with zipfile.ZipFile(compressed_file_2) as zp:
-            zp.extractall(self._out_dir)
+            zp.extractall(self._out_dir)  # nosec
         with open(os.path.join(self._out_dir, "test2.txt"), encoding="utf-8") as f:
             assert "This is test 2" == f.read()
 

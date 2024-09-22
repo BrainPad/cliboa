@@ -43,4 +43,7 @@ jobs:
             cd cliboa
             poetry run lint-imports
           fi
+      - name: execute bandit
+        run: |
+          poetry run bandit --severity-level high -r cliboa
 
