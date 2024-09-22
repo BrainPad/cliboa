@@ -45,5 +45,9 @@ jobs:
           fi
       - name: execute bandit
         run: |
-          poetry run bandit --severity-level high -r cliboa
+          if [ ${{ matrix.python_versions }} = 3.7 ]; then
+            echo "bandit does not support python${{ matrix.python_versions }}"
+          else
+            poetry run bandit --severity-level high -r cliboa
+          fi
 
