@@ -48,6 +48,7 @@ from .transform.csv import (
     CsvConvert,
     CsvDuplicateRowDelete,
     CsvMerge,
+    CsvMergeExclusive,
     CsvRowDelete,
     CsvSort,
     CsvToJsonl,
