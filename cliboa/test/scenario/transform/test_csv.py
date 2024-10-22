@@ -1083,6 +1083,38 @@ class TestCsvMergeExclusive(TestCsvTransform):
                     assert r["data"] == test_src_csv_data[2][1]
             assert rows == 2
 
+    def test_execute_ok_with_all_column(self):
+        # create test csv
+        test_src_csv_data = [["key", "data"], ["1", "spam1"], ["2", "spam2"], ["3", "spam3"]]
+        self._create_csv(test_src_csv_data, fname="test.csv")
+        test_target_csv_data = [["key", "data"], ["1", "spam1"], ["2", "second"], ["c", "spam3"]]
+        self._create_csv(test_target_csv_data, fname="alter.csv")
+
+        # set the essential attributes
+        instance = CsvMergeExclusive()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "all_column", True)
+        Helper.set_property(
+            instance, "target_compare_path", os.path.join(self._data_dir, "alter.csv")
+        )
+
+        instance.execute()
+        output_file = os.path.join(self._data_dir, "test.csv")
+        rows = 0
+        with open(output_file, "r") as o:
+            reader = csv.DictReader(o)
+            for r in reader:
+                rows += 1
+                if rows == 1:
+                    assert r["key"] == test_src_csv_data[2][0]
+                    assert r["data"] == test_src_csv_data[2][1]
+                if rows == 2:
+                    assert r["key"] == test_src_csv_data[3][0]
+                    assert r["data"] == test_src_csv_data[3][1]
+            assert rows == 2
+
     def test_execute_ng_with_src_column_not_exist(self):
         # create test csv
         test_src_csv_data = [["key", "data"], ["1", "spam1"], ["2", "spam2"]]
@@ -1126,6 +1158,73 @@ class TestCsvMergeExclusive(TestCsvTransform):
         with pytest.raises(KeyError) as e:
             instance.execute()
         assert "'Target Compare file does not exist target column [dummy].'" == str(e.value)
+
+    def test_execute_ng_with_all_column_and_src_column(self):
+        # create test csv
+        test_src_csv_data = [["key", "data"], ["1", "spam1"], ["2", "spam2"]]
+        self._create_csv(test_src_csv_data, fname="test.csv")
+        test_target_csv_data = [["id", "name"], ["3", "third"], ["4", "fourth"]]
+        self._create_csv(test_target_csv_data, fname="alter.csv")
+
+        # set the essential attributes
+        instance = CsvMergeExclusive()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "all_column", True)
+        Helper.set_property(instance, "src_column", "key")
+        Helper.set_property(
+            instance, "target_compare_path", os.path.join(self._data_dir, "alter.csv")
+        )
+
+        with pytest.raises(KeyError) as e:
+            instance.execute()
+        assert "'all_column cannot coexist with src_column or target_column.'" == str(e.value)
+
+    def test_execute_ng_with_all_column_and_target_column(self):
+        # create test csv
+        test_src_csv_data = [["key", "data"], ["1", "spam1"], ["2", "spam2"]]
+        self._create_csv(test_src_csv_data, fname="test.csv")
+        test_target_csv_data = [["id", "name"], ["3", "third"], ["4", "fourth"]]
+        self._create_csv(test_target_csv_data, fname="alter.csv")
+
+        # set the essential attributes
+        instance = CsvMergeExclusive()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "all_column", True)
+        Helper.set_property(instance, "target_column", "key")
+        Helper.set_property(
+            instance, "target_compare_path", os.path.join(self._data_dir, "alter.csv")
+        )
+
+        with pytest.raises(KeyError) as e:
+            instance.execute()
+        assert "'all_column cannot coexist with src_column or target_column.'" == str(e.value)
+
+    def test_execute_ng_with_all_column_and_src_column_and_target_column(self):
+        # create test csv
+        test_src_csv_data = [["key", "data"], ["1", "spam1"], ["2", "spam2"]]
+        self._create_csv(test_src_csv_data, fname="test.csv")
+        test_target_csv_data = [["id", "name"], ["3", "third"], ["4", "fourth"]]
+        self._create_csv(test_target_csv_data, fname="alter.csv")
+
+        # set the essential attributes
+        instance = CsvMergeExclusive()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "all_column", True)
+        Helper.set_property(instance, "src_column", "key")
+        Helper.set_property(instance, "target_column", "key")
+        Helper.set_property(
+            instance, "target_compare_path", os.path.join(self._data_dir, "alter.csv")
+        )
+
+        with pytest.raises(KeyError) as e:
+            instance.execute()
+        assert "'all_column cannot coexist with src_column or target_column.'" == str(e.value)
 
 
 class TestColumnLengthAdjust(TestCsvTransform):
