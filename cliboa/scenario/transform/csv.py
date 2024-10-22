@@ -360,9 +360,11 @@ class CsvMergeExclusive(FileBaseTransform):
 
     def __init__(self):
         super().__init__()
+        self.df_target_list = None
         self._src_column = None
         self._target_compare_path = None
         self._target_column = None
+        self._all_column = False
 
     def src_column(self, src_column):
         self._src_column = src_column
@@ -373,15 +375,16 @@ class CsvMergeExclusive(FileBaseTransform):
     def target_column(self, target_column):
         self._target_column = target_column
 
+    def all_column(self, all_column):
+        self._all_column = all_column
+
     def execute(self, *args):
         valid = EssentialParameters(
             self.__class__.__name__,
             [
                 self._src_dir,
                 self._src_pattern,
-                self._src_column,
                 self._target_compare_path,
-                self._target_column,
             ],
         )
         valid()
@@ -395,23 +398,31 @@ class CsvMergeExclusive(FileBaseTransform):
         )
         self.check_file_existence(target)
 
+        if self._all_column and (self._src_column or self._target_column):
+            raise KeyError("all_column cannot coexist with src_column or target_column.")
+
         header = pandas.read_csv(self._target_compare_path, nrows=0)
-        if self._target_column not in header:
+        if self._all_column is False and self._target_column not in header:
             raise KeyError(
                 "Target Compare file does not exist target column [%s]." % self._target_column
             )
 
-        df_target = pandas.read_csv(self._target_compare_path, usecols=[self._target_column])
-        self.df_target_list = df_target[self._target_column].values.tolist()
+        if self._all_column:
+            df_target = pandas.read_csv(self._target_compare_path)
+            self.df_target_list = df_target.values.tolist()
+        else:
+            df_target = pandas.read_csv(self._target_compare_path, usecols=[self._target_column])
+            self.df_target_list = df_target[self._target_column].values.tolist()
 
         super().io_files(files, func=self.convert)
 
     def convert(self, fi, fo):
-        header = pandas.read_csv(fi, dtype=str, encoding=self._encoding, nrows=0)
-        try:
-            header[self._src_column].values.tolist()
-        except KeyError:
-            raise KeyError("Src file does not exist target column [%s]." % self._target_column)
+        if self._all_column is False:
+            header = pandas.read_csv(fi, dtype=str, encoding=self._encoding, nrows=0)
+            try:
+                header[self._src_column].values.tolist()
+            except KeyError:
+                raise KeyError("Src file does not exist target column [%s]." % self._target_column)
 
         chunk_size_handling(self._read_csv_func, fi, fo)
 
@@ -420,7 +431,10 @@ class CsvMergeExclusive(FileBaseTransform):
         first_write = True
         tfr = pandas.read_csv(fi, chunksize=chunksize, na_filter=False)
         for df in tfr:
-            df = df[~df[self._src_column].isin(self.df_target_list)]
+            if self._all_column:
+                df = df.drop(self._all_elements_match(df.values.tolist()))
+            else:
+                df = df[~df[self._src_column].isin(self.df_target_list)]
             df.to_csv(
                 fo,
                 encoding=self._encoding,
@@ -429,6 +443,16 @@ class CsvMergeExclusive(FileBaseTransform):
                 mode="w" if first_write else "a",
             )
             first_write = False
+
+    def _all_elements_match(self, df_src_list):
+        target_list = []
+        for i in range(len(df_src_list)):
+            for j in range(len(self.df_target_list)):
+                if all(str(x) == str(y) for x, y in zip(df_src_list[i], self.df_target_list[j])):
+                    target_list.append(i)
+                else:
+                    continue
+        return target_list
 
 
 class ColumnLengthAdjust(FileBaseTransform):
