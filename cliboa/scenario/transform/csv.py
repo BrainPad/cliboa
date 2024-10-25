@@ -1060,7 +1060,8 @@ class CsvDuplicateRowDelete(FileBaseTransform):
         )
         valid()
 
-        os.makedirs(self._dest_dir, exist_ok=True)
+        if self._dest_dir:
+            os.makedirs(self._dest_dir, exist_ok=True)
 
         files = super().get_target_files(self._src_dir, self._src_pattern)
 
