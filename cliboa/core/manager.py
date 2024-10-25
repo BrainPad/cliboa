@@ -267,7 +267,11 @@ class ScenarioManager(object):
         Returns:
             str: replaced value
         """
-        shell_output = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True).communicate()[0]
+        shell_output = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, shell=True
+        ).communicate()[  # nosec
+            0
+        ]
         shell_output = shell_output.strip()
         # remove head byte string
         shell_output = re.sub("^b", "", str(shell_output))
