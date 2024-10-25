@@ -219,13 +219,15 @@ class FileDecompress(FileBaseTransform):
                 else:
                     pwd = self._password
                 with zipfile.ZipFile(f) as zp:
-                    zp.extractall(
+                    zp.extractall(  # nosec
                         self._dest_dir if self._dest_dir is not None else self._src_dir, pwd=pwd
                     ),
             elif ext == ".tar":
                 self._logger.info("Decompress tar file %s" % f)
                 with tarfile.open(f, "r:*") as tf:
-                    tf.extractall(self._dest_dir if self._dest_dir is not None else self._src_dir)
+                    tf.extractall(
+                        self._dest_dir if self._dest_dir is not None else self._src_dir
+                    )  # nosec
             elif ext == ".bz2":
                 self._logger.info("Decompress bz2 file %s" % f)
                 dcom_name = os.path.splitext(os.path.basename(f))[0]

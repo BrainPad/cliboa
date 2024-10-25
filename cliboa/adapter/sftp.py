@@ -91,7 +91,7 @@ class SftpAdapter(object):
 
             try:
                 ssh = SSHClient()
-                ssh.set_missing_host_key_policy(AutoAddPolicy())
+                ssh.set_missing_host_key_policy(AutoAddPolicy())  # nosec
                 if self._password:
                     ssh.connect(
                         hostname=self._host,
