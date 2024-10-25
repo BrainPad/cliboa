@@ -10,7 +10,7 @@ black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-squ
 
 
 # Table of Contents
-* [Introction](#introduction)
+* [Introduction](#introduction)
   * [What is cliboa](#what-is-cliboa)
   * [Features](#features)
 * [Manual](#manual)
@@ -49,7 +49,7 @@ See [CONTRIBUTING.md](/CONTRIBUTING.md)
 Available on macOS and any Linux distributions, like Debian, Ubuntu, CentOS, REL, or etc.
 
 ## Install cliboa
-python version 3.7 or later and poetry are required. In the environemnt which pip can be used, execute as below.
+Python version 3.7 or later and poetry are required. In the environment which pip can be used, execute as below.
 
 ```
 sudo pip3 install poetry
@@ -99,7 +99,7 @@ $ poetry install
 ```
 
 ## Write a Scenario of ETL Processing
-As a simple etl processing, write scenario.yml in simple-etl as below.
+As a simple ETL processing, write scenario.yml in simple-etl as below.
 
 The following example is just download a gzip file from the local sftp server, decompress it, and upload it to the local sftp server.
 
