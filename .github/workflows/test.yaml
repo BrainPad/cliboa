@@ -37,9 +37,8 @@ jobs:
           poetry run pytest --cov cliboa --cov-report term-missing --cov-report=xml
       - name: check layer dependency
         run: |
-            cd cliboa
-            poetry run lint-imports
-          fi
+          cd cliboa
+          poetry run lint-import
       - name: execute bandit
         run: |
           if [ ${{ matrix.python_versions }} = 3.7 ]; then
