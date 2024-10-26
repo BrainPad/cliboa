@@ -38,7 +38,7 @@ jobs:
       - name: check layer dependency
         run: |
           cd cliboa
-          poetry run lint-import
+          poetry run lint-imports
       - name: execute bandit
         run: |
           if [ ${{ matrix.python_versions }} = 3.7 ]; then
