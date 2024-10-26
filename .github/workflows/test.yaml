@@ -1,7 +1,9 @@
 name: cliboa-test
 
-on: [pull_request]
- 
+on:
+  pull_request:
+  workflow_dispatch:
+
 jobs:
   test_by_multiple_python_versions:
     runs-on: ubuntu-latest
