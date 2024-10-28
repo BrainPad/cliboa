@@ -27,7 +27,7 @@ from .extract.mysql import MysqlRead
 from .extract.postgres import PostgresqlRead
 from .extract.sftp import SftpDelete, SftpDownload, SftpDownloadFileDelete, SftpFileExistsCheck
 from .extract.sqlite import SqliteExport
-from .load.aws import S3Upload, DynamoDBWrite
+from .load.aws import DynamoDBWrite, S3Upload
 from .load.azure import AzureBlobUpload
 from .load.gcp import BigQueryCopy, BigQueryWrite, FirestoreDocumentCreate, GcsUpload
 from .load.http import HttpDelete, HttpPost
