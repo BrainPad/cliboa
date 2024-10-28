@@ -186,10 +186,12 @@ class DynamoDBWrite(BaseAws):
 
                     if partition_key not in item:
                         raise InvalidParameter(
-                            f"Partition key '{partition_key}' not found in JSONL file: {file} at line {line_number}"
+                            f"Partition key '{partition_key}' not found in JSONL file: "
+                            f"{file} at line {line_number}"
                         )
                     if sort_key and sort_key not in item:
                         raise InvalidParameter(
-                            f"Sort key '{sort_key}' not found in JSONL file: {file} at line {line_number}"
+                            f"Sort key '{sort_key}' not found in JSONL file: "
+                            f"{file} at line {line_number}"
                         )
                     batch.put_item(Item=item)

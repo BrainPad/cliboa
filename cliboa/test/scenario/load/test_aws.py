@@ -12,10 +12,6 @@
 # all copies or substantial portions of the Software.
 #
 
-
-import csv
-import json
-import os
 import tempfile
 from unittest.mock import MagicMock, patch
 
@@ -98,7 +94,10 @@ class TestDynamoDBWrite(BaseCliboaTest):
         mock_boto3_resource.return_value.Table.return_value = mock_table
         mock_table.key_schema = [{"AttributeName": "id", "KeyType": "HASH"}]
 
-        jsonl_content = '{"id": "1", "name": "test1"}\n{"id": "2", "name": "test2"}'
+        jsonl_content = (
+            '{"id": "1", "name": "test1", "timestamp": "2023-01-01"}\n'
+            '{"id": "2", "name": "test2", "timestamp": "2023-01-02"}'
+        )
         with tempfile.NamedTemporaryFile(mode="w", delete=True) as temp_file:
             temp_file.write(jsonl_content)
             temp_file.flush()
@@ -187,7 +186,10 @@ class TestDynamoDBWrite(BaseCliboaTest):
             {"AttributeName": "timestamp", "KeyType": "RANGE"},
         ]
 
-        jsonl_content = '{"id": "1", "name": "test1", "timestamp": "2023-01-01"}\n{"id": "2", "name": "test2", "timestamp": "2023-01-02"}'
+        jsonl_content = (
+            '{"id": "1", "name": "test1", "timestamp": "2023-01-01"}\n'
+            '{"id": "2", "name": "test2", "timestamp": "2023-01-02"}'
+        )
         with tempfile.NamedTemporaryFile(mode="w", delete=True) as temp_file:
             temp_file.write(jsonl_content)
             temp_file.flush()
