@@ -245,7 +245,7 @@ class DynamoDBRead(BaseAws):
         file_path = os.path.join(self._dest_dir, self._file_name)
         if self._file_format == "jsonl":
             self._write_jsonl(self._scan_table(table), file_path)
-        else:  # csv
+        else:
             self._write_csv(self._scan_table(table), file_path)
 
         self._logger.info(f"Downloaded items from DynamoDB table {self._table_name} to {file_path}")
