@@ -107,10 +107,10 @@ class TestDynamoDBWrite(BaseCliboaTest):
 
         mock_table.batch_writer.assert_called_once()
         mock_table.batch_writer().__enter__().put_item.assert_any_call(
-            Item={"id": "1", "name": "test1"}
+            Item={"id": "1", "name": "test1", "timestamp": "2023-01-01"}
         )
         mock_table.batch_writer().__enter__().put_item.assert_any_call(
-            Item={"id": "2", "name": "test2"}
+            Item={"id": "2", "name": "test2", "timestamp": "2023-01-02"}
         )
 
     @patch("boto3.resource")
