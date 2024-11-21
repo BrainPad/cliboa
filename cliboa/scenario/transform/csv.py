@@ -426,27 +426,23 @@ class CsvMergeExclusive(FileBaseTransform):
             except KeyError:
                 raise KeyError("Src file does not exist target column [%s]." % self._target_column)
 
-        chunk_size_handling(self._read_csv_func, fi, fo)
+        self._csv_write(fi, fo)
 
-    def _read_csv_func(self, chunksize, fi, fo):
+    def _csv_write(self, fi, fo):
         # Used in chunk_size_handling
-        first_write = True
-        tfr = pandas.read_csv(fi, dtype=str, chunksize=chunksize, na_filter=False)
+        df = pandas.read_csv(fi, dtype=str, na_filter=False)
         if self._all_column:
             df_target_set = {hash(tuple(row)) for row in self.df_target_list}
-        for df in tfr:
-            if self._all_column:
-                df = df.drop(self._all_elements_match(df.values.tolist(), df_target_set))
-            else:
-                df = df[~df[self._src_column].isin(self.df_target_list)]
-            df.to_csv(
-                fo,
-                encoding=self._encoding,
-                header=True if first_write else False,
-                index=False,
-                mode="w" if first_write else "a",
-            )
-            first_write = False
+            df = df.drop(self._all_elements_match(df.values.tolist(), df_target_set))
+        else:
+            df = df[~df[self._src_column].isin(self.df_target_list)]
+        df.to_csv(
+            fo,
+            encoding=self._encoding,
+            header=True,
+            index=False,
+            mode="a",
+        )
 
     def _all_elements_match(self, df_src_list, df_target_set):
         return [i for i, row in enumerate(df_src_list) if hash(tuple(row)) in df_target_set]
