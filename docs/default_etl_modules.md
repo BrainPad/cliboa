@@ -18,7 +18,6 @@ Can use ETL modules as below by default.
 |[SftpDownloadFileDelete](/docs/modules/sftp_download_file_delete.md)|Remove files downloaded via class 'SftpDownload' from SFTP server|
 |[S3Download](/docs/modules/s3_download.md)|Download files from S3|
 |[SqliteExport](/docs/modules/sqlite_export.md)|Export a table data to csv|
-|[FirestoreDocumentDownload](/docs/modules/firestore_document_download.md)|Download a document from Firestore|
 
 
 ## Transform Modules
@@ -49,7 +48,7 @@ Can use ETL modules as below by default.
 |[SftpUpload](/docs/modules/sftp_upload.md)|Upload a file via sftp|
 |[SqliteImport](/docs/modules/sqlite_import.md)|Read content from csv files and insert them into sqlite table|
 |[S3Upload](/docs/modules/s3_upload.md)|Upload files to S3|
-|[GcsCopy](/docs/modules/bigquery_copy.md)|Upload files to GCS|
+|[GcsCopy](/docs/modules/gcs_copy.md)|Upload files to GCS|
 
 
 ## Other Modules
