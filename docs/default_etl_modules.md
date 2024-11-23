@@ -6,6 +6,7 @@ Can use ETL modules as below by default.
 |----------|-----------|
 |[AzureBlobDownload](/docs/modules/azureblob_download.md)|Download files from Azure Blob Storage|
 |[BigQueryRead](/docs/modules/bigquery_read.md)|Read from bigquery table|
+|[DynamoDBRead](/docs/modules/dynamodb_read.md)|Read data from Amazon DynamoDB table|
 |[FirestoreDocumentDownload](/docs/modules/firestore_document_download.md)|Download a document from Firestore|
 |[FtpDownload](/docs/modules/ftp_download.md)|Download a file via ftp|
 |[FtpDownloadFileDelete](/docs/modules/ftp_download_file_delete.md)|Remove files downloaded via class 'FtpDownload' from FTP server.|
