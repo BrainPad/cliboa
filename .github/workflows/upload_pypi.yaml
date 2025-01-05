@@ -6,17 +6,9 @@ on:
       - "223" # debug
   workflow_dispatch:
     inputs:
-      username:
-        description: PyPI username
+      pypi_token:
+        description: PyPI token
         required: true
-        default: "spam"
-      password:
-        description: PyPI password
-        required: true
-        default: "spam"
-      is_test:
-        description: if upload pypi test repository
-        required: false
         default: ""
 
 jobs:
@@ -27,7 +19,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: 3.10
       - name: install dependencies
         run: |
           sudo python3 -m pip install twine
@@ -37,9 +29,8 @@ jobs:
           sudo python3 setup.py sdist bdist_wheel
       - name: upload to pypi
         run: |
-          # upload to pypi
-          PYPI_USERNAME=`jq -r '.inputs.username' $GITHUB_EVENT_PATH`
-          PYPI_PASSWORD=`jq -r '.inputs.password' $GITHUB_EVENT_PATH`
-          echo ::add-mask::$PYPI_USERNAME
-          echo ::add-mask::$PYPI_PASSWORD
-          sudo python3 tools/script/deploy_to_pypi.py $PYPI_USERNAME $PYPI_PASSWORD "${{ github.event.inputs.is_test }}"
+          # fetch a pypi token
+          PYPI_TOKEN=jq -r '.inputs.pypi_token' $GITHUB_EVENT_PATH`
+          echo ::add-mask::$PYPI_TOKEN
+          # upload a python package to pypi
+          sudo python3 -m twine upload --repository pypi dist/* -u "__token__" -p $PYPI_TOKEN
