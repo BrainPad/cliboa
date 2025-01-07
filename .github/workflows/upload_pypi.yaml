@@ -9,7 +9,7 @@ on:
       pypi_token:
         description: PyPI token
         required: true
-        default: ""
+        default: "spam"
 
 jobs:
   deploy_to_pypi:
