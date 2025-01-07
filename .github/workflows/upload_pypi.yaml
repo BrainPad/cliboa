@@ -6,7 +6,7 @@ on:
       - "449" # debug
   workflow_dispatch:
     inputs:
-      pypi_token:
+      token:
         description: PyPI token
         required: true
         default: "spam"
@@ -30,7 +30,7 @@ jobs:
       - name: upload to pypi
         run: |
           # fetch a pypi token
-          PYPI_TOKEN=jq -r '.inputs.pypi_token' $GITHUB_EVENT_PATH`
+          PYPI_TOKEN=jq -r '.inputs.token' $GITHUB_EVENT_PATH`
           echo ::add-mask::$PYPI_TOKEN
           # upload a python package to pypi
           sudo python3 -m twine upload --repository pypi dist/* -u "__token__" -p $PYPI_TOKEN
