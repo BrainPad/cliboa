@@ -43,6 +43,7 @@ Can use ETL modules as below by default.
 |----------|-----------|
 |[AzureBlobUpload](/docs/modules/azureblob_upload.md)|Upload files to Azure Blob Storage|
 |[BigQueryWrite](/docs/modules/bigquery_write.md)|Read content from a file and insert it into a table of bigquery|
+|[DynamoDBWrite](/docs/modules/dynamodb_write.md)|Write data to Amazon DynamoDB table|
 |[FirestoreDocumentCreate](/docs/modules/firestore_document_create.md)|Create document|
 |[GcsUpload](/docs/modules/gcs_upload.md)|Upload files to GCS|
 |[SftpUpload](/docs/modules/sftp_upload.md)|Upload a file via sftp|
