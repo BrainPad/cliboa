@@ -3,21 +3,13 @@ name: cliboa-deploy
 on:
   push:
     branches:
-      - "223" # debug
+      - "224" # debug
   workflow_dispatch:
     inputs:
-      username:
-        description: PyPI username
+      token:
+        description: PyPI token
         required: true
         default: "spam"
-      password:
-        description: PyPI password
-        required: true
-        default: "spam"
-      is_test:
-        description: if upload pypi test repository
-        required: false
-        default: ""
 
 jobs:
   deploy_to_pypi:
@@ -37,9 +29,8 @@ jobs:
           sudo python3 setup.py sdist bdist_wheel
       - name: upload to pypi
         run: |
-          # upload to pypi
-          PYPI_USERNAME=`jq -r '.inputs.username' $GITHUB_EVENT_PATH`
-          PYPI_PASSWORD=`jq -r '.inputs.password' $GITHUB_EVENT_PATH`
-          echo ::add-mask::$PYPI_USERNAME
-          echo ::add-mask::$PYPI_PASSWORD
-          sudo python3 tools/script/deploy_to_pypi.py $PYPI_USERNAME $PYPI_PASSWORD "${{ github.event.inputs.is_test }}"
+          # fetch a pypi token
+          PYPI_TOKEN=`jq -r '.inputs.token' $GITHUB_EVENT_PATH`
+          echo ::add-mask::$PYPI_TOKEN
+          # upload a python package to pypi
+          sudo python3 -m twine upload --repository pypi dist/* -u "__token__" -p $PYPI_TOKEN
