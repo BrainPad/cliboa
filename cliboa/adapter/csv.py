@@ -77,9 +77,10 @@ class Csv(object):
             remain_column_names: Columns which remain
             enc: Encoding
         """
-        with open(input_file, mode="r", encoding=enc) as in_f, open(
-            output_file, mode="w", encoding=enc
-        ) as out_f:
+        with (
+            open(input_file, mode="r", encoding=enc) as in_f,
+            open(output_file, mode="w", encoding=enc) as out_f,
+        ):
             reader = csv.DictReader(in_f)
             writer = csv.writer(out_f)
             writer.writerow(remain_column_names)
@@ -101,9 +102,10 @@ class Csv(object):
             remain_column_numbers: Column numbers which remain
             enc: Encoding
         """
-        with open(input_file, mode="r", encoding=enc) as in_f, open(
-            output_file, mode="w", encoding=enc
-        ) as out_f:
+        with (
+            open(input_file, mode="r", encoding=enc) as in_f,
+            open(output_file, mode="w", encoding=enc) as out_f,
+        ):
             reader = csv.reader(in_f)
             writer = csv.writer(out_f)
             for i, row in enumerate(reader):

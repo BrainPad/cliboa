@@ -19,21 +19,25 @@ from unittest.mock import patch
 
 from cliboa.conf import env
 from cliboa.core.listener import ScenarioStatusListener, StepListener, StepStatusListener
+from cliboa.core.scenario_queue import ScenarioQueue
+from cliboa.core.step_queue import StepQueue
 from cliboa.core.strategy import SingleProcExecutor, StepExecutor
 from cliboa.core.worker import ScenarioWorker
 from cliboa.interface import CommandArgumentParser
 from cliboa.scenario.sample_step import SampleCustomStep
+from cliboa.test import BaseCliboaTest
 from cliboa.util.exception import CliboaException
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
 
 
-class TestScenarioStatusListener(object):
+class TestScenarioStatusListener(BaseCliboaTest):
     def setup_method(self, method):
         cmd_parser = CommandArgumentParser()
         sys.argv.clear()
         sys.argv.append("spam")
         sys.argv.append("spam")
+        setattr(ScenarioQueue, "step_queue", StepQueue())
         self._listener = ScenarioStatusListener()
         self._worker = ScenarioWorker(cmd_parser.parse())
         self._log_file = os.path.join(env.BASE_DIR, "logs", "app.log")

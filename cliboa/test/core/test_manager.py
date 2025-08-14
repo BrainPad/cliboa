@@ -193,6 +193,11 @@ class TestYamlScenarioManager(BaseCliboaTest):
         assert instance._step == "sample_step"
         assert instance._memo == "foo_%s.csv" % today
 
+    @pytest.mark.skipif(
+        sys.platform == "darwin",
+        reason="The date command on macOS is different from the GNU version,"
+        "so this test will skip on a Mac.",
+    )
     def test_create_scenario_queue_ok_with_vars_plural(self):
         """
         Valid scenario.yml with {{ vars }}
@@ -224,6 +229,11 @@ class TestYamlScenarioManager(BaseCliboaTest):
         assert instance._step == "sample_step"
         assert instance._memo == "foo_%s_%s.csv" % (yesterday, today)
 
+    @pytest.mark.skipif(
+        sys.platform == "darwin",
+        reason="The date command on macOS is different from the GNU version,"
+        "so this test will skip on a Mac.",
+    )
     def test_create_scenario_queue_ok_with_vars_list(self):
         """
         Valid scenario.yml with {{ vars }}
@@ -253,7 +263,7 @@ class TestYamlScenarioManager(BaseCliboaTest):
         today = datetime.now().strftime("%Y%m%d")
         yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
         assert instance._step == "sample_step"
-        assert type(instance._memo) == list
+        assert isinstance(instance._memo, list)
         assert len(instance._memo) == 2
         for i, row in enumerate(instance._memo):
             if i == 0:
@@ -261,6 +271,11 @@ class TestYamlScenarioManager(BaseCliboaTest):
             elif i == 1:
                 assert row == "foo_%s.csv" % yesterday
 
+    @pytest.mark.skipif(
+        sys.platform == "darwin",
+        reason="The date command on macOS is different from the GNU version,"
+        "so this test will skip on a Mac.",
+    )
     def test_create_scenario_queue_ok_with_vars_dict(self):
         """
         Valid scenario.yml with {{ vars }}
@@ -290,7 +305,7 @@ class TestYamlScenarioManager(BaseCliboaTest):
         today = datetime.now().strftime("%Y%m%d")
         yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
         assert instance._step == "sample_step"
-        assert type(instance._memo) == dict
+        assert isinstance(instance._memo, dict)
         for k, v in instance._memo.items():
             if k == "one":
                 assert v == "foo_%s.csv" % today
@@ -325,9 +340,14 @@ class TestYamlScenarioManager(BaseCliboaTest):
         instance = instances[0]
 
         assert instance._step == "sample_step"
-        assert type(instance._memo) == datetime
+        assert isinstance(instance._memo, datetime)
         assert instance._memo == now_datetime
 
+    @pytest.mark.skipif(
+        sys.platform == "darwin",
+        reason="The date command on macOS is different from the GNU version,"
+        "so this test will skip on a Mac.",
+    )
     def test_create_scenario_queue_ok_with_vars_complicated(self):
         """
         Valid scenario.yml with {{ vars }}
@@ -362,7 +382,7 @@ class TestYamlScenarioManager(BaseCliboaTest):
         today = datetime.now().strftime("%Y%m%d")
         yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
         assert instance._step == "sample_step"
-        assert type(instance._memo) == list
+        assert isinstance(instance._memo, list)
         assert len(instance._memo) == 3
         for i, row in enumerate(instance._memo):
             if i == 0:
@@ -550,6 +570,11 @@ class TestJsonScenarioManager(BaseCliboaTest):
         assert instance._step == "sample_step"
         assert instance._memo == "foo_%s.csv" % today
 
+    @pytest.mark.skipif(
+        sys.platform == "darwin",
+        reason="The date command on macOS is different from the GNU version,"
+        "so this test will skip on a Mac.",
+    )
     def test_create_scenario_queue_ok_with_vars_plural(self):
         """
         Valid scenario.json with {{ vars }}
@@ -581,6 +606,11 @@ class TestJsonScenarioManager(BaseCliboaTest):
         assert instance._step == "sample_step"
         assert instance._memo == "foo_%s_%s.csv" % (yesterday, today)
 
+    @pytest.mark.skipif(
+        sys.platform == "darwin",
+        reason="The date command on macOS is different from the GNU version,"
+        "so this test will skip on a Mac.",
+    )
     def test_create_scenario_queue_ok_with_vars_list(self):
         """
         Valid scenario.json with {{ vars }}
@@ -610,7 +640,7 @@ class TestJsonScenarioManager(BaseCliboaTest):
         today = datetime.now().strftime("%Y%m%d")
         yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
         assert instance._step == "sample_step"
-        assert type(instance._memo) == list
+        assert isinstance(instance._memo, list)
         assert len(instance._memo) == 2
         for i, row in enumerate(instance._memo):
             if i == 0:
@@ -618,6 +648,11 @@ class TestJsonScenarioManager(BaseCliboaTest):
             elif i == 1:
                 assert row == "foo_%s.csv" % yesterday
 
+    @pytest.mark.skipif(
+        sys.platform == "darwin",
+        reason="The date command on macOS is different from the GNU version,"
+        "so this test will skip on a Mac.",
+    )
     def test_create_scenario_queue_ok_with_vars_dict(self):
         """
         Valid scenario.json with {{ vars }}
@@ -647,13 +682,18 @@ class TestJsonScenarioManager(BaseCliboaTest):
         today = datetime.now().strftime("%Y%m%d")
         yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
         assert instance._step == "sample_step"
-        assert type(instance._memo) == dict
+        assert isinstance(instance._memo, dict)
         for k, v in instance._memo.items():
             if k == "one":
                 assert v == "foo_%s.csv" % today
             elif k == "two":
                 assert v == "foo_%s.csv" % yesterday
 
+    @pytest.mark.skipif(
+        sys.platform == "darwin",
+        reason="The date command on macOS is different from the GNU version,"
+        "so this test will skip on a Mac.",
+    )
     def test_create_scenario_queue_ok_with_vars_complicated(self):
         """
         Valid scenario.json with {{ vars }}
@@ -686,7 +726,7 @@ class TestJsonScenarioManager(BaseCliboaTest):
         today = datetime.now().strftime("%Y%m%d")
         yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
         assert instance._step == "sample_step"
-        assert type(instance._memo) == list
+        assert isinstance(instance._memo, list)
         assert len(instance._memo) == 2
         for i, row in enumerate(instance._memo):
             if i == 0:

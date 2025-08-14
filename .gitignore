@@ -20,7 +20,7 @@ __pycache__
 .pydevproject
 
 # cliboa
-.coverage
+.coverage*
 .eggs
 build
 cliboa.egg-info
@@ -31,5 +31,4 @@ dist/
 logs/
 Pipfile
 Pipfile.lock
-pyproject.toml
 poetry.lock

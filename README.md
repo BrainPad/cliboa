@@ -49,7 +49,7 @@ See [CONTRIBUTING.md](/CONTRIBUTING.md)
 Available on macOS and any Linux distributions, like Debian, Ubuntu, CentOS, REL, or etc.
 
 ## Install cliboa
-Python version 3.7 or later and poetry are required. In the environment which pip can be used, execute as below.
+Python version 3.10 or later and poetry are required. In the environment which pip can be used, execute as below.
 
 ```
 sudo pip3 install poetry

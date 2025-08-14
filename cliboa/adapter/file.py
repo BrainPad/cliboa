@@ -28,9 +28,10 @@ class File(object):
             remains (str[]): Columns which remain for new csv
             enc=utf-8 (str): encording
         """
-        with codecs.open(input_file, mode="r", encoding=enc) as in_f, codecs.open(
-            output_file, mode="w", encoding="utf-8"
-        ) as out_f:
+        with (
+            codecs.open(input_file, mode="r", encoding=enc) as in_f,
+            codecs.open(output_file, mode="w", encoding="utf-8") as out_f,
+        ):
             reader = csv.DictReader(in_f)
             writer = csv.writer(out_f)
             writer.writerow(remains)

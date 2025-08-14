@@ -1,0 +1,56 @@
+name: cliboa-test-static
+
+on:
+  push:
+    branches:
+      - '**'
+    paths:
+      - '**.py'
+  schedule:
+    - cron: '0 0 1 * *'
+  workflow_dispatch:
+
+jobs:
+  test_by_multiple_python_versions:
+    if: github.event_name != 'schedule' || github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python_version: [ '3.10', '3.11', '3.12' ]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python_version }}
+
+      - name: install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+          poetry install
+
+      - name: validate poetry
+        run: |
+          poetry check --strict
+
+      - name: execute flake8
+        run: |
+          poetry run pflake8 .
+
+      - name: check black format
+        run: |
+          poetry run black --check .
+
+      - name: check isort
+        run: |
+          poetry run isort --check .
+
+      - name: execute bandit
+        run: |
+          poetry run bandit --severity-level high -r cliboa
+
+      - name: check layer dependency
+        run: |
+          poetry run lint-imports

@@ -466,6 +466,7 @@ class TestDateFormatConvert(TestFileTransform):
         assert rows == len(obj)
 
 
+@pytest.mark.skip("xlsxwriter is not used in cliboa.")
 class TestExcelConvert(TestFileTransform):
     def test_convert_ok(self):
         excel_file = os.path.join(self._data_dir, "test.xlxs")

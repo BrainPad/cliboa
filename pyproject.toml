@@ -1,0 +1,90 @@
+[project]
+name = "cliboa"
+version = "2.5.0b0"
+description = "application framework for ETL(ELT) processing"
+authors = [ { name = "BrainPad", email = "xxx@brainpad.co.jp"} ]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/BrainPad/cliboa"
+requires-python = ">=3.10"
+dynamic = ["dependencies"]
+
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Topic :: Software Development :: Build Tools",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
+
+include = [
+  "cliboa/conf/logging.conf",
+  "cliboa/conf/cliboa.ini",
+  "cliboa/template/Pipfile.*",
+  "cliboa/template/pyproject.*.toml",
+]
+
+[project.scripts]
+cliboadmin = "cliboa.cli.cliboadmin:main"
+
+[tool.poetry.dependencies]
+# data handling
+pandas = ">=1.3.4"
+python-dateutil = "^2"
+PyYaml = "^6.0.2"
+jsonlines = ">=2.0.0"
+cloudpickle = ">=2.0.0"
+# http, ssh
+requests = "^2.26.0"
+paramiko = ">=2.10.5"
+chardet = ">=4.0.0"
+# cloud platform
+boto3 = "^1.20.16"
+azure-storage-blob = "^12.9.0"
+google-auth = "^2.3.3"
+google-cloud-storage = ">=1.43.0"
+google-cloud-bigquery = ">=2.30.1"
+google-cloud-firestore = "^2.3.4"
+# RDB
+PyMySQL = "^1.0.2"
+psycopg2 = "^2.9.1"
+# utils
+multiprocessing-logging = "^0.3.1"
+python-gnupg = "^0.4.8"
+cryptography = "^38.0.1"
+
+[tool.poetry.group.dev.dependencies]
+autoflake = "^2.0"
+bandit = "^1.7"
+black = "^24.0"
+flake8 = "^7.0"
+import-linter = "^1.2"
+isort = "^5.0"
+pytest = "^8.0"
+pytest-cov = "^5.0"
+mock = "^4.0.3"
+XlsxWriter = "^3.0"
+safety = "^3.0"
+pyproject-flake8 = "^7.0.0"
+
+[tool.black]
+line-length = 100
+
+[tool.isort]
+profile = "black"
+line_length = 100
+# Temporary fix to avoid a circular dependency - allow unsorted import order.
+skip_glob = "cliboa/test/adapter/test_http.py"
+
+[tool.flake8]
+max-line-length = 100
+
+[tool.pytest.ini_options]
+testpaths = ["cliboa/test"]
+python_files = "test_*.py"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

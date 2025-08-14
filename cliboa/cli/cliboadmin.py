@@ -79,13 +79,6 @@ class CliboAdmin(object):
         )
         copyfile(run_cmd_path, os.path.join(self._bin_dir, "clibomanager.py"))
 
-        # copy Pipfile
-        pipfile_path, pyproject_toml_path = self._get_pipfile_and_pyproject_toml_path(
-            cliboa_install_path
-        )
-        copyfile(pipfile_path, os.path.join(ini_dir, "Pipfile"))
-        copyfile(pyproject_toml_path, os.path.join(ini_dir, "requirements.txt"))
-
         # copy environment.py
         cmn_env_path = os.path.join(cliboa_install_path, "cliboa", "conf", "default_environment.py")
         copyfile(cmn_env_path, os.path.join(self._cmn_dir, "environment.py"))
@@ -115,38 +108,6 @@ class CliboAdmin(object):
         os.makedirs(os.path.join("project", new_project_dir, "scenario"), exist_ok=False)
         with open(os.path.join("project", new_project_dir, "scenario.yml"), "w") as yaml:
             yaml.write("scenario:" + "\n")
-
-    def _get_pipfile_and_pyproject_toml_path(self, cliboa_install_path):
-        """
-        Get path of pyproject.toml and Pipfile for current python version
-        """
-        py_ver_info = sys.version
-        py_ver_info = py_ver_info.split(" ")
-        py_ver = py_ver_info[0].split(".")
-        py_major_ver = py_ver[0] + "." + py_ver[1]
-        py_major_ver_and_pyproject_toml = {
-            "3.7": "pyproject.above37.toml",
-            "3.8": "pyproject.above38.toml",
-            "3.9": "pyproject.above39.toml",
-            "3.10": "pyproject.above310.toml",
-        }
-        py_major_ver_and_pipfile = {
-            "3.7": "Pipfile.above37",
-            "3.8": "Pipfile.above38",
-            "3.9": "Pipfile.above39",
-            "3.10": "Pipfile.above310",
-        }
-        pipfile_path = os.path.join(
-            cliboa_install_path,
-            "cliboa/template",
-            py_major_ver_and_pipfile[py_major_ver],
-        )
-        pyproject_toml_path = os.path.join(
-            cliboa_install_path,
-            "cliboa/template",
-            py_major_ver_and_pyproject_toml[py_major_ver],
-        )
-        return pipfile_path, pyproject_toml_path
 
 
 class CommandArgumentParser(object):

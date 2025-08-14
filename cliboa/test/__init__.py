@@ -11,11 +11,14 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+import logging
 import os
 from shutil import copyfile
 from unittest import TestCase
 
 import pytest
+
+from cliboa.conf import env
 
 
 class BaseCliboaTest(TestCase):
@@ -39,6 +42,9 @@ class BaseCliboaTest(TestCase):
         # copy logging.conf
         conf_path = os.path.join("cliboa", "conf", "logging.conf")
         copyfile(conf_path, os.path.join("conf", "logging.conf"))
+        logging.config.fileConfig(
+            env.BASE_DIR + "/conf/logging.conf", disable_existing_loggers=False
+        )
 
         # copy cliboa.ini
         conf_path = os.path.join("cliboa", "conf", "cliboa.ini")
