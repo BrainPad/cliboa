@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -23,6 +25,8 @@ jobs:
           virtualenvs-create: true
           virtualenvs-in-project: true
           plugins: poetry-dynamic-versioning
+      - name: Show the most recent reachable tag.
+        run: git describe --tags
       - name: Build package
         run: poetry build
       - name: Publish package to TestPyPI
@@ -30,6 +34,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
+          verbose: true
       - name: Publish package to PyPI
         if: github.event_name == 'release'
         uses: pypa/gh-action-pypi-publish@release/v1

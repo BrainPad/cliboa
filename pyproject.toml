@@ -99,9 +99,9 @@ vcs = "git"
 style = "pep440"
 format-jinja = """
 {%- if distance == 0 -%}
-    {{ base }}
+    {{ serialize_pep440(base, stage, revision) }}
 {%- else -%}
-    {{ base }}.dev{{ distance }}
+    {{ serialize_pep440(base, stage, revision, dev=distance) }}
 {%- endif -%}
 """
 
