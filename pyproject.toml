@@ -1,18 +1,18 @@
 [project]
 name = "cliboa"
-version = "2.5.0b0"
 description = "application framework for ETL(ELT) processing"
-authors = [ { name = "BrainPad", email = "xxx@brainpad.co.jp"} ]
+authors = [ { name = "BrainPad", email = "cliboa@brainpad.co.jp"} ]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/BrainPad/cliboa"
-requires-python = ">=3.10"
-dynamic = ["dependencies"]
+requires-python = ">=3.10,<4.0"
+dynamic = ["dependencies", "version"]
 
+keywords = ["etl", "elt", "data pipeline", "workflow", "automation", "framework"]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Developers",
-  "Topic :: Software Development :: Build Tools",
+  "Topic :: Software Development :: Libraries :: Application Frameworks",
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
@@ -22,12 +22,20 @@ classifiers = [
 include = [
   "cliboa/conf/logging.conf",
   "cliboa/conf/cliboa.ini",
-  "cliboa/template/Pipfile.*",
-  "cliboa/template/pyproject.*.toml",
 ]
+
+[project.urls]
+Homepage = "https://github.com/BrainPad/cliboa"
+Documentation = "https://github.com/BrainPad/cliboa/wiki"
+Repository = "https://github.com/BrainPad/cliboa"
+Issues = "https://github.com/BrainPad/cliboa/issues"
+ChangeLog = "https://github.com/BrainPad/cliboa/releases"
 
 [project.scripts]
 cliboadmin = "cliboa.cli.cliboadmin:main"
+
+[tool.poetry]
+version = "0.0.0" # overwritten by poetry-dynamic-versioning
 
 [tool.poetry.dependencies]
 # data handling
@@ -75,7 +83,7 @@ line-length = 100
 [tool.isort]
 profile = "black"
 line_length = 100
-# Temporary fix to avoid a circular dependency - allow unsorted import order.
+# FIXME: Temporary fix to avoid a circular dependency - allow unsorted import order.
 skip_glob = "cliboa/test/adapter/test_http.py"
 
 [tool.flake8]
@@ -85,6 +93,18 @@ max-line-length = 100
 testpaths = ["cliboa/test"]
 python_files = "test_*.py"
 
+[tool.poetry-dynamic-versioning]
+enable = true
+vcs = "git"
+style = "pep440"
+format-jinja = """
+{%- if distance == 0 -%}
+    {{ base }}
+{%- else -%}
+    {{ base }}.dev{{ distance }}
+{%- endif -%}
+"""
+
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
+build-backend = "poetry_dynamic_versioning.backend"
