@@ -1271,6 +1271,7 @@ class TestCsvMerge(TestCsvTransform):
         Helper.set_property(instance, "src2_pattern", r"test2\.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
         Helper.set_property(instance, "dest_name", "test.csv")
+        Helper.set_property(instance, "join_on", "key")
         instance.execute()
 
         result_csv_path = os.path.join(self._data_dir, "test.csv")
@@ -1307,6 +1308,7 @@ class TestCsvMerge(TestCsvTransform):
         Helper.set_property(instance, "src2_pattern", r"test2\.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
         Helper.set_property(instance, "dest_name", "test.csv")
+        Helper.set_property(instance, "join_on", "key")
         instance.execute()
 
         result_csv_path = os.path.join(self._data_dir, "test.csv")
@@ -1345,6 +1347,7 @@ class TestCsvMerge(TestCsvTransform):
             Helper.set_property(instance, "src2_pattern", "test2.csv")
             Helper.set_property(instance, "dest_dir", self._data_dir)
             Helper.set_property(instance, "dest_name", "test.csv")
+            Helper.set_property(instance, "join_on", "key")
             instance.execute()
         assert "must be only one" in str(execinfo.value)
 
@@ -1366,6 +1369,7 @@ class TestCsvMerge(TestCsvTransform):
             Helper.set_property(instance, "src2_pattern", "test2(.*).csv")
             Helper.set_property(instance, "dest_dir", self._data_dir)
             Helper.set_property(instance, "dest_name", "test.csv")
+            Helper.set_property(instance, "join_on", "key")
             instance.execute()
         assert "must be only one" in str(execinfo.value)
 

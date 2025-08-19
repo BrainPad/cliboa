@@ -495,12 +495,16 @@ class CsvMerge(FileBaseTransform):
         super().__init__()
         self._src1_pattern = None
         self._src2_pattern = None
+        self._join_on = None
 
     def src1_pattern(self, src1_pattern):
         self._src1_pattern = src1_pattern
 
     def src2_pattern(self, src2_pattern):
         self._src2_pattern = src2_pattern
+
+    def join_on(self, value):
+        self._join_on = value
 
     def execute(self, *args):
         # essential parameters check
@@ -512,6 +516,7 @@ class CsvMerge(FileBaseTransform):
                 self._src2_pattern,
                 self._dest_dir,
                 self._dest_name,
+                self._join_on,
             ],
         )
         valid()
@@ -537,41 +542,26 @@ class CsvMerge(FileBaseTransform):
 
         self._logger.info("Merge %s and %s." % (target1_files[0], target2_files[0]))
 
-        chunk_size_handling(self._read_csv_func, target1_files, target2_files)
+        chunk_size_handling(self._merge_csv_files, target1_files[0], target2_files[0])
 
-    def _read_csv_func(self, chunksize, target1_files, target2_files):
-        # Used in chunk_size_handling
-        first_write = True
-        tfr1 = pandas.read_csv(
-            os.path.join(self._src_dir, target1_files[0]),
-            dtype=str,
-            encoding=self._encoding,
-            chunksize=chunksize,
-            na_filter=False,
-        )
-        for df in tfr1:
-            df.to_csv(
-                os.path.join(self._dest_dir, self._dest_name),
-                encoding=self._encoding,
-                header=True if first_write else False,
-                index=False,
-                mode="w" if first_write else "a",
-            )
-            first_write = False
-        tfr2 = pandas.read_csv(
-            os.path.join(self._src_dir, target2_files[0]),
-            dtype=str,
-            encoding=self._encoding,
-            chunksize=chunksize,
-        )
-        for df in tfr2:
-            df.to_csv(
-                os.path.join(self._dest_dir, self._dest_name),
-                encoding=self._encoding,
-                header=False,
-                index=False,
-                mode="a",
-            )
+    def _merge_csv_files(self, chunksize, target1_file: str, target2_file: str) -> None:
+        dest_path = os.path.join(self._dest_dir, self._dest_name)
+        df2 = pandas.read_csv(target2_file)
+
+        chunks = pandas.read_csv(target1_file, chunksize=chunksize, encoding=self._encoding)
+        is_first_chunk = True
+        for chunk in chunks:
+            merged_chunk = pandas.merge(chunk, df2, on=self._join_on)
+
+            if is_first_chunk:
+                merged_chunk.to_csv(
+                    dest_path, index=False, mode="w", header=True, encoding=self._encoding
+                )
+                is_first_chunk = False
+            else:
+                merged_chunk.to_csv(
+                    dest_path, index=False, mode="a", header=False, encoding=self._encoding
+                )
 
 
 class CsvColumnSelect(FileBaseTransform):

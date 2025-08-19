@@ -1,6 +1,6 @@
 # CsvMerge
 Merge two csv files into one with join style.
-This class behaves exactly same with the method 'pandas.merge'.
+This class behaves in much the same way as the method 'pandas.merge'.
 
 # Parameters
 |Parameters|Explanation|Required|Default|Remarks|
@@ -10,6 +10,7 @@ This class behaves exactly same with the method 'pandas.merge'.
 |src2_pattern|File pattern of source to merge. Regexp is available.|Yes|None||
 |dest_dir|Path of the directory which is for output files.|Yes|None|If a non-existent directory path is specified, the directory is automatically created.|
 |dest_name|Output file name|Yes|None||
+|join_on|Column name to join on|Yes|None||
 |encoding|Character encoding when read and write|No|utf-8||
 
 # Examples
@@ -23,6 +24,7 @@ scenario:
     src2_pattern: test2.csv
     dest_dir: /out
     dest_name: merge.csv
+    join_on: id
 
 Input: /in/test1.csv
 id, name
