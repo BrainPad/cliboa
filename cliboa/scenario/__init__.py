@@ -54,6 +54,7 @@ from .transform.csv import (
     CsvToJsonl,
     CsvTypeConvert,
     CsvValueExtract,
+    CsvSplitGrouped,
 )
 from .transform.file import (
     DateFormatConvert,
