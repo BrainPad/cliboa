@@ -17,8 +17,9 @@ import glob
 import hashlib
 import os
 import re
+import shutil
 from datetime import datetime
-from typing import List
+from typing import List, Set, Tuple
 
 import dask.dataframe as dask_df
 import jsonlines
@@ -1211,10 +1212,130 @@ class CsvSplitGrouped(FileBaseTransform):
         self._logger.info("input files is %s", files)
         self.check_file_existence(files)
 
-        self._split_csv_grouped(files)
+        if len(files) >= 2:
+            self._validate_headers(files)
 
-    def _split_csv_grouped(self, files: List[str]) -> None:
-        pass
+        unique_keys, found_empty = chunk_size_handling(self._collect_unique_keys, files)
+        if not unique_keys:
+            raise ValueError(
+                "No valid keys found in the specified column. No files will be created."
+            )
+        self._logger.info(f"Found {len(unique_keys)} unique key(s). Starting file split process.")
+
+        os.makedirs(self._dest_dir, exist_ok=True)
+        if len(unique_keys) == 1:
+            chunk_size_handling(self._process_single_key, files, unique_keys.pop(), found_empty)
+        else:
+            chunk_size_handling(self._process_multiple_keys, files, found_empty)
+
+    def _validate_headers(self, files: List[str]) -> None:
+        reference_header = pandas.read_csv(
+            files[0], nrows=0, encoding=self._encoding
+        ).columns.tolist()
+
+        for file_path in files[1:]:
+            current_header = pandas.read_csv(
+                file_path, nrows=0, encoding=self._encoding
+            ).columns.tolist()
+            if current_header != reference_header:
+                raise ValueError(
+                    f"Header mismatch found. File '{files[0]}' header is {reference_header}, "
+                    f"but file '{file_path}' header is {current_header}."
+                )
+
+    def _collect_unique_keys(self, chunksize: int, files: List[str]) -> Tuple[Set[str], bool]:
+        unique_keys = set()
+        found_empty = False
+        for file_path in files:
+            with pandas.read_csv(
+                file_path,
+                chunksize=chunksize,
+                usecols=[self._key_column],
+                keep_default_na=False,
+                encoding=self._encoding,
+            ) as reader:
+                for chunk in reader:
+                    cleaned_keys = chunk[self._key_column].astype(str).str.strip()
+                    if not found_empty and (cleaned_keys == "").any():
+                        found_empty = True
+                    non_empty_keys = cleaned_keys[cleaned_keys != ""].unique()
+                    unique_keys.update(non_empty_keys)
+        return unique_keys, found_empty
+
+    def _process_single_key(
+        self, chunksize: int, files: List[str], key: str, found_empty: bool
+    ) -> None:
+        self._logger.info(f"Processing in single-key mode. Outputting to '{key}.csv'.")
+        output_filename = f"{key}.csv"
+        output_path = os.path.join(self._dest_dir, output_filename)
+
+        write_mode = "w"
+        if found_empty is False:
+            files = files.copy()
+            first_file = files.pop()
+            shutil.copy2(first_file, output_path)
+            if len(files) == 0:
+                # When single input file and single key and not found empty value, very fast.
+                return
+            write_mode = "a"
+
+        is_first_write = True
+        with open(output_path, write_mode, newline="", encoding=self._encoding) as f_out:
+            for file_path in files:
+                with pandas.read_csv(
+                    file_path, chunksize=chunksize, keep_default_na=False, encoding=self._encoding
+                ) as reader:
+                    for chunk in reader:
+                        if found_empty is False:
+                            chunk.to_csv(f_out, header=False, index=False, encoding=self._encoding)
+                        else:
+                            filtered_chunk = chunk[chunk[self._key_column].astype(str) == key]
+                            if not filtered_chunk.empty:
+                                filtered_chunk.to_csv(
+                                    f_out,
+                                    header=is_first_write,
+                                    index=False,
+                                    encoding=self._encoding,
+                                )
+                                is_first_write = False
+
+    def _process_multiple_keys(self, chunksize: int, files: List[str], found_empty: bool) -> None:
+        self._logger.info("Processing in multi-key mode.")
+        file_pointers = {}
+        try:
+            for file_path in files:
+                with pandas.read_csv(
+                    file_path, chunksize=chunksize, keep_default_na=False, encoding=self._encoding
+                ) as reader:
+                    for chunk in reader:
+                        if found_empty:
+                            chunk.dropna(subset=[self._key_column], inplace=True)
+                            chunk[self._key_column] = (
+                                chunk[self._key_column].astype(str).str.strip()
+                            )
+                            chunk = chunk[chunk[self._key_column] != ""]
+                        if chunk.empty:
+                            continue
+
+                        for key, group_df in chunk.groupby(self._key_column):
+                            output_filename = f"{key}.csv"
+                            if output_filename not in file_pointers:
+                                file_pointers[output_filename] = open(
+                                    os.path.join(self._dest_dir, output_filename),
+                                    "w",
+                                    newline="",
+                                    encoding=self._encoding,
+                                )
+                                group_df.to_csv(
+                                    file_pointers[output_filename], header=True, index=False
+                                )
+                            else:
+                                group_df.to_csv(
+                                    file_pointers[output_filename], header=False, index=False
+                                )
+        finally:
+            for fp in file_pointers.values():
+                fp.close()
 
 
 def chunk_size_handling(read_csv_func, *args, **kwd):
@@ -1225,8 +1346,7 @@ def chunk_size_handling(read_csv_func, *args, **kwd):
     chunksize = 1024 * 1024
     while 0 < chunksize:
         try:
-            read_csv_func(chunksize, *args, **kwd)
-            break
+            return read_csv_func(chunksize, *args, **kwd)
         except MemoryError as error:
             if chunksize <= 1:
                 raise error
