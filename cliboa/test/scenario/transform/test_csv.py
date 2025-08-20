@@ -36,6 +36,7 @@ from cliboa.scenario.transform.csv import (
     CsvMergeExclusive,
     CsvRowDelete,
     CsvSort,
+    CsvSplitGrouped,
     CsvToJsonl,
     CsvTypeConvert,
     CsvValueExtract,
@@ -2421,3 +2422,116 @@ class TestCsvColumnReplace(TestCsvTransform):
         with pytest.raises(InvalidParameter) as execinfo:
             instance.execute()
         assert "The converted string is not defined in yaml file: rep_str" == str(execinfo.value)
+
+
+class TestCsvSplitGrouped(TestCsvTransform):
+    def test_execute_ok(self):
+        # create test file
+        csv_list1 = [
+            ["name", "class"],
+            ["alpha", "A"],
+            ["beta", "B"],
+            ["gamma", "A"],
+            ["delta", ""],
+            ["epsilon", "C"],
+        ]
+        self._create_csv(csv_list1, fname="test1.csv")
+
+        # set the essential attributes
+        instance = CsvSplitGrouped()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test1\.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "key_column", "class")
+        instance.execute()
+
+        csv_files = [v for v in os.listdir(self._data_dir) if v.endswith(".csv")]
+        expected_results = {
+            "A.csv": [["name", "class"], ["alpha", "A"], ["gamma", "A"]],
+            "B.csv": [["name", "class"], ["beta", "B"]],
+            "C.csv": [["name", "class"], ["epsilon", "C"]],
+        }
+        for file_name, expected_data in expected_results.items():
+            assert (
+                file_name in csv_files
+            ), f"Expected output {file_name} was not found, only exists {csv_files}"
+
+            with open(os.path.join(self._data_dir, file_name)) as f:
+                reader = csv.reader(f)
+                actual_data = [row for row in reader]
+                assert actual_data == expected_data, (
+                    f"Assertion failed for {file_name}: Data mismatch.\n"
+                    f"Expected: {expected_data}\nActual: {actual_data}"
+                )
+
+    def test_execute_ok_multiple_file(self):
+        # create test file
+        csv_list1 = [
+            ["name", "class"],
+            ["alpha", "A"],
+            ["beta", "B"],
+        ]
+        csv_list2 = [
+            ["name", "class"],
+            ["gamma", "A"],
+            ["delta", ""],
+            ["epsilon", "C"],
+        ]
+        self._create_csv(csv_list1, fname="test1.csv")
+        self._create_csv(csv_list2, fname="test2.csv")
+
+        # set the essential attributes
+        instance = CsvSplitGrouped()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r".*\.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "key_column", "class")
+        instance.execute()
+
+        csv_files = [v for v in os.listdir(self._data_dir) if v.endswith(".csv")]
+        expected_results = {
+            "A.csv": [["name", "class"], ["alpha", "A"], ["gamma", "A"]],
+            "B.csv": [["name", "class"], ["beta", "B"]],
+            "C.csv": [["name", "class"], ["epsilon", "C"]],
+        }
+        for file_name, expected_data in expected_results.items():
+            assert (
+                file_name in csv_files
+            ), f"Expected output {file_name} was not found, only exists {csv_files}"
+
+            with open(os.path.join(self._data_dir, file_name)) as f:
+                reader = csv.reader(f)
+                actual_data = [row for row in reader]
+                assert actual_data == expected_data, (
+                    f"Assertion failed for {file_name}: Data mismatch.\n"
+                    f"Expected: {expected_data}\nActual: {actual_data}"
+                )
+
+    def test_execute_ng_multiple_different_column_file(self):
+        # create test file
+        csv_list1 = [
+            ["name", "class"],
+            ["alpha", "A"],
+            ["beta", "B"],
+        ]
+        csv_list2 = [
+            ["name", "class", "age"],
+            ["gamma", "A", 10],
+            ["delta", "", 20],
+            ["epsilon", "C", 30],
+        ]
+        self._create_csv(csv_list1, fname="test1.csv")
+        self._create_csv(csv_list2, fname="test2.csv")
+
+        # set the essential attributes
+        instance = CsvSplitGrouped()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r".*\.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "key_column", "class")
+
+        with pytest.raises(Exception):
+            instance.execute()

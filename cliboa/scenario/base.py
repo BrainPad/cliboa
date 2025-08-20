@@ -16,6 +16,7 @@ import os
 import re
 import tempfile
 from abc import abstractmethod
+from typing import List
 
 from cliboa.adapter.file import File
 from cliboa.conf import env
@@ -91,7 +92,7 @@ class BaseStep(object):
     def execute(self, *args):
         pass
 
-    def get_target_files(self, src_dir, src_pattern):
+    def get_target_files(self, src_dir, src_pattern) -> List[str]:
         """
         Search files either with regular expression
         """

@@ -1177,6 +1177,46 @@ class CsvRowDelete(FileBaseTransform):
                         writer.writerow(row)
 
 
+class CsvSplitGrouped(FileBaseTransform):
+    """
+    Split csv files, using the value of a specific column as the output filename.
+
+    - The output filename is the value from the specified column, with a .csv extension appended.
+    - If the value of the specified column is empty, that row should be ignored.
+    - When multiple source files exist, the column definitions must all be the same.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self._key_column = None
+
+    def key_column(self, value) -> None:
+        self._key_column = value
+
+    def execute(self, *args) -> None:
+        # essential parameters check
+        valid = EssentialParameters(
+            self.__class__.__name__,
+            [
+                self._src_dir,
+                self._src_pattern,
+                self._dest_dir,
+                self._key_column,
+            ],
+        )
+        valid()
+
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+
+        self._logger.info("input files is %s", files)
+        self.check_file_existence(files)
+
+        self._split_csv_grouped(files)
+
+    def _split_csv_grouped(self, files: List[str]) -> None:
+        pass
+
+
 def chunk_size_handling(read_csv_func, *args, **kwd):
     """
     Processing to avoid memory errors in pandas's read_csv.

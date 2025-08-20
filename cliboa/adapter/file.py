@@ -15,6 +15,7 @@ import codecs
 import csv
 import os
 import re
+from typing import List
 
 
 class File(object):
@@ -43,7 +44,7 @@ class File(object):
                 writer.writerow(contents)
             out_f.flush()
 
-    def get_target_files(self, src_dir, src_pattern, tree=True):
+    def get_target_files(self, src_dir, src_pattern, tree=True) -> List[str]:
         """
         Get files which matches to the regular expression
 
