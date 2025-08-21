@@ -57,7 +57,7 @@ google-cloud-bigquery = ">=2.30.1"
 google-cloud-firestore = "^2.3.4"
 # RDB
 PyMySQL = "^1.0.2"
-psycopg2 = "^2.9.1"
+psycopg2-binary = "^2.9.1"
 # utils
 multiprocessing-logging = "^0.3.1"
 python-gnupg = "^0.4.8"
