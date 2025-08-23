@@ -1235,29 +1235,28 @@ class CsvSplitRows(FileBaseTransform):
                 output_filepath = None
 
                 for line in reader:
-                    # 指定行数に達したら新しいファイルを作成
+                    # new file per self._rows
                     if rows_count % self._rows == 0:
-                        # 書き込み中のファイルがあれば閉じる
+                        # close file-pointer if exists
                         if f_out:
                             f_out.close()
                             self._logger.info(
                                 f"Generated {output_filepath} with {self._rows} rows"
                                 f" by read up to line {rows_count} of the original."
                             )
-                        # 新しい分割ファイルの名前を決定し、書き込みモードで開く
+                        # open new file-pointer
                         suffix = self._suffix_format.format(file_index)
                         output_filepath = os.path.join(
                             self._using_dest_dir(), f"{file_name}{suffix}{ext}"
                         )
                         f_out = open(output_filepath, "w", encoding=self._encoding, newline="")
                         writer = csv.writer(f_out)
-                        # 新しいファイルにヘッダーを書き込む
                         writer.writerow(header)
                         file_index += 1
-                    # 行を書き込む
+                    # write current line
                     writer.writerow(line)
                     rows_count += 1
-                # 最後に開いていたファイルを閉じる
+                # close last file-pointer if exists
                 if f_out:
                     f_out.close()
                     last_rows = rows_count % self._rows
