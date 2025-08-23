@@ -13,11 +13,14 @@
 #
 
 import csv
+import glob
 import hashlib
 import os
 import re
 from datetime import datetime
+from typing import List
 
+import dask.dataframe as dask_df
 import jsonlines
 import pandas
 
@@ -493,18 +496,20 @@ class CsvMerge(FileBaseTransform):
 
     def __init__(self):
         super().__init__()
-        self._src1_pattern = None
-        self._src2_pattern = None
+        self._target_path = None
         self._join_on = None
+        self._engine = None
+        # not parameter
+        self._target_df = None
 
-    def src1_pattern(self, src1_pattern):
-        self._src1_pattern = src1_pattern
-
-    def src2_pattern(self, src2_pattern):
-        self._src2_pattern = src2_pattern
+    def target_path(self, value):
+        self._target_path = value
 
     def join_on(self, value):
         self._join_on = value
+
+    def engine(self, value):
+        self._engine = value
 
     def execute(self, *args):
         # essential parameters check
@@ -512,10 +517,9 @@ class CsvMerge(FileBaseTransform):
             self.__class__.__name__,
             [
                 self._src_dir,
-                self._src1_pattern,
-                self._src2_pattern,
+                self._src_pattern,
+                self._target_path,
                 self._dest_dir,
-                self._dest_name,
                 self._join_on,
             ],
         )
@@ -523,35 +527,57 @@ class CsvMerge(FileBaseTransform):
 
         os.makedirs(self._dest_dir, exist_ok=True)
 
-        target1_files = File().get_target_files(self._src_dir, self._src1_pattern)
-        target2_files = File().get_target_files(self._src_dir, self._src2_pattern)
-        if len(target1_files) == 0:
-            raise InvalidCount(
-                "An input file %s does not exist." % os.path.join(self._src_dir, self._src1_pattern)
-            )
-        elif len(target2_files) == 0:
+        source_files = self.get_target_files(self._src_dir, self._src_pattern)
+        if len(source_files) == 0:
             raise InvalidCount(
                 "An input file %s does not exist." % os.path.join(self._src_dir, self._src2_pattern)
             )
-        elif len(target1_files) > 1:
-            self._logger.error("Hit target files %s" % target1_files)
-            raise InvalidCount("Input files must be only one.")
-        elif len(target2_files) > 1:
-            self._logger.error("Hit target files %s" % target2_files)
-            raise InvalidCount("Input files must be only one.")
 
-        self._logger.info("Merge %s and %s." % (target1_files[0], target2_files[0]))
+        target_files = glob.glob(self._target_path)
+        if len(target_files) == 0:
+            raise InvalidCount("An target file %s does not exist." % self.target_path)
+        elif len(target_files) > 1:
+            self._logger.error("Hit target files %s" % target_files)
+            raise InvalidCount("Target files must be only one.")
 
-        chunk_size_handling(self._merge_csv_files, target1_files[0], target2_files[0])
+        if self._engine == "dask":
+            engine = "dask"
+        else:
+            engine = "pandas"
+        self._logger.info("Merge(%s) %s to %s" % (engine, target_files[0], source_files))
+        if engine == "dask":
+            self._dask_merge(source_files, target_files[0])
+        else:
+            self._pandas_merge(source_files, target_files[0])
 
-    def _merge_csv_files(self, chunksize, target1_file: str, target2_file: str) -> None:
-        dest_path = os.path.join(self._dest_dir, self._dest_name)
-        df2 = pandas.read_csv(target2_file)
+    def _dask_merge(self, source_files: List[str], target_file: str) -> None:
+        """
+        merge using dask
+        """
+        dd_target = dask_df.read_csv(target_file, encoding=self._encoding)
 
-        chunks = pandas.read_csv(target1_file, chunksize=chunksize, encoding=self._encoding)
+        for source_file in source_files:
+            dest_path = os.path.join(self._dest_dir, os.path.basename(source_file))
+            dd_source = dask_df.read_csv(source_file, encoding=self._encoding)
+            merged_dd = dask_df.merge(dd_source, dd_target, on=self._join_on)
+            merged_dd.to_csv(dest_path, single_file=True, index=False, encoding=self._encoding)
+
+    def _pandas_merge(self, source_files: List[str], target_file: str) -> None:
+        """
+        merge using pandas
+        NOTE: if target file is too large, use dask engine.
+        """
+        self._target_df = pandas.read_csv(target_file)
+        for source_file in source_files:
+            chunk_size_handling(self._pandas_merge_one, source_file)
+
+    def _pandas_merge_one(self, chunksize: int, source_file: str) -> None:
+        dest_path = os.path.join(self._dest_dir, os.path.basename(source_file))
+
+        chunks = pandas.read_csv(source_file, chunksize=chunksize, encoding=self._encoding)
         is_first_chunk = True
         for chunk in chunks:
-            merged_chunk = pandas.merge(chunk, df2, on=self._join_on)
+            merged_chunk = pandas.merge(chunk, self._target_df, on=self._join_on)
 
             if is_first_chunk:
                 merged_chunk.to_csv(
