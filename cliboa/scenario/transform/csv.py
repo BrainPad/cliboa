@@ -1178,6 +1178,95 @@ class CsvRowDelete(FileBaseTransform):
                         writer.writerow(row)
 
 
+class CsvSplitRows(FileBaseTransform):
+    """
+    Split csv files by rows.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self._rows = None
+        self._suffix_format = ".{:02d}"
+
+    def rows(self, value) -> None:
+        self._rows = value
+
+    def suffix_format(self, value) -> None:
+        self._suffix_format = value
+
+    def _using_dest_dir(self) -> str:
+        if self._dest_dir:
+            return self._dest_dir
+        else:
+            return self._src_dir
+
+    def execute(self, *args) -> None:
+        # essential parameters check
+        valid = EssentialParameters(
+            self.__class__.__name__,
+            [
+                self._src_dir,
+                self._src_pattern,
+                self._rows,
+            ],
+        )
+        valid()
+
+        files = super().get_target_files(self._src_dir, self._src_pattern)
+        self.check_file_existence(files)
+
+        os.makedirs(self._using_dest_dir(), exist_ok=True)
+
+        for filepath in files:
+            self._logger.info("Split {:s} per {:d} rows".format(filepath, self._rows))
+            file_name, ext = os.path.splitext(os.path.basename(filepath))
+            with open(filepath, "r", encoding=self._encoding, newline="") as f_in:
+                reader = csv.reader(f_in)
+                try:
+                    header = next(reader)
+                except StopIteration:
+                    self._logger.error(f"Empty {filepath}")
+                    continue
+
+                file_index = 0
+                rows_count = 0
+                writer = None
+                f_out = None
+                output_filepath = None
+
+                for line in reader:
+                    # 指定行数に達したら新しいファイルを作成
+                    if rows_count % self._rows == 0:
+                        # 書き込み中のファイルがあれば閉じる
+                        if f_out:
+                            f_out.close()
+                            self._logger.info(
+                                f"Generated {output_filepath} with {self._rows} rows"
+                                f" by read up to line {rows_count} of the original."
+                            )
+                        # 新しい分割ファイルの名前を決定し、書き込みモードで開く
+                        suffix = self._suffix_format.format(file_index)
+                        output_filepath = os.path.join(
+                            self._using_dest_dir(), f"{file_name}{suffix}{ext}"
+                        )
+                        f_out = open(output_filepath, "w", encoding=self._encoding, newline="")
+                        writer = csv.writer(f_out)
+                        # 新しいファイルにヘッダーを書き込む
+                        writer.writerow(header)
+                        file_index += 1
+                    # 行を書き込む
+                    writer.writerow(line)
+                    rows_count += 1
+                # 最後に開いていたファイルを閉じる
+                if f_out:
+                    f_out.close()
+                    last_rows = rows_count % self._rows
+                    self._logger.info(
+                        f"Generated {output_filepath} with {last_rows} rows"
+                        f" by read up to line {rows_count} of the original."
+                    )
+
+
 class CsvSplitGrouped(FileBaseTransform):
     """
     Split csv files, using the value of a specific column as the output filename.
