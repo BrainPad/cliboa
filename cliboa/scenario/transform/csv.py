@@ -1260,6 +1260,8 @@ class CsvSplitRows(FileBaseTransform):
                 if f_out:
                     f_out.close()
                     last_rows = rows_count % self._rows
+                    if last_rows == 0:
+                        last_rows = self._rows
                     self._logger.info(
                         f"Generated {output_filepath} with {last_rows} rows"
                         f" by read up to line {rows_count} of the original."
