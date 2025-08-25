@@ -30,4 +30,4 @@ class TestLisboaLog(object):
 
     def test_get_logger(self):
         logger = LisboaLog().get_logger(__name__)
-        assert type(logger) == logging.Logger
+        assert isinstance(logger, logging.Logger)

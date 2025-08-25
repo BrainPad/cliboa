@@ -3,6 +3,10 @@ import os
 import pytest
 from requests.exceptions import HTTPError
 
+# FIXME: This import is placed here as a temporary workaround to prevent a circular
+#       import error between `cliboa.adapter.http` and modules under `cliboa.scenario`.
+#       This dependency cycle should be properly resolved by refactoring.
+from cliboa.scenario.validator import EssentialParameters  # noqa: F401
 from cliboa.adapter.http import Download, FormAuth, Remove, Update, Upload
 
 

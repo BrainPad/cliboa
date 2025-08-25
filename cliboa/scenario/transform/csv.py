@@ -915,9 +915,10 @@ class CsvToJsonl(FileBaseTransform):
         super().io_files(files, ext="jsonl", func=self.convert)
 
     def convert(self, fi, fo):
-        with open(fi, mode="r", encoding=self._encoding, newline="") as i, jsonlines.open(
-            fo, mode="w"
-        ) as writer:
+        with (
+            open(fi, mode="r", encoding=self._encoding, newline="") as i,
+            jsonlines.open(fo, mode="w") as writer,
+        ):
             reader = csv.DictReader(i)
             for row in reader:
                 writer.write(row)

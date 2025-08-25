@@ -175,9 +175,10 @@ class FileBaseTransform(BaseStep, ExceptionHandler):
             output_path, temp_file = self.check_output_path(input_path, ext)
 
             if mode == "t":
-                with open(input_path, mode="r", encoding=encoding, newline="") as i, open(
-                    temp_file, mode="w", encoding=encoding, newline=""
-                ) as o:
+                with (
+                    open(input_path, mode="r", encoding=encoding, newline="") as i,
+                    open(temp_file, mode="w", encoding=encoding, newline="") as o,
+                ):
                     yield i, o
             elif mode == "b":
                 with open(input_path, mode="rb") as i, open(temp_file, mode="wb") as o:

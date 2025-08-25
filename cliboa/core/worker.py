@@ -44,15 +44,15 @@ class ScenarioWorker(object):
         """
         Notify to registered listener
         """
-        for l in self._listeners:
-            l.before_scenario(self)
+        for lis in self._listeners:
+            lis.before_scenario(self)
 
     def _after_scenario(self):
         """
         Notify to registered listener
         """
-        for l in self._listeners:
-            l.after_scenario(self)
+        for lis in self._listeners:
+            lis.after_scenario(self)
 
     def register_listeners(self, listener):
         """

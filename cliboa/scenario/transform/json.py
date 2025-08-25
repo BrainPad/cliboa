@@ -57,9 +57,10 @@ class JsonlToCsvBase(FileBaseTransform):
 
     def convert(self, fi, fo):
         writer = None
-        with jsonlines.open(fi) as reader, open(
-            fo, mode="w", encoding=self._encoding, newline=""
-        ) as f:
+        with (
+            jsonlines.open(fi) as reader,
+            open(fo, mode="w", encoding=self._encoding, newline="") as f,
+        ):
             for row in reader:
                 new_rows = self.convert_row(row)
                 if not new_rows:

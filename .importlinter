@@ -1,9 +1,6 @@
 [importlinter]
 root_packages =
-    adapter
-    core
-    scenario
-    util
+    cliboa
 
 [importlinter:contract:1]
 name = layered architecture contract
@@ -13,4 +10,5 @@ layers =
     scenario
     adapter
     util
+containers = cliboa
 include_external_packages = True
