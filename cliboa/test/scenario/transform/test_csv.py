@@ -2436,10 +2436,11 @@ class TestCsvSplitRows(TestCsvTransform):
         self._create_csv(csv_list1, fname="test1.csv")
 
         # set the essential attributes
-        instance = CsvSplitRows()
+        instance = CsvSplit()
         Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test1\.csv")
+        Helper.set_property(instance, "method", "rows")
         Helper.set_property(instance, "rows", 1)
         instance.execute()
 
@@ -2475,11 +2476,12 @@ class TestCsvSplitRows(TestCsvTransform):
         self._create_csv(csv_list1, fname="test1.csv")
 
         # set the essential attributes
-        instance = CsvSplitRows()
+        instance = CsvSplit()
         Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test1\.csv")
         Helper.set_property(instance, "dest_dir", self._result_dir)
+        Helper.set_property(instance, "method", "rows")
         Helper.set_property(instance, "rows", 2)
         Helper.set_property(instance, "suffix_format", "_{:03d}")
         instance.execute()
@@ -2504,7 +2506,7 @@ class TestCsvSplitRows(TestCsvTransform):
                 )
 
 
-class TestCsvSplit(TestCsvTransform):
+class TestCsvSplitGrouped(TestCsvTransform):
     def test_execute_ok(self):
         # create test file
         csv_list1 = [

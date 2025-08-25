@@ -19,7 +19,8 @@ import os
 import re
 import shutil
 from datetime import datetime
-from typing import List, Set, Tuple
+from enum import Enum
+from typing import Any, List, Set, Tuple
 
 import dask.dataframe as dask_df
 import jsonlines
@@ -1178,94 +1179,9 @@ class CsvRowDelete(FileBaseTransform):
                         writer.writerow(row)
 
 
-class CsvSplitRows(FileBaseTransform):
-    """
-    Split csv files by rows.
-    """
-
-    def __init__(self):
-        super().__init__()
-        self._rows = None
-        self._suffix_format = ".{:02d}"
-
-    def rows(self, value) -> None:
-        self._rows = value
-
-    def suffix_format(self, value) -> None:
-        self._suffix_format = value
-
-    def _using_dest_dir(self) -> str:
-        if self._dest_dir:
-            return self._dest_dir
-        else:
-            return self._src_dir
-
-    def execute(self, *args) -> None:
-        # essential parameters check
-        valid = EssentialParameters(
-            self.__class__.__name__,
-            [
-                self._src_dir,
-                self._src_pattern,
-                self._rows,
-            ],
-        )
-        valid()
-
-        files = super().get_target_files(self._src_dir, self._src_pattern)
-        self.check_file_existence(files)
-
-        os.makedirs(self._using_dest_dir(), exist_ok=True)
-
-        for filepath in files:
-            self._logger.info("Split {:s} per {:d} rows".format(filepath, self._rows))
-            file_name, ext = os.path.splitext(os.path.basename(filepath))
-            with open(filepath, "r", encoding=self._encoding, newline="") as f_in:
-                reader = csv.reader(f_in)
-                try:
-                    header = next(reader)
-                except StopIteration:
-                    self._logger.error(f"Empty {filepath}")
-                    continue
-
-                file_index = 0
-                rows_count = 0
-                writer = None
-                f_out = None
-                output_filepath = None
-
-                for line in reader:
-                    # new file per self._rows
-                    if rows_count % self._rows == 0:
-                        # close file-pointer if exists
-                        if f_out:
-                            f_out.close()
-                            self._logger.info(
-                                f"Generated {output_filepath} with {self._rows} rows"
-                                f" by read up to line {rows_count} of the original."
-                            )
-                        # open new file-pointer
-                        suffix = self._suffix_format.format(file_index)
-                        output_filepath = os.path.join(
-                            self._using_dest_dir(), f"{file_name}{suffix}{ext}"
-                        )
-                        f_out = open(output_filepath, "w", encoding=self._encoding, newline="")
-                        writer = csv.writer(f_out)
-                        writer.writerow(header)
-                        file_index += 1
-                    # write current line
-                    writer.writerow(line)
-                    rows_count += 1
-                # close last file-pointer if exists
-                if f_out:
-                    f_out.close()
-                    last_rows = rows_count % self._rows
-                    if last_rows == 0:
-                        last_rows = self._rows
-                    self._logger.info(
-                        f"Generated {output_filepath} with {last_rows} rows"
-                        f" by read up to line {rows_count} of the original."
-                    )
+class _CsvSplitMethodEnum(Enum):
+    ROWS = "rows"
+    GROUPED = "grouped"
 
 
 class CsvSplit(FileBaseTransform):
@@ -1279,14 +1195,29 @@ class CsvSplit(FileBaseTransform):
 
     def __init__(self):
         super().__init__()
-        self._key_column = None
         self._method = None
+        self._key_column = None
+        self._rows = None
+        self._suffix_format = ".{:02d}"
+
+    def method(self, value: str) -> None:
+        self._method = _CsvSplitMethodEnum(value)
 
     def key_column(self, value) -> None:
         self._key_column = value
 
-    def method(self, value) -> None:
-        self._method = value
+    def rows(self, value) -> None:
+        self._rows = value
+
+    def suffix_format(self, value) -> None:
+        self._suffix_format = value
+
+    @property
+    def output_dir(self) -> str:
+        if self._dest_dir:
+            return self._dest_dir
+        else:
+            return self._src_dir
 
     def execute(self, *args) -> None:
         # essential parameters check
@@ -1296,20 +1227,112 @@ class CsvSplit(FileBaseTransform):
                 self._src_dir,
                 self._src_pattern,
                 self._method,
-                self._dest_dir,
-                self._key_column,
             ],
         )
         valid()
 
-        # FIXME: If more 'method' parameters are added later, change to use an enum to manage them.
-        if self._method != "grouped":
-            raise ValueError(f"Invalid method parameter: {self._method}")
-
         files = super().get_target_files(self._src_dir, self._src_pattern)
-
-        self._logger.info("input files is %s", files)
         self.check_file_existence(files)
+        os.makedirs(self.output_dir, exist_ok=True)
+
+        properties = vars(self)
+        properties["output_dir"] = self.output_dir
+        if self._method.value == "rows":
+            executeInstance = _CsvSplitMethodRows(properties)
+        elif self._method.value == "grouped":
+            executeInstance = _CsvSplitMethodGrouped(properties)
+        else:
+            raise NotImplementedError(
+                f"Defined {self._method.value} in _CsvSplitMethodEnum,"
+                " but not implemented logic in execute."
+            )
+        executeInstance.execute(files)
+
+
+class _CsvSplitMethodBase:
+    def __init__(self, properties):
+        self._caller_properties = properties
+
+    def __getattr__(self, name) -> Any:
+        try:
+            return self._caller_properties[name]
+        except KeyError:
+            raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
+
+    def execute(self, files: List[str]) -> None:
+        raise NotImplementedError("Please implement execute method.")
+
+
+class _CsvSplitMethodRows(_CsvSplitMethodBase):
+    def execute(self, files: List[str]) -> None:
+        valid2 = EssentialParameters(
+            self.__class__.__name__,
+            [
+                self._rows,
+            ],
+        )
+        valid2()
+        for filepath in files:
+            self._split_one(filepath)
+
+    def _split_one(self, filepath: str) -> None:
+        self._logger.info("Split {:s} per {:d} rows".format(filepath, self._rows))
+        file_name, ext = os.path.splitext(os.path.basename(filepath))
+        with open(filepath, "r", encoding=self._encoding, newline="") as f_in:
+            reader = csv.reader(f_in)
+            try:
+                header = next(reader)
+            except StopIteration:
+                self._logger.error(f"Empty {filepath}")
+                return
+
+            file_index = 0
+            rows_count = 0
+            writer = None
+            f_out = None
+            output_filepath = None
+
+            for line in reader:
+                # new file per self._rows
+                if rows_count % self._rows == 0:
+                    # close file-pointer if exists
+                    if f_out:
+                        f_out.close()
+                        self._logger.info(
+                            f"Generated {output_filepath} with {self._rows} rows"
+                            f" by read up to line {rows_count} of the original."
+                        )
+                    # open new file-pointer
+                    suffix = self._suffix_format.format(file_index)
+                    output_filepath = os.path.join(self.output_dir, f"{file_name}{suffix}{ext}")
+                    f_out = open(output_filepath, "w", encoding=self._encoding, newline="")
+                    writer = csv.writer(f_out)
+                    writer.writerow(header)
+                    file_index += 1
+                # write current line
+                writer.writerow(line)
+                rows_count += 1
+            # close last file-pointer if exists
+            if f_out:
+                f_out.close()
+                last_rows = rows_count % self._rows
+                if last_rows == 0:
+                    last_rows = self._rows
+                self._logger.info(
+                    f"Generated {output_filepath} with {last_rows} rows"
+                    f" by read up to line {rows_count} of the original."
+                )
+
+
+class _CsvSplitMethodGrouped(_CsvSplitMethodBase):
+    def execute(self, files: List[str]) -> None:
+        valid2 = EssentialParameters(
+            self.__class__.__name__,
+            [
+                self._key_column,
+            ],
+        )
+        valid2()
 
         if len(files) >= 2:
             self._validate_headers(files)
@@ -1321,7 +1344,6 @@ class CsvSplit(FileBaseTransform):
             )
         self._logger.info(f"Found {len(unique_keys)} unique key(s). Starting file split process.")
 
-        os.makedirs(self._dest_dir, exist_ok=True)
         if len(unique_keys) == 1:
             chunk_size_handling(self._process_single_key, files, unique_keys.pop(), found_empty)
         else:
@@ -1366,7 +1388,7 @@ class CsvSplit(FileBaseTransform):
     ) -> None:
         self._logger.info(f"Processing in single-key mode. Outputting to '{key}.csv'.")
         output_filename = f"{key}.csv"
-        output_path = os.path.join(self._dest_dir, output_filename)
+        output_path = os.path.join(self.output_dir, output_filename)
 
         write_mode = "w"
         if found_empty is False:
@@ -1420,7 +1442,7 @@ class CsvSplit(FileBaseTransform):
                             output_filename = f"{key}.csv"
                             if output_filename not in file_pointers:
                                 file_pointers[output_filename] = open(
-                                    os.path.join(self._dest_dir, output_filename),
+                                    os.path.join(self.output_dir, output_filename),
                                     "w",
                                     newline="",
                                     encoding=self._encoding,
