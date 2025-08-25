@@ -35,4 +35,4 @@ Use <a href="https://guides.github.com/introduction/flow/">github flow</a>
 2. Commit your changes
 3. Push to the branch
 4. Create new pull request to master branch
-
+5. After merged, delete your remote branch

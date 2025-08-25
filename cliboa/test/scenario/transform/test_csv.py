@@ -36,8 +36,7 @@ from cliboa.scenario.transform.csv import (
     CsvMergeExclusive,
     CsvRowDelete,
     CsvSort,
-    CsvSplitGrouped,
-    CsvSplitRows,
+    CsvSplit,
     CsvToJsonl,
     CsvTypeConvert,
     CsvValueExtract,
@@ -2505,7 +2504,7 @@ class TestCsvSplitRows(TestCsvTransform):
                 )
 
 
-class TestCsvSplitGrouped(TestCsvTransform):
+class TestCsvSplit(TestCsvTransform):
     def test_execute_ok(self):
         # create test file
         csv_list1 = [
@@ -2519,11 +2518,12 @@ class TestCsvSplitGrouped(TestCsvTransform):
         self._create_csv(csv_list1, fname="test1.csv")
 
         # set the essential attributes
-        instance = CsvSplitGrouped()
+        instance = CsvSplit()
         Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test1\.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "method", "grouped")
         Helper.set_property(instance, "key_column", "class")
         instance.execute()
 
@@ -2558,11 +2558,12 @@ class TestCsvSplitGrouped(TestCsvTransform):
         self._create_csv(csv_list1, fname="test1.csv")
 
         # set the essential attributes
-        instance = CsvSplitGrouped()
+        instance = CsvSplit()
         Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test1\.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "method", "grouped")
         Helper.set_property(instance, "key_column", "class")
         instance.execute()
 
@@ -2602,11 +2603,12 @@ class TestCsvSplitGrouped(TestCsvTransform):
         self._create_csv(csv_list2, fname="test2.csv")
 
         # set the essential attributes
-        instance = CsvSplitGrouped()
+        instance = CsvSplit()
         Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r".*\.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "method", "grouped")
         Helper.set_property(instance, "key_column", "class")
         instance.execute()
 
@@ -2645,11 +2647,12 @@ class TestCsvSplitGrouped(TestCsvTransform):
         self._create_csv(csv_list2, fname="test2.csv")
 
         # set the essential attributes
-        instance = CsvSplitGrouped()
+        instance = CsvSplit()
         Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r".*\.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "method", "grouped")
         Helper.set_property(instance, "key_column", "class")
         instance.execute()
 
@@ -2689,11 +2692,12 @@ class TestCsvSplitGrouped(TestCsvTransform):
         self._create_csv(csv_list2, fname="test2.csv")
 
         # set the essential attributes
-        instance = CsvSplitGrouped()
+        instance = CsvSplit()
         Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r".*\.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "method", "grouped")
         Helper.set_property(instance, "key_column", "class")
 
         with pytest.raises(Exception):

@@ -12,7 +12,7 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-from .extract.aws import S3Delete, S3Download, S3DownloadFileDelete, S3FileExistsCheck
+from .extract.aws import DynamoDBRead, S3Delete, S3Download, S3DownloadFileDelete, S3FileExistsCheck
 from .extract.azure import AzureBlobDownload
 from .extract.ftp import FtpDownload, FtpDownloadFileDelete
 from .extract.gcp import (
@@ -27,7 +27,7 @@ from .extract.mysql import MysqlRead
 from .extract.postgres import PostgresqlRead
 from .extract.sftp import SftpDelete, SftpDownload, SftpDownloadFileDelete, SftpFileExistsCheck
 from .extract.sqlite import SqliteExport
-from .load.aws import S3Upload
+from .load.aws import DynamoDBWrite, S3Upload
 from .load.azure import AzureBlobUpload
 from .load.gcp import BigQueryCopy, BigQueryWrite, FirestoreDocumentCreate, GcsUpload
 from .load.http import HttpDelete, HttpPost
@@ -51,8 +51,7 @@ from .transform.csv import (
     CsvMergeExclusive,
     CsvRowDelete,
     CsvSort,
-    CsvSplitGrouped,
-    CsvSplitRows,
+    CsvSplit,
     CsvToJsonl,
     CsvTypeConvert,
     CsvValueExtract,

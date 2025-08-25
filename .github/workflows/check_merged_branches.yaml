@@ -1,0 +1,38 @@
+name: cliboa-check-branches
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '20 0 1 * *'
+
+jobs:
+  check-branches:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Find and list merged branches
+        id: find_branches
+        run: |
+          # Find all remote branches merged into master, excluding master itself.
+          MERGED_BRANCHES=$(git branch -r --merged origin/master | grep -v 'master' | sed 's/ *origin\///' | tr -d '\n')
+
+          # Check if the list of merged branches is not empty.
+          if [[ -n "${MERGED_BRANCHES// /}" ]]; then
+            echo "::error::The following remote branches have been merged into master but not deleted:"
+            echo "${MERGED_BRANCHES}"
+            echo "status=fail" >> $GITHUB_OUTPUT
+            echo "merged_branches=${MERGED_BRANCHES}" >> $GITHUB_OUTPUT
+          else
+            echo "No merged remote branches found. Great job! 👏"
+            echo "status=success" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Fail the CI if merged branches exist
+        if: steps.find_branches.outputs.status == 'fail'
+        run: |
+          echo "Failing the CI check."
+          exit 1
