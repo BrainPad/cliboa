@@ -1,45 +1,40 @@
 name: cliboa-deploy
 
 on:
-  push:
-    branches:
-      - "223" # debug
+  release:
+    types: [created]
   workflow_dispatch:
-    inputs:
-      username:
-        description: PyPI username
-        required: true
-        default: "spam"
-      password:
-        description: PyPI password
-        required: true
-        default: "spam"
-      is_test:
-        description: if upload pypi test repository
-        required: false
-        default: ""
 
 jobs:
   deploy_to_pypi:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     steps:
-      - uses: actions/checkout@v2
-      - name: Setup Python
-        uses: actions/setup-python@v2
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          python-version: 3.9
-      - name: install dependencies
-        run: |
-          sudo python3 -m pip install twine
-      - name: create pypi package
-        run: |
-          # create package
-          sudo python3 setup.py sdist bdist_wheel
-      - name: upload to pypi
-        run: |
-          # upload to pypi
-          PYPI_USERNAME=`jq -r '.inputs.username' $GITHUB_EVENT_PATH`
-          PYPI_PASSWORD=`jq -r '.inputs.password' $GITHUB_EVENT_PATH`
-          echo ::add-mask::$PYPI_USERNAME
-          echo ::add-mask::$PYPI_PASSWORD
-          sudo python3 tools/script/deploy_to_pypi.py $PYPI_USERNAME $PYPI_PASSWORD "${{ github.event.inputs.is_test }}"
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          plugins: poetry-dynamic-versioning
+      - name: Show the most recent reachable tag.
+        run: git describe --tags
+      - name: Build package
+        run: poetry build
+      - name: Publish package to TestPyPI
+        if: github.event_name == 'workflow_dispatch'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          verbose: true
+      - name: Publish package to PyPI
+        if: github.event_name == 'release'
+        uses: pypa/gh-action-pypi-publish@release/v1
