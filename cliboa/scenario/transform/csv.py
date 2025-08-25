@@ -1178,7 +1178,7 @@ class CsvRowDelete(FileBaseTransform):
                         writer.writerow(row)
 
 
-class CsvSplitGrouped(FileBaseTransform):
+class CsvSplit(FileBaseTransform):
     """
     Split csv files, using the value of a specific column as the output filename.
 
@@ -1190,9 +1190,13 @@ class CsvSplitGrouped(FileBaseTransform):
     def __init__(self):
         super().__init__()
         self._key_column = None
+        self._method = None
 
     def key_column(self, value) -> None:
         self._key_column = value
+
+    def method(self, value) -> None:
+        self._method = value
 
     def execute(self, *args) -> None:
         # essential parameters check
@@ -1201,11 +1205,16 @@ class CsvSplitGrouped(FileBaseTransform):
             [
                 self._src_dir,
                 self._src_pattern,
+                self._method,
                 self._dest_dir,
                 self._key_column,
             ],
         )
         valid()
+
+        # FIXME: If more 'method' parameters are added later, change to use an enum to manage them.
+        if self._method != "grouped":
+            raise ValueError(f"Invalid method parameter: {self._method}")
 
         files = super().get_target_files(self._src_dir, self._src_pattern)
 
