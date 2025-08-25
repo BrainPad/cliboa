@@ -2424,7 +2424,89 @@ class TestCsvColumnReplace(TestCsvTransform):
         assert "The converted string is not defined in yaml file: rep_str" == str(execinfo.value)
 
 
-class TestCsvSplit(TestCsvTransform):
+class TestCsvSplitRows(TestCsvTransform):
+    def test_execute_ok(self):
+        # create test file
+        csv_list1 = [
+            ["no", "name"],
+            ["1", "alpha"],
+            ["2", "beta"],
+            ["3", "gamma"],
+        ]
+        self._create_csv(csv_list1, fname="test1.csv")
+
+        # set the essential attributes
+        instance = CsvSplit()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test1\.csv")
+        Helper.set_property(instance, "method", "rows")
+        Helper.set_property(instance, "rows", 1)
+        instance.execute()
+
+        csv_files = [v for v in os.listdir(self._data_dir) if v.endswith(".csv")]
+        expected_results = {
+            "test1.00.csv": [["no", "name"], ["1", "alpha"]],
+            "test1.01.csv": [["no", "name"], ["2", "beta"]],
+            "test1.02.csv": [["no", "name"], ["3", "gamma"]],
+        }
+        for file_name, expected_data in expected_results.items():
+            assert (
+                file_name in csv_files
+            ), f"Expected output {file_name} was not found, only exists {csv_files}"
+
+            with open(os.path.join(self._data_dir, file_name)) as f:
+                reader = csv.reader(f)
+                actual_data = [row for row in reader]
+                assert actual_data == expected_data, (
+                    f"Assertion failed for {file_name}: Data mismatch.\n"
+                    f"Expected: {expected_data}\nActual: {actual_data}"
+                )
+
+    def test_execute_ok_with_custom_suffix(self):
+        # create test file
+        csv_list1 = [
+            ["no", "name"],
+            ["1", "alpha"],
+            ["2", "beta"],
+            ["3", "gamma"],
+            ["4", "delta"],
+            ["5", "epsilon"],
+        ]
+        self._create_csv(csv_list1, fname="test1.csv")
+
+        # set the essential attributes
+        instance = CsvSplit()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", r"test1\.csv")
+        Helper.set_property(instance, "dest_dir", self._result_dir)
+        Helper.set_property(instance, "method", "rows")
+        Helper.set_property(instance, "rows", 2)
+        Helper.set_property(instance, "suffix_format", "_{:03d}")
+        instance.execute()
+
+        csv_files = [v for v in os.listdir(self._result_dir) if v.endswith(".csv")]
+        expected_results = {
+            "test1_000.csv": [["no", "name"], ["1", "alpha"], ["2", "beta"]],
+            "test1_001.csv": [["no", "name"], ["3", "gamma"], ["4", "delta"]],
+            "test1_002.csv": [["no", "name"], ["5", "epsilon"]],
+        }
+        for file_name, expected_data in expected_results.items():
+            assert (
+                file_name in csv_files
+            ), f"Expected output {file_name} was not found, only exists {csv_files}"
+
+            with open(os.path.join(self._result_dir, file_name)) as f:
+                reader = csv.reader(f)
+                actual_data = [row for row in reader]
+                assert actual_data == expected_data, (
+                    f"Assertion failed for {file_name}: Data mismatch.\n"
+                    f"Expected: {expected_data}\nActual: {actual_data}"
+                )
+
+
+class TestCsvSplitGrouped(TestCsvTransform):
     def test_execute_ok(self):
         # create test file
         csv_list1 = [
