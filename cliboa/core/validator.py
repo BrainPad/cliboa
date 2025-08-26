@@ -104,6 +104,7 @@ class EssentialParameters(object):
     DEPRECATED: Use cliboa.scenario.validator.EssentialParameters instead.
     This class will be removed in a future major version.
     """
+
     def __init__(self, cls_name, param_list):
         """
         Args:
@@ -114,7 +115,7 @@ class EssentialParameters(object):
             "EssentialParameters from cliboa.core.validator is deprecated. "
             "Use cliboa.scenario.validator.EssentialParameters instead.",
             DeprecationWarning,
-            stacklevel=2
+            stacklevel=2,
         )
         self._cls_name = cls_name
         self._param_list = param_list
