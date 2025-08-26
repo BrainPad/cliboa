@@ -12,6 +12,7 @@
 # all copies or substantial portions of the Software.
 #
 import os
+import warnings
 
 from cliboa.util.exception import DirStructureInvalid, FileNotFound, ScenarioFileInvalid
 
@@ -95,6 +96,33 @@ class ScenarioFileExistence(object):
         exists_scenario_file = os.path.isfile(scenario_file)
         if not exists_scenario_file:
             raise FileNotFound("scenario.yml %s does not exist" % scenario_file)
+
+
+class EssentialParameters(object):
+    """
+    Essential parameter validation
+    DEPRECATED: Use cliboa.scenario.validator.EssentialParameters instead.
+    This class will be removed in a future major version.
+    """
+    def __init__(self, cls_name, param_list):
+        """
+        Args:
+            cls_name: class name which has validation target parameters
+            param_list: list of validation target parameters
+        """
+        warnings.warn(
+            "EssentialParameters from cliboa.core.validator is deprecated. "
+            "Use cliboa.scenario.validator.EssentialParameters instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        self._cls_name = cls_name
+        self._param_list = param_list
+
+    def __call__(self):
+        for p in self._param_list:
+            if not p:
+                raise Exception("The essential parameter is not specified in %s." % self._cls_name)
 
 
 class EssentialKeys(object):
