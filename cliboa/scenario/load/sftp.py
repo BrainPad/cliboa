@@ -14,8 +14,8 @@
 import os
 
 from cliboa.adapter.sftp import SftpAdapter
-from cliboa.scenario.validator import EssentialParameters
 from cliboa.scenario.sftp import BaseSftp
+from cliboa.scenario.validator import EssentialParameters
 from cliboa.util.constant import StepStatus
 
 

@@ -2,8 +2,8 @@ import os
 
 from cryptography.fernet import Fernet
 
-from cliboa.scenario.validator import EssentialParameters
 from cliboa.scenario.base import BaseStep
+from cliboa.scenario.validator import EssentialParameters
 
 
 class AesBase(BaseStep):

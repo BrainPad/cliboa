@@ -14,8 +14,8 @@
 import os
 import subprocess
 
-from cliboa.scenario.validator import EssentialParameters
 from cliboa.scenario.base import BaseStep
+from cliboa.scenario.validator import EssentialParameters
 
 
 class ExecuteShellScript(BaseStep):

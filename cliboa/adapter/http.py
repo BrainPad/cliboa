@@ -18,7 +18,6 @@ from time import sleep
 import requests
 from requests.exceptions import HTTPError
 
-
 from cliboa.util.lisboa_log import LisboaLog
 
 VALID_HTTP_STATUS = 200
