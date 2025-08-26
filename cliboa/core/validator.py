@@ -97,24 +97,6 @@ class ScenarioFileExistence(object):
             raise FileNotFound("scenario.yml %s does not exist" % scenario_file)
 
 
-class EssentialParameters(object):
-    """
-    Essential parameter validation
-    """
-
-    def __init__(self, cls_name, param_list):
-        """
-        Args:
-            cls_name: class name which has validation target parameters
-            param_list: list of validation target parameters
-        """
-        self._cls_name = cls_name
-        self._param_list = param_list
-
-    def __call__(self):
-        for p in self._param_list:
-            if not p:
-                raise Exception("The essential parameter is not specified in %s." % self._cls_name)
 
 
 class EssentialKeys(object):

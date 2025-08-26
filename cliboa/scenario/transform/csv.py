@@ -29,7 +29,7 @@ import pandas
 from cliboa.adapter.csv import Csv
 from cliboa.adapter.file import File
 from cliboa.adapter.sqlite import SqliteAdapter
-from cliboa.core.validator import EssentialParameters
+from cliboa.scenario.validator import EssentialParameters
 from cliboa.scenario.transform.file import FileBaseTransform
 from cliboa.util.exception import FileNotFound, InvalidCount, InvalidParameter
 from cliboa.util.string import StringUtil

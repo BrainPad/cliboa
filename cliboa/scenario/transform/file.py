@@ -24,7 +24,7 @@ import zipfile
 import pandas
 
 from cliboa.adapter.file import File
-from cliboa.core.validator import EssentialParameters
+from cliboa.scenario.validator import EssentialParameters
 from cliboa.scenario.base import BaseStep
 from cliboa.scenario.extras import ExceptionHandler
 from cliboa.util.date import DateUtil

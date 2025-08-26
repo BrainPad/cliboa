@@ -2,7 +2,7 @@ import os
 
 from cryptography.fernet import Fernet
 
-from cliboa.core.validator import EssentialParameters
+from cliboa.scenario.validator import EssentialParameters
 from cliboa.scenario.base import BaseStep
 
 

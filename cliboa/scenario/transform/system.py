@@ -14,7 +14,7 @@
 import os
 import subprocess
 
-from cliboa.core.validator import EssentialParameters
+from cliboa.scenario.validator import EssentialParameters
 from cliboa.scenario.base import BaseStep
 
 

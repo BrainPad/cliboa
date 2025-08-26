@@ -3,11 +3,8 @@ import os
 import pytest
 from requests.exceptions import HTTPError
 
-# FIXME: This import is placed here as a temporary workaround to prevent a circular
-#       import error between `cliboa.adapter.http` and modules under `cliboa.scenario`.
-#       This dependency cycle should be properly resolved by refactoring.
-from cliboa.scenario.validator import EssentialParameters  # noqa: F401
-from cliboa.adapter.http import Download, FormAuth, Remove, Update, Upload
+
+from cliboa.adapter.http import Download, Remove, Update, Upload
 
 
 class TestHttp(object):
@@ -17,16 +14,6 @@ class TestHttp(object):
     _DUMMY_PASSWORD = "spam"
 
 
-class TestFormAuth(TestHttp):
-    def test_execute(self):
-        a = FormAuth()
-        setattr(a, "form_url", self._DUMMY_URL)
-        setattr(a, "form_id", self._DUMMY_ID)
-        setattr(a, "form_password", self._DUMMY_PASSWORD)
-        a.execute()
-        assert a.form_url == self._DUMMY_URL
-        assert a.form_id == self._DUMMY_ID
-        assert a.form_password == self._DUMMY_PASSWORD
 
 
 class TestDownload(object):

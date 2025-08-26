@@ -14,7 +14,7 @@
 import csv
 import os
 
-from cliboa.core.validator import EssentialParameters
+from cliboa.scenario.validator import EssentialParameters
 from cliboa.scenario.base import BaseStep
 from cliboa.util.exception import FileNotFound, InvalidParameter
 from cliboa.util.rdbms_util import Rdbms_Util

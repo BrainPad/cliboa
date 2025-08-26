@@ -1,6 +1,6 @@
 import os
 
-from cliboa.core.validator import EssentialParameters
+from cliboa.scenario.validator import EssentialParameters
 from cliboa.scenario.base import BaseStep
 from cliboa.util.gpg import Gpg
 
