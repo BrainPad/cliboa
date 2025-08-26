@@ -24,7 +24,6 @@ from cliboa.util.lisboa_log import LisboaLog
 VALID_HTTP_STATUS = 200
 
 
-
 class Http(ABC):
     """
     Http client abstract class

@@ -97,8 +97,6 @@ class ScenarioFileExistence(object):
             raise FileNotFound("scenario.yml %s does not exist" % scenario_file)
 
 
-
-
 class EssentialKeys(object):
     """
     Check if 'step: ' and 'class: $class_name' exist in scenario.yml

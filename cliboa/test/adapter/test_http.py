@@ -14,8 +14,6 @@ class TestHttp(object):
     _DUMMY_PASSWORD = "spam"
 
 
-
-
 class TestDownload(object):
     def setup_method(self, method):
         self._dest_path = "/tmp/test.result"
