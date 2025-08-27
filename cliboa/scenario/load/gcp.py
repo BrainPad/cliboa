@@ -18,9 +18,9 @@ import os
 import pandas
 
 from cliboa.adapter.gcp import BigQueryAdapter, FireStoreAdapter, GcsAdapter, ServiceAccount
-from cliboa.core.validator import EssentialParameters
 from cliboa.scenario.gcp import BaseBigQuery, BaseFirestore, BaseGcs
 from cliboa.scenario.load.file import FileWrite
+from cliboa.scenario.validator import EssentialParameters
 from cliboa.util.exception import FileNotFound, InvalidFormat
 
 

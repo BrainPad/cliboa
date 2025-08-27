@@ -18,52 +18,9 @@ from time import sleep
 import requests
 from requests.exceptions import HTTPError
 
-from cliboa.scenario.validator import EssentialParameters
 from cliboa.util.lisboa_log import LisboaLog
 
 VALID_HTTP_STATUS = 200
-
-
-class FormAuth(object):
-    """
-    form authentication
-    """
-
-    def __init__(self):
-        self._form_url = None
-        self._form_id = None
-        self._form_password = None
-
-    @property
-    def form_url(self):
-        return self._form_url
-
-    @form_url.setter
-    def form_url(self, form_url):
-        self._form_url = form_url
-
-    @property
-    def form_id(self):
-        return self._form_id
-
-    @form_id.setter
-    def form_id(self, form_id):
-        self._form_id = form_id
-
-    @property
-    def form_password(self):
-        return self._form_password
-
-    @form_password.setter
-    def form_password(self, form_password):
-        self._form_password = form_password
-
-    def execute(self, *args):
-        valid = EssentialParameters(
-            self.__class__.__name__,
-            [self._form_url, self._form_id, self._form_password],
-        )
-        valid()
 
 
 class Http(ABC):

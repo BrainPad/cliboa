@@ -18,8 +18,8 @@ import jsonlines
 import pandas
 
 from cliboa.adapter.csv import Csv
-from cliboa.core.validator import EssentialParameters
 from cliboa.scenario.transform.file import FileBaseTransform
+from cliboa.scenario.validator import EssentialParameters
 from cliboa.util.exception import InvalidParameter
 
 
