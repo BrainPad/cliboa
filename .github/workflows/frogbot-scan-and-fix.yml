@@ -26,6 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # frog bot setting
       - uses: jfrog/frogbot@5d9c42c30f1169d8be4ba5510b40e75ffcbbc2a9  # v2.21.2
         env:
           # [Mandatory if the two conditions below are met]
