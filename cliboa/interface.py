@@ -63,7 +63,8 @@ class ScenarioRunner(object):
         Execute scenario
         """
         worker = ScenarioWorker(self._cmd_args)
-        worker.register_listeners(ScenarioStatusListener())
+            worker.register_listeners(ScenarioStatusListener())
+        raise RuntimeException("Invalid syntax for test to fail ci")
         return worker.execute_scenario()
 
 
