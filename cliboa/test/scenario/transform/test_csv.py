@@ -1834,6 +1834,74 @@ class TestCsvDuplicateRowDelete(TestCsvTransform):
                 record_count += 1
             assert record_count == 3
 
+    def test_execute_ok_pandas_engine(self):
+        # Test pandas engine explicitly
+        test_csv_data = [
+            ["col_1", "col_2"],
+            ["1", "A"],
+            ["1", "A"],  # duplicate
+            ["2", "B"],
+            ["3", "C"],
+            ["2", "B"],  # duplicate
+        ]
+        self._create_csv(test_csv_data)
+
+        instance = CsvDuplicateRowDelete()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "engine", "pandas")
+        instance.execute()
+
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            rows = list(reader)
+            # Should have 4 unique rows (header + 3 unique data rows)
+            assert len(rows) == 4
+            self.assertEqual(["col_1", "col_2"], rows[0])
+            self.assertEqual(["1", "A"], rows[1])
+            self.assertEqual(["2", "B"], rows[2])
+            self.assertEqual(["3", "C"], rows[3])
+
+    def test_execute_ok_dask_engine(self):
+        # Test dask engine
+        test_csv_data = [
+            ["col_1", "col_2"],
+            ["1", "A"],
+            ["1", "A"],  # duplicate
+            ["2", "B"],
+            ["3", "C"],
+            ["2", "B"],  # duplicate
+        ]
+        self._create_csv(test_csv_data)
+
+        instance = CsvDuplicateRowDelete()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "src_dir", self._data_dir)
+        Helper.set_property(instance, "src_pattern", "test.csv")
+        Helper.set_property(instance, "dest_dir", self._data_dir)
+        Helper.set_property(instance, "engine", "dask")
+        instance.execute()
+
+        output_file = os.path.join(self._data_dir, "test.csv")
+        with open(output_file, "r") as o:
+            reader = csv.reader(o)
+            rows = list(reader)
+            # Should have 4 unique rows, but order may not be preserved
+            assert len(rows) == 4
+            # Check that all expected unique values are present
+            row_set = {tuple(row) for row in rows}
+            expected_set = {("col_1", "col_2"), ("1", "A"), ("2", "B"), ("3", "C")}
+            self.assertEqual(row_set, expected_set)
+
+    def test_engine_invalid_parameter(self):
+        # Test invalid engine parameter
+        instance = CsvDuplicateRowDelete()
+        with pytest.raises(InvalidParameter):
+            Helper.set_property(instance, "engine", "invalid_engine")
+
 
 class TestCsvRowDelete(TestCsvTransform):
     def test_execute_ok_match(self):

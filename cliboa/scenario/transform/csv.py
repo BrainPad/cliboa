@@ -1084,9 +1084,23 @@ class CsvDuplicateRowDelete(FileBaseTransform):
     def __init__(self):
         super().__init__()
         self._delimiter = ","
+        self._engine = "pandas"  # 'pandas' or 'dask' for large files
 
     def delimiter(self, delimiter):
         self._delimiter = delimiter
+
+    def engine(self, engine):
+        """
+        Set processing engine.
+
+        Args:
+            engine (str): 'pandas' for memory-efficient processing with
+                         preserved order, 'dask' for very large files
+                         (may not preserve original order)
+        """
+        if engine not in ["pandas", "dask"]:
+            raise InvalidParameter("Engine must be 'pandas' or 'dask'")
+        self._engine = engine
 
     def execute(self, *args):
         # essential parameters check
@@ -1105,16 +1119,85 @@ class CsvDuplicateRowDelete(FileBaseTransform):
         super().io_files(files, func=self.convert)
 
     def convert(self, fi, fo):
-        with open(fi, "r") as i:
-            reader = csv.reader(i, delimiter=self._delimiter)
-            result = []
-            for li in reader:
-                if li not in result:
-                    result.append(li)
-            with open(fo, "w", newline="") as o:
-                writer = csv.writer(o, delimiter=self._delimiter)
-                for w in result:
-                    writer.writerow(w)
+        if self._engine == "dask":
+            self._convert_with_dask(fi, fo)
+        else:
+            self._convert_with_pandas(fi, fo)
+
+    def _convert_with_pandas(self, fi, fo):
+        """
+        Memory-efficient duplicate removal using pandas with set for tracking
+        seen rows.
+
+        Preserves original row order.
+        """
+        seen_rows = set()
+        first_write = True
+
+        # Use pandas to read in chunks for better memory management
+        chunk_size = 10000  # Process 10k rows at a time
+
+        for chunk in pandas.read_csv(
+            fi,
+            delimiter=self._delimiter,
+            dtype=str,
+            na_filter=False,
+            chunksize=chunk_size,
+            header=None,
+            encoding=self._encoding,
+        ):
+            # Convert DataFrame to list of tuples for hashability
+            unique_rows = []
+            for _, row in chunk.iterrows():
+                row_tuple = tuple(row.values)
+                if row_tuple not in seen_rows:
+                    seen_rows.add(row_tuple)
+                    unique_rows.append(row.values)
+
+            # Write unique rows to output file
+            if unique_rows:
+                unique_df = pandas.DataFrame(unique_rows)
+                unique_df.to_csv(
+                    fo,
+                    mode="w" if first_write else "a",
+                    header=False,
+                    index=False,
+                    sep=self._delimiter,
+                    encoding=self._encoding,
+                )
+                first_write = False
+
+    def _convert_with_dask(self, fi, fo):
+        """
+        Handle very large files using dask.
+
+        May not preserve original row order but provides better memory
+        efficiency for extremely large datasets.
+        """
+        self._logger.info("Using dask engine - original row order may not be preserved")
+
+        # Read CSV with dask
+        df = dask_df.read_csv(
+            fi,
+            delimiter=self._delimiter,
+            dtype=str,
+            na_filter=False,
+            encoding=self._encoding,
+            header=None,
+        )
+
+        # Remove duplicates using dask
+        df_unique = df.drop_duplicates()
+
+        # Write to output file
+        df_unique.to_csv(
+            fo,
+            single_file=True,
+            header=False,
+            index=False,
+            sep=self._delimiter,
+            encoding=self._encoding,
+        )
 
 
 class CsvRowDelete(FileBaseTransform):
