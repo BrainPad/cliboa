@@ -1,6 +1,6 @@
 name: cliboa-security
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   git_secrets:

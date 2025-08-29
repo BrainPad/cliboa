@@ -1,4 +1,4 @@
-name: cliboa-test-static
+name: cliboa-test
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
       - '**.py'
   schedule:
     - cron: '0 0 1 * *'
+  pull_request:
   workflow_dispatch:
 
 jobs:
@@ -54,3 +55,7 @@ jobs:
       - name: check layer dependency
         run: |
           poetry run lint-imports
+
+      - name: execute unittest and instrument coverage
+        run: |
+          poetry run pytest --cov cliboa --cov-report term-missing --cov-report=xml
