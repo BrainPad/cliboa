@@ -1,5 +1,5 @@
 # CsvRowDelete
-Delete specific rows from csv files.
+Filter CSV rows by comparing key column values between source and reference CSV files. Rows are kept or deleted based on whether their key values exist in the reference file.
 
 # Parameters
 | Parameters       | Explanation                                                                                                                 | Required | Default | Remarks |
