@@ -11,6 +11,7 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+import json
 import os
 import shutil
 import sys
@@ -57,16 +58,22 @@ class TestBase(TestCase):
             all_calls = mock_logger.info.call_args_list
             logged_messages = [call[0][0] for call in all_calls]
 
-            # Verify logging
-            step_logged = any("_step : test_step" in msg for msg in logged_messages)
-            retry_count_logged = any("_retry_count : 5" in msg for msg in logged_messages)
-            symbol_logged = any("_symbol : None" in msg for msg in logged_messages)
-            parallel_logged = any("_parallel : None" in msg for msg in logged_messages)
-
-            self.assertTrue(step_logged, "Step property should be logged")
-            self.assertTrue(retry_count_logged, "Retry count property should be logged")
-            self.assertTrue(symbol_logged, "Symbol property should be logged")
-            self.assertTrue(parallel_logged, "Parallel property should be logged")
+            # Find Step properties JSON and verify property values
+            step_props_found = False
+            for msg in logged_messages:
+                if msg.startswith("Step properties: "):
+                    json_str = msg.replace("Step properties: ", "", 1)
+                    try:
+                        props = json.loads(json_str)
+                        self.assertEqual(props.get("_step"), "test_step")
+                        self.assertEqual(props.get("_retry_count"), 5)
+                        self.assertEqual(props.get("_symbol"), None)
+                        self.assertEqual(props.get("_parallel"), None)
+                        step_props_found = True
+                        break
+                    except json.JSONDecodeError:
+                        pass
+            self.assertTrue(step_props_found, "Step properties JSON should be found and valid")
         finally:
             instance._logger = original_logger
 
@@ -88,9 +95,22 @@ class TestBase(TestCase):
 
             all_calls = mock_logger.info.call_args_list
             logged_messages = [call[0][0] for call in all_calls]
-            # Verify password masking
-            password_masked = any("_password : ****" in msg for msg in logged_messages)
-            self.assertTrue(password_masked, "Password should be masked as ****")
+
+            # Find Step properties JSON and verify password masking
+            step_props_found = False
+            for msg in logged_messages:
+                if msg.startswith("Step properties: "):
+                    json_str = msg.replace("Step properties: ", "", 1)
+                    try:
+                        props = json.loads(json_str)
+                        self.assertEqual(
+                            props.get("_password"), "****", "Password should be masked as ****"
+                        )
+                        step_props_found = True
+                        break
+                    except json.JSONDecodeError:
+                        pass
+            self.assertTrue(step_props_found, "Step properties JSON should be found and valid")
         finally:
             instance._logger = original_logger
 
@@ -113,12 +133,25 @@ class TestBase(TestCase):
 
             all_calls = mock_logger.info.call_args_list
             logged_messages = [call[0][0] for call in all_calls]
-            # Verify AWS key masking
-            access_key_masked = any("_access_key : ****" in msg for msg in logged_messages)
-            secret_key_masked = any("_secret_key : ****" in msg for msg in logged_messages)
 
-            self.assertTrue(access_key_masked, "Access key should be masked as ****")
-            self.assertTrue(secret_key_masked, "Secret key should be masked as ****")
+            # Find Step properties JSON and verify AWS key masking
+            step_props_found = False
+            for msg in logged_messages:
+                if msg.startswith("Step properties: "):
+                    json_str = msg.replace("Step properties: ", "", 1)
+                    try:
+                        props = json.loads(json_str)
+                        self.assertEqual(
+                            props.get("_access_key"), "****", "Access key should be masked as ****"
+                        )
+                        self.assertEqual(
+                            props.get("_secret_key"), "****", "Secret key should be masked as ****"
+                        )
+                        step_props_found = True
+                        break
+                    except json.JSONDecodeError:
+                        pass
+            self.assertTrue(step_props_found, "Step properties JSON should be found and valid")
         finally:
             instance._logger = original_logger
 

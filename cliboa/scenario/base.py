@@ -12,6 +12,7 @@
 # all copies or substantial portions of the Software.
 #
 import configparser
+import json
 import os
 import re
 import tempfile
@@ -63,11 +64,15 @@ class BaseStep(object):
             except Exception as e:
                 self._logger.warning(e)
 
+        props_dict = {}
         for k, v in self.__dict__.items():
             if mask is not None and pattern.search(k):
-                self._logger.info("%s : ****" % k)
+                props_dict[k] = "****"
             else:
-                self._logger.info("%s : %s" % (k, v))
+                props_dict[k] = v
+        self._logger.info(
+            "Step properties: %s" % json.dumps(props_dict, ensure_ascii=False, default=str)
+        )
         try:
             for listener in self._listeners:
                 listener.before_step(self)
