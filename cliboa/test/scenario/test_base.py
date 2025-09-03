@@ -15,6 +15,7 @@ import os
 import shutil
 import sys
 from unittest import TestCase
+from unittest.mock import MagicMock
 
 from cliboa.conf import env
 from cliboa.interface import CommandArgumentParser, ScenarioRunner
@@ -35,42 +36,91 @@ class TestBase(TestCase):
         runner = ScenarioRunner(self._cmd_args)
         runner.add_system_path()
 
+    def test_logging_properties(self):
+        """
+        Test basic property logging functionality.
+        """
+        instance = SampleCustomStep()
+
+        mock_logger = MagicMock()
+        original_logger = instance._logger
+        instance._logger = mock_logger
+
+        try:
+            # Set normal properties (not sensitive)
+            Helper.set_property(instance, "step", "test_step")
+            Helper.set_property(instance, "retry_count", 5)
+            instance.trigger()
+
+            mock_logger.info.assert_called()
+
+            all_calls = mock_logger.info.call_args_list
+            logged_messages = [call[0][0] for call in all_calls]
+
+            # Verify logging
+            step_logged = any("_step : test_step" in msg for msg in logged_messages)
+            retry_count_logged = any("_retry_count : 5" in msg for msg in logged_messages)
+            symbol_logged = any("_symbol : None" in msg for msg in logged_messages)
+            parallel_logged = any("_parallel : None" in msg for msg in logged_messages)
+
+            self.assertTrue(step_logged, "Step property should be logged")
+            self.assertTrue(retry_count_logged, "Retry count property should be logged")
+            self.assertTrue(symbol_logged, "Symbol property should be logged")
+            self.assertTrue(parallel_logged, "Parallel property should be logged")
+        finally:
+            instance._logger = original_logger
+
     def test_logging_mask_password(self):
         """
         In log file, 'password' is masked.
         """
         instance = SampleCustomStep()
-        instance._logger = LisboaLog.get_logger(__name__)
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(instance.__class__.__name__))
-        Helper.set_property(instance, "password", "test")
-        instance.trigger()
-        ret = False
-        with open(self._log_file, mode="r", encoding="utf-8") as f:
-            for line in f:
-                if "password : ****" in line:
-                    ret = True
-                    break
-        self.assertTrue(ret)
+
+        mock_logger = MagicMock()
+        original_logger = instance._logger
+        instance._logger = mock_logger
+
+        try:
+            Helper.set_property(instance, "password", "test")
+            instance.trigger()
+
+            mock_logger.info.assert_called()
+
+            all_calls = mock_logger.info.call_args_list
+            logged_messages = [call[0][0] for call in all_calls]
+            # Verify password masking
+            password_masked = any("_password : ****" in msg for msg in logged_messages)
+            self.assertTrue(password_masked, "Password should be masked as ****")
+        finally:
+            instance._logger = original_logger
 
     def test_logging_mask_aws_keys(self):
         """
         In log file, 'access_key' and 'secret_key' of AWS are masked.
         """
         instance = SampleCustomStep()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(instance.__class__.__name__))
-        Helper.set_property(instance, "access_key", "test")
-        Helper.set_property(instance, "secret_key", "test")
-        instance.trigger()
-        masked_access_key = False
-        masked_secret_key = False
-        with open(self._log_file, mode="r", encoding="utf-8") as f:
-            for line in f:
-                if "access_key : ****" in line:
-                    masked_access_key = True
-                elif "secret_key : ****" in line:
-                    masked_secret_key = True
-        self.assertTrue(masked_access_key)
-        self.assertTrue(masked_secret_key)
+
+        mock_logger = MagicMock()
+        original_logger = instance._logger
+        instance._logger = mock_logger
+
+        try:
+            Helper.set_property(instance, "access_key", "test")
+            Helper.set_property(instance, "secret_key", "test")
+            instance.trigger()
+
+            mock_logger.info.assert_called()
+
+            all_calls = mock_logger.info.call_args_list
+            logged_messages = [call[0][0] for call in all_calls]
+            # Verify AWS key masking
+            access_key_masked = any("_access_key : ****" in msg for msg in logged_messages)
+            secret_key_masked = any("_secret_key : ****" in msg for msg in logged_messages)
+
+            self.assertTrue(access_key_masked, "Access key should be masked as ****")
+            self.assertTrue(secret_key_masked, "Secret key should be masked as ****")
+        finally:
+            instance._logger = original_logger
 
     def test_source_path_reader_with_none(self):
         instance = SampleCustomStep()
