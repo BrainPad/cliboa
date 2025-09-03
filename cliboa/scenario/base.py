@@ -16,7 +16,7 @@ import os
 import re
 import tempfile
 from abc import abstractmethod
-from typing import List
+from typing import List, Optional
 
 from cliboa.adapter.file import File
 from cliboa.conf import env
@@ -52,7 +52,7 @@ class BaseStep(object):
     def listeners(self, listeners):
         self._listeners = listeners
 
-    def trigger(self, *args):
+    def trigger(self, *args) -> Optional[int]:
         mask = None
         path = os.path.join(env.BASE_DIR, "conf", "cliboa.ini")
         if os.path.exists(path):
@@ -97,7 +97,7 @@ class BaseStep(object):
                 listener.after_completion(self)
 
     @abstractmethod
-    def execute(self, *args):
+    def execute(self, *args) -> Optional[int]:
         pass
 
     def get_target_files(self, src_dir, src_pattern) -> List[str]:
