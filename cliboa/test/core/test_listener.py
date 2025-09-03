@@ -26,6 +26,7 @@ from cliboa.core.worker import ScenarioWorker
 from cliboa.interface import CommandArgumentParser
 from cliboa.scenario.sample_step import SampleCustomStep
 from cliboa.test import BaseCliboaTest
+from cliboa.util.constant import StepStatus
 from cliboa.util.exception import CliboaException
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
@@ -141,9 +142,9 @@ class TestAppropriateListnerCall(unittest.TestCase):
             Helper.set_property(step, "listeners", [StepStatusListener()])
             executor = SingleProcExecutor([step])
 
-            with self.assertRaises(CliboaException):
-                executor.execute_steps(None)
+            res = executor.execute_steps(None)
 
+            assert res == StepStatus.ABNORMAL_TERMINATION
             mock_before_step.assert_called_once()
             mock_error_step.assert_called_once()
             mock_after_step.assert_not_called()

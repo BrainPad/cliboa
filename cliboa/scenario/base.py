@@ -21,6 +21,7 @@ from typing import List
 from cliboa.adapter.file import File
 from cliboa.conf import env
 from cliboa.util.cache import StepArgument
+from cliboa.util.constant import StepStatus
 from cliboa.util.exception import FileNotFound, InvalidParameter
 
 
@@ -80,10 +81,17 @@ class BaseStep(object):
             return ret
 
         except Exception as e:
+            self._logger.exception(
+                "Error occurred during the execution of {}.{}".format(
+                    self.__class__.__module__,
+                    self.__class__.__name__,
+                )
+            )
+
             for listener in self._listeners:
                 listener.error_step(self, e)
 
-            return self._exception_dispatcher(e)
+            return StepStatus.ABNORMAL_TERMINATION
         finally:
             for listener in self._listeners:
                 listener.after_completion(self)
@@ -137,10 +145,3 @@ class BaseStep(object):
             return src["file"]
         else:
             raise InvalidParameter("The parameter is invalid.")
-
-    def _exception_dispatcher(self, e):
-        """
-        Handle and dispath CliboaExceptions
-        """
-        # TODO Currently not doing anything
-        raise e
