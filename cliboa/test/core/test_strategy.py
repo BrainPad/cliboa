@@ -19,7 +19,8 @@ from cliboa.core.strategy import MultiProcExecutor, MultiProcWithConfigExecutor,
 from cliboa.interface import CommandArgumentParser
 from cliboa.scenario.sample_step import SampleStep
 from cliboa.test import BaseCliboaTest
-from cliboa.util.exception import CliboaException, StepExecutionFailed
+from cliboa.util.constant import StepStatus
+from cliboa.util.exception import CliboaException
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
 from cliboa.util.parallel_with_config import ParallelWithConfig
@@ -66,11 +67,8 @@ class TestStrategy(BaseCliboaTest):
             setattr(ScenarioQueue, "step_queue", q)
 
             executor = MultiProcExecutor([step1, step2])
-            try:
-                executor.execute_steps(None)
-                self.fail("Error must be occured")
-            except StepExecutionFailed:
-                pass
+            res = executor.execute_steps(None)
+            assert res == StepStatus.ABNORMAL_TERMINATION
 
     def test_multi_process_error_continue(self):
         py_info = sys.version_info
@@ -111,11 +109,8 @@ class TestStrategy(BaseCliboaTest):
             setattr(ScenarioQueue, "step_queue", q)
 
             executor = MultiProcWithConfigExecutor([ParallelWithConfig([step1, step2], config)])
-            try:
-                executor.execute_steps(None)
-                self.fail("Error must be occured")
-            except StepExecutionFailed:
-                pass
+            res = executor.execute_steps(None)
+            assert res == StepStatus.ABNORMAL_TERMINATION
 
     def test_multi_with_config_process_error_continue(self):
         py_info = sys.version_info

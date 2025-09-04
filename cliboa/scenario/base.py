@@ -17,11 +17,12 @@ import os
 import re
 import tempfile
 from abc import abstractmethod
-from typing import List
+from typing import List, Optional
 
 from cliboa.adapter.file import File
 from cliboa.conf import env
 from cliboa.util.cache import StepArgument
+from cliboa.util.constant import StepStatus
 from cliboa.util.exception import FileNotFound, InvalidParameter
 
 
@@ -52,7 +53,7 @@ class BaseStep(object):
     def listeners(self, listeners):
         self._listeners = listeners
 
-    def trigger(self, *args):
+    def trigger(self, *args) -> Optional[int]:
         mask = None
         path = os.path.join(env.BASE_DIR, "conf", "cliboa.ini")
         if os.path.exists(path):
@@ -85,16 +86,23 @@ class BaseStep(object):
             return ret
 
         except Exception as e:
+            self._logger.exception(
+                "Error occurred during the execution of {}.{}".format(
+                    self.__class__.__module__,
+                    self.__class__.__name__,
+                )
+            )
+
             for listener in self._listeners:
                 listener.error_step(self, e)
 
-            return self._exception_dispatcher(e)
+            return StepStatus.ABNORMAL_TERMINATION
         finally:
             for listener in self._listeners:
                 listener.after_completion(self)
 
     @abstractmethod
-    def execute(self, *args):
+    def execute(self, *args) -> Optional[int]:
         pass
 
     def get_target_files(self, src_dir, src_pattern) -> List[str]:
@@ -142,10 +150,3 @@ class BaseStep(object):
             return src["file"]
         else:
             raise InvalidParameter("The parameter is invalid.")
-
-    def _exception_dispatcher(self, e):
-        """
-        Handle and dispath CliboaExceptions
-        """
-        # TODO Currently not doing anything
-        raise e
