@@ -1131,18 +1131,24 @@ class CsvDuplicateRowDelete(FileBaseTransform):
 
         Preserves original row order.
         """
-        seen_rows = set()
-        first_write = True
+        # Initialize shared state for chunk processing
+        self._seen_rows = set()
+        self._first_write = True
 
-        # Use pandas to read in chunks for better memory management
-        chunk_size = 10000  # Process 10k rows at a time
+        # Use existing chunk_size_handling infrastructure
+        chunk_size_handling(self._read_csv_func, fi, fo)
 
+    def _read_csv_func(self, chunksize, fi, fo):
+        """
+        Process CSV in chunks with duplicate removal.
+        Used by chunk_size_handling for memory-efficient processing.
+        """
         for chunk in pandas.read_csv(
             fi,
             delimiter=self._delimiter,
             dtype=str,
             na_filter=False,
-            chunksize=chunk_size,
+            chunksize=chunksize,
             header=None,
             encoding=self._encoding,
         ):
@@ -1150,8 +1156,8 @@ class CsvDuplicateRowDelete(FileBaseTransform):
             unique_rows = []
             for _, row in chunk.iterrows():
                 row_tuple = tuple(row.values)
-                if row_tuple not in seen_rows:
-                    seen_rows.add(row_tuple)
+                if row_tuple not in self._seen_rows:
+                    self._seen_rows.add(row_tuple)
                     unique_rows.append(row.values)
 
             # Write unique rows to output file
@@ -1159,13 +1165,13 @@ class CsvDuplicateRowDelete(FileBaseTransform):
                 unique_df = pandas.DataFrame(unique_rows)
                 unique_df.to_csv(
                     fo,
-                    mode="w" if first_write else "a",
+                    mode="w" if self._first_write else "a",
                     header=False,
                     index=False,
                     sep=self._delimiter,
                     encoding=self._encoding,
                 )
-                first_write = False
+                self._first_write = False
 
     def _convert_with_dask(self, fi, fo):
         """
