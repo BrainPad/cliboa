@@ -13,11 +13,13 @@
 #
 from abc import abstractmethod
 from multiprocessing import Pool
+from typing import Optional
 
 import cloudpickle
 from multiprocessing_logging import install_mp_handler
 
 from cliboa.core.scenario_queue import ScenarioQueue
+from cliboa.util.constant import StepStatus
 from cliboa.util.exception import StepExecutionFailed
 from cliboa.util.lisboa_log import LisboaLog
 
@@ -39,7 +41,7 @@ class StepExecutor(object):
         self._step = obj
 
     @abstractmethod
-    def execute_steps(self):
+    def execute_steps(self) -> Optional[int]:
         """
         Execute steps in scenario file
         """
@@ -50,18 +52,17 @@ class SingleProcExecutor(StepExecutor):
     Execute steps in queue with single thread
     """
 
-    def execute_steps(self, args):
+    def execute_steps(self, args) -> Optional[int]:
         try:
             cls = self._step[0]
             ret = cls.trigger(args)
             return ret
 
-        except Exception as e:
-            self._logger.error(
-                "Exception occurred during %s execution. Error Message: %s"
-                % (cls.__class__.__name__, str(e))
+        except Exception:
+            self._logger.exception(
+                "Exception occurred during %s execution." % (cls.__class__.__name__,)
             )
-            raise e
+            return StepStatus.ABNORMAL_TERMINATION
 
 
 class MultiProcExecutor(StepExecutor):
@@ -73,13 +74,16 @@ class MultiProcExecutor(StepExecutor):
     def _async_step_execute(cls):
         try:
             clz = cloudpickle.loads(cls)
-            clz.trigger()
-            return "OK"
+            res = clz.trigger()
+            if res == StepStatus.ABNORMAL_TERMINATION:
+                return "NG"
+            else:
+                return "OK"
         except Exception as e:
             LisboaLog.get_logger(__name__).error(e)
             return "NG"
 
-    def execute_steps(self, args):
+    def execute_steps(self, args) -> Optional[int]:
         self._logger.info(
             "Multi process start. Execute step count=%s." % ScenarioQueue.step_queue.multi_proc_cnt
         )
@@ -94,9 +98,9 @@ class MultiProcExecutor(StepExecutor):
                             self._logger.warning("Multi process response. %s" % r)
                         else:
                             raise StepExecutionFailed("Multi process response. %s" % r)
-        except Exception as e:
-            self._logger.error("Exception occurred during multi process execution.")
-            raise e
+        except Exception:
+            self._logger.exception("Exception occurred during multi process execution.")
+            return StepStatus.ABNORMAL_TERMINATION
 
 
 class MultiProcWithConfigExecutor(MultiProcExecutor):
@@ -111,7 +115,7 @@ class MultiProcWithConfigExecutor(MultiProcExecutor):
         if "multi_process_count" in obj[0].config.keys():
             self._multi_proc_cnt = obj[0].config["multi_process_count"]
 
-    def execute_steps(self, args):
+    def execute_steps(self, args) -> Optional[int]:
         self._logger.info("Multi process start. Execute step count=%s." % self._multi_proc_cnt)
         install_mp_handler()
         packed = [cloudpickle.dumps(step) for step in self._step]
@@ -124,6 +128,6 @@ class MultiProcWithConfigExecutor(MultiProcExecutor):
                             self._logger.warning("Multi process response. %s" % r)
                         else:
                             raise StepExecutionFailed("Multi process response. %s" % r)
-        except Exception as e:
-            self._logger.error("Exception occurred during multi process execution.")
-            raise e
+        except Exception:
+            self._logger.exception("Exception occurred during multi process execution.")
+            return StepStatus.ABNORMAL_TERMINATION
