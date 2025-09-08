@@ -13,6 +13,7 @@
 #
 from abc import abstractmethod
 
+from cliboa.scenario.base import BaseStep
 from cliboa.util.lisboa_log import LisboaLog
 
 
@@ -31,15 +32,15 @@ class ScenarioListener(BaseListener):
     """
 
     @abstractmethod
-    def before_scenario(self, worker):
+    def before_scenario(self, worker) -> None:
         """
         Execute before scenario start.
         """
 
     @abstractmethod
-    def after_scenario(self, worker):
+    def after_scenario(self, worker) -> None:
         """
-        Execute after scenario was finished.
+        Execute after scenario was finished, regardless of the outcome.
         """
 
 
@@ -55,27 +56,27 @@ class StepListener(BaseListener):
     """
 
     @abstractmethod
-    def before_step(self, *args, **kwargs):
+    def before_step(self, step: BaseStep) -> None:
         """
         Execute before a step is called.
         """
 
     @abstractmethod
-    def after_step(self, *args, **kwargs):
+    def after_step(self, step: BaseStep) -> None:
         """
-        Execute after a step was successfully completed.
-        """
-
-    @abstractmethod
-    def error_step(self, *args, **kwargs):
-        """
-        Execute when error occurred while executing a step.
+        Execute after a step is completed, regardless of the return value.
         """
 
     @abstractmethod
-    def after_completion(self, *args, **kwargs):
+    def error_step(self, step: BaseStep, e: Exception) -> None:
         """
-        Execute after a step
+        Execute when exception occurred while executing a step.
+        """
+
+    @abstractmethod
+    def after_completion(self, step: BaseStep) -> None:
+        """
+        Execute finally of a step
         (no matter the step was successfully completed or ended with an error)
         """
 
@@ -85,10 +86,10 @@ class ScenarioStatusListener(BaseListener):
     Listener for scenario execution status
     """
 
-    def before_scenario(self, worker):
+    def before_scenario(self, worker) -> None:
         self._logger.info("Start scenario execution. %s" % (worker.get_scenario_queue_status()))
 
-    def after_scenario(self, worker):
+    def after_scenario(self, worker) -> None:
         self._logger.info("Finish scenario execution. %s" % (worker.get_scenario_queue_status()))
 
 
@@ -98,11 +99,11 @@ class StepStatusListener(StepListener):
     By default, Cliboa implements StepStatusListener in all steps.
     """
 
-    def before_step(self, *args, **kwargs):
-        self._logger.info("Start step execution. %s" % args[0].__class__.__name__)
+    def before_step(self, step: BaseStep) -> None:
+        self._logger.info("Start step execution. %s" % step.__class__.__name__)
 
-    def after_step(self, *args, **kwargs):
-        self._logger.info("Finish step execution. %s" % args[0].__class__.__name__)
+    def after_step(self, step: BaseStep) -> None:
+        self._logger.info("Finish step execution. %s" % step.__class__.__name__)
 
-    def after_completion(self, *args, **kwargs):
-        self._logger.info("Complete step execution. %s" % args[0].__class__.__name__)
+    def after_completion(self, step: BaseStep) -> None:
+        self._logger.info("Complete step execution. %s" % step.__class__.__name__)
