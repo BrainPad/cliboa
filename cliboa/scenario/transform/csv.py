@@ -1131,10 +1131,6 @@ class CsvDuplicateRowDelete(FileBaseTransform):
 
         Preserves original row order.
         """
-        # Initialize shared state for chunk processing
-        self._seen_rows = set()
-        self._first_write = True
-
         # Use existing chunk_size_handling infrastructure
         chunk_size_handling(self._read_csv_func, fi, fo)
 
@@ -1143,6 +1139,10 @@ class CsvDuplicateRowDelete(FileBaseTransform):
         Process CSV in chunks with duplicate removal.
         Used by chunk_size_handling for memory-efficient processing.
         """
+        # Initialize state for each execution
+        seen_rows = set()
+        first_write = True
+
         for chunk in pandas.read_csv(
             fi,
             delimiter=self._delimiter,
@@ -1156,8 +1156,8 @@ class CsvDuplicateRowDelete(FileBaseTransform):
             unique_rows = []
             for _, row in chunk.iterrows():
                 row_tuple = tuple(row.values)
-                if row_tuple not in self._seen_rows:
-                    self._seen_rows.add(row_tuple)
+                if row_tuple not in seen_rows:
+                    seen_rows.add(row_tuple)
                     unique_rows.append(row.values)
 
             # Write unique rows to output file
@@ -1165,13 +1165,13 @@ class CsvDuplicateRowDelete(FileBaseTransform):
                 unique_df = pandas.DataFrame(unique_rows)
                 unique_df.to_csv(
                     fo,
-                    mode="w" if self._first_write else "a",
+                    mode="w" if first_write else "a",
                     header=False,
                     index=False,
                     sep=self._delimiter,
                     encoding=self._encoding,
                 )
-                self._first_write = False
+                first_write = False
 
     def _convert_with_dask(self, fi, fo):
         """

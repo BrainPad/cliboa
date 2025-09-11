@@ -1,11 +1,6 @@
 # CsvDuplicateRowDelete
 Remove duplicate lines in CSV(TSV) file.  
-Considered to be deleted only when the entire line is completely matched.  
-
-**Performance Improvements (v2.0+):**
-- Memory-efficient processing using set-based duplicate detection
-- ~32x faster processing on datasets with many duplicates
-- Support for very large files through chunked processing and Dask engine
+Considered to be deleted only when the entire line is completely matched.
 
 # Parameters
 |Parameters|Explanation|Required|Default|Remarks|
