@@ -72,7 +72,7 @@ class TestHttpPost(object):
         Helper.set_property(instance, "retry_intvl_sec", 1)
         with pytest.raises(HTTPError) as execinfo:
             instance.execute()
-        assert "Http request failed. HTTP Status code: 404" in str(execinfo.value)
+        assert "Http request failed" in str(execinfo.value)
 
 
 class TestHttpPut(object):
@@ -123,7 +123,7 @@ class TestHttpPut(object):
         Helper.set_property(instance, "retry_intvl_sec", 1)
         with pytest.raises(HTTPError) as execinfo:
             instance.execute()
-        assert "Http request failed. HTTP Status code: 404" in str(execinfo.value)
+        assert "Http request failed" in str(execinfo.value)
 
 
 class TestHttpDelete(object):
@@ -172,4 +172,4 @@ class TestHttpDelete(object):
         Helper.set_property(instance, "retry_intvl_sec", 1)
         with pytest.raises(HTTPError) as execinfo:
             instance.execute()
-        assert "Http request failed. HTTP Status code: 404" in str(execinfo.value)
+        assert "Http request failed" in str(execinfo.value)

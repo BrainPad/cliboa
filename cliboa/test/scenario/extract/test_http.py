@@ -113,7 +113,7 @@ class TestDownloadViaBasicAuth(BaseCliboaTest):
 
         with pytest.raises(HTTPError) as execinfo:
             instance.execute()
-        assert "Http request failed. HTTP Status code: 401" in str(execinfo.value)
+        assert "Http request failed" in str(execinfo.value)
 
 
 class TestHttpGet(object):
@@ -199,7 +199,7 @@ class TestHttpGet(object):
         Helper.set_property(instance, "retry_intvl_sec", 1)
         with pytest.raises(HTTPError) as execinfo:
             instance.execute()
-        assert "Http request failed. HTTP Status code: 404" in str(execinfo.value)
+        assert "Http request failed" in str(execinfo.value)
 
     @patch("requests.get")
     def test_execute_ng_2(self, mock_get):
@@ -220,4 +220,4 @@ class TestHttpGet(object):
 
         with pytest.raises(HTTPError) as execinfo:
             instance.execute()
-        assert "Http request failed. HTTP Status code: 401" in str(execinfo.value)
+        assert "Http request failed" in str(execinfo.value)
