@@ -29,13 +29,16 @@ class TestHttpDownload(object):
     def setup_method(self, method):
         self._data_dir = os.path.join(env.BASE_DIR, "data")
 
-    @patch("cliboa.scenario.extract.http.requests.get")
+    @patch("requests.get")
     def test_execute_ok(self, mock_get):
         # Mock successful response
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.text = (
             '{"args":{"foo1":"bar1","foo2":"bar2"},"headers":{"host":"postman-echo.com"}}'
+        )
+        mock_response.content = (
+            b'{"args":{"foo1":"bar1","foo2":"bar2"},"headers":{"host":"postman-echo.com"}}'
         )
         mock_response.raise_for_status.return_value = None
         mock_get.return_value = mock_response
@@ -62,12 +65,13 @@ class TestDownloadViaBasicAuth(BaseCliboaTest):
     def setUp(self):
         self._data_dir = os.path.join(env.BASE_DIR, "data")
 
-    @patch("cliboa.scenario.extract.http.requests.get")
+    @patch("requests.get")
     def test_execute_ok(self, mock_get):
         # Mock successful response
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.text = '{\n  "authenticated": true\n}'
+        mock_response.content = b'{\n  "authenticated": true\n}'
         mock_response.raise_for_status.return_value = None
         mock_get.return_value = mock_response
 
@@ -92,7 +96,7 @@ class TestDownloadViaBasicAuth(BaseCliboaTest):
         assert '{\n  "authenticated": true\n}' in result
         mock_get.assert_called_once()
 
-    @patch("cliboa.scenario.extract.http.requests.get")
+    @patch("requests.get")
     def test_execute_ng(self, mock_get):
         # Mock HTTP error
         mock_get.side_effect = HTTPError("Http request failed. HTTP Status code: 401")
@@ -116,13 +120,16 @@ class TestHttpGet(object):
     def setup_method(self, method):
         self._data_dir = os.path.join(env.BASE_DIR, "data")
 
-    @patch("cliboa.scenario.extract.http.requests.get")
+    @patch("requests.get")
     def test_execute_ok_1(self, mock_get):
         # Mock successful response
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.text = (
             '{"args":{"foo1":"bar1","foo2":"bar2"},"headers":{"host":"postman-echo.com"}}'
+        )
+        mock_response.content = (
+            b'{"args":{"foo1":"bar1","foo2":"bar2"},"headers":{"host":"postman-echo.com"}}'
         )
         mock_response.raise_for_status.return_value = None
         mock_get.return_value = mock_response
@@ -146,12 +153,13 @@ class TestHttpGet(object):
         assert "postman-echo.com" in result
         mock_get.assert_called_once()
 
-    @patch("cliboa.scenario.extract.http.requests.get")
+    @patch("requests.get")
     def test_execute_ok_2(self, mock_get):
         # Mock successful response
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.text = '{\n  "authenticated": true\n}'
+        mock_response.content = b'{\n  "authenticated": true\n}'
         mock_response.raise_for_status.return_value = None
         mock_get.return_value = mock_response
 
@@ -176,7 +184,7 @@ class TestHttpGet(object):
         assert '{\n  "authenticated": true\n}' in result
         mock_get.assert_called_once()
 
-    @patch("cliboa.scenario.extract.http.requests.get")
+    @patch("requests.get")
     def test_execute_ng_1(self, mock_get):
         # Mock HTTP error
         mock_get.side_effect = HTTPError("Http request failed. HTTP Status code: 404")
@@ -193,7 +201,7 @@ class TestHttpGet(object):
             instance.execute()
         assert "Http request failed. HTTP Status code: 404" in str(execinfo.value)
 
-    @patch("cliboa.scenario.extract.http.requests.get")
+    @patch("requests.get")
     def test_execute_ng_2(self, mock_get):
         # Mock HTTP error
         mock_get.side_effect = HTTPError("Http request failed. HTTP Status code: 401")
