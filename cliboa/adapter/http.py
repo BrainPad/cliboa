@@ -63,6 +63,8 @@ class Http(ABC):
 
         if res is not None:
             raise HTTPError("Http request failed. HTTP Status code: %s" % res.status_code)
+        else:
+            raise HTTPError("Http request failed after all retries.")
 
 
 class Download(Http):

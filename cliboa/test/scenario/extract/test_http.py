@@ -13,6 +13,7 @@
 #
 import os
 import shutil
+from unittest.mock import Mock, patch
 
 import pytest
 from requests.exceptions import HTTPError
@@ -28,7 +29,17 @@ class TestHttpDownload(object):
     def setup_method(self, method):
         self._data_dir = os.path.join(env.BASE_DIR, "data")
 
-    def test_execute_ok(self):
+    @patch("cliboa.scenario.extract.http.requests.get")
+    def test_execute_ok(self, mock_get):
+        # Mock successful response
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.text = (
+            '{"args":{"foo1":"bar1","foo2":"bar2"},"headers":{"host":"postman-echo.com"}}'
+        )
+        mock_response.raise_for_status.return_value = None
+        mock_get.return_value = mock_response
+
         try:
             instance = HttpDownload()
             Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
@@ -44,13 +55,22 @@ class TestHttpDownload(object):
         finally:
             shutil.rmtree(self._data_dir)
         assert "postman-echo.com" in result
+        mock_get.assert_called_once()
 
 
 class TestDownloadViaBasicAuth(BaseCliboaTest):
     def setUp(self):
         self._data_dir = os.path.join(env.BASE_DIR, "data")
 
-    def test_execute_ok(self):
+    @patch("cliboa.scenario.extract.http.requests.get")
+    def test_execute_ok(self, mock_get):
+        # Mock successful response
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.text = '{\n  "authenticated": true\n}'
+        mock_response.raise_for_status.return_value = None
+        mock_get.return_value = mock_response
+
         try:
             os.makedirs(self._data_dir, exist_ok=True)
             instance = HttpDownloadViaBasicAuth()
@@ -70,8 +90,13 @@ class TestDownloadViaBasicAuth(BaseCliboaTest):
         finally:
             shutil.rmtree(self._data_dir)
         assert '{\n  "authenticated": true\n}' in result
+        mock_get.assert_called_once()
 
-    def test_execute_ng(self):
+    @patch("cliboa.scenario.extract.http.requests.get")
+    def test_execute_ng(self, mock_get):
+        # Mock HTTP error
+        mock_get.side_effect = HTTPError("Http request failed. HTTP Status code: 401")
+
         instance = HttpDownloadViaBasicAuth()
         Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
         # use Postman echo
@@ -91,7 +116,17 @@ class TestHttpGet(object):
     def setup_method(self, method):
         self._data_dir = os.path.join(env.BASE_DIR, "data")
 
-    def test_execute_ok_1(self):
+    @patch("cliboa.scenario.extract.http.requests.get")
+    def test_execute_ok_1(self, mock_get):
+        # Mock successful response
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.text = (
+            '{"args":{"foo1":"bar1","foo2":"bar2"},"headers":{"host":"postman-echo.com"}}'
+        )
+        mock_response.raise_for_status.return_value = None
+        mock_get.return_value = mock_response
+
         try:
             os.makedirs(self._data_dir, exist_ok=True)
             instance = HttpGet()
@@ -109,8 +144,17 @@ class TestHttpGet(object):
         finally:
             shutil.rmtree(self._data_dir)
         assert "postman-echo.com" in result
+        mock_get.assert_called_once()
 
-    def test_execute_ok_2(self):
+    @patch("cliboa.scenario.extract.http.requests.get")
+    def test_execute_ok_2(self, mock_get):
+        # Mock successful response
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.text = '{\n  "authenticated": true\n}'
+        mock_response.raise_for_status.return_value = None
+        mock_get.return_value = mock_response
+
         try:
             os.makedirs(self._data_dir, exist_ok=True)
             instance = HttpGet()
@@ -130,8 +174,13 @@ class TestHttpGet(object):
         finally:
             shutil.rmtree(self._data_dir)
         assert '{\n  "authenticated": true\n}' in result
+        mock_get.assert_called_once()
 
-    def test_execute_ng_1(self):
+    @patch("cliboa.scenario.extract.http.requests.get")
+    def test_execute_ng_1(self, mock_get):
+        # Mock HTTP error
+        mock_get.side_effect = HTTPError("Http request failed. HTTP Status code: 404")
+
         instance = HttpGet()
         Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
         # use Postman echo
@@ -144,7 +193,11 @@ class TestHttpGet(object):
             instance.execute()
         assert "Http request failed. HTTP Status code: 404" in str(execinfo.value)
 
-    def test_execute_ng_2(self):
+    @patch("cliboa.scenario.extract.http.requests.get")
+    def test_execute_ng_2(self, mock_get):
+        # Mock HTTP error
+        mock_get.side_effect = HTTPError("Http request failed. HTTP Status code: 401")
+
         instance = HttpGet()
         Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
         # use Postman echo
