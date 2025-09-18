@@ -13,7 +13,6 @@ classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Developers",
   "Topic :: Software Development :: Libraries :: Application Frameworks",
-  "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -91,6 +90,7 @@ skip_glob = "cliboa/test/adapter/test_http.py"
 
 [tool.flake8]
 max-line-length = 100
+extend-ignore = "E203"
 
 [tool.pytest.ini_options]
 testpaths = ["cliboa/test"]
