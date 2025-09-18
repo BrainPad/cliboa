@@ -91,6 +91,7 @@ skip_glob = "cliboa/test/adapter/test_http.py"
 
 [tool.flake8]
 max-line-length = 100
+extend-ignore = "E203"
 
 [tool.pytest.ini_options]
 testpaths = ["cliboa/test"]

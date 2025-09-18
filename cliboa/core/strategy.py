@@ -18,6 +18,7 @@ from typing import Optional
 import cloudpickle
 from multiprocessing_logging import install_mp_handler
 
+from cliboa import state
 from cliboa.core.scenario_queue import ScenarioQueue
 from cliboa.util.constant import StepStatus
 from cliboa.util.exception import StepExecutionFailed
@@ -55,6 +56,7 @@ class SingleProcExecutor(StepExecutor):
     def execute_steps(self, args) -> Optional[int]:
         try:
             cls = self._step[0]
+            state.set(cls.__class__.__name__)
             ret = cls.trigger(args)
             return ret
 
@@ -84,6 +86,7 @@ class MultiProcExecutor(StepExecutor):
             return "NG"
 
     def execute_steps(self, args) -> Optional[int]:
+        state.set("MultiProcess")
         self._logger.info(
             "Multi process start. Execute step count=%s." % ScenarioQueue.step_queue.multi_proc_cnt
         )
@@ -116,6 +119,7 @@ class MultiProcWithConfigExecutor(MultiProcExecutor):
             self._multi_proc_cnt = obj[0].config["multi_process_count"]
 
     def execute_steps(self, args) -> Optional[int]:
+        state.set("MultiProcessWC")
         self._logger.info("Multi process start. Execute step count=%s." % self._multi_proc_cnt)
         install_mp_handler()
         packed = [cloudpickle.dumps(step) for step in self._step]

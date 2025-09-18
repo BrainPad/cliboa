@@ -19,6 +19,7 @@ from shutil import copyfile
 import pytest
 
 from cliboa.conf import env
+from cliboa.util.log_record import CliboaLogRecord
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -38,6 +39,7 @@ def setup_cliboa_env(tmpdir_factory):
     conf_path = os.path.join("cliboa", "conf", "logging.conf")
     copyfile(conf_path, os.path.join("conf", "logging.conf"))
     logging.config.fileConfig(env.BASE_DIR + "/conf/logging.conf", disable_existing_loggers=False)
+    logging.setLogRecordFactory(CliboaLogRecord)
 
     # copy cliboa.ini
     conf_path = os.path.join("cliboa", "conf", "cliboa.ini")
