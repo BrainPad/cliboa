@@ -10,24 +10,20 @@ jobs:
       - name: install git-secrets
         run: |
           sudo ln -s "$(which echo)" /usr/local/bin/say
-          git clone https://github.com/awslabs/git-secrets.git git-secrets
-          cd git-secrets
+          git clone https://github.com/awslabs/git-secrets.git /tmp/git-secrets
+          cd /tmp/git-secrets
           sudo make install
-      - name: setup git-secrets
+      - name: setup and scan git-secrets
         run: |
-          cd git-secrets
           git secrets --install
-
           # add aws secrets
           git secrets --register-aws
-
           # add other secrets
           git secrets --add "password\s*=\s*\".+\""
           git secrets --add --allowed "password\s*=\"dummy.*\""
-      - name: check secrets
-        run: |
-          cd git-secrets
           # list rules
+          echo "---- Registered patterns ----"
           git secrets --list
           # check
-          git secrets --scan -r .
+          echo "---- Scanning repository (tracked files only) ----"
+          git ls-files -z | xargs -0 git secrets --scan

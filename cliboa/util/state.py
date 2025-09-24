@@ -7,6 +7,8 @@ class StateManager:
         return self._state
 
     def __str__(self) -> str:
+        # NOTE: The full format "[05/12]StepName" was compromised.
+        # TODO: Revisit this if we do a major refactor.
         return self.current
 
     def set(self, new_state: str):
