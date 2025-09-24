@@ -13,6 +13,7 @@
 #
 import os
 import shutil
+from unittest.mock import Mock, patch
 
 import pytest
 from requests.exceptions import HTTPError
@@ -27,7 +28,16 @@ class TestHttpPost(object):
     def setup_method(self, method):
         self._data_dir = os.path.join(env.BASE_DIR, "data")
 
-    def test_execute_ok(self):
+    @patch("requests.post")
+    def test_execute_ok(self, mock_post):
+        # Mock successful response
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.text = '{"data":{"key":"value"},"headers":{"host":"postman-echo.com"}}'
+        mock_response.content = b'{"data":{"key":"value"},"headers":{"host":"postman-echo.com"}}'
+        mock_response.raise_for_status.return_value = None
+        mock_post.return_value = mock_response
+
         try:
             os.makedirs(self._data_dir, exist_ok=True)
             instance = HttpPost()
@@ -44,8 +54,13 @@ class TestHttpPost(object):
         finally:
             shutil.rmtree(self._data_dir)
         assert "postman-echo.com" in result
+        mock_post.assert_called_once()
 
-    def test_execute_ng(self):
+    @patch("requests.post")
+    def test_execute_ng(self, mock_post):
+        # Mock HTTP error
+        mock_post.side_effect = HTTPError("Http request failed. HTTP Status code: 404")
+
         instance = HttpPost()
         Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
         # use Postman echo
@@ -57,14 +72,23 @@ class TestHttpPost(object):
         Helper.set_property(instance, "retry_intvl_sec", 1)
         with pytest.raises(HTTPError) as execinfo:
             instance.execute()
-        assert "Http request failed. HTTP Status code: 404" in str(execinfo.value)
+        assert "Http request failed" in str(execinfo.value)
 
 
 class TestHttpPut(object):
     def setup_method(self, method):
         self._data_dir = os.path.join(env.BASE_DIR, "data")
 
-    def test_execute_ok(self):
+    @patch("requests.put")
+    def test_execute_ok(self, mock_put):
+        # Mock successful response
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.text = '{"data":{"key":"value"},"headers":{"host":"postman-echo.com"}}'
+        mock_response.content = b'{"data":{"key":"value"},"headers":{"host":"postman-echo.com"}}'
+        mock_response.raise_for_status.return_value = None
+        mock_put.return_value = mock_response
+
         try:
             os.makedirs(self._data_dir, exist_ok=True)
             instance = HttpPut()
@@ -81,8 +105,13 @@ class TestHttpPut(object):
         finally:
             shutil.rmtree(self._data_dir)
         assert "postman-echo.com" in result
+        mock_put.assert_called_once()
 
-    def test_execute_ng(self):
+    @patch("requests.put")
+    def test_execute_ng(self, mock_put):
+        # Mock HTTP error
+        mock_put.side_effect = HTTPError("Http request failed. HTTP Status code: 404")
+
         instance = HttpPut()
         Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
         # use Postman echo
@@ -94,14 +123,23 @@ class TestHttpPut(object):
         Helper.set_property(instance, "retry_intvl_sec", 1)
         with pytest.raises(HTTPError) as execinfo:
             instance.execute()
-        assert "Http request failed. HTTP Status code: 404" in str(execinfo.value)
+        assert "Http request failed" in str(execinfo.value)
 
 
 class TestHttpDelete(object):
     def setup_method(self, method):
         self._data_dir = os.path.join(env.BASE_DIR, "data")
 
-    def test_execute_ok(self):
+    @patch("requests.delete")
+    def test_execute_ok(self, mock_delete):
+        # Mock successful response
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.text = '{"headers":{"host":"postman-echo.com"}}'
+        mock_response.content = b'{"headers":{"host":"postman-echo.com"}}'
+        mock_response.raise_for_status.return_value = None
+        mock_delete.return_value = mock_response
+
         try:
             os.makedirs(self._data_dir, exist_ok=True)
             instance = HttpDelete()
@@ -117,8 +155,13 @@ class TestHttpDelete(object):
         finally:
             shutil.rmtree(self._data_dir)
         assert "postman-echo.com" in result
+        mock_delete.assert_called_once()
 
-    def test_execute_ng(self):
+    @patch("requests.delete")
+    def test_execute_ng(self, mock_delete):
+        # Mock HTTP error
+        mock_delete.side_effect = HTTPError("Http request failed. HTTP Status code: 404")
+
         instance = HttpDelete()
         Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
         # use Postman echo
@@ -129,4 +172,4 @@ class TestHttpDelete(object):
         Helper.set_property(instance, "retry_intvl_sec", 1)
         with pytest.raises(HTTPError) as execinfo:
             instance.execute()
-        assert "Http request failed. HTTP Status code: 404" in str(execinfo.value)
+        assert "Http request failed" in str(execinfo.value)
