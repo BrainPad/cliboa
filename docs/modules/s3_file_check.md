@@ -8,10 +8,13 @@ Files check via S3.
 |access_key|AWS access key|No|None||
 |secret_key|AWS secret key|No|None||
 |profile|Profile name|No|None|Section name of ~/.aws/config|
+|role_arn|IAM Role ARN to assume (cross-account)|No|None|Cannot be used with access_key/secret_key or profile|
+|external_id|External ID for assume role|No|None|Used only when role_arn is specified|
 |bucket|S3 bucket name|Yes|None||
 |prefix|Folder prefix used to filter blobs|No|`""`||
 |delimiter|Delimiter, used with prefix to emulate hierarchy|No|`""`||
-|src_pattern|File pattern of source to download. Regexp is available|Yes|None||
+|src_pattern|File pattern to check. Regexp is available|Yes|None||
+
 
 # Examples
 ```
@@ -22,4 +25,15 @@ Files check via S3.
     bucket: s3_test
     prefix: test_prefix
     src_pattern: test_(.*)_.csv
+```
+
+## Cross-account example
+```
+- step:
+  class: S3FileExistsCheck
+  arguments:
+    bucket: s3_test
+    src_pattern: test_(.*)_.csv
+    role_arn: arn:aws:iam::123456789012:role/CrossAccountRole
+    external_id: your-external-id
 ```
