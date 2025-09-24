@@ -10,8 +10,9 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import boto3
 from unittest.mock import patch
+
+import boto3
 
 from cliboa.adapter.aws import S3Adapter
 from cliboa.test import BaseCliboaTest
@@ -46,7 +47,6 @@ class TestS3Adapter(BaseCliboaTest):
     def test_get_resource_with_no_keys(self):
         r = S3Adapter().get_resource()
         assert r == boto3.resource("s3")
-
 
     @patch("boto3.client")
     def test_get_client_with_role_arn(self, mock_boto3_client):

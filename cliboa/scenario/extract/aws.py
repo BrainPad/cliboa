@@ -57,7 +57,9 @@ class S3Download(BaseS3):
         valid = EssentialParameters(self.__class__.__name__, [self._src_pattern])
         valid()
 
-        adapter = S3Adapter(self._access_key, self._secret_key, self._profile, self._role_arn, self._external_id)
+        adapter = S3Adapter(
+            self._access_key, self._secret_key, self._profile, self._role_arn, self._external_id
+        )
         client = adapter.get_client()
 
         p = client.get_paginator("list_objects")
@@ -103,7 +105,9 @@ class S3DownloadFileDelete(BaseS3):
             self._delimiter = super().get_step_argument("delimiter")
             self._src_pattern = super().get_step_argument("src_pattern")
 
-            adapter = S3Adapter(self._access_key, self._secret_key, self._profile, self._role_arn, self._external_id)
+            adapter = S3Adapter(
+                self._access_key, self._secret_key, self._profile, self._role_arn, self._external_id
+            )
             client = adapter.get_client()
 
             for key in keys:
@@ -139,7 +143,9 @@ class S3Delete(BaseS3):
         valid = EssentialParameters(self.__class__.__name__, [self._src_pattern])
         valid()
 
-        adapter = S3Adapter(self._access_key, self._secret_key, self._profile, self._role_arn, self._external_id)
+        adapter = S3Adapter(
+            self._access_key, self._secret_key, self._profile, self._role_arn, self._external_id
+        )
         client = adapter.get_client()
 
         p = client.get_paginator("list_objects")
@@ -179,7 +185,9 @@ class S3FileExistsCheck(BaseS3):
         valid = EssentialParameters(self.__class__.__name__, [self._src_pattern])
         valid()
 
-        adapter = S3Adapter(self._access_key, self._secret_key, self._profile, self._role_arn, self._external_id)
+        adapter = S3Adapter(
+            self._access_key, self._secret_key, self._profile, self._role_arn, self._external_id
+        )
 
         p = adapter.get_client().get_paginator("list_objects")
         for page in p.paginate(Bucket=self._bucket, Delimiter=self._delimiter, Prefix=self._prefix):

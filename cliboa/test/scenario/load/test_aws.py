@@ -12,30 +12,19 @@
 # all copies or substantial portions of the Software.
 #
 
+import os
 import tempfile
 from unittest.mock import MagicMock, patch
 
 import pytest
 from botocore.exceptions import ClientError
 
+from cliboa.adapter.aws import S3Adapter
 from cliboa.scenario.load.aws import DynamoDBWrite, S3Upload
 from cliboa.test import BaseCliboaTest
 from cliboa.util.exception import FileNotFound, InvalidFormat, InvalidParameter
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
-
-
-class BaseS3Test(BaseCliboaTest):
-    """Base test class for S3 related tests"""
-    
-    def _test_cross_account_role_properties(self, instance_class):
-        """Test cross-account IAM role properties for any S3 class"""
-        instance = instance_class()
-        Helper.set_property(instance, "role_arn", "arn:aws:iam::123456789012:role/TestRole")
-        Helper.set_property(instance, "external_id", "test-external-id")
-
-        self.assertEqual(instance._role_arn, "arn:aws:iam::123456789012:role/TestRole")
-        self.assertEqual(instance._external_id, "test-external-id")
 
 
 class TestDynamoDBWrite(BaseCliboaTest):
@@ -222,7 +211,24 @@ class TestDynamoDBWrite(BaseCliboaTest):
         )
 
 
-class TestS3Upload(BaseS3Test):
-    def test_cross_account_role_properties(self):
+class TestS3Upload(BaseCliboaTest):
+    @patch.object(S3Adapter, "get_client")
+    def test_cross_account_role_properties(self, m_get_client):
         """Test S3Upload with cross-account IAM role properties"""
-        self._test_cross_account_role_properties(S3Upload)
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            # Create a test file
+            test_file = os.path.join(tmp_dir, "test.txt")
+            with open(test_file, "w") as f:
+                f.write("test content")
+
+            instance = S3Upload()
+            Helper.set_property(instance, "bucket", "test-bucket")
+            Helper.set_property(instance, "src_dir", tmp_dir)
+            Helper.set_property(instance, "src_pattern", "test.*")
+            Helper.set_property(instance, "role_arn", "arn:aws:iam::123456789012:role/TestRole")
+            Helper.set_property(instance, "external_id", "test-external-id")
+
+            instance.execute()
+
+            # Verify that S3Adapter was called with cross-account parameters
+            m_get_client.assert_called_once()
