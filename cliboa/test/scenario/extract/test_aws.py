@@ -19,13 +19,26 @@ from decimal import Decimal
 from unittest.mock import patch
 
 from cliboa.adapter.aws import S3Adapter
-from cliboa.scenario.extract.aws import DynamoDBRead, S3Delete, S3Download, S3FileExistsCheck
+from cliboa.scenario.extract.aws import DynamoDBRead, S3Delete, S3Download, S3DownloadFileDelete, S3FileExistsCheck
 from cliboa.test import BaseCliboaTest
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
 
 
-class TestS3Download(BaseCliboaTest):
+class BaseS3Test(BaseCliboaTest):
+    """Base test class for S3 related tests"""
+    
+    def _test_cross_account_role_properties(self, instance_class):
+        """Test cross-account IAM role properties for any S3 class"""
+        instance = instance_class()
+        Helper.set_property(instance, "role_arn", "arn:aws:iam::123456789012:role/TestRole")
+        Helper.set_property(instance, "external_id", "test-external-id")
+
+        self.assertEqual(instance._role_arn, "arn:aws:iam::123456789012:role/TestRole")
+        self.assertEqual(instance._external_id, "test-external-id")
+
+
+class TestS3Download(BaseS3Test):
     @patch.object(S3Adapter, "get_client")
     def test_execute_ok(self, m_get_client):
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -42,8 +55,12 @@ class TestS3Download(BaseCliboaTest):
 
             assert m_get_object.call_args_list == []
 
+    def test_cross_account_role_properties(self):
+        """Test S3Download with cross-account IAM role properties"""
+        self._test_cross_account_role_properties(S3Download)
 
-class TestS3Delete(BaseCliboaTest):
+
+class TestS3Delete(BaseS3Test):
     @patch.object(S3Adapter, "get_client")
     def test_execute_ok(self, m_get_client):
         m_get_object = m_get_client.return_value.get_object
@@ -58,8 +75,12 @@ class TestS3Delete(BaseCliboaTest):
 
         assert m_get_object.call_args_list == []
 
+    def test_cross_account_role_properties(self):
+        """Test S3Delete with cross-account IAM role properties"""
+        self._test_cross_account_role_properties(S3Delete)
 
-class TestS3FileExistsCheck(BaseCliboaTest):
+
+class TestS3FileExistsCheck(BaseS3Test):
     @patch.object(S3Adapter, "get_client")
     def test_execute_file_exists(self, m_get_client):
         m_get_object = m_get_client.return_value.get_object
@@ -87,6 +108,16 @@ class TestS3FileExistsCheck(BaseCliboaTest):
         instance.execute()
         # 処理の正常終了を確認
         assert m_get_object.call_args_list == []
+
+    def test_cross_account_role_properties(self):
+        """Test S3FileExistsCheck with cross-account IAM role properties"""
+        self._test_cross_account_role_properties(S3FileExistsCheck)
+
+
+class TestS3DownloadFileDelete(BaseS3Test):
+    def test_cross_account_role_properties(self):
+        """Test S3DownloadFileDelete with cross-account IAM role properties"""
+        self._test_cross_account_role_properties(S3DownloadFileDelete)
 
 
 class TestDynamoDBRead(BaseCliboaTest):

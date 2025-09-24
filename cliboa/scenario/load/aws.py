@@ -54,7 +54,7 @@ class S3Upload(BaseS3):
         valid = EssentialParameters(self.__class__.__name__, [self._src_dir, self._src_pattern])
         valid()
 
-        adapter = S3Adapter(self._access_key, self._secret_key, self._profile)
+        adapter = S3Adapter(self._access_key, self._secret_key, self._profile, self._role_arn, self._external_id)
         resource = adapter.get_resource()
         bucket = resource.Bucket(self._bucket)
         files = super().get_target_files(self._src_dir, self._src_pattern)

@@ -18,11 +18,24 @@ from unittest.mock import MagicMock, patch
 import pytest
 from botocore.exceptions import ClientError
 
-from cliboa.scenario.load.aws import DynamoDBWrite
+from cliboa.scenario.load.aws import DynamoDBWrite, S3Upload
 from cliboa.test import BaseCliboaTest
 from cliboa.util.exception import FileNotFound, InvalidFormat, InvalidParameter
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
+
+
+class BaseS3Test(BaseCliboaTest):
+    """Base test class for S3 related tests"""
+    
+    def _test_cross_account_role_properties(self, instance_class):
+        """Test cross-account IAM role properties for any S3 class"""
+        instance = instance_class()
+        Helper.set_property(instance, "role_arn", "arn:aws:iam::123456789012:role/TestRole")
+        Helper.set_property(instance, "external_id", "test-external-id")
+
+        self.assertEqual(instance._role_arn, "arn:aws:iam::123456789012:role/TestRole")
+        self.assertEqual(instance._external_id, "test-external-id")
 
 
 class TestDynamoDBWrite(BaseCliboaTest):
@@ -207,3 +220,9 @@ class TestDynamoDBWrite(BaseCliboaTest):
         mock_table.batch_writer().__enter__().put_item.assert_any_call(
             Item={"id": "2", "name": "test2", "timestamp": "2023-01-02"}
         )
+
+
+class TestS3Upload(BaseS3Test):
+    def test_cross_account_role_properties(self):
+        """Test S3Upload with cross-account IAM role properties"""
+        self._test_cross_account_role_properties(S3Upload)
