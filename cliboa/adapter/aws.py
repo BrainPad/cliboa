@@ -37,7 +37,7 @@ class S3Adapter(object):
 
         # 2) Allow at most one of {profile, access_key/secret_key, role_arn}
         auth_methods = [bool(profile), bool(access_key and secret_key), bool(role_arn)]
-        if sum(auth_methods) != 1:
+        if sum(auth_methods) > 1:
             raise InvalidParameter(
                 "Specify only one of profile, access_key/secret_key, or role_arn."
             )
