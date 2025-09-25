@@ -212,8 +212,8 @@ class TestDynamoDBWrite(BaseCliboaTest):
 
 
 class TestS3Upload(BaseCliboaTest):
-    @patch.object(S3Adapter, "get_client")
-    def test_cross_account_role_properties(self, m_get_client):
+    @patch.object(S3Adapter, "get_resource")
+    def test_cross_account_role_properties(self, m_get_resource):
         """Test S3Upload with cross-account IAM role properties"""
         with tempfile.TemporaryDirectory() as tmp_dir:
             # Create a test file
@@ -222,6 +222,7 @@ class TestS3Upload(BaseCliboaTest):
                 f.write("test content")
 
             instance = S3Upload()
+            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
             Helper.set_property(instance, "bucket", "test-bucket")
             Helper.set_property(instance, "src_dir", tmp_dir)
             Helper.set_property(instance, "src_pattern", "test.*")
@@ -231,4 +232,4 @@ class TestS3Upload(BaseCliboaTest):
             instance.execute()
 
             # Verify that S3Adapter was called with cross-account parameters
-            m_get_client.assert_called_once()
+            m_get_resource.assert_called_once()

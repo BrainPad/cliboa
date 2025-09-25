@@ -137,6 +137,7 @@ class TestS3FileExistsCheck(BaseCliboaTest):
         m_pagenate.return_value = [{"Contents": [{"Key": "test.txt"}]}]
 
         instance = S3FileExistsCheck()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
         Helper.set_property(instance, "bucket", "test-bucket")
         Helper.set_property(instance, "src_pattern", "test.*")
         Helper.set_property(instance, "role_arn", "arn:aws:iam::123456789012:role/TestRole")
@@ -158,6 +159,7 @@ class TestS3DownloadFileDelete(BaseCliboaTest):
         ObjectStore.put("dl1", [{"Key": "test.txt"}])
 
         instance = S3DownloadFileDelete()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
         Helper.set_property(instance, "bucket", "test-bucket")
         Helper.set_property(instance, "role_arn", "arn:aws:iam::123456789012:role/TestRole")
         Helper.set_property(instance, "external_id", "test-external-id")
