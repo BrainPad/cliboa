@@ -11,6 +11,7 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+from cliboa import state
 from cliboa.core.factory import StepExecutorFactory
 from cliboa.core.scenario_queue import ScenarioQueue
 from cliboa.util.constant import StepStatus
@@ -61,14 +62,18 @@ class ScenarioWorker(object):
         self._listeners.append(listener)
 
     def execute_scenario(self):
+        state.set("_BeforeScenario")
         self._before_scenario()
         try:
+            state.set("_ExecuteScenario")
             return self._execute_steps()
         except Exception as e:
             self._logger.error(e)
             raise e
         finally:
+            state.set("_AfterScenario")
             self._after_scenario()
+            state.set("_EndScenario")
 
     def _execute_steps(self):
         """

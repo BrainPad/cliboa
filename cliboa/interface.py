@@ -16,11 +16,13 @@ import logging.config
 import os
 import sys
 
+from cliboa import state
 from cliboa.conf import env
 from cliboa.core.factory import ScenarioManagerFactory
 from cliboa.core.listener import ScenarioStatusListener
 from cliboa.core.worker import ScenarioWorker
 from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.log_record import CliboaLogRecord
 
 
 class ScenarioRunner(object):
@@ -36,6 +38,7 @@ class ScenarioRunner(object):
         logging.config.fileConfig(
             env.BASE_DIR + "/conf/logging.conf", disable_existing_loggers=False
         )
+        logging.setLogRecordFactory(CliboaLogRecord)
         self._logger = LisboaLog.get_logger(__name__)
         self._pj_scenario_dir = os.path.join(
             env.PROJECT_DIR, cmd_args.project_name, env.SCENARIO_DIR_NAME
@@ -55,6 +58,7 @@ class ScenarioRunner(object):
         """
         Create scenario queue
         """
+        state.set("_LoadScenario")
         manager = ScenarioManagerFactory.create(self._cmd_args)
         manager.create_scenario_queue()
 
@@ -62,6 +66,7 @@ class ScenarioRunner(object):
         """
         Execute scenario
         """
+        state.set("_WorkScenario")
         worker = ScenarioWorker(self._cmd_args)
         worker.register_listeners(ScenarioStatusListener())
         return worker.execute_scenario()
