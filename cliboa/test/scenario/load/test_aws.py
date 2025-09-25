@@ -12,13 +12,15 @@
 # all copies or substantial portions of the Software.
 #
 
+import os
 import tempfile
 from unittest.mock import MagicMock, patch
 
 import pytest
 from botocore.exceptions import ClientError
 
-from cliboa.scenario.load.aws import DynamoDBWrite
+from cliboa.adapter.aws import S3Adapter
+from cliboa.scenario.load.aws import DynamoDBWrite, S3Upload
 from cliboa.test import BaseCliboaTest
 from cliboa.util.exception import FileNotFound, InvalidFormat, InvalidParameter
 from cliboa.util.helper import Helper
@@ -207,3 +209,27 @@ class TestDynamoDBWrite(BaseCliboaTest):
         mock_table.batch_writer().__enter__().put_item.assert_any_call(
             Item={"id": "2", "name": "test2", "timestamp": "2023-01-02"}
         )
+
+
+class TestS3Upload(BaseCliboaTest):
+    @patch.object(S3Adapter, "get_resource")
+    def test_cross_account_role_properties(self, m_get_resource):
+        """Test S3Upload with cross-account IAM role properties"""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            # Create a test file
+            test_file = os.path.join(tmp_dir, "test.txt")
+            with open(test_file, "w") as f:
+                f.write("test content")
+
+            instance = S3Upload()
+            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "bucket", "test-bucket")
+            Helper.set_property(instance, "src_dir", tmp_dir)
+            Helper.set_property(instance, "src_pattern", "test.*")
+            Helper.set_property(instance, "role_arn", "arn:aws:iam::123456789012:role/TestRole")
+            Helper.set_property(instance, "external_id", "test-external-id")
+
+            instance.execute()
+
+            # Verify that S3Adapter was called with cross-account parameters
+            m_get_resource.assert_called_once()

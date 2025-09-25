@@ -52,9 +52,17 @@ class BaseS3(BaseAws):
     def __init__(self):
         super().__init__()
         self._bucket = None
+        self._role_arn = None
+        self._external_id = None
 
     def bucket(self, bucket):
         self._bucket = bucket
+
+    def role_arn(self, role_arn):
+        self._role_arn = role_arn
+
+    def external_id(self, external_id):
+        self._external_id = external_id
 
     def execute(self, *args):
         valid = EssentialParameters(self.__class__.__name__, [self._bucket])

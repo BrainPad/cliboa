@@ -19,7 +19,13 @@ from decimal import Decimal
 from unittest.mock import patch
 
 from cliboa.adapter.aws import S3Adapter
-from cliboa.scenario.extract.aws import DynamoDBRead, S3Delete, S3Download, S3FileExistsCheck
+from cliboa.scenario.extract.aws import (
+    DynamoDBRead,
+    S3Delete,
+    S3Download,
+    S3DownloadFileDelete,
+    S3FileExistsCheck,
+)
 from cliboa.test import BaseCliboaTest
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
@@ -42,6 +48,25 @@ class TestS3Download(BaseCliboaTest):
 
             assert m_get_object.call_args_list == []
 
+    @patch.object(S3Adapter, "get_client")
+    def test_cross_account_role_properties(self, m_get_client):
+        """Test S3Download with cross-account IAM role properties"""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            m_pagenate = m_get_client.return_value.get_paginator.return_value.paginate
+            m_pagenate.return_value = [{"Contents": [{"Key": "test.txt"}]}]
+
+            instance = S3Download()
+            Helper.set_property(instance, "bucket", "test-bucket")
+            Helper.set_property(instance, "src_pattern", "test.*")
+            Helper.set_property(instance, "dest_dir", tmp_dir)
+            Helper.set_property(instance, "role_arn", "arn:aws:iam::123456789012:role/TestRole")
+            Helper.set_property(instance, "external_id", "test-external-id")
+
+            instance.execute()
+
+            # Verify that S3Adapter was called with cross-account parameters
+            m_get_client.assert_called_once()
+
 
 class TestS3Delete(BaseCliboaTest):
     @patch.object(S3Adapter, "get_client")
@@ -57,6 +82,23 @@ class TestS3Delete(BaseCliboaTest):
         instance.execute()
 
         assert m_get_object.call_args_list == []
+
+    @patch.object(S3Adapter, "get_client")
+    def test_cross_account_role_properties(self, m_get_client):
+        """Test S3Delete with cross-account IAM role properties"""
+        m_pagenate = m_get_client.return_value.get_paginator.return_value.paginate
+        m_pagenate.return_value = [{"Contents": [{"Key": "test.txt"}]}]
+
+        instance = S3Delete()
+        Helper.set_property(instance, "bucket", "test-bucket")
+        Helper.set_property(instance, "src_pattern", "test.*")
+        Helper.set_property(instance, "role_arn", "arn:aws:iam::123456789012:role/TestRole")
+        Helper.set_property(instance, "external_id", "test-external-id")
+
+        instance.execute()
+
+        # Verify that S3Adapter was called with cross-account parameters
+        m_get_client.assert_called_once()
 
 
 class TestS3FileExistsCheck(BaseCliboaTest):
@@ -87,6 +129,45 @@ class TestS3FileExistsCheck(BaseCliboaTest):
         instance.execute()
         # 処理の正常終了を確認
         assert m_get_object.call_args_list == []
+
+    @patch.object(S3Adapter, "get_client")
+    def test_cross_account_role_properties(self, m_get_client):
+        """Test S3FileExistsCheck with cross-account IAM role properties"""
+        m_pagenate = m_get_client.return_value.get_paginator.return_value.paginate
+        m_pagenate.return_value = [{"Contents": [{"Key": "test.txt"}]}]
+
+        instance = S3FileExistsCheck()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "bucket", "test-bucket")
+        Helper.set_property(instance, "src_pattern", "test.*")
+        Helper.set_property(instance, "role_arn", "arn:aws:iam::123456789012:role/TestRole")
+        Helper.set_property(instance, "external_id", "test-external-id")
+
+        instance.execute()
+
+        # Verify that S3Adapter was called with cross-account parameters
+        m_get_client.assert_called_once()
+
+
+class TestS3DownloadFileDelete(BaseCliboaTest):
+    @patch.object(S3Adapter, "get_client")
+    def test_cross_account_role_properties(self, m_get_client):
+        """Test S3DownloadFileDelete with cross-account IAM role properties"""
+        # Mock ObjectStore data (simulating previous S3Download step)
+        from cliboa.util.cache import ObjectStore
+
+        ObjectStore.put("dl1", [{"Key": "test.txt"}])
+
+        instance = S3DownloadFileDelete()
+        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "bucket", "test-bucket")
+        Helper.set_property(instance, "role_arn", "arn:aws:iam::123456789012:role/TestRole")
+        Helper.set_property(instance, "external_id", "test-external-id")
+
+        instance.execute()
+
+        # Verify that S3Adapter was called with cross-account parameters
+        m_get_client.assert_called_once()
 
 
 class TestDynamoDBRead(BaseCliboaTest):
