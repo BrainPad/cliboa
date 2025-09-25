@@ -30,14 +30,16 @@ class S3Adapter(object):
         external_id: str = None,
     ):
 
-        if (access_key and secret_key) and profile:
-            raise InvalidParameter(
-                "Either access_key and secret_key or profile path can be specified."
-            )
+        # Validate credential combinations
+        # 1) access_key and secret_key must be specified together
+        if (access_key is None) ^ (secret_key is None):
+            raise InvalidParameter("access_key and secret_key must be specified together.")
 
-        if role_arn and (access_key or secret_key or profile):
+        # 2) Allow at most one of {profile, access_key/secret_key, role_arn}
+        auth_methods = [bool(profile), bool(access_key and secret_key), bool(role_arn)]
+        if sum(auth_methods) != 1:
             raise InvalidParameter(
-                "role_arn cannot be specified with access_key/secret_key or profile."
+                "Specify only one of profile, access_key/secret_key, or role_arn."
             )
 
         self._access_key = access_key
@@ -84,19 +86,7 @@ class S3Adapter(object):
         """
         Get S3 client using cross-account IAM role
         """
-        sts_client = boto3.client("sts")
-
-        assume_role_kwargs = {"RoleArn": self._role_arn, "RoleSessionName": "cliboa-session"}
-
-        if self._external_id:
-            assume_role_kwargs["ExternalId"] = self._external_id
-
-        try:
-            response = sts_client.assume_role(**assume_role_kwargs)
-        except Exception as e:
-            raise InvalidParameter(f"Failed to assume role {self._role_arn}: {str(e)}")
-
-        credentials = response["Credentials"]
+        credentials = self._assume_role_credentials()
 
         return boto3.client(
             "s3",
@@ -109,6 +99,18 @@ class S3Adapter(object):
         """
         Get S3 resource using cross-account IAM role
         """
+        credentials = self._assume_role_credentials()
+
+        session = Session(
+            aws_access_key_id=credentials["AccessKeyId"],
+            aws_secret_access_key=credentials["SecretAccessKey"],
+            aws_session_token=credentials["SessionToken"],
+        )
+
+        return session.resource("s3")
+
+    def _assume_role_credentials(self):
+        """Assume the configured role and return temporary credentials dict."""
         sts_client = boto3.client("sts")
 
         assume_role_kwargs = {"RoleArn": self._role_arn, "RoleSessionName": "cliboa-session"}
@@ -121,12 +123,4 @@ class S3Adapter(object):
         except Exception as e:
             raise InvalidParameter(f"Failed to assume role {self._role_arn}: {str(e)}")
 
-        credentials = response["Credentials"]
-
-        session = Session(
-            aws_access_key_id=credentials["AccessKeyId"],
-            aws_secret_access_key=credentials["SecretAccessKey"],
-            aws_session_token=credentials["SessionToken"],
-        )
-
-        return session.resource("s3")
+        return response["Credentials"]
