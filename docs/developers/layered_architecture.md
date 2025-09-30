@@ -7,14 +7,14 @@ Cliboa uses a layered architecture.
 Roles of each layers is below:
 
 1. interface
-  * The interface to use cliboa application easily.
+    * The interface to use cliboa application easily.
 2. core
-  * Main logic of cliboa.
+    * Main logic of cliboa.
 3. scenario
-  * Classes of ETL steps.
+    * Classes of ETL steps.
 4. adapter
-  * Adapter classes and functions for external communication.
+    * Adapter classes and functions for external communication.
 5. util
-  * Reusable helper, or foundational, classes and functions - they are not involved in external communication.
+    * Reusable helper, or foundational, classes and functions - they are not involved in external communication.
 6. conf
-  * Load environment variables.
+    * Load environment variables.
