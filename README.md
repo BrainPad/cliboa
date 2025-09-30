@@ -32,7 +32,7 @@ cliboa is an application framework which can implement ETL(ELT) pipeline. It eas
   * [YAML Configuration](/docs/yaml_configuration.md)
   * [Default ETL Modules](/docs/default_etl_modules.md)
 * [How to Contribute](/CONTRIBUTING.md)
-  * [Coding Style Guide](/docs/developers/coding_style_guide.md)]
-  * [Layered Architecture](/docs/developers/layered_architecture.md)]
+  * [Coding Style Guide](/docs/developers/coding_style_guide.md)
+  * [Layered Architecture](/docs/developers/layered_architecture.md)
   * [How to Implement Additional ETL Modules](/docs/additional_etl_modules.md)
     * [Step Class Extention](/docs/developers/step_class_extention.md)
