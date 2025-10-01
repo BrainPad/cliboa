@@ -22,8 +22,8 @@ import yaml
 from cliboa.conf import env
 from cliboa.core.file_parser import JsonScenarioParser, YamlScenarioParser
 from cliboa.interface import CommandArgumentParser
-from tests import BaseCliboaTest
 from cliboa.util.exception import ScenarioFileInvalid
+from tests import BaseCliboaTest
 
 
 class TestYamlScenarioParser(BaseCliboaTest):

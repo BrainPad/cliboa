@@ -20,9 +20,9 @@ from requests.exceptions import HTTPError
 
 from cliboa.conf import env
 from cliboa.scenario.extract.http import HttpDownload, HttpDownloadViaBasicAuth, HttpGet
-from tests import BaseCliboaTest
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
+from tests import BaseCliboaTest
 
 
 class TestHttpDownload(object):

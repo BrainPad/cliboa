@@ -20,8 +20,8 @@ from cliboa.core.factory import CustomInstanceFactory, ScenarioManagerFactory, S
 from cliboa.core.manager import JsonScenarioManager, YamlScenarioManager
 from cliboa.core.strategy import MultiProcExecutor, MultiProcWithConfigExecutor, SingleProcExecutor
 from cliboa.interface import CommandArgumentParser
-from tests import BaseCliboaTest
 from cliboa.util.parallel_with_config import ParallelWithConfig
+from tests import BaseCliboaTest
 
 
 class TestFactory(BaseCliboaTest):
