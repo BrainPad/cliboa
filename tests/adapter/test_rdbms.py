@@ -2,7 +2,7 @@ from contextlib import ExitStack
 from unittest.mock import MagicMock, Mock, patch
 
 from cliboa.adapter.mysql import MysqlAdaptor
-from cliboa.test import BaseCliboaTest
+from tests import BaseCliboaTest
 
 
 class TestRdbms(BaseCliboaTest):

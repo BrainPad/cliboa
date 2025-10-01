@@ -15,7 +15,7 @@ from unittest.mock import patch
 import boto3
 
 from cliboa.adapter.aws import S3Adapter
-from cliboa.test import BaseCliboaTest
+from tests import BaseCliboaTest
 from cliboa.util.exception import InvalidParameter
 
 

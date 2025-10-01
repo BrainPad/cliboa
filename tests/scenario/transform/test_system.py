@@ -18,7 +18,7 @@ from glob import glob
 
 from cliboa.conf import env
 from cliboa.scenario.transform.system import ExecuteShellScript
-from cliboa.test import BaseCliboaTest
+from tests import BaseCliboaTest
 from cliboa.util.helper import Helper
 
 

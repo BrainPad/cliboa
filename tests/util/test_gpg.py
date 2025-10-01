@@ -18,7 +18,7 @@ import sys
 import pytest
 
 from cliboa.conf import env
-from cliboa.test import BaseCliboaTest
+from tests import BaseCliboaTest
 from cliboa.util.exception import CliboaException
 from cliboa.util.gpg import Gpg
 

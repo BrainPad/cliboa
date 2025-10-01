@@ -21,7 +21,7 @@ import pytest
 
 from cliboa.conf import env
 from cliboa.scenario.transform.json import JsonlAddKeyValue, JsonlToCsv, JsonlToCsvBase
-from cliboa.test import BaseCliboaTest
+from tests import BaseCliboaTest
 from cliboa.util.exception import InvalidParameter
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
