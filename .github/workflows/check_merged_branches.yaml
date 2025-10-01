@@ -20,12 +20,29 @@ jobs:
           # Find all remote branches merged into master, excluding master itself.
           MERGED_BRANCHES=$(git branch -r --merged origin/master | grep -v 'master' | sed 's/ *origin\///' | tr -d '\n')
 
+          BRANCHES_TO_DELETE=""
+          for branch in ${MERGED_BRANCHES}; do
+            if [[ ${branch} =~ ^v[0-9]+\.[0-9]+$ ]]; then
+              if [[ -n "$(git tag -l "${branch}*")" ]]; then
+                echo "❌ Branch '${branch}' is a released version branch. It should be deleted."
+                BRANCHES_TO_DELETE="${BRANCHES_TO_DELETE} ${branch}"
+              else
+                echo "✅ Branch '${branch}' is a future version branch."
+              fi
+            else
+              echo "❌ Branch '${branch}' is a regular merged branch. It should be deleted."
+              BRANCHES_TO_DELETE="${BRANCHES_TO_DELETE} ${branch}"
+            fi
+          done
+
+          BRANCHES_TO_DELETE=$(echo "${BRANCHES_TO_DELETE}" | xargs)
+
           # Check if the list of merged branches is not empty.
-          if [[ -n "${MERGED_BRANCHES// /}" ]]; then
+          if [[ -n "${BRANCHES_TO_DELETE}" ]]; then
             echo "::error::The following remote branches have been merged into master but not deleted:"
-            echo "${MERGED_BRANCHES}"
+            echo "${BRANCHES_TO_DELETE}"
             echo "status=fail" >> $GITHUB_OUTPUT
-            echo "merged_branches=${MERGED_BRANCHES}" >> $GITHUB_OUTPUT
+            echo "merged_branches=${BRANCHES_TO_DELETE}" >> $GITHUB_OUTPUT
           else
             echo "No merged remote branches found. Great job! 👏"
             echo "status=success" >> $GITHUB_OUTPUT
@@ -34,5 +51,5 @@ jobs:
       - name: Fail the CI if merged branches exist
         if: steps.find_branches.outputs.status == 'fail'
         run: |
-          echo "Failing the CI check."
+          echo "Failing the CI check because deletable merged branches were found."
           exit 1
