@@ -36,10 +36,10 @@ from cliboa.scenario.transform.file import (
     FileDivide,
     FileRename,
 )
-from cliboa.test import BaseCliboaTest
 from cliboa.util.exception import CliboaException, FileNotFound, InvalidParameter
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
+from tests import BaseCliboaTest
 
 
 class TestFileTransform(BaseCliboaTest):

@@ -16,10 +16,10 @@ import shutil
 
 from cliboa.conf import env
 from cliboa.scenario.transform.gpg import GpgDecrypt, GpgEncrypt
-from cliboa.test import BaseCliboaTest
 from cliboa.util.gpg import Gpg
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
+from tests import BaseCliboaTest
 
 
 class TestGpg(BaseCliboaTest):

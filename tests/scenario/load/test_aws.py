@@ -21,10 +21,10 @@ from botocore.exceptions import ClientError
 
 from cliboa.adapter.aws import S3Adapter
 from cliboa.scenario.load.aws import DynamoDBWrite, S3Upload
-from cliboa.test import BaseCliboaTest
 from cliboa.util.exception import FileNotFound, InvalidFormat, InvalidParameter
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
+from tests import BaseCliboaTest
 
 
 class TestDynamoDBWrite(BaseCliboaTest):

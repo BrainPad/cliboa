@@ -21,8 +21,8 @@ import yaml
 
 from cliboa.conf import env
 from cliboa.interface import CommandArgumentParser, ScenarioRunner
-from cliboa.test import BaseCliboaTest
 from cliboa.util.exception import FileNotFound
+from tests import BaseCliboaTest
 
 
 class TestCommandArgumentParser(BaseCliboaTest):

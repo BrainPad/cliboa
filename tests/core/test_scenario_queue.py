@@ -12,7 +12,7 @@
 
 from cliboa.core.scenario_queue import ScenarioQueue
 from cliboa.core.step_queue import StepQueue
-from cliboa.test import BaseCliboaTest
+from tests import BaseCliboaTest
 
 
 class TestScenarioQueue(BaseCliboaTest):

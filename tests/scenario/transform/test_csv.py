@@ -41,10 +41,10 @@ from cliboa.scenario.transform.csv import (
     CsvTypeConvert,
     CsvValueExtract,
 )
-from cliboa.test import BaseCliboaTest
 from cliboa.util.exception import InvalidParameter
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
+from tests import BaseCliboaTest
 
 
 class TestCsvTransform(BaseCliboaTest):

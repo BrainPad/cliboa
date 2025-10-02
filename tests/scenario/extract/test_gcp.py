@@ -16,9 +16,9 @@ from mock import call, patch
 
 from cliboa.adapter.gcp import BigQueryAdapter, GcsAdapter
 from cliboa.scenario.extract.gcp import BigQueryRead, GcsFileExistsCheck
-from cliboa.test import BaseCliboaTest
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
+from tests import BaseCliboaTest
 
 
 class TestBigQueryRead(BaseCliboaTest):

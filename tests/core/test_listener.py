@@ -25,11 +25,11 @@ from cliboa.core.strategy import SingleProcExecutor, StepExecutor
 from cliboa.core.worker import ScenarioWorker
 from cliboa.interface import CommandArgumentParser
 from cliboa.scenario.sample_step import SampleCustomStep
-from cliboa.test import BaseCliboaTest
 from cliboa.util.constant import StepStatus
 from cliboa.util.exception import CliboaException
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
+from tests import BaseCliboaTest
 
 
 class TestScenarioStatusListener(BaseCliboaTest):

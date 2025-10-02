@@ -18,12 +18,12 @@ from cliboa.core.step_queue import StepQueue
 from cliboa.core.strategy import MultiProcExecutor, MultiProcWithConfigExecutor, SingleProcExecutor
 from cliboa.interface import CommandArgumentParser
 from cliboa.scenario.sample_step import SampleStep
-from cliboa.test import BaseCliboaTest
 from cliboa.util.constant import StepStatus
 from cliboa.util.exception import CliboaException
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
 from cliboa.util.parallel_with_config import ParallelWithConfig
+from tests import BaseCliboaTest
 
 
 class TestStrategy(BaseCliboaTest):
