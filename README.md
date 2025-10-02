@@ -13,19 +13,7 @@ black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-squ
 * [Introduction](#introduction)
   * [What is cliboa](#what-is-cliboa)
   * [Features](#features)
-* [Manual](#manual)
-* [How to Contribute](#how-to-contribute)
-* [Quick Start](#quick-start)
-  * [Install cliboa](#install-cliboa)
-  * [Configuration of a Simple ETL Processing](#configuration-of-a-simple-etl-processing)
-  * [Directory Tree](#directory-tree)
-  * [Install PyPI packages](#install-pypi-packages)
-  * [Write a Scenario of ETL Processing](#write-a-scenario-of-etl-processing)
-  * [Set an environment](#set-an-environment)
-  * [Execute a scenario of ETL Processing](#execute-a-scenario-of-etl-processing)
-* [YAML Configuration](#yaml-configuration)
-* [Default ETL Modules](#default-etl-modules)
-* [How to Implement Additional ETL Modules](#how-to-implement-additional-etl-modules)
+* [Documentation](#documentation)
 
 # Introduction
 ## What is cliboa
@@ -37,89 +25,14 @@ cliboa is an application framework which can implement ETL(ELT) pipeline. It eas
 - ETL(ELT) processing is executable by YAML based configuration.
 - Additional modules for ETL(ELT) pipeline can be implemented by only a few steps if default modules not enough.
 
-# Manual
-See [MANUAL.md](/MANUAL.md)
+# Documentation
 
-# How to Contribute
-See [CONTRIBUTING.md](/CONTRIBUTING.md)
-
-
-# Quick Start
-## Requirements
-Available on macOS and any Linux distributions, like Debian, Ubuntu, CentOS, REL, or etc.
-
-## Install cliboa
-Python version 3.10 or later and poetry are required. In the environment which pip can be used, execute as below.
-
-```
-sudo pip3 install poetry
-sudo pip3 install cliboa
-```
-
-## Configuration of a Simple ETL Processing
-After installed cliboa, 'cliboadmin' can be used as an administrator command. 
-
-Create an executable environment of cliboa by using cliboadmin.
-
-```
-$ cd /usr/local
-$ sudo cliboadmin init sample
-$ cd sample
-$ sudo cliboadmin create simple-etl
-```
-
-## Directory Tree
-Directory tree which was created aforementioned commands is as below.
-
-```
-sample
-├── pyproject.toml
-├── bin
-│   └── clibomanager.py
-├── cliboa
-│   └── conf
-├── common
-│   ├── __init__.py
-│   ├── environment.py
-│   └── scenario
-├── conf
-│   ├── cliboa.ini
-│   └── logging.conf
-├── logs
-├── project
-│   └── simple-etl
-│       ├── scenario
-│       └── scenario.yml
-```
-
-## Install PyPI packages
-```
-$ cd sample
-$ poetry install
-```
-
-## Write a Scenario of ETL Processing
-As a simple ETL processing, write scenario.yml in simple-etl as below.
-
-The following example is just download a gzip file from the local sftp server, decompress it, and upload it to the local sftp server.
-
-See [Examples](docs/yaml_configuration.md#examples)
-
-## Set an Environment
-To make the above scenario available, set a local machine as a sftp server according to respective environments. Also, put "test.csv.gz" under /usr/local.
-
-## Execute a Scenario of ETL Processing
-After wrote scenario.yml and set the environment, execute a scenario by as below command.
-```
-cd sample
-poetry run python3 bin/clibomanager.py simple-etl
-```
-
-# YAML Configuration
-see [yaml_configuration.md](/docs/yaml_configuration.md)
-
-# Default ETL Modules
-see [default_etl_modules.md](/docs/default_etl_modules.md)
-
-# How to Implement Additional ETL Modules
-see [additional_etl_modules.md](/docs/additional_etl_modules.md)
+* [QuickStart](/docs/quick_start.md)
+* [MANUAL](/docs/manual.md)
+  * [YAML Configuration](/docs/yaml_configuration.md)
+  * [Default ETL Modules](/docs/default_etl_modules.md)
+* [How to Contribute](/CONTRIBUTING.md)
+  * [Coding Style Guide](/docs/developers/coding_style_guide.md)
+  * [Layered Architecture](/docs/developers/layered_architecture.md)
+  * [How to Implement Additional ETL Modules](/docs/additional_etl_modules.md)
+    * [Step Class Extention](/docs/developers/step_class_extention.md)
