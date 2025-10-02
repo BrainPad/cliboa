@@ -31,4 +31,3 @@ dist/
 logs/
 Pipfile
 Pipfile.lock
-poetry.lock
