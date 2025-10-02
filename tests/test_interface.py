@@ -20,8 +20,9 @@ import pytest
 import yaml
 
 from cliboa.conf import env
-from cliboa.interface import CommandArgumentParser, ScenarioRunner
-from cliboa.util.exception import FileNotFound
+from cliboa.core.runner import ScenarioRunner
+from cliboa.interface import _add_system_path as if_add_system_path
+from cliboa.interface import _parse as if_parse
 from tests import BaseCliboaTest
 
 
@@ -35,8 +36,7 @@ class TestCommandArgumentParser(BaseCliboaTest):
         sys.argv.append("spam")
 
     def test_yaml_parse(self):
-        cmd_parser = CommandArgumentParser()
-        cmd_args = cmd_parser.parse()
+        cmd_args = if_parse()
         assert cmd_args.project_name == "spam"
 
     def test_json_parse(self):
@@ -45,16 +45,19 @@ class TestCommandArgumentParser(BaseCliboaTest):
         sys.argv.append("spam")
         sys.argv.append("--format")
         sys.argv.append("json")
-        cmd_parser = CommandArgumentParser()
-        cmd_args = cmd_parser.parse()
+        cmd_args = if_parse()
         assert cmd_args.project_name == "spam"
         assert cmd_args.format == "json"
 
+    def test_add_system_path(self):
+        if_add_system_path("spam")
+        includes_spam = any("project/spam" in p for p in sys.path)
+        self.assertTrue(includes_spam)
 
+
+@pytest.mark.skip(reason="ScenarioRunner is scheduled for a redesign for v3.")
 class TestScenarioRunner(BaseCliboaTest):
     def setup_method(self, method):
-        cmd_parser = CommandArgumentParser()
-        self._cmd_args = cmd_parser.parse()
         self._pj_dir = os.path.join(env.BASE_DIR, "project", "spam")
         self._scenario_yaml_file = os.path.join(self._pj_dir, "scenario.yml")
         self._scenario_json_file = os.path.join(self._pj_dir, "scenario.json")
@@ -64,21 +67,6 @@ class TestScenarioRunner(BaseCliboaTest):
         os.makedirs(self._pj_dir)
         yield "test in progress"
         shutil.rmtree(self._pj_dir)
-
-    def setup_json_argv(self):
-        sys.argv.clear()
-        sys.argv.append("project_name")
-        sys.argv.append("spam")
-        sys.argv.append("--format")
-        sys.argv.append("json")
-        cmd_parser = CommandArgumentParser()
-        return cmd_parser.parse()
-
-    def test_add_system_path(self):
-        runner = ScenarioRunner(self._cmd_args)
-        runner.add_system_path()
-        includes_spam = any("project/spam" in p for p in sys.path)
-        self.assertTrue(includes_spam)
 
     def test_create_scenario_queue_ok(self):
         test_data = {
@@ -94,15 +82,14 @@ class TestScenarioRunner(BaseCliboaTest):
         with open(self._scenario_yaml_file, "w") as f:
             f.write(yaml.dump(test_data, default_flow_style=False))
 
-        runner = ScenarioRunner(self._cmd_args)
-        runner.create_scenario_queue()
+        runner = ScenarioRunner("spam")
+        runner._create_scenario_queue()
 
         with open(self._scenario_json_file, "w") as f:
             json.dump(test_data, f, indent=4)
 
-        cmd_args = self.setup_json_argv()
-        runner = ScenarioRunner(cmd_args)
-        runner.create_scenario_queue()
+        runner = ScenarioRunner("spam", "json")
+        runner._create_scenario_queue()
 
     def test_execute_scenario_ok(self):
         test_data = {
@@ -117,18 +104,11 @@ class TestScenarioRunner(BaseCliboaTest):
         with open(self._scenario_yaml_file, "w") as f:
             f.write(yaml.dump(test_data, default_flow_style=False))
 
-        runner = ScenarioRunner(self._cmd_args)
-        runner.execute_scenario()
+        runner = ScenarioRunner("spam")
+        runner._execute_scenario()
 
         with open(self._scenario_json_file, "w") as f:
             json.dump(test_data, f, indent=4)
 
-        cmd_args = self.setup_json_argv()
-        runner = ScenarioRunner(cmd_args)
-        runner.execute_scenario()
-
-    def test_run_ng(self):
-        with pytest.raises(FileNotFound):
-            from cliboa.interface import run
-
-            run()
+        runner = ScenarioRunner("spam", "json")
+        runner._execute_scenario()

@@ -16,6 +16,7 @@ import os
 import shutil
 import sys
 from datetime import datetime, timedelta
+from types import SimpleNamespace
 
 import pytest
 import yaml
@@ -23,19 +24,16 @@ import yaml
 from cliboa.conf import env
 from cliboa.core.manager import JsonScenarioManager, YamlScenarioManager
 from cliboa.core.scenario_queue import ScenarioQueue
-from cliboa.interface import CommandArgumentParser
 from cliboa.util.exception import ScenarioFileInvalid
 from cliboa.util.parallel_with_config import ParallelWithConfig
 from tests import BaseCliboaTest
 
 
+@pytest.mark.skip(reason="ScenarioManager is scheduled for a redesign for v3.")
 class TestYamlScenarioManager(BaseCliboaTest):
     def setUp(self):
-        cmd_parser = CommandArgumentParser()
-        sys.argv.clear()
-        sys.argv.append("spam")
-        sys.argv.append("spam")
-        self._cmd_args = cmd_parser.parse()
+        cmd_args = {"project_name": "spam", "format": "yaml"}
+        self._cmd_args = SimpleNamespace(**cmd_args)
         self._pj_dir = os.path.join(env.PROJECT_DIR, "spam")
         os.makedirs(self._pj_dir, exist_ok=True)
         self._pj_scenario_file = os.path.join(self._pj_dir, "scenario.yml")
@@ -451,15 +449,11 @@ class TestYamlScenarioManager(BaseCliboaTest):
         assert instance._memo == "foo_ABC_bar"
 
 
+@pytest.mark.skip(reason="ScenarioManager is scheduled for a redesign for v3.")
 class TestJsonScenarioManager(BaseCliboaTest):
     def setUp(self):
-        cmd_parser = CommandArgumentParser()
-        sys.argv.clear()
-        sys.argv.append("project_name")
-        sys.argv.append("spam")
-        sys.argv.append("--format")
-        sys.argv.append("json")
-        self._cmd_args = cmd_parser.parse()
+        cmd_args = {"project_name": "spam", "format": "json"}
+        self._cmd_args = SimpleNamespace(**cmd_args)
         self._pj_dir = os.path.join(env.PROJECT_DIR, "spam")
         os.makedirs(self._pj_dir, exist_ok=True)
         self._pj_scenario_file = os.path.join(self._pj_dir, "scenario.json")

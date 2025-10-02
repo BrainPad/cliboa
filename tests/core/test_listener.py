@@ -15,6 +15,7 @@ import os
 import sys
 import unittest
 from contextlib import ExitStack
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from cliboa.conf import env
@@ -23,7 +24,6 @@ from cliboa.core.scenario_queue import ScenarioQueue
 from cliboa.core.step_queue import StepQueue
 from cliboa.core.strategy import SingleProcExecutor, StepExecutor
 from cliboa.core.worker import ScenarioWorker
-from cliboa.interface import CommandArgumentParser
 from cliboa.scenario.sample_step import SampleCustomStep
 from cliboa.util.constant import StepStatus
 from cliboa.util.exception import CliboaException
@@ -34,13 +34,10 @@ from tests import BaseCliboaTest
 
 class TestScenarioStatusListener(BaseCliboaTest):
     def setup_method(self, method):
-        cmd_parser = CommandArgumentParser()
-        sys.argv.clear()
-        sys.argv.append("spam")
-        sys.argv.append("spam")
         setattr(ScenarioQueue, "step_queue", StepQueue())
         self._listener = ScenarioStatusListener()
-        self._worker = ScenarioWorker(cmd_parser.parse())
+        cmd_args = {"project_name": "spam", "format": "yaml"}
+        self._worker = ScenarioWorker(SimpleNamespace(**cmd_args))
         self._log_file = os.path.join(env.BASE_DIR, "logs", "app.log")
 
     def test_after_scenario(self):
@@ -62,10 +59,6 @@ class TestScenarioStatusListener(BaseCliboaTest):
 
 class TestStepStatusListener(object):
     def setup_method(self, method):
-        CommandArgumentParser()
-        sys.argv.clear()
-        sys.argv.append("spam")
-        sys.argv.append("spam")
         self._listener = StepStatusListener()
         self._executor = StepExecutor(["1"])
         self._log_file = os.path.join(env.BASE_DIR, "logs", "app.log")
