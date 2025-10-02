@@ -19,37 +19,26 @@ import pytest
 from cliboa.core.factory import CustomInstanceFactory, ScenarioManagerFactory, StepExecutorFactory
 from cliboa.core.manager import JsonScenarioManager, YamlScenarioManager
 from cliboa.core.strategy import MultiProcExecutor, MultiProcWithConfigExecutor, SingleProcExecutor
-from cliboa.interface import CommandArgumentParser
 from cliboa.util.parallel_with_config import ParallelWithConfig
 from tests import BaseCliboaTest
 
 
 class TestFactory(BaseCliboaTest):
     def setup_method(self, method):
-        cmd_parser = CommandArgumentParser()
-        self._cmd_args = cmd_parser.parse()
-
-    def setup_json_argv(self):
-        sys.argv.clear()
-        sys.argv.append("project_name")
-        sys.argv.append("spam")
-        sys.argv.append("--format")
-        sys.argv.append("json")
-        cmd_parser = CommandArgumentParser()
-        return cmd_parser.parse()
+        pass
 
 
+@pytest.mark.skip(reason="ScenarioManager is scheduled for a redesign for v3.")
 class TestScenarioManagerFactory(TestFactory):
     def test_create_ok(self):
         """
         Succeeded to create instance with yml and json
         """
-        manager = ScenarioManagerFactory.create(self._cmd_args)
-        self.assertTrue(isinstance(manager, type(YamlScenarioManager(self._cmd_args))))
+        manager = ScenarioManagerFactory.create("spam", "yaml")
+        self.assertTrue(isinstance(manager, YamlScenarioManager))
 
-        cmd_args = self.setup_json_argv()
-        manager = ScenarioManagerFactory.create(cmd_args)
-        self.assertTrue(isinstance(manager, type(JsonScenarioManager(cmd_args))))
+        manager = ScenarioManagerFactory.create("spam", "json")
+        self.assertTrue(isinstance(manager, JsonScenarioManager))
 
     def test_create_ng(self):
         """

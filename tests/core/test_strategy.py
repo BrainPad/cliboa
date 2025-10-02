@@ -12,11 +12,11 @@
 # all copies or substantial portions of the Software.
 #
 import sys
+from types import SimpleNamespace
 
 from cliboa.core.scenario_queue import ScenarioQueue
 from cliboa.core.step_queue import StepQueue
 from cliboa.core.strategy import MultiProcExecutor, MultiProcWithConfigExecutor, SingleProcExecutor
-from cliboa.interface import CommandArgumentParser
 from cliboa.scenario.sample_step import SampleStep
 from cliboa.util.constant import StepStatus
 from cliboa.util.exception import CliboaException
@@ -34,11 +34,8 @@ class TestStrategy(BaseCliboaTest):
     MULTI_PROC_SUPPORT_VER = 35
 
     def setup_method(self, method):
-        cmd_parser = CommandArgumentParser()
-        sys.argv.clear()
-        sys.argv.append("spam")
-        sys.argv.append("spam")
-        self._cmd_args = cmd_parser.parse()
+        cmd_args = {"project_name": "spam", "format": "yaml"}
+        self._cmd_args = SimpleNamespace(**cmd_args)
 
     def test_single_process_executor_ok(self):
         """

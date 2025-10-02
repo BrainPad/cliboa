@@ -12,22 +12,11 @@
 # all copies or substantial portions of the Software.
 #
 import logging
-import os
-import sys
 
-from cliboa.conf import env
-from cliboa.interface import CommandArgumentParser
 from cliboa.util.lisboa_log import LisboaLog
 
 
 class TestLisboaLog(object):
-    def setup_method(self, method):
-        CommandArgumentParser()
-        sys.argv.clear()
-        sys.argv.append("hoge")
-        sys.argv.append("hoge")
-        self._log_file = os.path.join(env.BASE_DIR, "logs", "app.log")
-
     def test_get_logger(self):
         logger = LisboaLog().get_logger(__name__)
         assert isinstance(logger, logging.Logger)

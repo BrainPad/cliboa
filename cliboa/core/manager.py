@@ -41,27 +41,23 @@ class ScenarioManager(object):
     Note : Currently only yaml format scenario file is implemented.
     """
 
-    def __init__(self, cmd_args):
+    def __init__(self, project_name: str, scenario_format: str):
         self._logger = LisboaLog.get_logger(__name__)
-        self._cmd_args = cmd_args
-        self._pj_dir = os.path.join(env.PROJECT_DIR, cmd_args.project_name)
-        self._pj_scenario_dir = os.path.join(
-            env.PROJECT_DIR, cmd_args.project_name, env.SCENARIO_DIR_NAME
-        )
-        if cmd_args.format == "yaml":
+        self._pj_dir = os.path.join(env.PROJECT_DIR, project_name)
+        self._pj_scenario_dir = os.path.join(env.PROJECT_DIR, project_name, env.SCENARIO_DIR_NAME)
+        if scenario_format == "yaml":
             self._pj_scenario_file = (
-                os.path.join(env.PROJECT_DIR, cmd_args.project_name, env.SCENARIO_FILE_NAME)
-                + ".yml"
+                os.path.join(env.PROJECT_DIR, project_name, env.SCENARIO_FILE_NAME) + ".yml"
             )
             self._cmn_scenario_file = os.path.join(env.COMMON_DIR, env.SCENARIO_FILE_NAME) + ".yml"
         else:
             self._pj_scenario_file = (
-                os.path.join(env.PROJECT_DIR, cmd_args.project_name, env.SCENARIO_FILE_NAME)
+                os.path.join(env.PROJECT_DIR, project_name, env.SCENARIO_FILE_NAME)
                 + "."
-                + cmd_args.format
+                + scenario_format
             )
             self._cmn_scenario_file = (
-                os.path.join(env.COMMON_DIR, env.SCENARIO_FILE_NAME) + "." + cmd_args.format
+                os.path.join(env.COMMON_DIR, env.SCENARIO_FILE_NAME) + "." + scenario_format
             )
         self._replace_vars_pattern = re.compile(r"{{(.*?)}}")
 

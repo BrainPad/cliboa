@@ -11,21 +11,17 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import sys
+from types import SimpleNamespace
 
 from cliboa.core.scenario_queue import ScenarioQueue
 from cliboa.core.worker import ScenarioWorker
-from cliboa.interface import CommandArgumentParser
 from cliboa.scenario.sample_step import SampleStep
 
 
 class TestWorker(object):
     def setup_method(self, method):
-        cmd_parser = CommandArgumentParser()
-        sys.argv.clear()
-        sys.argv.append("spam")
-        sys.argv.append("spam")
-        self._cmd_args = cmd_parser.parse()
+        cmd_args = {"project_name": "spam", "format": "yaml"}
+        self._cmd_args = SimpleNamespace(**cmd_args)
 
     def test_execute_scenario_ok(self):
         """

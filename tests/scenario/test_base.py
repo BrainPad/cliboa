@@ -14,12 +14,11 @@
 import json
 import os
 import shutil
-import sys
+from types import SimpleNamespace
 from unittest import TestCase
 from unittest.mock import MagicMock
 
 from cliboa.conf import env
-from cliboa.interface import CommandArgumentParser, ScenarioRunner
 from cliboa.scenario.sample_step import SampleCustomStep
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
@@ -27,15 +26,10 @@ from cliboa.util.lisboa_log import LisboaLog
 
 class TestBase(TestCase):
     def setup_method(self, method):
-        sys.argv.clear()
-        sys.argv.append("spam")
-        sys.argv.append("spam")
-        cmd_parser = CommandArgumentParser()
-        self._cmd_args = cmd_parser.parse()
+        cmd_args = {"project_name": "spam", "format": "yaml"}
+        self._cmd_args = SimpleNamespace(**cmd_args)
         self._log_file = os.path.join(env.BASE_DIR, "logs", "app.log")
         self._data_dir = os.path.join(env.BASE_DIR, "data")
-        runner = ScenarioRunner(self._cmd_args)
-        runner.add_system_path()
 
     def test_logging_properties(self):
         """
