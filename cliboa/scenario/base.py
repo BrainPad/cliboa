@@ -26,12 +26,13 @@ from cliboa.util.constant import StepStatus
 from cliboa.util.exception import FileNotFound, InvalidParameter
 
 
-class BaseStep(object):
+class BaseStep:
     """
     Base class of all the step classes
     """
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._step = None
         self._symbol = None
         self._parallel = None
