@@ -71,15 +71,6 @@ class BaseSftp(BaseStep):
 
     def get_adaptor(self):
         if isinstance(self._key, str):
-            self._logger.warning(
-                (
-                    "DeprecationWarning: "
-                    "In the near future, "
-                    "the `key` will be changed to accept only dictionary types. "
-                    "Please see more information "
-                    "https://github.com/BrainPad/cliboa/blob/master/docs/modules/sftp_download.md"
-                )
-            )
             key_filepath = self._key
         else:
             key_filepath = self._source_path_reader(self._key)

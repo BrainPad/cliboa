@@ -123,9 +123,10 @@ class BaseStep:
     def _property_path_reader(self, src, encoding="utf-8"):
         """
         Returns an resource contents from the path if src starts with "path:",
+
+        DeprecationWarning: Will be removed in the near future
         returns src if not
         """
-        self._logger.warning("DeprecationWarning: Will be removed in the near future")
         if src[:5].upper() == "PATH:":
             fpath = src[5:]
             if os.path.exists(fpath) is False:
