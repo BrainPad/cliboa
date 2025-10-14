@@ -1,19 +1,14 @@
-import logging
+"""
+Deprecated
+TODO: remove this module until v3.0 stable release
+"""
+
+from cliboa.util.base import _warn_deprecated
+from cliboa.util.log import _get_logger
 
 
 class LisboaLog(object):
-    """
-    Logger class for lisboa
-    """
-
     @staticmethod
     def get_logger(modname):
-        """
-        Get logger
-
-        Args:
-            modname (str): module name
-        Returns:
-            logger instance
-        """
-        return logging.getLogger(modname)
+        _warn_deprecated("cliboa.util.lisboa_log.LisboaLog")
+        return _get_logger(modname)

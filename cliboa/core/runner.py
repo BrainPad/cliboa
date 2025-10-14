@@ -7,11 +7,11 @@ from cliboa.conf import env
 from cliboa.core.factory import ScenarioManagerFactory
 from cliboa.core.listener import ScenarioStatusListener
 from cliboa.core.worker import ScenarioWorker
-from cliboa.util.lisboa_log import LisboaLog
-from cliboa.util.log_record import CliboaLogRecord
+from cliboa.util.base import _BaseObject
+from cliboa.util.log import CliboaLogRecord
 
 
-class ScenarioRunner(object):
+class ScenarioRunner(_BaseObject):
     """
     Scenario Runner
     """
@@ -23,7 +23,10 @@ class ScenarioRunner(object):
         execute_method_argument: List[str] = [],
         load_logging_conf: bool = True,
         set_cliboa_log: bool = True,
+        *args,
+        **kwargs,
     ):
+        super().__init__(*args, **kwargs)
         """
         Initialize and prepare cliboa execution environment.
         """
@@ -34,7 +37,6 @@ class ScenarioRunner(object):
             )
         if set_cliboa_log:
             logging.setLogRecordFactory(CliboaLogRecord)
-        self._logger = LisboaLog.get_logger(__name__)
 
         # params
         self._project_name = project_name

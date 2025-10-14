@@ -5,6 +5,19 @@ from typing import List
 
 from cliboa import state
 
+
+def _get_logger(modname: str):
+    """
+    Get logger
+
+    Args:
+        modname (str): module name
+    Returns:
+        logger instance
+    """
+    return logging.getLogger(modname)
+
+
 _sys_uniq_path = []
 _last_sys_path_count = -1
 
