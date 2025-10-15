@@ -19,7 +19,7 @@ import pytest
 from cliboa.adapter.sqlite import SqliteAdapter
 from cliboa.scenario.extract.sqlite import SqliteExport
 from cliboa.util.helper import Helper
-from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.log import _get_logger
 
 
 class TestSqliteExport(object):
@@ -121,7 +121,7 @@ class TestSqliteExport(object):
 
     def _create_instance(self):
         instance = SqliteExport()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "dbname", self._DB_NAME)
         Helper.set_property(instance, "dest_path", self._RESULT_FILE)
         Helper.set_property(instance, "tblname", self._TBL_NAME)

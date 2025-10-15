@@ -43,7 +43,7 @@ from cliboa.scenario.transform.csv import (
 )
 from cliboa.util.exception import InvalidParameter
 from cliboa.util.helper import Helper
-from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.log import _get_logger
 from tests import BaseCliboaTest
 
 
@@ -74,7 +74,7 @@ class TestCsvColumnHash(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnHash()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "columns", ["passwd"])
@@ -97,7 +97,7 @@ class TestCsvColumnHash(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnHash()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "columns", ["passwd"])
@@ -123,7 +123,7 @@ class TestCsvColumnHash(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnHash()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "columns", ["passwd", "email"])
@@ -153,7 +153,7 @@ class TestCsvColumnHash(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnHash()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "columns", ["passwd"])
@@ -178,7 +178,7 @@ class TestCsvColumnExtract(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnExtract()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         remain_columns = ["key"]
@@ -200,7 +200,7 @@ class TestCsvColumnExtract(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnExtract()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         remain_column_number = 1
@@ -227,7 +227,7 @@ class TestCsvColumnExtract(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnExtract()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         remain_column_numbers = "1,3"
@@ -263,7 +263,7 @@ class TestCsvColumnExtract(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnExtract()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         remain_column_numbers = 3
@@ -295,7 +295,7 @@ class TestCsvColumnDelete(TestCsvTransform):
         self._create_csv(test_csv_data)
         # set the essential attributes
         instance = CsvColumnDelete()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         regex_pattern = "^.*_2$"
@@ -323,7 +323,7 @@ class TestCsvColumnDelete(TestCsvTransform):
         self._create_csv(test_csv_data)
         # set the essential attributes
         instance = CsvColumnDelete()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         regex_pattern = "^.*_2$"
@@ -352,7 +352,7 @@ class TestCsvColumnDelete(TestCsvTransform):
         self._create_csv(test_csv_data)
         # set the essential attributes
         instance = CsvColumnDelete()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         regex_pattern = "^target_.*$"
@@ -379,7 +379,7 @@ class TestCsvColumnDelete(TestCsvTransform):
         self._create_csv(test_csv_data)
         # set the essential attributes
         instance = CsvColumnDelete()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         regex_pattern = "^.*$"
@@ -405,7 +405,7 @@ class TestCsvColumnDelete(TestCsvTransform):
         self._create_csv(test_csv_data)
         # set the essential attributes
         instance = CsvColumnDelete()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         regex_pattern = "^.*_1$"
@@ -432,7 +432,7 @@ class TestCsvColumnDelete(TestCsvTransform):
         self._create_csv(test_csv_data)
         # set the essential attributes
         instance = CsvColumnDelete()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         with pytest.raises(Exception) as e:
@@ -452,7 +452,7 @@ class TestCsvValueExtract(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvValueExtract()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -482,7 +482,7 @@ class TestCsvValueExtract(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvValueExtract()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -509,7 +509,7 @@ class TestCsvValueExtract(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvValueExtract()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -540,7 +540,7 @@ class TestCsvColumnSelect(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnSelect()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -571,7 +571,7 @@ class TestCsvColumnSelect(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnSelect()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -603,7 +603,7 @@ class TestCsvColumnSelect(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnSelect()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -633,7 +633,7 @@ class TestCsvColumnSelect(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnSelect()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -654,7 +654,7 @@ class TestCsvColumnConcat(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnConcat()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -680,7 +680,7 @@ class TestCsvColumnConcat(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnConcat()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -706,7 +706,7 @@ class TestCsvColumnConcat(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnConcat()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -733,7 +733,7 @@ class TestCsvColumnConcat(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnConcat()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -760,7 +760,7 @@ class TestCsvColumnConcat(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnConcat()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -786,7 +786,7 @@ class TestCsvColumnConcat(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnConcat()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -807,7 +807,7 @@ class TestCsvTypeConvert(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvTypeConvert()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -833,7 +833,7 @@ class TestCsvTypeConvert(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvTypeConvert()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -859,7 +859,7 @@ class TestCsvTypeConvert(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvTypeConvert()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -889,7 +889,7 @@ class TestCsvTypeConvert(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvTypeConvert()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -915,7 +915,7 @@ class TestCsvTypeConvert(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvTypeConvert()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -943,7 +943,7 @@ class TestCsvTypeConvert(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvTypeConvert()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.*.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -980,7 +980,7 @@ class TestCsvTypeConvert(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvTypeConvert()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -1002,7 +1002,7 @@ class TestCsvMergeExclusive(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvMergeExclusive()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "src_column", "key")
@@ -1031,7 +1031,7 @@ class TestCsvMergeExclusive(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvMergeExclusive()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "src_column", "key")
@@ -1060,7 +1060,7 @@ class TestCsvMergeExclusive(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvMergeExclusive()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "src_column", "key")
@@ -1093,7 +1093,7 @@ class TestCsvMergeExclusive(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvMergeExclusive()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "all_column", True)
@@ -1125,7 +1125,7 @@ class TestCsvMergeExclusive(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvMergeExclusive()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "src_column", "dummy")
@@ -1147,7 +1147,7 @@ class TestCsvMergeExclusive(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvMergeExclusive()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "src_column", "key")
@@ -1169,7 +1169,7 @@ class TestCsvMergeExclusive(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvMergeExclusive()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "all_column", True)
@@ -1191,7 +1191,7 @@ class TestCsvMergeExclusive(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvMergeExclusive()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "all_column", True)
@@ -1213,7 +1213,7 @@ class TestCsvMergeExclusive(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvMergeExclusive()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "all_column", True)
@@ -1235,7 +1235,7 @@ class TestColumnLengthAdjust(TestCsvTransform):
         file2 = self._create_csv(test_csv_data, fname="test2.csv")
 
         instance = ColumnLengthAdjust()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.*.csv")
         Helper.set_property(instance, "adjust", {"data": 5})
@@ -1275,7 +1275,7 @@ class TestCsvMerge(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvMerge()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test\.csv")
         Helper.set_property(instance, "target_path", os.path.join(self._data_dir, "test2.csv"))
@@ -1321,7 +1321,7 @@ class TestCsvMerge(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvMerge()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test\.csv")
         Helper.set_property(instance, "target_path", os.path.join(self._data_dir, "test2.csv"))
@@ -1363,7 +1363,7 @@ class TestCsvConcat(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvConcat()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_filenames", ["test1.csv", "test2.csv", "test3.csv"])
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -1396,7 +1396,7 @@ class TestCsvConcat(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvConcat()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test.*\.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -1421,7 +1421,7 @@ class TestCsvConcat(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvConcat()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test.*\.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -1450,7 +1450,7 @@ class TestCsvConcat(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvConcat()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test.*\.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -1483,7 +1483,7 @@ class TestCsvConcat(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvConcat()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_filenames", ["test1.csv", "test2.csv", "test3.csv"])
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -1510,7 +1510,7 @@ class TestCsvConcat(TestCsvTransform):
         with pytest.raises(InvalidParameter) as execinfo:
             # set the essential attributes
             instance = CsvConcat()
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "logger", _get_logger(__name__))
             Helper.set_property(instance, "src_dir", self._data_dir)
             Helper.set_property(instance, "src_pattern", r"test.*\.csv")
             Helper.set_property(instance, "src_filenames", ["test1.csv", "test2.csv"])
@@ -1528,7 +1528,7 @@ class TestCsvConvert(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvConvert()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test\.csv")
         Helper.set_property(instance, "headers", [{"key": "new_key"}, {"data": "new_data"}])
@@ -1546,7 +1546,7 @@ class TestCsvConvert(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvConvert()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test\.csv")
         Helper.set_property(instance, "headers", [{"key": "new_key"}])
@@ -1576,7 +1576,7 @@ class TestCsvConvert(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvConvert()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test\.csv")
         Helper.set_property(instance, "headers_existence", True)
@@ -1597,7 +1597,7 @@ class TestCsvConvert(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvConvert()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -1622,7 +1622,7 @@ class TestCsvConvert(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvConvert()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test\.csv")
         Helper.set_property(instance, "headers_existence", False)
@@ -1640,7 +1640,7 @@ class TestCsvConvert(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvConvert()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test\.csv")
         Helper.set_property(instance, "headers", [{"key": "new_key"}, {"data": "new_data"}])
@@ -1660,7 +1660,7 @@ class TestCsvConvert(TestCsvTransform):
 
         # set attributes
         instance = CsvConvert()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -1687,7 +1687,7 @@ class TestCsvDuplicateRowDelete(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvDuplicateRowDelete()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test.*\.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -1718,7 +1718,7 @@ class TestCsvDuplicateRowDelete(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvDuplicateRowDelete()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -1750,7 +1750,7 @@ class TestCsvDuplicateRowDelete(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvDuplicateRowDelete()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test.*\.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -1781,7 +1781,7 @@ class TestCsvDuplicateRowDelete(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvDuplicateRowDelete()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -1814,7 +1814,7 @@ class TestCsvDuplicateRowDelete(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvDuplicateRowDelete()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.tsv")
         Helper.set_property(instance, "delimiter", "\t")
@@ -1853,7 +1853,7 @@ class TestCsvDuplicateRowDelete(TestCsvTransform):
         self._create_csv(test_csv_data)
 
         instance = CsvDuplicateRowDelete()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -1905,7 +1905,7 @@ class TestCsvRowDelete(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvRowDelete()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test.*\.csv")
         Helper.set_property(instance, "alter_path", self._data_dir + "/" + "alter.csv")
@@ -1934,7 +1934,7 @@ class TestCsvRowDelete(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvRowDelete()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test.*\.csv")
         Helper.set_property(instance, "alter_path", self._data_dir + "/" + "alter.csv")
@@ -1960,7 +1960,7 @@ class TestCsvRowDelete(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvRowDelete()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test.*\.csv")
         Helper.set_property(instance, "alter_path", self._data_dir + "/" + "alter.csv")
@@ -1989,7 +1989,7 @@ class TestCsvRowDelete(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvRowDelete()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test.*\.csv")
         Helper.set_property(instance, "alter_path", self._data_dir + "/" + "alter.csv")
@@ -2020,7 +2020,7 @@ class TestCsvRowDelete(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvRowDelete()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test.*\.csv")
         Helper.set_property(instance, "alter_path", self._data_dir + "/" + "alter.csv")
@@ -2049,7 +2049,7 @@ class TestCsvRowDelete(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvRowDelete()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test.*\.csv")
         Helper.set_property(instance, "alter_path", self._data_dir + "/" + "alter.csv")
@@ -2080,7 +2080,7 @@ class TestCsvRowDelete(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvRowDelete()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test.*\.csv")
         Helper.set_property(instance, "alter_path", self._data_dir + "/" + "alter.csv")
@@ -2109,7 +2109,7 @@ class TestCsvRowDelete(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvRowDelete()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test.*\.csv")
         Helper.set_property(instance, "alter_path", self._data_dir + "/" + "alter.csv")
@@ -2137,7 +2137,7 @@ class TestCsvSort(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvSort()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test.*\.csv")
         Helper.set_property(instance, "dest_dir", self._result_dir)
@@ -2169,7 +2169,7 @@ class TestCsvSort(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvSort()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test.*\.csv")
         Helper.set_property(instance, "dest_dir", self._result_dir)
@@ -2204,7 +2204,7 @@ class TestCsvToJsonl(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvToJsonl()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test.*\.csv")
         Helper.set_property(instance, "dest_dir", self._result_dir)
@@ -2231,7 +2231,7 @@ class TestCsvColumnCopy(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnCopy()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -2259,7 +2259,7 @@ class TestCsvColumnCopy(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnCopy()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -2287,7 +2287,7 @@ class TestCsvColumnCopy(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnCopy()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -2310,7 +2310,7 @@ class TestCsvColumnCopy(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnCopy()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -2327,7 +2327,7 @@ class TestCsvColumnCopy(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnCopy()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -2346,7 +2346,7 @@ class TestCsvColumnReplace(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnReplace()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "column", "address")
@@ -2373,7 +2373,7 @@ class TestCsvColumnReplace(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnReplace()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "column", "address")
@@ -2400,7 +2400,7 @@ class TestCsvColumnReplace(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnReplace()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "column", "address")
@@ -2427,7 +2427,7 @@ class TestCsvColumnReplace(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnReplace()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "column", "address")
@@ -2454,7 +2454,7 @@ class TestCsvColumnReplace(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnReplace()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "column", "address")
@@ -2473,7 +2473,7 @@ class TestCsvColumnReplace(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnReplace()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.csv")
         Helper.set_property(instance, "regex_pattern", "")
@@ -2497,7 +2497,7 @@ class TestCsvSplitRows(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvSplit()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test1\.csv")
         Helper.set_property(instance, "method", "rows")
@@ -2537,7 +2537,7 @@ class TestCsvSplitRows(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvSplit()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test1\.csv")
         Helper.set_property(instance, "dest_dir", self._result_dir)
@@ -2581,7 +2581,7 @@ class TestCsvSplitGrouped(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvSplit()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test1\.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -2621,7 +2621,7 @@ class TestCsvSplitGrouped(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvSplit()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test1\.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -2666,7 +2666,7 @@ class TestCsvSplitGrouped(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvSplit()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r".*\.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -2710,7 +2710,7 @@ class TestCsvSplitGrouped(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvSplit()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r".*\.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -2755,7 +2755,7 @@ class TestCsvSplitGrouped(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvSplit()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r".*\.csv")
         Helper.set_property(instance, "dest_dir", self._data_dir)

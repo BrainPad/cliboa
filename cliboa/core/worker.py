@@ -15,7 +15,7 @@ from cliboa import state
 from cliboa.core.factory import StepExecutorFactory
 from cliboa.core.scenario_queue import ScenarioQueue
 from cliboa.util.constant import StepStatus
-from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.log import _get_logger
 
 
 class ScenarioWorker(object):
@@ -28,7 +28,7 @@ class ScenarioWorker(object):
         Args:
             cmd_args: command line arguments
         """
-        self._logger = LisboaLog.get_logger(__name__)
+        self._logger = _get_logger(__name__)
         self._scenario_queue = ScenarioQueue
         self._cmd_args = cmd_args
         self._listeners = []

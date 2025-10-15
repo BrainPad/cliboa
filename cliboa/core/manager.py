@@ -27,7 +27,7 @@ from cliboa.util.cache import StepArgument
 from cliboa.util.class_util import ClassUtil
 from cliboa.util.exception import InvalidParameter, ScenarioFileInvalid
 from cliboa.util.helper import Helper
-from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.log import _get_logger
 from cliboa.util.parallel_with_config import ParallelWithConfig
 
 __all__ = ["YamlScenarioManager", "JsonScenarioManager"]
@@ -42,7 +42,7 @@ class ScenarioManager(object):
     """
 
     def __init__(self, project_name: str, scenario_format: str):
-        self._logger = LisboaLog.get_logger(__name__)
+        self._logger = _get_logger(__name__)
         self._pj_dir = os.path.join(env.PROJECT_DIR, project_name)
         self._pj_scenario_dir = os.path.join(env.PROJECT_DIR, project_name, env.SCENARIO_DIR_NAME)
         if scenario_format == "yaml":
@@ -179,7 +179,7 @@ class ScenarioManager(object):
         Helper.set_property(
             instance,
             "logger",
-            LisboaLog.get_logger(instance.__class__.__name__),
+            _get_logger(instance.__class__.__name__),
         )
 
         return instance

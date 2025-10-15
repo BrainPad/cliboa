@@ -19,7 +19,7 @@ from shutil import copyfile
 import pytest
 
 from cliboa.conf import env
-from cliboa.util.log_record import CliboaLogRecord
+from cliboa.util.log import CliboaLogRecord
 
 
 @pytest.fixture(scope="session", autouse=True)

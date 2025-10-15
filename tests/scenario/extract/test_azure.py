@@ -22,7 +22,7 @@ from cliboa.adapter.azure import BlobServiceAdapter
 from cliboa.conf import env
 from cliboa.scenario.extract.azure import AzureBlobDownload
 from cliboa.util.helper import Helper
-from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.log import _get_logger
 
 Blob = namedtuple("Blob", "name")
 
@@ -47,7 +47,7 @@ class TestAzureBlobDownload(object):
         try:
             # Act
             instance = AzureBlobDownload()
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "logger", _get_logger(__name__))
             # use Postman echo
             Helper.set_property(
                 instance,

@@ -12,7 +12,7 @@
 # all copies or substantial portions of the Software.
 #
 from cliboa.scenario.base import BaseStep
-from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.log import _get_logger
 
 
 class SampleStep(BaseStep):
@@ -24,7 +24,7 @@ class SampleStep(BaseStep):
         super().__init__()
         self._retry_count = 3
         self._memo = None
-        self._logger = LisboaLog.get_logger(__name__)
+        self._logger = _get_logger(__name__)
 
     def retry_count(self, retry_count):
         self._retry_count = retry_count

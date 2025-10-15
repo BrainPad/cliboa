@@ -14,12 +14,12 @@
 import random
 import string
 
-from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.log import _get_logger
 
 
 class StringUtil(object):
     def __init__(self):
-        self._logger = LisboaLog.get_logger(__name__)
+        self._logger = _get_logger(__name__)
 
     def random_str(self, length):
         """

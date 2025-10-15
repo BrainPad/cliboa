@@ -17,7 +17,7 @@ from mock import call, patch
 from cliboa.adapter.gcp import BigQueryAdapter, GcsAdapter
 from cliboa.scenario.extract.gcp import BigQueryRead, GcsFileExistsCheck
 from cliboa.util.helper import Helper
-from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.log import _get_logger
 from tests import BaseCliboaTest
 
 
@@ -34,7 +34,7 @@ class TestBigQueryRead(BaseCliboaTest):
         Helper.set_property(instance, "query", "select * from *")
         Helper.set_property(instance, "dest_dir", "test_Dir")
         Helper.set_property(instance, "filename", "test_filename")
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         instance.execute()
         assert m_get_client.call_args_list == [
             call(credentials="test_tblname", project="test_dataset", location="location")
@@ -65,7 +65,7 @@ class TestBigQueryRead(BaseCliboaTest):
         Helper.set_property(instance, "bucket", "test_bucket")
         Helper.set_property(instance, "dest_dir", "test_Dir")
         Helper.set_property(instance, "filename", "test_filename.csv")
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         instance.execute()
         assert m_bq_client.call_args_list == [call()]
         assert m_gcs_client.call_args_list == [call()]
@@ -83,7 +83,7 @@ class TestGcsFileExistsCheck(BaseCliboaTest):
         Helper.set_property(instance, "project_id", "hoge")
         Helper.set_property(instance, "bucket", "piyo")
         Helper.set_property(instance, "src_pattern", "spam")
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         instance.execute()
         # 処理の正常終了を確認
         assert m_get_object.call_args_list == []
@@ -99,7 +99,7 @@ class TestGcsFileExistsCheck(BaseCliboaTest):
         Helper.set_property(instance, "project_id", "hoge")
         Helper.set_property(instance, "bucket", "piyo")
         Helper.set_property(instance, "src_pattern", "spam1")
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         instance.execute()
         # 処理の正常終了を確認
         assert m_get_object.call_args_list == []

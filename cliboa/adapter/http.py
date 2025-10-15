@@ -18,7 +18,7 @@ from time import sleep
 import requests
 from requests.exceptions import HTTPError
 
-from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.log import _get_logger
 
 VALID_HTTP_STATUS = 200
 
@@ -29,7 +29,7 @@ class Http(ABC):
     """
 
     def __init__(self, url, dest_path, timeout, retry_cnt, retry_intvl_sec, params):
-        self._logger = LisboaLog.get_logger(__name__)
+        self._logger = _get_logger(__name__)
         self._url = url
         self._dest_path = dest_path
         self._timeout = timeout

@@ -21,7 +21,7 @@ from requests.exceptions import HTTPError
 from cliboa.conf import env
 from cliboa.scenario.extract.http import HttpDownload, HttpDownloadViaBasicAuth, HttpGet
 from cliboa.util.helper import Helper
-from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.log import _get_logger
 from tests import BaseCliboaTest
 
 
@@ -45,7 +45,7 @@ class TestHttpDownload(object):
 
         try:
             instance = HttpDownload()
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "logger", _get_logger(__name__))
             # use Postman echo
             Helper.set_property(instance, "src_url", "https://postman-echo.com")
             Helper.set_property(instance, "src_pattern", "get?foo1=bar1&foo2=bar2")
@@ -78,7 +78,7 @@ class TestDownloadViaBasicAuth(BaseCliboaTest):
         try:
             os.makedirs(self._data_dir, exist_ok=True)
             instance = HttpDownloadViaBasicAuth()
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "logger", _get_logger(__name__))
             # use Postman echo
             Helper.set_property(instance, "src_url", "https://postman-echo.com")
             Helper.set_property(instance, "src_pattern", "basic-auth")
@@ -102,7 +102,7 @@ class TestDownloadViaBasicAuth(BaseCliboaTest):
         mock_get.side_effect = HTTPError("Http request failed. HTTP Status code: 401")
 
         instance = HttpDownloadViaBasicAuth()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         # use Postman echo
         Helper.set_property(instance, "src_url", "https://postman-echo.com")
         Helper.set_property(instance, "src_pattern", "basic-auth")
@@ -137,7 +137,7 @@ class TestHttpGet(object):
         try:
             os.makedirs(self._data_dir, exist_ok=True)
             instance = HttpGet()
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "logger", _get_logger(__name__))
             # use Postman echo
             Helper.set_property(
                 instance, "src_url", "https://postman-echo.com/get?foo1=bar1&foo2=bar2"
@@ -166,7 +166,7 @@ class TestHttpGet(object):
         try:
             os.makedirs(self._data_dir, exist_ok=True)
             instance = HttpGet()
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "logger", _get_logger(__name__))
             # use Postman echo
             Helper.set_property(instance, "src_url", "https://postman-echo.com/basic-auth")  # noqa
             Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -190,7 +190,7 @@ class TestHttpGet(object):
         mock_get.side_effect = HTTPError("Http request failed. HTTP Status code: 404")
 
         instance = HttpGet()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         # use Postman echo
         Helper.set_property(instance, "src_url", "https://spam.com/get?foo1=bar1&foo2=bar2")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -207,7 +207,7 @@ class TestHttpGet(object):
         mock_get.side_effect = HTTPError("Http request failed. HTTP Status code: 401")
 
         instance = HttpGet()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         # use Postman echo
         Helper.set_property(instance, "src_url", "https://postman-echo.com/basic-auth")  # noqa
         Helper.set_property(instance, "dest_dir", self._data_dir)

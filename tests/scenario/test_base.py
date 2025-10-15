@@ -21,7 +21,7 @@ from unittest.mock import MagicMock
 from cliboa.conf import env
 from cliboa.scenario.sample_step import SampleCustomStep
 from cliboa.util.helper import Helper
-from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.log import _get_logger
 
 
 class TestBase(TestCase):
@@ -151,7 +151,7 @@ class TestBase(TestCase):
 
     def test_source_path_reader_with_none(self):
         instance = SampleCustomStep()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(instance.__class__.__name__))
+        Helper.set_property(instance, "logger", _get_logger(instance.__class__.__name__))
         ret = instance._source_path_reader(None)
 
         assert ret is None
@@ -164,9 +164,7 @@ class TestBase(TestCase):
                 f.write("test")
 
             instance = SampleCustomStep()
-            Helper.set_property(
-                instance, "logger", LisboaLog.get_logger(instance.__class__.__name__)
-            )
+            Helper.set_property(instance, "logger", _get_logger(instance.__class__.__name__))
 
             ret = instance._source_path_reader({"file": dummy_pass})
             assert ret == dummy_pass
@@ -178,7 +176,7 @@ class TestBase(TestCase):
 
     def test_source_path_reader_with_content(self):
         instance = SampleCustomStep()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(instance.__class__.__name__))
+        Helper.set_property(instance, "logger", _get_logger(instance.__class__.__name__))
         ret = instance._source_path_reader({"content": "test"})
         with open(ret, "r") as fp:
             actual = fp.read()
