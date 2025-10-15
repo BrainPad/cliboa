@@ -17,7 +17,7 @@ import shutil
 from cliboa.conf import env
 from cliboa.scenario.extract.ftp import FtpDownload
 from cliboa.util.helper import Helper
-from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.log import _get_logger
 from tests import BaseCliboaTest
 
 
@@ -29,7 +29,7 @@ class TestFtpDownload(BaseCliboaTest):
         try:
             os.makedirs(self._data_dir)
             instance = FtpDownload()
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "logger", _get_logger(__name__))
             # use public ftp
             """
             Helper.set_property(instance, "host", "test.rebex.net")

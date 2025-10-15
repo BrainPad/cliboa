@@ -13,10 +13,10 @@
 #
 import logging
 
-from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.log import _get_logger
 
 
-class TestLisboaLog(object):
+class TestGetLogger(object):
     def test_get_logger(self):
-        logger = LisboaLog().get_logger(__name__)
+        logger = _get_logger(__name__)
         assert isinstance(logger, logging.Logger)

@@ -22,7 +22,7 @@ from cliboa import state
 from cliboa.core.scenario_queue import ScenarioQueue
 from cliboa.util.constant import StepStatus
 from cliboa.util.exception import StepExecutionFailed
-from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.log import _get_logger
 
 __all__ = ["SingleProcExecutor", "MultiProcExecutor", "MultiProcWithConfigExecutor"]
 
@@ -38,7 +38,7 @@ class StepExecutor(object):
             q: queue which stores execution target steps
             cmd_args: command line arguments
         """
-        self._logger = LisboaLog.get_logger(__name__)
+        self._logger = _get_logger(__name__)
         self._step = obj
 
     @abstractmethod
@@ -82,7 +82,7 @@ class MultiProcExecutor(StepExecutor):
             else:
                 return "OK"
         except Exception as e:
-            LisboaLog.get_logger(__name__).error(e)
+            _get_logger(__name__).error(e)
             return "NG"
 
     def execute_steps(self, args) -> Optional[int]:

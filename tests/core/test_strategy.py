@@ -21,7 +21,7 @@ from cliboa.scenario.sample_step import SampleStep
 from cliboa.util.constant import StepStatus
 from cliboa.util.exception import CliboaException
 from cliboa.util.helper import Helper
-from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.log import _get_logger
 from cliboa.util.parallel_with_config import ParallelWithConfig
 from tests import BaseCliboaTest
 
@@ -51,13 +51,13 @@ class TestStrategy(BaseCliboaTest):
         minor_ver = py_info[1]
         py_ver = int(str(major_ver) + str(minor_ver))
 
-        log = LisboaLog.get_logger(self.__class__.__name__)
+        log = _get_logger(self.__class__.__name__)
         log.info(minor_ver)
         if py_ver >= self.MULTI_PROC_SUPPORT_VER:
             step1 = SampleStep()
-            Helper.set_property(step1, "logger", LisboaLog.get_logger(step1.__class__.__name__))
+            Helper.set_property(step1, "logger", _get_logger(step1.__class__.__name__))
             step2 = ErrorSampleStep()
-            Helper.set_property(step2, "logger", LisboaLog.get_logger(step2.__class__.__name__))
+            Helper.set_property(step2, "logger", _get_logger(step2.__class__.__name__))
 
             q = StepQueue()
             q.force_continue = False
@@ -75,9 +75,9 @@ class TestStrategy(BaseCliboaTest):
 
         if py_ver >= self.MULTI_PROC_SUPPORT_VER:
             step1 = SampleStep()
-            Helper.set_property(step1, "logger", LisboaLog.get_logger(step1.__class__.__name__))
+            Helper.set_property(step1, "logger", _get_logger(step1.__class__.__name__))
             step2 = ErrorSampleStep()
-            Helper.set_property(step2, "logger", LisboaLog.get_logger(step2.__class__.__name__))
+            Helper.set_property(step2, "logger", _get_logger(step2.__class__.__name__))
 
             q = StepQueue()
             q.force_continue = True
@@ -92,13 +92,13 @@ class TestStrategy(BaseCliboaTest):
         minor_ver = py_info[1]
         py_ver = int(str(major_ver) + str(minor_ver))
 
-        log = LisboaLog.get_logger(self.__class__.__name__)
+        log = _get_logger(self.__class__.__name__)
         log.info(minor_ver)
         if py_ver >= self.MULTI_PROC_SUPPORT_VER:
             step1 = SampleStep()
-            Helper.set_property(step1, "logger", LisboaLog.get_logger(step1.__class__.__name__))
+            Helper.set_property(step1, "logger", _get_logger(step1.__class__.__name__))
             step2 = ErrorSampleStep()
-            Helper.set_property(step2, "logger", LisboaLog.get_logger(step2.__class__.__name__))
+            Helper.set_property(step2, "logger", _get_logger(step2.__class__.__name__))
             config = {"multi_process_count": 3}
 
             q = StepQueue()
@@ -117,9 +117,9 @@ class TestStrategy(BaseCliboaTest):
 
         if py_ver >= self.MULTI_PROC_SUPPORT_VER:
             step1 = SampleStep()
-            Helper.set_property(step1, "logger", LisboaLog.get_logger(step1.__class__.__name__))
+            Helper.set_property(step1, "logger", _get_logger(step1.__class__.__name__))
             step2 = ErrorSampleStep()
-            Helper.set_property(step2, "logger", LisboaLog.get_logger(step2.__class__.__name__))
+            Helper.set_property(step2, "logger", _get_logger(step2.__class__.__name__))
             config = {"multi_process_count": 3}
 
             q = StepQueue()

@@ -23,7 +23,7 @@ from cliboa.adapter.aws import S3Adapter
 from cliboa.scenario.load.aws import DynamoDBWrite, S3Upload
 from cliboa.util.exception import FileNotFound, InvalidFormat, InvalidParameter
 from cliboa.util.helper import Helper
-from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.log import _get_logger
 from tests import BaseCliboaTest
 
 
@@ -35,7 +35,7 @@ class TestDynamoDBWrite(BaseCliboaTest):
         Helper.set_property(instance, "src_pattern", "test*")
         Helper.set_property(instance, "file_format", file_format)
         Helper.set_property(instance, "region", "us-west-2")
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         return instance
 
     @patch("cliboa.scenario.load.aws.BaseAws.get_target_files")
@@ -222,7 +222,7 @@ class TestS3Upload(BaseCliboaTest):
                 f.write("test content")
 
             instance = S3Upload()
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "logger", _get_logger(__name__))
             Helper.set_property(instance, "bucket", "test-bucket")
             Helper.set_property(instance, "src_dir", tmp_dir)
             Helper.set_property(instance, "src_pattern", "test.*")

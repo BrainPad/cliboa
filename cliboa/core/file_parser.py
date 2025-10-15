@@ -25,7 +25,7 @@ from cliboa.core.validator import (
     ScenarioYamlKey,
     ScenarioYamlType,
 )
-from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.log import _get_logger
 
 
 class ScenarioParser(object):
@@ -34,7 +34,7 @@ class ScenarioParser(object):
     """
 
     def __init__(self, pj_scenario_file, cmn_scenario_file):
-        self._logger = LisboaLog.get_logger(__name__)
+        self._logger = _get_logger(__name__)
         self._pj_scenario_file = pj_scenario_file
         self._cmn_scenario_file = cmn_scenario_file
 
