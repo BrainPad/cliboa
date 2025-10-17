@@ -12,11 +12,11 @@
 # all copies or substantial portions of the Software.
 #
 from cliboa.adapter.sqlite import SqliteAdapter
+from cliboa.util.base import _BaseObject
 from cliboa.util.exception import InvalidParameter, SqliteInvalid
-from cliboa.util.log import _get_logger
 
 
-class EssentialParameters(object):
+class EssentialParameters:
     """
     Validation for the essential parameters of step class
     """
@@ -38,7 +38,7 @@ class EssentialParameters(object):
                 )
 
 
-class SqliteTableExistence(object):
+class SqliteTableExistence(_BaseObject):
     """
     Validation for the table of sqlite
     """
@@ -50,11 +50,11 @@ class SqliteTableExistence(object):
             tblname: table name
             returns_bool: return bool or not
         """
+        super().__init__()
         self._sqlite_adptr = SqliteAdapter()
         self._dbname = dbname
         self._tblname = tblname
         self._returns_bool = returns_bool
-        self._logger = _get_logger(__name__)
 
     def __call__(self):
         try:

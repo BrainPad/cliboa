@@ -13,29 +13,9 @@
 #
 from importlib import import_module
 
-from cliboa.core.manager import JsonScenarioManager, YamlScenarioManager  # noqa
 from cliboa.core.strategy import MultiProcExecutor, MultiProcWithConfigExecutor, SingleProcExecutor
 from cliboa.util.class_util import ClassUtil
 from cliboa.util.parallel_with_config import ParallelWithConfig
-
-
-class ScenarioManagerFactory(object):
-    """
-    Create scenario manager instance
-    """
-
-    @staticmethod
-    def create(project_name: str, scenario_format: str):
-        """
-        Create ScenarioManager Instance(YamlScenarioManager or JsonScenarioManager)
-        Args:
-            cmd_args: Command Line Arguments
-        Returns:
-            scenario manager instance
-        """
-        scenario_manager_cls = scenario_format.capitalize() + "ScenarioManager"
-        instance = globals()[scenario_manager_cls]
-        return instance(project_name, scenario_format)
 
 
 class StepExecutorFactory(object):
