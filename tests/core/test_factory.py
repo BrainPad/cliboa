@@ -14,10 +14,9 @@
 
 import sys
 
-import pytest
+from cliboa.core.factory import CustomInstanceFactory, StepExecutorFactory
 
-from cliboa.core.factory import CustomInstanceFactory, ScenarioManagerFactory, StepExecutorFactory
-from cliboa.core.manager import JsonScenarioManager, YamlScenarioManager
+# from cliboa.core.manager import ScenarioManager
 from cliboa.core.strategy import MultiProcExecutor, MultiProcWithConfigExecutor, SingleProcExecutor
 from cliboa.util.parallel_with_config import ParallelWithConfig
 from tests import BaseCliboaTest
@@ -28,25 +27,25 @@ class TestFactory(BaseCliboaTest):
         pass
 
 
-@pytest.mark.skip(reason="ScenarioManager is scheduled for a redesign for v3.")
-class TestScenarioManagerFactory(TestFactory):
-    def test_create_ok(self):
-        """
-        Succeeded to create instance with yml and json
-        """
-        manager = ScenarioManagerFactory.create("spam", "yaml")
-        self.assertTrue(isinstance(manager, YamlScenarioManager))
-
-        manager = ScenarioManagerFactory.create("spam", "json")
-        self.assertTrue(isinstance(manager, JsonScenarioManager))
-
-    def test_create_ng(self):
-        """
-        Failed to create instance
-        """
-        with pytest.raises(AttributeError) as excinfo:
-            ScenarioManagerFactory.create("")
-        assert "object has no attribute" in str(excinfo.value)
+# @pytest.mark.skip(reason="ScenarioManager is scheduled for a redesign for v3.")
+# class TestScenarioManagerFactory(TestFactory):
+#     def test_create_ok(self):
+#         """
+#         Succeeded to create instance with yml and json
+#         """
+#         manager = ScenarioManagerFactory.create("spam", "yaml")
+#         self.assertTrue(isinstance(manager, YamlScenarioManager))
+#
+#         manager = ScenarioManagerFactory.create("spam", "json")
+#         self.assertTrue(isinstance(manager, JsonScenarioManager))
+#
+#     def test_create_ng(self):
+#         """
+#         Failed to create instance
+#         """
+#         with pytest.raises(AttributeError) as excinfo:
+#             ScenarioManagerFactory.create("")
+#         assert "object has no attribute" in str(excinfo.value)
 
 
 class TestStepExecutorFactory(TestFactory):

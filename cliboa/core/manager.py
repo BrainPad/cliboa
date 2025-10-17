@@ -11,29 +11,27 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+import copy
 import os
 import re
 import subprocess
-from abc import abstractmethod
+from typing import Tuple
 
 from cliboa.conf import env
-from cliboa.core.file_parser import JsonScenarioParser, YamlScenarioParser
+from cliboa.core.file_parser import ScenarioParser
 from cliboa.core.listener import StepStatusListener
 from cliboa.core.scenario_queue import ScenarioQueue
 from cliboa.core.step_queue import StepQueue
-from cliboa.core.validator import ProjectDirectoryExistence, ScenarioFileExistence
 from cliboa.scenario import *  # noqa
+from cliboa.util.base import _BaseObject
 from cliboa.util.cache import StepArgument
 from cliboa.util.class_util import ClassUtil
-from cliboa.util.exception import InvalidParameter, ScenarioFileInvalid
+from cliboa.util.exception import InvalidFormat, InvalidParameter, ScenarioFileInvalid
 from cliboa.util.helper import Helper
-from cliboa.util.log import _get_logger
 from cliboa.util.parallel_with_config import ParallelWithConfig
 
-__all__ = ["YamlScenarioManager", "JsonScenarioManager"]
 
-
-class ScenarioManager(object):
+class ScenarioManager(_BaseObject):
     """
     Base class which is to create individual instances from scenario files,
     and push them to the executable queue.
@@ -42,113 +40,110 @@ class ScenarioManager(object):
     """
 
     def __init__(self, project_name: str, scenario_format: str):
-        self._logger = _get_logger(__name__)
-        self._pj_dir = os.path.join(env.PROJECT_DIR, project_name)
-        self._pj_scenario_dir = os.path.join(env.PROJECT_DIR, project_name, env.SCENARIO_DIR_NAME)
+        super().__init__()
         if scenario_format == "yaml":
-            self._pj_scenario_file = (
+            pj_scenario_file = (
                 os.path.join(env.PROJECT_DIR, project_name, env.SCENARIO_FILE_NAME) + ".yml"
             )
-            self._cmn_scenario_file = os.path.join(env.COMMON_DIR, env.SCENARIO_FILE_NAME) + ".yml"
-        else:
-            self._pj_scenario_file = (
+            cmn_scenario_file = os.path.join(env.COMMON_DIR, env.SCENARIO_FILE_NAME) + ".yml"
+        elif scenario_format == "json":
+            pj_scenario_file = (
                 os.path.join(env.PROJECT_DIR, project_name, env.SCENARIO_FILE_NAME)
                 + "."
                 + scenario_format
             )
-            self._cmn_scenario_file = (
+            cmn_scenario_file = (
                 os.path.join(env.COMMON_DIR, env.SCENARIO_FILE_NAME) + "." + scenario_format
             )
-        self._replace_vars_pattern = re.compile(r"{{(.*?)}}")
+        else:
+            raise InvalidFormat(f"scenario format '{scenario_format}' is invalid.")
+
+        self._parser = ScenarioParser(pj_scenario_file, cmn_scenario_file, scenario_format)
 
     def create_scenario_queue(self):
-        # validation
-        self._valid_essential_dir()
-        self._valid_essential_files()
+        """
+        Main logic
+        """
+        self._logger.info("Start to create scenario queue.")
+        scenario_list = self._parser.parse()
+        self._save_scenario_queue(scenario_list)
+        self._logger.info("Finish to create scenario queue.")
 
-        scenario_list = self.parse_file()
-        if not scenario_list or isinstance(scenario_list, list) is False:
-            raise ScenarioFileInvalid("scenario file is invalid.")
-
-        self._logger.info("Start to create scenario queue")
-        queue = StepQueue()
-        self._add_queue(queue, scenario_list)
-
-        # save queue to static area
+    def _save_scenario_queue(self, scenario_list: list[dict]) -> None:
+        self._validate_scenario_list(scenario_list)
+        queue = self._create_queue(scenario_list)
+        # save queue as a global variable
         setattr(ScenarioQueue, "step_queue", queue)
-        self._logger.info("Finish to invoke scenario")
 
-    @abstractmethod
-    def parse_file(self, file):
-        """
-        Parse file contents to the list object
-        """
+    def _validate_scenario_list(self, scenario_list: list[dict]) -> None:
+        if not isinstance(scenario_list, list):
+            raise ScenarioFileInvalid("scenario file is invalid.")
+        if len(scenario_list) == 0:
+            raise ScenarioFileInvalid("scenario file is empty.")
 
-    def _valid_essential_dir(self):
-        """
-        Project directory validation
-        """
-        valid_instance = ProjectDirectoryExistence()
-        valid_instance(self._pj_dir)
-
-    def _valid_essential_files(self):
-        """
-        Scenario file validation
-        """
-        valid_instance = ScenarioFileExistence()
-        valid_instance(self._pj_scenario_file)
-
-    def _add_queue(self, queue, scenario_list):
+    def _create_queue(self, scenario_list: list[dict]) -> StepQueue:
         """
         Add executable instance to the queue
         """
+        # StepQueue is custom class extending queue.Queue
+        queue = StepQueue()
         for block in scenario_list:
+            # TODO: Redesign scenario data structure, especially all scenario configuration values.
             if "multi_process_count" in block.keys():
                 Helper.set_property(queue, "multi_proc_cnt", block.get("multi_process_count"))
             elif "force_continue" in block.keys():
                 Helper.set_property(queue, "force_continue", block.get("force_continue"))
             else:
-                instance = self._create_executable_instances(block)
-                queue.push(instance)
+                instance = self._create_step_instances(block)
+                queue.put(instance)
 
-        self._logger.info("Finish to create scenario queue")
+        return queue
 
-    def _create_executable_instances(self, s_dict):
+    def _create_step_instances(self, s_dict: dict) -> list[BaseStep | ParallelWithConfig]:  # noqa
         """
         Create executable instances
 
-        Returns:
-            list: Executable instances
+        This function returns a list, and its contents can be one of three patterns:
+        1. A list containing a single BaseStep instance. This will be executed sequentially.
+        2. A list containing multiple BaseStep instances. These will be executed in parallel.
+        3. A list containing a single ParallelWithConfig instance.
+           This will also be executed in parallel.
         """
         instances = []
         if "parallel" in s_dict.keys():
             for row in s_dict.get("parallel"):
                 instance = self._create_instance(row)
                 instances.append(instance)
+                # save arguments to refer by symbol as a global variables.
                 StepArgument._put(row["step"], instance)
         elif "parallel_with_config" in s_dict.keys():
-            steps_config_block = s_dict.get("parallel_with_config")
-            steps, config = self._split_steps_config(steps_config_block)
+            steps, config = self._split_steps_config(s_dict.get("parallel_with_config"))
+            # Memo: ParallelWithConfig is named-tuple.
             parallel = ParallelWithConfig([], config)
             for row in steps:
                 instance = self._create_instance(row)
                 parallel.steps.append(instance)
+                # save arguments to refer by symbol as a global variables.
                 StepArgument._put(row["step"], instance)
             instances.append(parallel)
         else:
             instance = self._create_instance(s_dict)
             instances.append(instance)
+            # save arguments to refer by symbol as a global variables.
             StepArgument._put(s_dict["step"], instance)
 
         return instances
 
-    def _create_instance(self, s_dict):
+    def _create_instance(self, s_dict: dict) -> BaseStep:  # noqa
         """
         Create instance
+
+        Memo: resolve with_vars in this method.
         """
         cls_name = s_dict["class"]
         self._logger.debug("Create %s instance" % cls_name)
 
+        # Create BaseStep instance.
         if ClassUtil().is_custom_cls(cls_name) is True:
             from cliboa.core.factory import CustomInstanceFactory
 
@@ -157,52 +152,26 @@ class ScenarioManager(object):
             cls = globals()[cls_name]
             instance = cls()
 
+        # Set arguments to instance.
         cls_attrs_dict = {}
         if "arguments" in s_dict.keys():
             cls_attrs_dict = s_dict["arguments"]
 
         values = {}
         if cls_attrs_dict:
-            cls_attrs_dict, with_vars = self._split_class_vars(cls_attrs_dict)
-            ret = self._replace_arguments(cls_attrs_dict, with_vars)
+            with_vars = cls_attrs_dict.pop("with_vars", {})
+            ret = self._replace_arguments(cls_attrs_dict, copy.deepcopy(with_vars))
             for dict_k, dict_v in ret.items():
                 Helper.set_property(instance, dict_k, dict_v)
             values.update(ret)
 
-        base_args = ["step", "symbol", "parallel", "listeners"]
+        # Set metadata to instance.
+        base_args = ["step", "symbol", "parallel"]
         for arg in base_args:
-            if arg == "listeners":
-                self._append_listeners(instance, s_dict.get(arg), values)
-            else:
-                Helper.set_property(instance, arg, s_dict.get(arg))
-
-        Helper.set_property(
-            instance,
-            "logger",
-            _get_logger(instance.__class__.__name__),
-        )
+            Helper.set_property(instance, arg, s_dict.get(arg))
+        self._append_listeners(instance, s_dict.get("listeners"), values)
 
         return instance
-
-    def _split_class_vars(self, arguments):
-        """
-        If "with_vars" exist in arguments of individual steps,
-        split into two(arguments except with_vars and with_vars)
-
-        Args:
-            arguments (dict): Arguments of steps
-
-        Returns:
-            tuple: (step attribute, with_vars parameter)
-        """
-        exists_with_vars = "with_vars" in arguments.keys()
-        with_vars = {}
-        if exists_with_vars:
-            variables = arguments["with_vars"]
-            for yaml_k, yaml_v in variables.items():
-                with_vars[yaml_k] = yaml_v
-            del arguments["with_vars"]
-        return arguments, with_vars
 
     def _replace_arguments(self, arguments, with_vars):
         """
@@ -223,7 +192,7 @@ class ScenarioManager(object):
         elif isinstance(arguments, list):
             return [self._replace_arguments(list_v, with_vars) for list_v in arguments]
         elif isinstance(arguments, str):
-            matches = self._replace_vars_pattern.findall(arguments)
+            matches = re.compile(r"{{(.*?)}}").findall(arguments)
             for match in matches:
                 var_name = match.strip()
                 if not var_name:
@@ -234,8 +203,8 @@ class ScenarioManager(object):
                     cmd = with_vars[var_name]
                     if not cmd:
                         raise ScenarioFileInvalid(
-                            "scenario file is invalid. 'with_vars' definition against %s does not exist."  # noqa
-                            % var_name
+                            "scenario file is invalid."
+                            " 'with_vars' definition against %s does not exist." % var_name
                         )
                     arguments = self._replace_vars(arguments, var_name, cmd)
             return arguments
@@ -291,7 +260,7 @@ class ScenarioManager(object):
         env_value = os.environ[var_name[4:]]
         return re.sub(r"{{(\s?)%s(\s?)}}" % var_name, env_value, yaml_v)
 
-    def _split_steps_config(self, block):
+    def _split_steps_config(self, block) -> Tuple[list, dict]:
         """
         If "config" exist in arguments of parallel_with_config,
         split into two(list of steps and config)
@@ -329,29 +298,3 @@ class ScenarioManager(object):
                     clz.__dict__.update(values)
                     listeners.append(CustomInstanceFactory.create(clz))
         Helper.set_property(instance, "listeners", listeners)
-
-
-class YamlScenarioManager(ScenarioManager):
-    """
-    Create instances from yaml format scenario file.
-    """
-
-    def parse_file(self):
-        """
-        Parse yaml format file to list object
-        """
-        parser = YamlScenarioParser(self._pj_scenario_file, self._cmn_scenario_file)
-        return parser.parse()
-
-
-class JsonScenarioManager(ScenarioManager):
-    """
-    Create instances from json format scenario file.
-    """
-
-    def parse_file(self):
-        """
-        Parse json format file to list object
-        """
-        parser = JsonScenarioParser(self._pj_scenario_file, self._cmn_scenario_file)
-        return parser.parse()

@@ -17,16 +17,8 @@ import shutil
 import pytest
 
 from cliboa.conf import env
-from cliboa.core.validator import (
-    EssentialKeys,
-    ProjectDirectoryExistence,
-    ScenarioFileExistence,
-    ScenarioJsonKey,
-    ScenarioJsonType,
-    ScenarioYamlKey,
-    ScenarioYamlType,
-)
-from cliboa.util.exception import DirStructureInvalid, FileNotFound, ScenarioFileInvalid
+from cliboa.core.validator import EssentialKeys
+from cliboa.util.exception import ScenarioFileInvalid
 
 
 class TestValidators(object):
@@ -38,200 +30,6 @@ class TestValidators(object):
     def teardown_method(self, method):
         if os.path.exists(self._pj_dir):
             shutil.rmtree(self._pj_dir)
-
-    def test_scenario_yaml_type_ok(self):
-        """
-        scenario.yml type is valid
-        """
-        test_data = {
-            "scenario": [
-                {
-                    "arguments": {"retry_count": 10},
-                    "class": "SftpDownload",
-                    "step": "sftp_download",
-                }
-            ]
-        }
-        valid_instance = ScenarioYamlType(test_data)
-        ret = valid_instance()
-        assert ret is None
-
-    def test_scenario_yaml_type_ng(self):
-        """
-        scenario.yml type is invalid
-        """
-        test_data = [
-            {
-                "scenario": {
-                    "arguments": {"retry_count": 10},
-                    "class": "SftpDownload",
-                    "step": "sftp_download",
-                }
-            }
-        ]
-        with pytest.raises(ScenarioFileInvalid) as excinfo:
-            valid_instance = ScenarioYamlType(test_data)
-            valid_instance()
-        assert "scenario.yml is invalid. Check scenario.yml format." in str(excinfo.value)
-
-    def test_scenario_yaml_key_ok(self):
-        """
-        scenario.yml essential key is valid
-        """
-        test_data = {
-            "scenario": [
-                {
-                    "arguments": {"retry_count": 10},
-                    "class": "SftpDownload",
-                    "step": "sftp_download",
-                }
-            ]
-        }
-        valid_instance = ScenarioYamlKey(test_data)
-        ret = valid_instance()
-        assert ret is None
-
-    def test_scenario_yaml_key_ng_with_no_content(self):
-        """
-        scenario.yml essential key exists, but content does not exist.
-        """
-        test_data = {"scenario": ""}
-        with pytest.raises(ScenarioFileInvalid) as excinfo:
-            valid_instance = ScenarioYamlKey(test_data)
-            valid_instance()
-        assert (
-            "scenario.yml is invalid. 'scenario:' key does not exist, or 'scenario:' key exists but content under 'scenario:' key does not exist."  # noqa
-            in str(excinfo.value)
-        )
-
-    def test_scenario_yaml_key_ng_with_no_scenario_key(self):
-        """
-        scenario.yml essential key does not exist.
-        """
-        test_data = {"spam": ""}
-        with pytest.raises(ScenarioFileInvalid) as excinfo:
-            valid_instance = ScenarioYamlKey(test_data)
-            valid_instance()
-        assert (
-            "scenario.yml is invalid. 'scenario:' key does not exist, or 'scenario:' key exists but content under 'scenario:' key does not exist."  # noqa
-            in str(excinfo.value)
-        )
-
-    def test_scenario_json_type_ok(self):
-        """
-        scenario.json type is valid
-        """
-        test_data = {
-            "scenario": [
-                {
-                    "arguments": {"retry_count": 10},
-                    "class": "SftpDownload",
-                    "step": "sftp_download",
-                }
-            ]
-        }
-        valid_instance = ScenarioJsonType(test_data)
-        ret = valid_instance()
-        assert ret is None
-
-    def test_scenario_json_type_ng(self):
-        """
-        scenario.json type is invalid
-        """
-        test_data = [
-            {
-                "scenario": {
-                    "arguments": {"retry_count": 10},
-                    "class": "SftpDownload",
-                    "step": "sftp_download",
-                }
-            }
-        ]
-        with pytest.raises(ScenarioFileInvalid) as excinfo:
-            valid_instance = ScenarioJsonType(test_data)
-            valid_instance()
-        assert "scenario.json is invalid. Check scenario.json format." in str(excinfo.value)
-
-    def test_scenario_json_key_ok(self):
-        """
-        scenario.json essential key is valid
-        """
-        test_data = {
-            "scenario": [
-                {
-                    "arguments": {"retry_count": 10},
-                    "class": "SftpDownload",
-                    "step": "sftp_download",
-                }
-            ]
-        }
-        valid_instance = ScenarioJsonKey(test_data)
-        ret = valid_instance()
-        assert ret is None
-
-    def test_scenario_json_key_ng_with_no_content(self):
-        """
-        scenario.json essential key exists, but content does not exist.
-        """
-        test_data = {"scenario": ""}
-        with pytest.raises(ScenarioFileInvalid) as excinfo:
-            valid_instance = ScenarioJsonKey(test_data)
-            valid_instance()
-        assert (
-            "scenario.json is invalid. 'scenario:' key does not exist, or 'scenario:' key exists but content under 'scenario:' key does not exist."  # noqa
-            in str(excinfo.value)
-        )
-
-    def test_scenario_json_key_ng_with_no_scenario_key(self):
-        """
-        scenario.json essential key does not exist.
-        """
-        test_data = {"spam": ""}
-        with pytest.raises(ScenarioFileInvalid) as excinfo:
-            valid_instance = ScenarioJsonKey(test_data)
-            valid_instance()
-        assert (
-            "scenario.json is invalid. 'scenario:' key does not exist, or 'scenario:' key exists but content under 'scenario:' key does not exist."  # noqa
-            in str(excinfo.value)
-        )
-
-    def test_project_directory_existence_ok(self):
-        """
-        Specified directory exists
-        """
-        valid_instance = ProjectDirectoryExistence()
-        ret = valid_instance(self._pj_dir)
-        assert ret is None
-
-    def test_project_directory_existence_ng(self):
-        """
-        Specified directory does not exist
-        """
-        shutil.rmtree(self._pj_dir)
-        with pytest.raises(DirStructureInvalid) as excinfo:
-            valid_instance = ProjectDirectoryExistence()
-            valid_instance(self._pj_dir)
-        assert "Project directory %s does not exist" % self._pj_dir in str(excinfo.value)
-
-    def test_scenario_file_existence_ok(self):
-        """
-        Specified file exists
-        """
-        scenario_file = os.path.join(self._pj_dir, "scenario.yml")
-        open(scenario_file, "w").close
-        valid_instance = ScenarioFileExistence()
-        ret = valid_instance(scenario_file)
-        assert ret is None
-
-    def test_scenario_file_existence_ng(self):
-        """
-        Specified file does not exist
-        """
-        scenario_file = os.path.join(self._pj_dir, "scenario.yml")
-        valid_instance = ScenarioFileExistence()
-        with pytest.raises(FileNotFound) as excinfo:
-            valid_instance(scenario_file)
-        assert "scenario.yml %s does not exist" % scenario_file in str(excinfo.value)
 
     def test_essential_keys_ok_1(self):
         """
@@ -293,7 +91,7 @@ class TestValidators(object):
         with pytest.raises(ScenarioFileInvalid) as excinfo:
             valid_instance = EssentialKeys(test_yaml)
             valid_instance()
-        assert "scenario.yml is invalid. 'step:' does not exist." in str(excinfo.value)
+        assert "scenario file is invalid. 'step:' does not exist." in str(excinfo.value)
 
     def test_essential_keys_ng_2(self):
         """
@@ -311,7 +109,7 @@ class TestValidators(object):
         with pytest.raises(ScenarioFileInvalid) as excinfo:
             valid_instance = EssentialKeys(test_yaml)
             valid_instance()
-        assert "scenario.yml is invalid. 'step:' does not exist." in str(excinfo.value)
+        assert "scenario file is invalid. 'step:' does not exist." in str(excinfo.value)
 
     def test_essential_keys_ng_3(self):
         """
@@ -332,7 +130,7 @@ class TestValidators(object):
             valid_instance = EssentialKeys(test_yaml)
             valid_instance()
         assert (
-            "scenario.yml is invalid. 'config:' key does not exist, or 'config:' value does not exist."  # noqa
+            "scenario file is invalid. 'config:' key does not exist, or 'config:' value does not exist."  # noqa
             in str(excinfo.value)
         )  # noqa
 
@@ -346,7 +144,7 @@ class TestValidators(object):
             valid_instance = EssentialKeys(test_yaml)
             valid_instance()
         assert (
-            "scenario.yml is invalid. 'steps:' key does not exist, or 'steps:' value does not exist."  # noqa
+            "scenario file is invalid. 'steps:' key does not exist, or 'steps:' value does not exist."  # noqa
             in str(excinfo.value)
         )  # noqa
 
@@ -369,4 +167,4 @@ class TestValidators(object):
         with pytest.raises(ScenarioFileInvalid) as excinfo:
             valid_instance = EssentialKeys(test_yaml)
             valid_instance()
-        assert "scenario.yml is invalid. 'step:' does not exist." in str(excinfo.value)
+        assert "scenario file is invalid. 'step:' does not exist." in str(excinfo.value)

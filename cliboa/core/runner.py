@@ -4,8 +4,8 @@ from typing import List
 
 from cliboa import state
 from cliboa.conf import env
-from cliboa.core.factory import ScenarioManagerFactory
 from cliboa.core.listener import ScenarioStatusListener
+from cliboa.core.manager import ScenarioManager
 from cliboa.core.worker import ScenarioWorker
 from cliboa.util.base import _BaseObject
 from cliboa.util.log import CliboaLogRecord
@@ -55,7 +55,7 @@ class ScenarioRunner(_BaseObject):
         Create scenario queue
         """
         state.set("_LoadScenario")
-        manager = ScenarioManagerFactory.create(self._project_name, self._scenario_format)
+        manager = ScenarioManager(self._project_name, self._scenario_format)
         manager.create_scenario_queue()
 
     def _execute_scenario(self):
