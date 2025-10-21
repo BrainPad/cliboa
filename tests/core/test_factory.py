@@ -14,7 +14,7 @@
 
 import pytest
 
-from cliboa.core.factory import CustomInstanceFactory, StepExecutorFactory
+from cliboa.core.factory import _create_custom_instance, _create_step_executor
 
 # from cliboa.core.manager import ScenarioManager
 from cliboa.core.strategy import MultiProcExecutor, SingleProcExecutor
@@ -48,13 +48,13 @@ class TestFactory(BaseCliboaTest):
 #         assert "object has no attribute" in str(excinfo.value)
 
 
-class TestStepExecutorFactory(TestFactory):
+class Test_create_step_executor(TestFactory):
     def test_create_single(self):
         """
         Succeeded to create SingleProcess instance
         """
 
-        s = StepExecutorFactory.create("1")
+        s = _create_step_executor("1")
         self.assertTrue(isinstance(s, SingleProcExecutor))
 
     def test_create_multi_with_config(self):
@@ -62,13 +62,13 @@ class TestStepExecutorFactory(TestFactory):
         Succeeded to create MultiProcess instance with config
         """
         instance = ParallelWithConfig(["1", "2"], {"multi_process_count": 2})
-        s = StepExecutorFactory.create(instance)
+        s = _create_step_executor(instance)
         self.assertTrue(isinstance(s, MultiProcExecutor))
 
 
-class TestCustomInstanceFactory(TestFactory):
+class Test_create_custom_instance(TestFactory):
     def test_execute_no_candidates(self):
-        custom_instance = CustomInstanceFactory.create("NotCustomClass")
+        custom_instance = _create_custom_instance("NotCustomClass")
         assert custom_instance is None
 
     @pytest.mark.skip(
@@ -77,5 +77,5 @@ class TestCustomInstanceFactory(TestFactory):
     )
     def test_execute_with_candidates(self):
         # sys.path.append("cliboa/scenario")
-        custom_instance = CustomInstanceFactory.create("SampleStep")
+        custom_instance = _create_custom_instance("SampleStep")
         assert custom_instance is not None
