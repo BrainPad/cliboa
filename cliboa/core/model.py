@@ -63,6 +63,7 @@ class _BaseWithVars(BaseModel):
 class StepModel(_BaseWithVars):
     step: str = Field(frozen=True)
     class_name: str = Field(alias="class", frozen=True)
+    listeners: str | list[str] | None = None
     symbol: str | None = Field(default=None, frozen=True)
     arguments: dict[str, Any] | None = None
 
@@ -131,6 +132,13 @@ class ParallelConfigModel(BaseModel):
                 r = getattr(model, k)
                 if r is not None:
                     setattr(self, k, r)
+
+    def fill_default(self) -> Self:
+        if self.multi_process_count is None:
+            self.multi_process_count = 2
+        if self.force_continue is None:
+            self.force_continue = False
+        return self
 
 
 class ParallelStepModel(BaseModel):

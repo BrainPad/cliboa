@@ -80,6 +80,7 @@ mock = "^4.0.3"
 XlsxWriter = "^3.0"
 safety = "^3.0"
 pyproject-flake8 = "^7.0.0"
+pytest-timeout = "^2.4.0"
 
 [tool.black]
 line-length = 100
