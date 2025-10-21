@@ -36,7 +36,6 @@ class BaseStep(_BaseObject):
         super().__init__(*args, **kwargs)
         self._step = None
         self._symbol = None
-        self._parallel = None
         self._listeners = []
 
     def step(self, step):
@@ -44,9 +43,6 @@ class BaseStep(_BaseObject):
 
     def symbol(self, symbol):
         self._symbol = symbol
-
-    def parallel(self, parallel):
-        self._parallel = parallel
 
     def logger(self, logger):
         self._logger = logger

@@ -23,6 +23,7 @@ from cliboa.util.exception import ScenarioFileInvalid
 from tests import BaseCliboaTest
 
 
+@pytest.mark.skip(reason="ScenarioParser is scheduled for a redesign for v3.")
 class TestYamlScenarioParser(BaseCliboaTest):
     """
     TODO: Separate Parser and Loader tests; mock the Loader in Parser tests

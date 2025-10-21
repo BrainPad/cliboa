@@ -19,26 +19,21 @@ import cloudpickle
 from multiprocessing_logging import install_mp_handler
 
 from cliboa import state
-from cliboa.core.scenario_queue import ScenarioQueue
+from cliboa.scenario.base import BaseStep
+from cliboa.util.base import _BaseObject
 from cliboa.util.constant import StepStatus
 from cliboa.util.exception import StepExecutionFailed
 from cliboa.util.log import _get_logger
+from cliboa.util.parallel_with_config import ParallelWithConfig
 
-__all__ = ["SingleProcExecutor", "MultiProcExecutor", "MultiProcWithConfigExecutor"]
 
-
-class StepExecutor(object):
+class _StepExecutor(_BaseObject):
     """
     Strategy class when steps in scenario file are executed
     """
 
-    def __init__(self, obj):
-        """
-        Args:
-            q: queue which stores execution target steps
-            cmd_args: command line arguments
-        """
-        self._logger = _get_logger(__name__)
+    def __init__(self, obj: BaseStep | ParallelWithConfig):
+        super().__init__()
         self._step = obj
 
     @abstractmethod
@@ -48,26 +43,23 @@ class StepExecutor(object):
         """
 
 
-class SingleProcExecutor(StepExecutor):
+class SingleProcExecutor(_StepExecutor):
     """
     Execute steps in queue with single thread
     """
 
     def execute_steps(self, args) -> Optional[int]:
         try:
-            cls = self._step[0]
-            state.set(cls.__class__.__name__)
-            ret = cls.trigger(args)
-            return ret
-
+            state.set(self._step.__class__.__name__)
+            return self._step.trigger(args)
         except Exception:
             self._logger.exception(
-                "Exception occurred during %s execution." % (cls.__class__.__name__,)
+                "Exception occurred during %s execution." % (self._step.__class__.__name__,)
             )
             return StepStatus.ABNORMAL_TERMINATION
 
 
-class MultiProcExecutor(StepExecutor):
+class MultiProcExecutor(_StepExecutor):
     """
     Execute steps in queue with multi process
     """
@@ -86,49 +78,19 @@ class MultiProcExecutor(StepExecutor):
             return "NG"
 
     def execute_steps(self, args) -> Optional[int]:
+        # FIXME: args not passed to BaseStep
         state.set("MultiProcess")
         self._logger.info(
-            "Multi process start. Execute step count=%s." % ScenarioQueue.step_queue.multi_proc_cnt
+            "Multi process start. Execute step count=%s." % self._step.config.multi_process_count
         )
         install_mp_handler()
-        packed = [cloudpickle.dumps(step) for step in self._step]
+        packed = [cloudpickle.dumps(step) for step in self._step.steps]
 
         try:
-            with Pool(processes=ScenarioQueue.step_queue.multi_proc_cnt) as p:
+            with Pool(processes=self._step.config.multi_process_count) as p:
                 for r in p.imap_unordered(self._async_step_execute, packed):
                     if r == "NG":
-                        if ScenarioQueue.step_queue.force_continue:
-                            self._logger.warning("Multi process response. %s" % r)
-                        else:
-                            raise StepExecutionFailed("Multi process response. %s" % r)
-        except Exception:
-            self._logger.exception("Exception occurred during multi process execution.")
-            return StepStatus.ABNORMAL_TERMINATION
-
-
-class MultiProcWithConfigExecutor(MultiProcExecutor):
-    """
-    Execute steps in queue in multi process with given config
-    """
-
-    def __init__(self, obj):
-        super().__init__(obj)
-        self._step = obj[0].steps
-        self._multi_proc_cnt = None
-        if "multi_process_count" in obj[0].config.keys():
-            self._multi_proc_cnt = obj[0].config["multi_process_count"]
-
-    def execute_steps(self, args) -> Optional[int]:
-        state.set("MultiProcessWC")
-        self._logger.info("Multi process start. Execute step count=%s." % self._multi_proc_cnt)
-        install_mp_handler()
-        packed = [cloudpickle.dumps(step) for step in self._step]
-
-        try:
-            with Pool(processes=self._multi_proc_cnt) as p:
-                for r in p.imap_unordered(self._async_step_execute, packed):
-                    if r == "NG":
-                        if ScenarioQueue.step_queue.force_continue:
+                        if self._step.config.force_continue:
                             self._logger.warning("Multi process response. %s" % r)
                         else:
                             raise StepExecutionFailed("Multi process response. %s" % r)

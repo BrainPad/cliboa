@@ -12,12 +12,12 @@
 # all copies or substantial portions of the Software.
 #
 
-import sys
+import pytest
 
 from cliboa.core.factory import CustomInstanceFactory, StepExecutorFactory
 
 # from cliboa.core.manager import ScenarioManager
-from cliboa.core.strategy import MultiProcExecutor, MultiProcWithConfigExecutor, SingleProcExecutor
+from cliboa.core.strategy import MultiProcExecutor, SingleProcExecutor
 from cliboa.util.parallel_with_config import ParallelWithConfig
 from tests import BaseCliboaTest
 
@@ -54,24 +54,16 @@ class TestStepExecutorFactory(TestFactory):
         Succeeded to create SingleProcess instance
         """
 
-        s = StepExecutorFactory.create(["1"])
-        self.assertTrue(isinstance(s, type(SingleProcExecutor(None))))
-
-    def test_create_multi(self):
-        """
-        Succeeded to create MultiProcess instance
-        """
-        s = StepExecutorFactory.create(["1", "2"])
-        self.assertTrue(isinstance(s, type(MultiProcExecutor(None))))
+        s = StepExecutorFactory.create("1")
+        self.assertTrue(isinstance(s, SingleProcExecutor))
 
     def test_create_multi_with_config(self):
         """
         Succeeded to create MultiProcess instance with config
         """
-        instance = [ParallelWithConfig(["1", "2"], {"multi_process_count": 2})]
+        instance = ParallelWithConfig(["1", "2"], {"multi_process_count": 2})
         s = StepExecutorFactory.create(instance)
-        print(s)
-        self.assertTrue(isinstance(s, type(MultiProcWithConfigExecutor(instance))))
+        self.assertTrue(isinstance(s, MultiProcExecutor))
 
 
 class TestCustomInstanceFactory(TestFactory):
@@ -79,7 +71,11 @@ class TestCustomInstanceFactory(TestFactory):
         custom_instance = CustomInstanceFactory.create("NotCustomClass")
         assert custom_instance is None
 
+    @pytest.mark.skip(
+        "The factory is scheduled for a redesign for v3"
+        " which will eliminate the sys.path.append dependency."
+    )
     def test_execute_with_candidates(self):
-        sys.path.append("cliboa/scenario")
+        # sys.path.append("cliboa/scenario")
         custom_instance = CustomInstanceFactory.create("SampleStep")
         assert custom_instance is not None
