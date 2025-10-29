@@ -23,8 +23,8 @@ from cliboa.util.exception import FileNotFound, ScenarioFileInvalid
 
 
 class _ScenarioLoader(_BaseObject):
-    def __init__(self, scenario_file: str, is_required: bool = False):
-        super().__init__()
+    def __init__(self, scenario_file: str, is_required: bool = False, **kwargs):
+        super().__init__(**kwargs)
         self._scenario_file = scenario_file
         if is_required and not self._exists():
             raise FileNotFound("File %s does not exist" % self._scenario_file)

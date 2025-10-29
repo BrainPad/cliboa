@@ -11,20 +11,23 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+import sys
+
+from cliboa.interface import _parse_args
 
 
-class ScenarioQueue(object):
-    """
-    Composition of extract, transform, load queues
-    """
+class TestCommandArgumentParser:
+    def test_yaml_parse(self, monkeypatch):
+        test_args = ["", "spam"]
+        monkeypatch.setattr(sys, "argv", test_args)
 
-    step_queue = None
+        cmd_args = _parse_args()
+        assert cmd_args.project_name == "spam"
 
-    class __metaclass__(type):
-        @property
-        def step_queue(cls):
-            return cls.step_queue  # pragma: no cover
+    def test_json_parse(self, monkeypatch):
+        test_args = ["project_name", "spam", "--format", "json"]
+        monkeypatch.setattr(sys, "argv", test_args)
 
-        @step_queue.setter
-        def step_queue(cls, q):
-            cls.step_queue = q  # pragma: no cover
+        cmd_args = _parse_args()
+        assert cmd_args.project_name == "spam"
+        assert cmd_args.format == "json"

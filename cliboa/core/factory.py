@@ -12,53 +12,94 @@
 # all copies or substantial portions of the Software.
 #
 from importlib import import_module
+from typing import Tuple
 
+from cliboa.conf import env
 from cliboa.core.loader import _JsonScenarioLoader, _ScenarioLoader, _YamlScenarioLoader
-from cliboa.core.strategy import MultiProcExecutor, SingleProcExecutor, _StepExecutor
-from cliboa.scenario.base import BaseStep
-from cliboa.util.class_util import ClassUtil
-from cliboa.util.exception import InvalidFormat
-from cliboa.util.parallel_with_config import ParallelWithConfig
+from cliboa.scenario import *  # noqa
+from cliboa.util.base import _BaseObject
+from cliboa.util.exception import InvalidFormat, InvalidScenarioClass
 
 
-def _get_scenario_loader_class(scenario_format: str) -> type[_ScenarioLoader]:
+def _get_scenario_loader_class(file_format: str) -> type[_ScenarioLoader]:
     """
     Create scenario loader instance
     """
-    if scenario_format == "yaml":
+    if file_format == "yaml":
         return _YamlScenarioLoader
-    elif scenario_format == "json":
+    elif file_format == "json":
         return _JsonScenarioLoader
     else:
-        raise InvalidFormat(f"scenario format '{scenario_format}' is invalid.")
+        raise InvalidFormat(f"scenario format '{file_format}' is invalid.")
 
 
-def _create_step_executor(obj: BaseStep | ParallelWithConfig) -> _StepExecutor:
+class _CliboaFactory(_BaseObject):
     """
-    Create step execution strategy instance
+    Factory class to create cliboa step|listener instance
+     - both cliboa's default class and user's custom class.
 
-    Args:
-        obj: queue which stores execution target steps
-    Returns:
-        step execution strategy instance
+    Depends on envs: COMMON_CUSTOM_CLASSES, PROJECT_CUSTOM_CLASSES
     """
-    if isinstance(obj, ParallelWithConfig):
-        return MultiProcExecutor(obj)
-    else:
-        return SingleProcExecutor(obj)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._custom_classes = env.COMMON_CUSTOM_CLASSES + env.PROJECT_CUSTOM_CLASSES
+
+    def _describe_class(self, cls_name: str) -> Tuple[str, str] | None:
+        """
+        Returns a pair of module path and class name by given name.
+
+        Args:
+            cls_name: Class name
+
+        Return (tuple):
+            tuple:
+                - module path
+                - class name
+        """
+        module = None
+        for c in self._custom_classes:
+            s = c.split(".")
+            if s[-1:][0] == cls_name:
+                module = s
+                break
+
+        if module is None:
+            return None
+
+        root = ".".join(module[:-1])
+        mod_name = module[-1:][0]
+
+        return root, mod_name
+
+    def _create_custom_instance(self, cls_name: str) -> object | None:
+        """
+        Import python module and create instance dynamically
+
+        Return:
+            Created instance.
+            None: If cls_name was not found in the defined class list.
+        """
+        ret = self._describe_class(cls_name)
+        if ret is None:
+            return None
+        (root, mod_name) = ret
+        instance = getattr(import_module(root), mod_name)
+        return instance()
+
+    def create(self, cls_name: str) -> object:
+        """
+        Create cliboa step|listener instance.
+        """
+        try:
+            instance = self._create_custom_instance(cls_name)
+            if instance is None:
+                cls = globals()[cls_name]
+                instance = cls()
+            return instance
+        except Exception:
+            self._logger.exception(f"Failed to create an instance of {cls_name}")
+            raise InvalidScenarioClass(f"Invalid scenario class '{cls_name}'")
 
 
-def _create_custom_instance(cls_name: str):
-    """
-    Import python module and create instance dynamically
-
-    Return:
-        Created instance.
-        None: If cls_name was not found in the defined class list.
-    """
-    ret = ClassUtil().describe_class(cls_name)
-    if ret is None:
-        return None
-    (root, mod_name) = ret
-    instance = getattr(import_module(root), mod_name)
-    return instance()
+_cliboa_factory = _CliboaFactory()

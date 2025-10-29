@@ -21,6 +21,11 @@ class CliboaException(Exception):
     pass
 
 
+class InvalidScenarioClass(CliboaException):
+    # Exception when scenario class is invalid
+    pass
+
+
 class DirStructureInvalid(CliboaException):
     # Exception when directory structure invalid
     pass

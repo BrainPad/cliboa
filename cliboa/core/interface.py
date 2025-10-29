@@ -11,6 +11,30 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-from collections import namedtuple
+from abc import ABC, abstractmethod
 
-ParallelWithConfig = namedtuple("ParallelWithConfig", ["steps", "config"])
+
+class _IExecute(ABC):
+    """
+    Interface of executable step instance.
+    """
+
+    @abstractmethod
+    def execute(self) -> int | None:
+        pass
+
+
+class IScenarioExecutor(ABC):
+    """
+    Interface of scenario executor instance for scenario listeners.
+    """
+
+    @property
+    @abstractmethod
+    def max_steps_size(self) -> int:
+        pass
+
+    @property
+    @abstractmethod
+    def current_steps_size(self) -> int:
+        pass

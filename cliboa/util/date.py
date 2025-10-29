@@ -13,14 +13,11 @@
 #
 import dateutil.parser as parser
 
-from cliboa.util.log import _get_logger
+from cliboa.util.base import _BaseObject
 
 
-class DateUtil(object):
-    def __init__(self):
-        self._logger = _get_logger(__name__)
-
-    def convert_date_format(self, str, format):
+class DateUtil(_BaseObject):
+    def convert_date_format(self, dt_str: str, dt_format: str):
         """
         Convert date string to other format date string.
         The converter parser is based on the specifications below.
@@ -34,8 +31,8 @@ class DateUtil(object):
         Returns:
             str: new format date string or None if str is None
         """
-        if not str:
+        if not dt_str:
             return None
 
-        p = parser.parse(str)
-        return p.strftime(format)
+        p = parser.parse(dt_str)
+        return p.strftime(dt_format)

@@ -12,7 +12,6 @@
 # all copies or substantial portions of the Software.
 #
 from cliboa.scenario.base import BaseStep
-from cliboa.util.log import _get_logger
 
 
 class SampleStep(BaseStep):
@@ -24,7 +23,6 @@ class SampleStep(BaseStep):
         super().__init__()
         self._retry_count = 3
         self._memo = None
-        self._logger = _get_logger(__name__)
 
     def retry_count(self, retry_count):
         self._retry_count = retry_count
@@ -41,9 +39,6 @@ class SampleStepSub(SampleStep):
     """
     For unit test
     """
-
-    def __init__(self):
-        super().__init__()
 
     def execute(self, *args):
         self._logger.info("Start %s" % self.__class__.__name__)

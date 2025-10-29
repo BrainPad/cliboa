@@ -12,44 +12,30 @@
 # all copies or substantial portions of the Software.
 #
 import os
-import sys
-import unittest
-from contextlib import ExitStack
-from types import SimpleNamespace
-from unittest.mock import patch
+from unittest import TestCase
 
 from cliboa.conf import env
-from cliboa.core.listener import ScenarioStatusListener, StepListener, StepStatusListener
-from cliboa.core.scenario_queue import ScenarioQueue
-from cliboa.core.step_queue import StepQueue
-from cliboa.core.strategy import SingleProcExecutor, _StepExecutor
-from cliboa.core.worker import ScenarioWorker
+from cliboa.core.executor import _ScenarioExecutor
+from cliboa.core.listener import ScenarioStatusListener, StepStatusListener
 from cliboa.scenario.sample_step import SampleCustomStep
-from cliboa.util.constant import StepStatus
-from cliboa.util.exception import CliboaException
-from cliboa.util.helper import Helper
-from cliboa.util.log import _get_logger
-from tests import BaseCliboaTest
 
 
-class TestScenarioStatusListener(BaseCliboaTest):
+class TestScenarioStatusListener(TestCase):
     def setup_method(self, method):
-        setattr(ScenarioQueue, "step_queue", StepQueue())
         self._listener = ScenarioStatusListener()
-        cmd_args = {"project_name": "spam", "format": "yaml"}
-        self._worker = ScenarioWorker(SimpleNamespace(**cmd_args))
+        self._executor = _ScenarioExecutor([])
         self._log_file = os.path.join(env.BASE_DIR, "logs", "app.log")
 
-    def test_after_scenario(self):
-        self._listener.after_scenario(self._worker)
+    def test_completion(self):
+        self._listener.completion(self._executor)
         with open(self._log_file) as f:
             for line in f:
                 pass
             last_line = line
-        assert "Finish" in last_line
+        assert "Complete" in last_line
 
-    def test_before_scenario(self):
-        self._listener.before_scenario(self._worker)
+    def test_before(self):
+        self._listener.before(self._executor)
         with open(self._log_file) as f:
             for line in f:
                 pass
@@ -57,122 +43,25 @@ class TestScenarioStatusListener(BaseCliboaTest):
         assert "Start" in last_line
 
 
-class TestStepStatusListener(object):
+class TestStepStatusListener:
     def setup_method(self, method):
         self._listener = StepStatusListener()
-        self._executor = _StepExecutor(["1"])
+        self._step = SampleCustomStep()
         self._log_file = os.path.join(env.BASE_DIR, "logs", "app.log")
 
-    def test_after_step(self):
-        self._listener.after_step(self._executor)
+    def _get_last_log(self):
         with open(self._log_file) as f:
             for line in f:
                 pass
             last_line = line
+        return last_line
+
+    def test_after(self):
+        self._listener.after(self._step)
+        last_line = self._get_last_log()
         assert "Finish" in last_line
 
-    def test_before_step(self):
-        self._listener.before_step(self._executor)
-        with open(self._log_file) as f:
-            for line in f:
-                pass
-            last_line = line
+    def test_before(self):
+        self._listener.before(self._step)
+        last_line = self._get_last_log()
         assert "Start" in last_line
-
-
-class TestAppropriateListnerCall(unittest.TestCase):
-    def test_end_with_noerror(self):
-        if sys.version_info.minor < 6:
-            # ignore test if python version is less 3.6(assert_called is not supported)
-            return
-
-        with ExitStack() as stack:
-            mock_before_step = stack.enter_context(
-                patch("cliboa.core.listener.StepStatusListener.before_step")
-            )
-            mock_error_step = stack.enter_context(
-                patch("cliboa.core.listener.StepStatusListener.error_step")
-            )
-            mock_after_step = stack.enter_context(
-                patch("cliboa.core.listener.StepStatusListener.after_step")
-            )
-            mock_post_step = stack.enter_context(
-                patch("cliboa.core.listener.StepStatusListener.after_completion")
-            )
-
-            step = SampleCustomStep()
-            Helper.set_property(step, "logger", _get_logger(step.__class__.__name__))
-            Helper.set_property(step, "listeners", [StepStatusListener()])
-            executor = SingleProcExecutor(step)
-            executor.execute_steps(None)
-
-            mock_before_step.assert_called_once()
-            mock_error_step.assert_not_called()
-            mock_after_step.assert_called_once()
-            mock_post_step.assert_called_once()
-
-    def test_end_with_error(self):
-        if sys.version_info.minor < 6:
-            # ignore test if python version is less 3.6 (mock#assert_called is not supported)
-            return
-
-        with ExitStack() as stack:
-            mock_before_step = stack.enter_context(
-                patch("cliboa.core.listener.StepStatusListener.before_step")
-            )
-            mock_error_step = stack.enter_context(
-                patch("cliboa.core.listener.StepStatusListener.error_step")
-            )
-            mock_after_step = stack.enter_context(
-                patch("cliboa.core.listener.StepStatusListener.after_step")
-            )
-            mock_post_step = stack.enter_context(
-                patch("cliboa.core.listener.StepStatusListener.after_completion")
-            )
-
-            step = ErrorSampleCustomStep()
-            Helper.set_property(step, "logger", _get_logger(step.__class__.__name__))
-            Helper.set_property(step, "listeners", [StepStatusListener()])
-            executor = SingleProcExecutor(step)
-
-            res = executor.execute_steps(None)
-
-            assert res == StepStatus.ABNORMAL_TERMINATION
-            mock_before_step.assert_called_once()
-            mock_error_step.assert_called_once()
-            mock_after_step.assert_not_called()
-            mock_post_step.assert_called_once()
-
-
-class TestListenerArguments(unittest.TestCase):
-    def test_ok(self):
-        if sys.version_info.minor < 6:
-            # ignore test if python version is less 3.6(assert_called is not supported)
-            return
-
-        step = SampleCustomStep()
-        Helper.set_property(step, "logger", _get_logger(step.__class__.__name__))
-        clz = CustomStepListener()
-        values = {"test_key": "test_value"}
-        clz.__dict__.update(values)
-        Helper.set_property(step, "listeners", [clz])
-        executor = SingleProcExecutor(step)
-        executor.execute_steps(None)
-
-
-class ErrorSampleCustomStep(SampleCustomStep):
-    def __init__(self):
-        super().__init__()
-
-    def execute(self, *args):
-        raise CliboaException("Something wrong")
-
-
-class CustomStepListener(StepListener):
-    def before_step(self, *args, **kwargs):
-        dict = self.__dict__
-        assert "test_value" == dict.get("test_key")
-
-    def error_step(self, *args, **kwargs):
-        dict = self.__dict__
-        assert "test_value" == dict.get("test_key")

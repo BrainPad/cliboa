@@ -14,14 +14,11 @@
 import random
 import string
 
-from cliboa.util.log import _get_logger
+from cliboa.util.base import _BaseObject
 
 
-class StringUtil(object):
-    def __init__(self):
-        self._logger = _get_logger(__name__)
-
-    def random_str(self, length):
+class StringUtil(_BaseObject):
+    def random_str(self, length: int):
         """
         Generate a random string
 
