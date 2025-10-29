@@ -22,7 +22,7 @@ from cliboa.conf import env
 from cliboa.core.manager import ScenarioManager
 from cliboa.core.model import CommandArgument
 from cliboa.util.exception import InvalidFormat
-from cliboa.util.log import CliboaLogRecord
+from cliboa.util.log import CliboaLogRecord, _get_logger
 
 
 def _parse_args():
@@ -58,6 +58,7 @@ def _add_system_path(project_name: str):
     add_target_paths.append(pj_scenario_dir)
     for path in add_target_paths:
         sys.path.append(path)
+    _get_logger(__name__).info(f"Appended cliboa's system path to sys.path: {sys.path}")
 
 
 def _initialize_cliboa_logging():
@@ -104,13 +105,12 @@ def run(add_system_path: bool = True):
     TODO: When change the factory logic to creating scenario classes without additional path
           dependence, add_system_path's default value will be False.
     """
+    _initialize_cliboa_logging()
     cmd_args = _parse_args()
     if add_system_path:
         _add_system_path(cmd_args.project_name)
 
-    _initialize_cliboa_logging()
     pj, cmn = _generate_scenario_path(cmd_args.project_name, cmd_args.format)
-
     manager = ScenarioManager(
         pj, cmn, cmd_args.format, CommandArgument(args=cmd_args.execute_method_argument)
     )

@@ -96,6 +96,8 @@ def _create_module_path(record_path) -> str:
 
     module_path, _ = os.path.splitext(rel_path)
     parts = module_path.split(os.sep)
+    if len(parts) >= 2 and parts[-1] == "__init__":
+        parts.pop()
 
     s_parts = []
     full_flg = False

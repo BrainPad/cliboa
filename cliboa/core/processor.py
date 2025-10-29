@@ -54,7 +54,7 @@ class _ParallelProcessor(_BaseObject, _IExecute):
             return "NG"
 
     def execute(self) -> int | None:
-        state.set("_ParallelExecute")
+        state.set("_ProcessParallel")
         self._logger.info(
             "Multi process start. Execute step count=%s." % self._config.multi_process_count
         )
