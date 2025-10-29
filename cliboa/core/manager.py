@@ -11,147 +11,48 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import copy
-import os
-
-from cliboa.conf import env
-from cliboa.core.file_parser import ScenarioParser
-from cliboa.core.listener import StepStatusListener
-from cliboa.core.model import ParallelConfigModel, ParallelStepModel, ScenarioModel, StepModel
-from cliboa.core.scenario_queue import ScenarioQueue
-from cliboa.core.step_queue import StepQueue
-from cliboa.scenario import *  # noqa
+from cliboa import state
+from cliboa.core.builder import _ScenarioBuilder
+from cliboa.core.executor import _ScenarioExecutor
+from cliboa.core.listener import ScenarioStatusListener
+from cliboa.core.model import CommandArgument
 from cliboa.util.base import _BaseObject
-from cliboa.util.cache import StepArgument
-from cliboa.util.class_util import ClassUtil
-from cliboa.util.exception import CliboaException, InvalidFormat
-from cliboa.util.helper import Helper
-from cliboa.util.parallel_with_config import ParallelWithConfig
 
 
 class ScenarioManager(_BaseObject):
     """
-    Base class which is to create individual instances from scenario files,
-    and push them to the executable queue.
-
-    Note : Currently only yaml format scenario file is implemented.
+    Main class to execute pipeline by scenario files.
     """
 
-    def __init__(self, project_name: str, scenario_format: str):
-        super().__init__()
-        if scenario_format == "yaml":
-            pj_scenario_file = (
-                os.path.join(env.PROJECT_DIR, project_name, env.SCENARIO_FILE_NAME) + ".yml"
-            )
-            cmn_scenario_file = os.path.join(env.COMMON_DIR, env.SCENARIO_FILE_NAME) + ".yml"
-        elif scenario_format == "json":
-            pj_scenario_file = (
-                os.path.join(env.PROJECT_DIR, project_name, env.SCENARIO_FILE_NAME)
-                + "."
-                + scenario_format
-            )
-            cmn_scenario_file = (
-                os.path.join(env.COMMON_DIR, env.SCENARIO_FILE_NAME) + "." + scenario_format
-            )
-        else:
-            raise InvalidFormat(f"scenario format '{scenario_format}' is invalid.")
+    def __init__(
+        self,
+        scenario_file: str,
+        common_file: str | list[str] | None = None,
+        file_format: str = "yaml",
+        cmd_arg: CommandArgument | None = None,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+        self._builder = self._resolve(
+            "scenario_builder", _ScenarioBuilder, scenario_file, common_file, file_format, cmd_arg
+        )
 
-        self._parser = ScenarioParser(pj_scenario_file, cmn_scenario_file, scenario_format)
-
-    def create_scenario_queue(self):
+    def execute(self) -> int:
         """
-        Main logic
+        Main logic of cliboa.
         """
-        self._logger.info("Start to create scenario queue.")
-        scenario = self._parser.parse()
-        scenario.setup()
-        queue = self._create_queue(scenario)
-        # save queue as a global variable
-        setattr(ScenarioQueue, "step_queue", queue)
-        self._logger.info("Finish to create scenario queue.")
+        # 1. Load scenario files and build scenario step instances which are ready to execute.
+        state.set("_BuildScenario")
+        steps = self._builder.execute()
 
-    def _create_queue(self, scenario: ScenarioModel) -> StepQueue:
-        """
-        Add executable instance to the queue
-        """
-        # StepQueue is custom class extending queue.Queue
-        queue = StepQueue()
-        for step in scenario.scenario:
-            instance = self._create_step_instance(step)
-            queue.put(instance)
+        # 2. Prepare the steps by wrapping them in an executor instance.
+        state.set("_PrepareScenario")
+        executor = self._resolve("scenario_executor", _ScenarioExecutor, steps)
+        executor.register_listener(
+            self._resolve("scenario_status_listener", ScenarioStatusListener)
+        )
 
-        return queue
-
-    def _create_step_instance(
-        self, step: StepModel | ParallelStepModel
-    ) -> BaseStep | ParallelWithConfig:  # noqa
-        """
-        Create executable instances
-        """
-        if isinstance(step, StepModel):
-            instance = self._create_instance(step)
-            # save arguments to refer by symbol as a global variables.
-            StepArgument._put(step.step, instance)
-            return instance
-        elif isinstance(step, ParallelStepModel):
-            instances = []
-            for p_step in step.parallel:
-                instance = self._create_instance(p_step)
-                instances.append(instance)
-                # save arguments to refer by symbol as a global variables.
-                StepArgument._put(p_step.step, instance)
-            # Memo: ParallelWithConfig is named-tuple.
-            if step.parallel_config is None:
-                return ParallelWithConfig(instances, ParallelConfigModel().fill_default())
-            else:
-                return ParallelWithConfig(instances, step.parallel_config.fill_default())
-        else:
-            raise CliboaException(f"Unexpected step instance: {step.__class__.__name__}")
-
-    def _create_instance(self, step: StepModel) -> BaseStep:  # noqa
-        """
-        Create instance
-
-        Memo: resolve with_vars in this method.
-        """
-        cls_name = step.class_name
-        self._logger.debug("Create %s instance" % cls_name)
-
-        # Create BaseStep instance.
-        if ClassUtil().is_custom_cls(cls_name) is True:
-            from cliboa.core.factory import _create_custom_instance
-
-            instance = _create_custom_instance(cls_name)
-        else:
-            cls = globals()[cls_name]
-            instance = cls()
-
-        # Set arguments to instance.
-        if step.arguments:
-            for k, v in step.arguments:
-                Helper.set_property(instance, k, v)
-
-        # Set metadata to instance.
-        Helper.set_property(instance, "step", step.step)
-        Helper.set_property(instance, "symbol", step.symbol)
-        # Add listeners
-        Helper.set_property(instance, "listeners", self._generate_listeners(step))
-
-        return instance
-
-    def _append_listeners(self, step: StepModel):
-        listeners = [StepStatusListener()]
-        if step.listeners is not None:
-            from cliboa.core.factory import _create_custom_instance
-
-            arguments = copy.deepcopy(step.arguments)
-            if type(step.listeners) is str:
-                clz = _create_custom_instance(step.listeners)
-                clz.__dict__.update(arguments)
-                listeners.append(clz)
-            elif type(step.listeners) is list:
-                for listener_cls in step.listeners:
-                    clz = _create_custom_instance(listener_cls)
-                    clz.__dict__.update(arguments)
-                    listeners.append(_create_custom_instance(clz))
-        return listeners
+        # 3. Execute the scenario and return the int result code.
+        state.set("_ExecuteScenario")
+        return executor.execute()
