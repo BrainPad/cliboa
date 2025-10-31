@@ -90,6 +90,7 @@ The details of self-merging are as follows.
 
 1.  **Core Logic Changes (`cliboa/`):**
     * Any changes within the `cliboa/` directory **must** be reviewed and approved by at least one other Core Maintainer. Self-merge is **not** permitted.
+    * However, self-merge is **permitted** if the changes involve only code comments, without changing the logic.
 2.  **Other Changes:**
     * Changes to all other files are considered low-risk and can be **self-merged**.
     * However if you, as the Core Maintainer, **feel a review is necessary, you may request a review** from another Core Maintainer.
