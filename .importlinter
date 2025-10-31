@@ -6,9 +6,12 @@ root_packages =
 name = layered architecture contract
 type = layers
 layers =
+    interface
     core
+    listener
     scenario
     adapter
     util
+    conf
 containers = cliboa
 include_external_packages = True
