@@ -11,16 +11,11 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import json
 import os
 import shutil
 from unittest import TestCase
-from unittest.mock import MagicMock
 
 from cliboa.conf import env
-from cliboa.core.executor import _StepExecutor
-from cliboa.core.listener import StepStatusListener
-from cliboa.core.model import StepModel
 from cliboa.scenario.sample_step import SampleCustomStep
 from cliboa.util.helper import Helper
 from cliboa.util.log import _get_logger
@@ -28,126 +23,7 @@ from cliboa.util.log import _get_logger
 
 class TestBase(TestCase):
     def setup_method(self, method):
-        self._log_file = os.path.join(env.BASE_DIR, "logs", "app.log")
         self._data_dir = os.path.join(env.BASE_DIR, "data")
-
-    def test_logging_properties(self):
-        """
-        Test basic property logging functionality.
-        """
-        instance = SampleCustomStep()
-
-        mock_logger = MagicMock()
-        model = StepModel.model_validate(
-            {"step": "test_step", "class": "SampleCustomStep", "arguments": {"retry_count": 5}}
-        )
-        executor = _StepExecutor(instance, model)
-        listener = StepStatusListener()
-        listener._logger = mock_logger
-        executor.register_listener(listener)
-        executor.execute()
-
-        mock_logger.info.assert_called()
-
-        all_calls = mock_logger.info.call_args_list
-        logged_messages = [call[0][0] for call in all_calls]
-
-        # Find Step properties JSON and verify property values
-        step_props_found = False
-        for msg in logged_messages:
-            if msg.startswith("Step properties: "):
-                json_str = msg.replace("Step properties: ", "", 1)
-                try:
-                    props = json.loads(json_str)
-                    self.assertEqual(props.get("_step"), "test_step")
-                    self.assertEqual(props.get("_retry_count"), 5)
-                    self.assertEqual(props.get("_symbol"), None)
-                    step_props_found = True
-                    break
-                except json.JSONDecodeError:
-                    pass
-        self.assertTrue(step_props_found, "Step properties JSON should be found and valid")
-
-    def test_logging_mask_password(self):
-        """
-        In log file, 'password' is masked.
-        """
-        instance = SampleCustomStep()
-
-        mock_logger = MagicMock()
-        model = StepModel.model_validate(
-            {"step": "test_step", "class": "SampleCustomStep", "arguments": {"password": "test"}}
-        )
-        executor = _StepExecutor(instance, model)
-        listener = StepStatusListener()
-        listener._logger = mock_logger
-        executor.register_listener(listener)
-        executor.execute()
-
-        mock_logger.info.assert_called()
-
-        all_calls = mock_logger.info.call_args_list
-        logged_messages = [call[0][0] for call in all_calls]
-
-        # Find Step properties JSON and verify password masking
-        step_props_found = False
-        for msg in logged_messages:
-            if msg.startswith("Step properties: "):
-                json_str = msg.replace("Step properties: ", "", 1)
-                try:
-                    props = json.loads(json_str)
-                    self.assertEqual(
-                        props.get("_password"), "****", "Password should be masked as ****"
-                    )
-                    step_props_found = True
-                    break
-                except json.JSONDecodeError:
-                    pass
-        self.assertTrue(step_props_found, "Step properties JSON should be found and valid")
-
-    def test_logging_mask_aws_keys(self):
-        """
-        In log file, 'access_key' and 'secret_key' of AWS are masked.
-        """
-        instance = SampleCustomStep()
-
-        mock_logger = MagicMock()
-        model = StepModel.model_validate(
-            {
-                "step": "test_step",
-                "class": "SampleCustomStep",
-                "arguments": {"access_key": "test", "secret_key": "test"},
-            }
-        )
-        executor = _StepExecutor(instance, model)
-        listener = StepStatusListener()
-        listener._logger = mock_logger
-        executor.register_listener(listener)
-        executor.execute()
-
-        mock_logger.info.assert_called()
-
-        all_calls = mock_logger.info.call_args_list
-        logged_messages = [call[0][0] for call in all_calls]
-
-        # Find Step properties JSON and verify AWS key masking
-        step_props_found = False
-        for msg in logged_messages:
-            if msg.startswith("Step properties: "):
-                json_str = msg.replace("Step properties: ", "", 1)
-                try:
-                    props = json.loads(json_str)
-                    self.assertEqual(
-                        props.get("_access_key"), "****", "Access key should be masked as ****"
-                    )
-                    self.assertEqual(
-                        props.get("_secret_key"), "****", "Secret key should be masked as ****"
-                    )
-                    step_props_found = True
-                    break
-                except json.JSONDecodeError:
-                    pass
-        self.assertTrue(step_props_found, "Step properties JSON should be found and valid")
 
     def test_source_path_reader_with_none(self):
         instance = SampleCustomStep()

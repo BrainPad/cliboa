@@ -14,11 +14,17 @@
 from abc import ABC, abstractmethod
 
 
-class _IExecute(ABC):
+class IScenarioExecutor(ABC):
     """
-    Interface of executable step instance.
+    Interface of scenario executor instance for scenario listeners.
     """
 
+    @property
     @abstractmethod
-    def execute(self) -> int | None:
+    def max_steps_size(self) -> int:
+        pass
+
+    @property
+    @abstractmethod
+    def current_steps_size(self) -> int:
         pass

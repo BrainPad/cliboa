@@ -13,10 +13,11 @@
 #
 import copy
 from abc import abstractmethod
-from typing import Any, Iterable
+from typing import Any
 
-from cliboa.core.interface import IScenarioExecutor, _IExecute
+from cliboa.core.interface import _IExecute
 from cliboa.core.model import CommandArgument, StepModel
+from cliboa.listener.interface import IScenarioExecutor
 from cliboa.scenario.base import BaseStep
 from cliboa.util.base import _BaseObject
 from cliboa.util.constant import StepStatus
@@ -40,22 +41,18 @@ class _BaseExecutor(_BaseObject, _IExecute):
         return self
 
     def _execute_listener(self, kind: str, e: Exception | None = None) -> None:
-        method_candidates = self._get_listener_method_candidates(kind)
-        method = None
         for lis in self._listeners:
             try:
-                for method in method_candidates:
-                    target = getattr(lis, method)
-                    if callable(target):
-                        if e:
-                            target(self._get_listener_arg(), e)
-                        else:
-                            target(self._get_listener_arg())
-                        # call only first.
-                        return
+                target = getattr(lis, kind)
+                if callable(target):
+                    if e:
+                        target(self._get_listener_arg(), e)
+                    else:
+                        target(self._get_listener_arg())
             except Exception:
                 self._logger.exception(
-                    f"Error occurred during listener.{method} in {self.__class__.__name__}"
+                    f"Error occurred during {lis.__class__.__name__}.{kind}"
+                    f" in {self.__class__.__name__}"
                 )
 
     def execute(self) -> int | None:
@@ -78,12 +75,6 @@ class _BaseExecutor(_BaseObject, _IExecute):
             return StepStatus.ABNORMAL_TERMINATION
         finally:
             self._execute_listener("completion")
-
-    def _get_listener_method_candidates(self, kind: str) -> Iterable[str]:
-        """
-        for backward compatible
-        """
-        return (kind,)
 
     @abstractmethod
     def _execute_main(self) -> int | None:
@@ -161,23 +152,12 @@ class _StepExecutor(_BaseExecutor):
         self._args = copy.deepcopy(cmd_arg.args) if cmd_arg and cmd_arg.args else []
         self._kwargs = copy.deepcopy(cmd_arg.kwargs) if cmd_arg and cmd_arg.kwargs else {}
 
-    def _get_listener_arg(self) -> Any:
+    @property
+    def step(self) -> BaseStep:
         return self._step
 
-    def _get_listener_method_candidates(self, kind: str) -> Iterable[str]:
-        """
-        for backward compatible
-        """
-        if kind in ("before", "after", "error"):
-            return (
-                kind,
-                f"{kind}_step",
-            )
-        else:
-            return (
-                kind,
-                f"after_{kind}",
-            )
+    def _get_listener_arg(self) -> Any:
+        return self._step
 
     def _execute_main(self) -> int | None:
         return self._step.execute(*self._args, **self._kwargs)
