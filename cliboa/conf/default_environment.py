@@ -39,3 +39,12 @@ COMMON_CUSTOM_CLASSES = []
 
 # project congenital classes to make available
 PROJECT_CUSTOM_CLASSES = []
+
+# logging mask re pattern
+# LOGGING_MASK = ".*password.*|.*secret_key.*"
+
+# logging parital mask re pattern
+# LOGGING_PARTIAL_MASK = ".*access_key.*|.*token.*"
+
+# logging partial mask config - expose the first and latest LOGGING_PARTIAL_NUM characters.
+# LOGGING_PARTIAL_NUM = 3

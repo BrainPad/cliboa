@@ -14,6 +14,7 @@
 
 import os
 from importlib import import_module
+from typing import Any
 
 
 class Environment:
@@ -37,6 +38,12 @@ class Environment:
         for env in dir(mod):
             val = getattr(mod, env)
             setattr(self, env, val)
+
+    def get(self, key: str, default: Any | None = None) -> Any | None:
+        if hasattr(self, key):
+            return getattr(self, key, default)
+        else:
+            return default
 
 
 env = Environment()

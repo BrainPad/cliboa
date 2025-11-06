@@ -20,7 +20,6 @@ classifiers = [
 
 include = [
   "cliboa/conf/logging.conf",
-  "cliboa/conf/cliboa.ini",
 ]
 
 [project.urls]
