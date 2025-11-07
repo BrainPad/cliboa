@@ -25,15 +25,13 @@ from cliboa.util.exception import InvalidFormat, InvalidParameter, ScenarioFileI
 
 
 class _BaseWithVars(BaseModel):
-    with_vars: dict[str, str] | None = None
+    with_vars: dict[str, str] = Field(default_factory=dict)
     _with_static_vars: dict[str, str] = PrivateAttr(default_factory=dict)
 
     def calc(self) -> None:
         """
         calculate with_vars shell commands, and store result.
         """
-        if not self.with_vars:
-            return
         for var_name, cmd in self.with_vars.items():
             self._with_static_vars[var_name] = self._exec_shell_cmd(cmd)
 
@@ -65,7 +63,7 @@ class StepModel(_BaseWithVars):
     class_name: str = Field(alias="class", frozen=True)
     listeners: str | list[str] | None = None
     symbol: str | None = Field(default=None, frozen=True)
-    arguments: dict[str, Any] | None = None
+    arguments: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="before")
     @classmethod
@@ -144,33 +142,24 @@ class ParallelConfigModel(BaseModel):
 class ParallelStepModel(BaseModel):
     step: str | None = Field(default=None, frozen=True)
     parallel: Tuple[StepModel, ...] = Field(min_length=1, frozen=True)
-    parallel_config: ParallelConfigModel | None = None
+    parallel_config: ParallelConfigModel = Field(default_factory=ParallelConfigModel)
 
     def _merge_parallel_config(self, data: ParallelConfigModel) -> None:
         if not isinstance(data, ParallelConfigModel):
             return
-        if not self.parallel_config:
-            self.parallel_config = data
-        else:
-            self.parallel_config.merge(data)
+        self.parallel_config.merge(data)
 
 
 class ScenarioModel(_BaseWithVars):
     scenario: Tuple[StepModel | ParallelStepModel, ...] = Field(min_length=1, frozen=True)
-    parallel_config: ParallelConfigModel | None = None
+    parallel_config: ParallelConfigModel = Field(default_factory=ParallelConfigModel)
 
     def merge(self, cmn: Self) -> None:
         """
         Merge common scenario settings.
         """
-        if cmn.parallel_config:
-            if not self.parallel_config:
-                self.parallel_config = cmn.parallel_config
-            else:
-                self.parallel_config.merge(cmn.parallel_config)
-
-        if cmn.with_vars:
-            self.with_vars = cmn.with_vars | (self.with_vars or {})
+        self.parallel_config.merge(cmn.parallel_config)
+        self.with_vars = cmn.with_vars | self.with_vars
 
         for step in self.scenario:
             if isinstance(step, StepModel):
@@ -187,8 +176,8 @@ class ScenarioModel(_BaseWithVars):
             if step.class_name != cmn_step.class_name:
                 continue
 
-            step.arguments = (cmn_step.arguments or {}) | (step.arguments or {})
-            step.with_vars = (cmn_step.with_vars or {}) | (step.with_vars or {})
+            step.arguments = cmn_step.arguments | step.arguments
+            step.with_vars = cmn_step.with_vars | step.with_vars
             return
 
     def setup(self) -> None:
@@ -222,8 +211,7 @@ class ScenarioModel(_BaseWithVars):
         """
         if self._with_static_vars:
             self._apply_steps("_merge_static_vars", self._with_static_vars)
-        if self.parallel_config:
-            self._apply_parallel_steps("_merge_parallel_config", self.parallel_config)
+        self._apply_parallel_steps("_merge_parallel_config", self.parallel_config)
 
     def _replace_vars_steps(self) -> None:
         """
