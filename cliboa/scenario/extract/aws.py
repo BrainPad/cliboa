@@ -308,9 +308,12 @@ class DynamoDBRead(BaseAws):
         if partition_key_value is not None:
             # Query操作
             self._logger.info(
-                f"Using query operation with partition key: {partition_key_name}={partition_key_value}"
+                f"Using query operation with partition key: "
+                f"{partition_key_name}={partition_key_value}"
             )
-            yield from self._query_with_filter(table, partition_key_name, partition_key_value, sort_key_name)
+            yield from self._query_with_filter(
+                table, partition_key_name, partition_key_value, sort_key_name
+            )
         else:
             # Scan操作
             self._logger.info("Using scan operation with filter")
@@ -319,10 +322,10 @@ class DynamoDBRead(BaseAws):
     def _build_filter_expression(self, exclude_keys: list[str] = []):
         """
         FilterExpression構築
-        
+
         Args:
             exclude_keys: 除外するキーのリスト（パーティションキー、ソートキーなど）
-        
+
         Returns:
             filter_expression or None
         """
@@ -330,72 +333,78 @@ class DynamoDBRead(BaseAws):
         for attr_name, attr_value in self._filter_conditions.items():
             if attr_name in exclude_keys:
                 continue
-            
+
             condition = Attr(attr_name).eq(attr_value)
-            filter_expression = condition if filter_expression is None else (filter_expression & condition)
-        
+            filter_expression = (
+                condition
+                if filter_expression is None
+                else (filter_expression & condition)
+            )
+
         return filter_expression
-    
+
     def _execute_with_pagination(self, table, operation_name, **base_kwargs):
         """
         DynamoDB操作をページネーション付きで実行
-        
+
         Args:
             table: DynamoDBテーブルオブジェクト
             operation_name: 'query' or 'scan'
             **base_kwargs: 操作固有のパラメータ（KeyConditionExpression等）
-        
+
         Yields:
             dict: 各アイテム
         """
         operation = getattr(table, operation_name)
         last_evaluated_key = None
-        
+
         while True:
             kwargs = base_kwargs.copy()
             if last_evaluated_key:
                 kwargs["ExclusiveStartKey"] = last_evaluated_key
-            
+
             response = operation(**kwargs)
-            
+
             for item in response["Items"]:
                 yield item
-            
+
             last_evaluated_key = response.get("LastEvaluatedKey")
             if not last_evaluated_key:
                 break
-            
-    def _query_with_filter(self, table, partition_key_name, partition_key_value, sort_key_name):
+
+    def _query_with_filter(
+        self, table, partition_key_name, partition_key_value, sort_key_name
+    ):
         """Query操作でデータを取得"""
         # KeyConditionExpression構築
         key_condition = Key(partition_key_name).eq(partition_key_value)
         if sort_key_name and sort_key_name in self._filter_conditions:
             sort_key_value = self._filter_conditions[sort_key_name]
             key_condition = key_condition & Key(sort_key_name).eq(sort_key_value)
-        
+
         # FilterExpression構築（パーティション/ソートキーを除外）
         exclude_keys = [partition_key_name]
         if sort_key_name:
             exclude_keys.append(sort_key_name)
         filter_expression = self._build_filter_expression(exclude_keys)
-        
+
         # Query実行
         query_kwargs = {"KeyConditionExpression": key_condition}
         if filter_expression is not None:
             query_kwargs["FilterExpression"] = filter_expression
-        
+
         yield from self._execute_with_pagination(table, "query", **query_kwargs)
-    
+
     def _scan_with_filter(self, table):
         """Scan操作でデータを取得"""
         # FilterExpression構築（全条件）
         filter_expression = self._build_filter_expression()
-        
+
         # Scan実行
         scan_kwargs = {}
         if filter_expression is not None:
             scan_kwargs["FilterExpression"] = filter_expression
-        
+
         yield from self._execute_with_pagination(table, "scan", **scan_kwargs)
     
     def _write_jsonl(self, items, file_path):

@@ -19,7 +19,6 @@ from decimal import Decimal
 from unittest.mock import patch
 
 import boto3
-from boto3.dynamodb.conditions import And, Attr
 from moto import mock_aws
 
 from cliboa.adapter.aws import S3Adapter
@@ -434,8 +433,20 @@ class TestDynamoDBRead(BaseCliboaTest):
             BillingMode="PAY_PER_REQUEST",
         )
 
-        table.put_item(Item={"user_id": "12345", "order_date": "2025-10-25", "amount": Decimal("100")})
-        table.put_item(Item={"user_id": "12345", "order_date": "2025-10-26", "amount": Decimal("200")})
+        table.put_item(
+            Item={
+                "user_id": "12345",
+                "order_date": "2025-10-25",
+                "amount": Decimal("100"),
+            }
+        )
+        table.put_item(
+            Item={
+                "user_id": "12345",
+                "order_date": "2025-10-26",
+                "amount": Decimal("200"),
+            }
+        )
 
         with tempfile.TemporaryDirectory() as temp_dir:
             instance = DynamoDBRead()
