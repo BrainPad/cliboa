@@ -406,7 +406,7 @@ class DynamoDBRead(BaseAws):
             scan_kwargs["FilterExpression"] = filter_expression
 
         yield from self._execute_with_pagination(table, "scan", **scan_kwargs)
-    
+
     def _write_jsonl(self, items, file_path):
         """
         アイテムをJSONL形式でファイルに書き込みます。
