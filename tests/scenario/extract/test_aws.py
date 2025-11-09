@@ -18,6 +18,10 @@ import tempfile
 from decimal import Decimal
 from unittest.mock import patch
 
+import boto3
+from boto3.dynamodb.conditions import And, Attr
+from moto import mock_aws
+
 from cliboa.adapter.aws import S3Adapter
 from cliboa.scenario.extract.aws import (
     DynamoDBRead,
@@ -26,9 +30,9 @@ from cliboa.scenario.extract.aws import (
     S3DownloadFileDelete,
     S3FileExistsCheck,
 )
+from tests import BaseCliboaTest
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
-from tests import BaseCliboaTest
 
 
 class TestS3Download(BaseCliboaTest):
@@ -171,83 +175,125 @@ class TestS3DownloadFileDelete(BaseCliboaTest):
 
 
 class TestDynamoDBRead(BaseCliboaTest):
-    @patch("boto3.resource")
-    def test_execute_csv_with_nested_data(self, mock_boto_resource):
-        test_data = {
-            "Items": [
-                {
-                    "id": "1",
-                    "name": "Item 1",
-                    "details": {
-                        "value": Decimal("100"),
-                        "attributes": {"color": "red", "size": "large"},
-                    },
+    @mock_aws
+    def test_execute_csv_with_nested_data(self):
+        """Test CSV output with nested data structures"""
+        dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
+        table = dynamodb.create_table(
+            TableName="test_table",
+            KeySchema=[{"AttributeName": "id", "KeyType": "HASH"}],
+            AttributeDefinitions=[{"AttributeName": "id", "AttributeType": "S"}],
+            BillingMode="PAY_PER_REQUEST",
+        )
+
+        # Insert test data with nested structures
+        table.put_item(
+            Item={
+                "id": "1",
+                "name": "Item 1",
+                "details": {
+                    "value": Decimal("100"),
+                    "attributes": {"color": "red", "size": "large"},
                 },
-                {
-                    "id": "2",
-                    "name": "Item 2",
-                    "details": {
-                        "value": Decimal("200"),
-                        "attributes": {"color": "blue", "size": "medium"},
-                    },
+            }
+        )
+        table.put_item(
+            Item={
+                "id": "2",
+                "name": "Item 2",
+                "details": {
+                    "value": Decimal("200"),
+                    "attributes": {"color": "blue", "size": "medium"},
                 },
-            ],
-            "Count": 2,
-            "ScannedCount": 2,
-            "LastEvaluatedKey": None,
-        }
+            }
+        )
+
         expected_csv = [
             ["id", "name", "details"],
             ["1", "Item 1", '{"value": 100, "attributes": {"color": "red", "size": "large"}}'],
             ["2", "Item 2", '{"value": 200, "attributes": {"color": "blue", "size": "medium"}}'],
         ]
 
-        self._run_test(mock_boto_resource, test_data, expected_csv, "csv")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            instance = DynamoDBRead()
+            Helper.set_property(instance, "table_name", "test_table")
+            Helper.set_property(instance, "file_name", "output.csv")
+            Helper.set_property(instance, "dest_dir", temp_dir)
+            Helper.set_property(instance, "file_format", "csv")
+            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "region", "us-east-1")
+            instance.execute()
 
-    @patch("boto3.resource")
-    def test_execute_csv_without_nested_data(self, mock_boto_resource):
-        test_data = {
-            "Items": [
-                {"id": "1", "name": "Item 1", "value": Decimal("100")},
-                {"id": "2", "name": "Item 2", "value": Decimal("200")},
-            ],
-            "Count": 2,
-            "ScannedCount": 2,
-            "LastEvaluatedKey": None,
-        }
+            output_file_path = os.path.join(temp_dir, instance._file_name)
+            assert os.path.exists(output_file_path)
+            self._verify_csv(output_file_path, expected_csv)
+
+    @mock_aws
+    def test_execute_csv_without_nested_data(self):
+        """Test CSV output with simple data structures"""
+        dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
+        table = dynamodb.create_table(
+            TableName="test_table",
+            KeySchema=[{"AttributeName": "id", "KeyType": "HASH"}],
+            AttributeDefinitions=[{"AttributeName": "id", "AttributeType": "S"}],
+            BillingMode="PAY_PER_REQUEST",
+        )
+
+        table.put_item(Item={"id": "1", "name": "Item 1", "value": Decimal("100")})
+        table.put_item(Item={"id": "2", "name": "Item 2", "value": Decimal("200")})
+
         expected_csv = [
             ["id", "name", "value"],
             ["1", "Item 1", "100"],
             ["2", "Item 2", "200"],
         ]
 
-        self._run_test(mock_boto_resource, test_data, expected_csv, "csv")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            instance = DynamoDBRead()
+            Helper.set_property(instance, "table_name", "test_table")
+            Helper.set_property(instance, "file_name", "output.csv")
+            Helper.set_property(instance, "dest_dir", temp_dir)
+            Helper.set_property(instance, "file_format", "csv")
+            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "region", "us-east-1")
+            instance.execute()
 
-    @patch("boto3.resource")
-    def test_execute_jsonl_with_nested_data(self, mock_boto_resource):
-        test_data = {
-            "Items": [
-                {
-                    "id": "1",
-                    "name": "Item 1",
-                    "details": {
-                        "value": Decimal("100"),
-                        "attributes": {"color": "red", "size": "large"},
-                    },
+            output_file_path = os.path.join(temp_dir, instance._file_name)
+            assert os.path.exists(output_file_path)
+            self._verify_csv(output_file_path, expected_csv)
+
+    @mock_aws
+    def test_execute_jsonl_with_nested_data(self):
+        """Test JSONL output with nested data structures"""
+        dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
+        table = dynamodb.create_table(
+            TableName="test_table",
+            KeySchema=[{"AttributeName": "id", "KeyType": "HASH"}],
+            AttributeDefinitions=[{"AttributeName": "id", "AttributeType": "S"}],
+            BillingMode="PAY_PER_REQUEST",
+        )
+
+        table.put_item(
+            Item={
+                "id": "1",
+                "name": "Item 1",
+                "details": {
+                    "value": Decimal("100"),
+                    "attributes": {"color": "red", "size": "large"},
                 },
-                {
-                    "id": "2",
-                    "name": "Item 2",
-                    "details": {
-                        "value": Decimal("200"),
-                        "attributes": {"color": "blue", "size": "medium"},
-                    },
+            }
+        )
+        table.put_item(
+            Item={
+                "id": "2",
+                "name": "Item 2",
+                "details": {
+                    "value": Decimal("200"),
+                    "attributes": {"color": "blue", "size": "medium"},
                 },
-            ],
-            "Count": 2,
-            "ScannedCount": 2,
-            "LastEvaluatedKey": None,
-        }
+            }
+        )
+
         expected_jsonl = [
             {
                 "id": "1",
@@ -261,47 +307,52 @@ class TestDynamoDBRead(BaseCliboaTest):
             },
         ]
 
-        self._run_test(mock_boto_resource, test_data, expected_jsonl, "jsonl")
-
-    @patch("boto3.resource")
-    def test_execute_jsonl_without_nested_data(self, mock_boto_resource):
-        test_data = {
-            "Items": [
-                {"id": "1", "name": "Item 1", "value": Decimal("100")},
-                {"id": "2", "name": "Item 2", "value": Decimal("200")},
-            ],
-            "Count": 2,
-            "ScannedCount": 2,
-            "LastEvaluatedKey": None,
-        }
-        expected_jsonl = [
-            {"id": "1", "name": "Item 1", "value": 100},
-            {"id": "2", "name": "Item 2", "value": 200},
-        ]
-
-        self._run_test(mock_boto_resource, test_data, expected_jsonl, "jsonl")
-
-    def _run_test(self, mock_boto_resource, test_data, expected_data, file_format):
-        mock_table = mock_boto_resource.return_value.Table.return_value
-        mock_table.scan.return_value = test_data
-
         with tempfile.TemporaryDirectory() as temp_dir:
             instance = DynamoDBRead()
             Helper.set_property(instance, "table_name", "test_table")
-            Helper.set_property(instance, "file_name", f"output.{file_format}")
+            Helper.set_property(instance, "file_name", "output.jsonl")
             Helper.set_property(instance, "dest_dir", temp_dir)
-            Helper.set_property(instance, "file_format", file_format)
+            Helper.set_property(instance, "file_format", "jsonl")
             Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
             Helper.set_property(instance, "region", "us-east-1")
             instance.execute()
 
             output_file_path = os.path.join(temp_dir, instance._file_name)
             assert os.path.exists(output_file_path)
+            self._verify_jsonl(output_file_path, expected_jsonl)
 
-            if file_format == "csv":
-                self._verify_csv(output_file_path, expected_data)
-            else:  # jsonl
-                self._verify_jsonl(output_file_path, expected_data)
+    @mock_aws
+    def test_execute_jsonl_without_nested_data(self):
+        """Test JSONL output with simple data structures"""
+        dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
+        table = dynamodb.create_table(
+            TableName="test_table",
+            KeySchema=[{"AttributeName": "id", "KeyType": "HASH"}],
+            AttributeDefinitions=[{"AttributeName": "id", "AttributeType": "S"}],
+            BillingMode="PAY_PER_REQUEST",
+        )
+
+        table.put_item(Item={"id": "1", "name": "Item 1", "value": Decimal("100")})
+        table.put_item(Item={"id": "2", "name": "Item 2", "value": Decimal("200")})
+
+        expected_jsonl = [
+            {"id": "1", "name": "Item 1", "value": 100},
+            {"id": "2", "name": "Item 2", "value": 200},
+        ]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            instance = DynamoDBRead()
+            Helper.set_property(instance, "table_name", "test_table")
+            Helper.set_property(instance, "file_name", "output.jsonl")
+            Helper.set_property(instance, "dest_dir", temp_dir)
+            Helper.set_property(instance, "file_format", "jsonl")
+            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "region", "us-east-1")
+            instance.execute()
+
+            output_file_path = os.path.join(temp_dir, instance._file_name)
+            assert os.path.exists(output_file_path)
+            self._verify_jsonl(output_file_path, expected_jsonl)
 
     def _verify_csv(self, file_path, expected_data):
         with open(file_path, "r", newline="") as csvfile:
@@ -331,3 +382,288 @@ class TestDynamoDBRead(BaseCliboaTest):
 
         for expected, actual in zip(expected_data, actual_data):
             assert expected == actual, f"Data mismatch: expected {expected}, got {actual}"
+
+    @mock_aws
+    def test_execute_with_query_partition_key_only(self):
+        """Test query operation with partition key only"""
+        dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
+        table = dynamodb.create_table(
+            TableName="test_table",
+            KeySchema=[{"AttributeName": "user_id", "KeyType": "HASH"}],
+            AttributeDefinitions=[{"AttributeName": "user_id", "AttributeType": "S"}],
+            BillingMode="PAY_PER_REQUEST",
+        )
+
+        table.put_item(Item={"user_id": "12345", "name": "User 1", "status": "active"})
+        table.put_item(Item={"user_id": "67890", "name": "User 2", "status": "active"})
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            instance = DynamoDBRead()
+            Helper.set_property(instance, "table_name", "test_table")
+            Helper.set_property(instance, "file_name", "output.csv")
+            Helper.set_property(instance, "dest_dir", temp_dir)
+            Helper.set_property(instance, "filter_conditions", {"user_id": "12345"})
+            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "region", "us-east-1")
+            instance.execute()
+
+            output_file_path = os.path.join(temp_dir, instance._file_name)
+            assert os.path.exists(output_file_path)
+
+            # Verify that only the queried user_id is in the output
+            with open(output_file_path, "r") as f:
+                reader = csv.DictReader(f)
+                items = list(reader)
+            assert len(items) == 1
+            assert items[0]["user_id"] == "12345"
+
+    @mock_aws
+    def test_execute_with_query_partition_and_sort_key(self):
+        """Test query operation with partition key and sort key"""
+        dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
+        table = dynamodb.create_table(
+            TableName="test_table",
+            KeySchema=[
+                {"AttributeName": "user_id", "KeyType": "HASH"},
+                {"AttributeName": "order_date", "KeyType": "RANGE"},
+            ],
+            AttributeDefinitions=[
+                {"AttributeName": "user_id", "AttributeType": "S"},
+                {"AttributeName": "order_date", "AttributeType": "S"},
+            ],
+            BillingMode="PAY_PER_REQUEST",
+        )
+
+        table.put_item(Item={"user_id": "12345", "order_date": "2025-10-25", "amount": Decimal("100")})
+        table.put_item(Item={"user_id": "12345", "order_date": "2025-10-26", "amount": Decimal("200")})
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            instance = DynamoDBRead()
+            Helper.set_property(instance, "table_name", "test_table")
+            Helper.set_property(instance, "file_name", "output.csv")
+            Helper.set_property(instance, "dest_dir", temp_dir)
+            Helper.set_property(
+                instance, "filter_conditions", {"user_id": "12345", "order_date": "2025-10-25"}
+            )
+            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "region", "us-east-1")
+            instance.execute()
+
+            output_file_path = os.path.join(temp_dir, instance._file_name)
+            assert os.path.exists(output_file_path)
+
+            # Verify exact match on both keys
+            with open(output_file_path, "r") as f:
+                reader = csv.DictReader(f)
+                items = list(reader)
+            assert len(items) == 1
+            assert items[0]["user_id"] == "12345"
+            assert items[0]["order_date"] == "2025-10-25"
+
+    @mock_aws
+    def test_execute_with_nonexistent_attribute_in_filter(self):
+        """Test with filter condition for non-existent attribute (should not error)"""
+        dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
+        table = dynamodb.create_table(
+            TableName="test_table",
+            KeySchema=[{"AttributeName": "user_id", "KeyType": "HASH"}],
+            AttributeDefinitions=[{"AttributeName": "user_id", "AttributeType": "S"}],
+            BillingMode="PAY_PER_REQUEST",
+        )
+
+        # Item without the non_existent_field attribute
+        table.put_item(Item={"user_id": "12345", "name": "User 1"})
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            instance = DynamoDBRead()
+            Helper.set_property(instance, "table_name", "test_table")
+            Helper.set_property(instance, "file_name", "output.csv")
+            Helper.set_property(instance, "dest_dir", temp_dir)
+            Helper.set_property(
+                instance, "filter_conditions", {"user_id": "12345", "non_existent_field": "value"}
+            )
+            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "region", "us-east-1")
+            instance.execute()
+
+            # Should not raise error, just return empty results
+            output_file_path = os.path.join(temp_dir, instance._file_name)
+            assert os.path.exists(output_file_path)
+
+            # Verify no items match (non_existent_field filter excludes the item)
+            with open(output_file_path, "r") as f:
+                reader = csv.DictReader(f)
+                items = list(reader)
+            assert len(items) == 0
+
+    @mock_aws
+    def test_query_with_actual_filtering(self):
+        """Test query operation with partition key and FilterExpression"""
+        # Create DynamoDB table with partition key and sort key
+        dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
+        table = dynamodb.create_table(
+            TableName="test_table",
+            KeySchema=[
+                {"AttributeName": "user_id", "KeyType": "HASH"},
+                {"AttributeName": "timestamp", "KeyType": "RANGE"},
+            ],
+            AttributeDefinitions=[
+                {"AttributeName": "user_id", "AttributeType": "S"},
+                {"AttributeName": "timestamp", "AttributeType": "S"},
+            ],
+            BillingMode="PAY_PER_REQUEST",
+        )
+
+        # Insert test data with user_id="123"
+        table.put_item(
+            Item={
+                "user_id": "123",
+                "timestamp": "2025-01-01",
+                "status": "active",
+                "name": "Event1",
+            }
+        )
+        table.put_item(
+            Item={
+                "user_id": "123",
+                "timestamp": "2025-01-02",
+                "status": "inactive",
+                "name": "Event2",
+            }
+        )
+        table.put_item(
+            Item={
+                "user_id": "123",
+                "timestamp": "2025-01-03",
+                "status": "active",
+                "name": "Event3",
+            }
+        )
+        table.put_item(
+            Item={
+                "user_id": "456",
+                "timestamp": "2025-01-01",
+                "status": "active",
+                "name": "Event4",
+            }
+        )
+
+        # Execute DynamoDBRead with filter: user_id="123" AND status="active"
+        with tempfile.TemporaryDirectory() as temp_dir:
+            instance = DynamoDBRead()
+            Helper.set_property(instance, "table_name", "test_table")
+            Helper.set_property(instance, "file_name", "output.csv")
+            Helper.set_property(instance, "dest_dir", temp_dir)
+            Helper.set_property(
+                instance, "filter_conditions", {"user_id": "123", "status": "active"}
+            )
+            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "region", "us-east-1")
+            instance.execute()
+
+            # Verify: only 2 items with user_id=123 and status=active
+            output_file_path = os.path.join(temp_dir, instance._file_name)
+            with open(output_file_path, "r") as f:
+                reader = csv.DictReader(f)
+                items = list(reader)
+
+            # Should have exactly 2 items
+            assert len(items) == 2
+            for item in items:
+                assert item["user_id"] == "123"
+                assert item["status"] == "active"
+
+            # Verify timestamps
+            timestamps = [item["timestamp"] for item in items]
+            assert "2025-01-01" in timestamps
+            assert "2025-01-03" in timestamps
+            assert "2025-01-02" not in timestamps  # inactive
+
+    @mock_aws
+    def test_scan_with_actual_filtering(self):
+        """Test scan operation with filtering on non-key attributes"""
+        # Create DynamoDB table
+        dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
+        table = dynamodb.create_table(
+            TableName="test_table",
+            KeySchema=[{"AttributeName": "user_id", "KeyType": "HASH"}],
+            AttributeDefinitions=[{"AttributeName": "user_id", "AttributeType": "S"}],
+            BillingMode="PAY_PER_REQUEST",
+        )
+
+        # Insert test data with mixed status (active and inactive)
+        table.put_item(Item={"user_id": "1", "status": "active", "name": "User1"})
+        table.put_item(Item={"user_id": "2", "status": "inactive", "name": "User2"})
+        table.put_item(Item={"user_id": "3", "status": "active", "name": "User3"})
+        table.put_item(Item={"user_id": "4", "status": "inactive", "name": "User4"})
+        table.put_item(Item={"user_id": "5", "status": "active", "name": "User5"})
+
+        # Execute DynamoDBRead with filter: status="active"
+        with tempfile.TemporaryDirectory() as temp_dir:
+            instance = DynamoDBRead()
+            Helper.set_property(instance, "table_name", "test_table")
+            Helper.set_property(instance, "file_name", "output.csv")
+            Helper.set_property(instance, "dest_dir", temp_dir)
+            Helper.set_property(instance, "filter_conditions", {"status": "active"})
+            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "region", "us-east-1")
+            instance.execute()
+
+            # Verify: only active items are retrieved
+            output_file_path = os.path.join(temp_dir, instance._file_name)
+            with open(output_file_path, "r") as f:
+                reader = csv.DictReader(f)
+                items = list(reader)
+
+            # Should have exactly 3 active items
+            assert len(items) == 3
+            for item in items:
+                assert item["status"] == "active"
+
+            # user_id 2 and 4 (inactive) should not be included
+            user_ids = [item["user_id"] for item in items]
+            assert "1" in user_ids
+            assert "3" in user_ids
+            assert "5" in user_ids
+            assert "2" not in user_ids
+            assert "4" not in user_ids
+
+    @mock_aws
+    def test_scan_without_filter(self):
+        """Test scan operation without any filter (full table scan)"""
+        # Create DynamoDB table
+        dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
+        table = dynamodb.create_table(
+            TableName="test_table",
+            KeySchema=[{"AttributeName": "id", "KeyType": "HASH"}],
+            AttributeDefinitions=[{"AttributeName": "id", "AttributeType": "S"}],
+            BillingMode="PAY_PER_REQUEST",
+        )
+
+        # Insert test data
+        table.put_item(Item={"id": "1", "value": "A"})
+        table.put_item(Item={"id": "2", "value": "B"})
+        table.put_item(Item={"id": "3", "value": "C"})
+
+        # Execute DynamoDBRead without filter
+        with tempfile.TemporaryDirectory() as temp_dir:
+            instance = DynamoDBRead()
+            Helper.set_property(instance, "table_name", "test_table")
+            Helper.set_property(instance, "file_name", "output.csv")
+            Helper.set_property(instance, "dest_dir", temp_dir)
+            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "region", "us-east-1")
+            instance.execute()
+
+            # Verify: all items are retrieved
+            output_file_path = os.path.join(temp_dir, instance._file_name)
+            with open(output_file_path, "r") as f:
+                reader = csv.DictReader(f)
+                items = list(reader)
+
+            # Should have all 3 items
+            assert len(items) == 3
+            ids = [item["id"] for item in items]
+            assert "1" in ids
+            assert "2" in ids
+            assert "3" in ids

@@ -34,6 +34,9 @@ ChangeLog = "https://github.com/BrainPad/cliboa/releases"
 cliboadmin = "cliboa.cli.cliboadmin:main"
 
 [tool.poetry]
+name = "cliboa"
+description = "application framework for ETL(ELT) processing"
+authors = ["BrainPad <cliboa@brainpad.co.jp>"]
 version = "0.0.0" # overwritten by poetry-dynamic-versioning
 
 [tool.poetry.dependencies]
@@ -78,6 +81,7 @@ mock = "^4.0.3"
 XlsxWriter = "^3.0"
 safety = "^3.0"
 pyproject-flake8 = "^7.0.0"
+moto = {extras = ["dynamodb"], version = "^5.1.15"}
 
 [tool.black]
 line-length = 100
