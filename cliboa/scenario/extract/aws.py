@@ -336,9 +336,7 @@ class DynamoDBRead(BaseAws):
 
             condition = Attr(attr_name).eq(attr_value)
             filter_expression = (
-                condition
-                if filter_expression is None
-                else (filter_expression & condition)
+                condition if filter_expression is None else (filter_expression & condition)
             )
 
         return filter_expression
@@ -372,9 +370,7 @@ class DynamoDBRead(BaseAws):
             if not last_evaluated_key:
                 break
 
-    def _query_with_filter(
-        self, table, partition_key_name, partition_key_value, sort_key_name
-    ):
+    def _query_with_filter(self, table, partition_key_name, partition_key_value, sort_key_name):
         """Query操作でデータを取得"""
         # KeyConditionExpression構築
         key_condition = Key(partition_key_name).eq(partition_key_value)

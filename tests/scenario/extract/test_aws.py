@@ -29,9 +29,9 @@ from cliboa.scenario.extract.aws import (
     S3DownloadFileDelete,
     S3FileExistsCheck,
 )
-from tests import BaseCliboaTest
 from cliboa.util.helper import Helper
 from cliboa.util.lisboa_log import LisboaLog
+from tests import BaseCliboaTest
 
 
 class TestS3Download(BaseCliboaTest):
