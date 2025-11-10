@@ -75,7 +75,7 @@ class CliboAdmin(object):
         cliboa_install_path = os.path.dirname(cliboa.__path__[0])
 
         run_cmd_path = os.path.join(
-            cliboa_install_path, "cliboa", "template", "bin", "clibomanager.py"
+            cliboa_install_path, "cliboa", "cli", "template", "bin", "clibomanager.py"
         )
         copyfile(run_cmd_path, os.path.join(self._bin_dir, "clibomanager.py"))
 
@@ -84,7 +84,7 @@ class CliboAdmin(object):
         copyfile(cmn_env_path, os.path.join(self._cmn_dir, "environment.py"))
 
         # copy logging.conf
-        conf_path = os.path.join(cliboa_install_path, "cliboa", "conf", "logging.conf")
+        conf_path = os.path.join(cliboa_install_path, "cliboa", "cli", "template", "logging.conf")
         copyfile(conf_path, os.path.join(ini_dir, "conf", "logging.conf"))
 
         # create __init__.py

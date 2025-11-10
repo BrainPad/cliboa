@@ -36,7 +36,7 @@ def setup_cliboa_env(tmpdir_factory):
     copyfile(cmn_env_path, os.path.join("common", "environment.py"))
 
     # copy logging.conf
-    conf_path = os.path.join("cliboa", "conf", "logging.conf")
+    conf_path = os.path.join("cliboa", "cli", "template", "logging.conf")
     copyfile(conf_path, os.path.join("conf", "logging.conf"))
     logging.config.fileConfig(env.BASE_DIR + "/conf/logging.conf", disable_existing_loggers=False)
     logging.setLogRecordFactory(CliboaLogRecord)
