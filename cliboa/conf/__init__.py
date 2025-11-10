@@ -24,13 +24,13 @@ class Environment:
 
     def __init__(self):
         """
-        Load environment.py in project
-        If values are not set in environment.py, default values are used
+        Load environment in project
+        If values are not set in environment, default values are used
         """
         env_module = os.environ.get("CLIBOA_ENV")
         if not env_module:
             # Assume executing unit test codes
-            mod = import_module("cliboa.common.environment")
+            mod = import_module("cliboa.conf.default_environment")
         else:
             # Assume executing cfmanager.py
             mod = import_module(env_module)
