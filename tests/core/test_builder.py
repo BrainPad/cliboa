@@ -1,11 +1,12 @@
 import logging
 from typing import Any, Dict, Type
-from unittest.mock import ANY, MagicMock, Mock
+from unittest.mock import MagicMock, Mock
 
 import pytest
 
 from cliboa.core.builder import _ScenarioBuilder
 from cliboa.core.model import StepModel
+from cliboa.scenario.sample_step import SampleStepSub
 
 
 class _IExecute(object):
@@ -38,25 +39,12 @@ class MockStepStatusListener:
     pass
 
 
-class MockStepArgument:
-    """
-    Mock class for StepArgument.
-    """
-
-    _put = MagicMock()
-
-    @classmethod
-    def reset_mock(cls):
-        """Helper to reset the class method mock for isolation."""
-        cls._put.reset_mock()
-
-
 class MockFactory:
     """
     Mock factory that asserts 'create' is called with a string.
     """
 
-    def create(self, class_name: Any) -> Mock:
+    def create(self, class_name: Any, **kwargs) -> Mock:
         """
         Mock create method.
         Requirement: Fail if argument is not a string.
@@ -67,6 +55,11 @@ class MockFactory:
         mock_instance = Mock()
         mock_instance.class_name = class_name
         return mock_instance
+
+
+class MockFactorySub:
+    def create(self, class_name: Any, **kwargs) -> SampleStepSub:
+        return SampleStepSub(**kwargs)
 
 
 class TestScenarioBuilderExecute:
@@ -98,6 +91,22 @@ class TestScenarioBuilderExecute:
 
         return DummyLoader
 
+    def _assert_mock_called_at_least_once(self, mock_func: MagicMock, *args) -> None:
+        calls = mock_func.mock_calls
+        found = False
+        for c in calls:
+            if len(args) > len(c.args):
+                continue
+            args_match = True
+            for i, expected_arg in enumerate(args):
+                if expected_arg != c.args[i]:
+                    args_match = False
+                    break
+            if args_match:
+                found = True
+                break
+        assert found, f"Mock(*{args}) call not found"
+
     @pytest.fixture
     def mock_factory(self) -> MagicMock:
         """
@@ -107,17 +116,7 @@ class TestScenarioBuilderExecute:
         factory_instance.create = MagicMock(side_effect=factory_instance.create)
         return factory_instance
 
-    @pytest.fixture
-    def mock_step_argument_cls(self) -> Type[MockStepArgument]:
-        """
-        Fixture to reset the mock step argument class for test isolation.
-        """
-        MockStepArgument.reset_mock()
-        return MockStepArgument
-
-    def test_execute_simple_steps(
-        self, mock_factory: MagicMock, mock_step_argument_cls: Type[MockStepArgument]
-    ):
+    def test_execute_simple_steps(self, mock_factory: MagicMock):
         """
         Test execute with a scenario containing two simple steps.
         Checks length and instance types of the result.
@@ -133,7 +132,6 @@ class TestScenarioBuilderExecute:
         builder = _ScenarioBuilder(
             scenario_file="main.yml",
             di_loader=DummyLoaderCls,
-            di_step_argument=mock_step_argument_cls,
             di_factory=mock_factory,
             di_step_executor=MockStepExecutor,
             di_parallel_processor=MockParallelProcessor,
@@ -146,10 +144,8 @@ class TestScenarioBuilderExecute:
         assert isinstance(steps[0], MockStepExecutor)
 
         assert mock_factory.create.call_count == 2
-        mock_factory.create.assert_any_call("DummyStep1")
-        mock_factory.create.assert_any_call("DummyStep2")
-
-        assert mock_step_argument_cls._put.call_count == 2
+        self._assert_mock_called_at_least_once(mock_factory.create, "DummyStep1")
+        self._assert_mock_called_at_least_once(mock_factory.create, "DummyStep2")
 
         assert steps[0].register_listener.call_count == 1
         assert steps[1].register_listener.call_count == 1
@@ -157,9 +153,7 @@ class TestScenarioBuilderExecute:
         assert steps[0].step.step == "Step1"
         assert steps[1].step.step == "Step2"
 
-    def test_execute_parallel_steps(
-        self, mock_factory: MagicMock, mock_step_argument_cls: Type[MockStepArgument]
-    ):
+    def test_execute_parallel_steps(self, mock_factory: MagicMock):
         """
         Test execute with a scenario containing one parallel block.
         """
@@ -179,7 +173,6 @@ class TestScenarioBuilderExecute:
         builder = _ScenarioBuilder(
             scenario_file="main.yml",
             di_loader=DummyLoaderCls,
-            di_step_argument=mock_step_argument_cls,
             di_factory=mock_factory,
             di_step_executor=MockStepExecutor,
             di_parallel_processor=MockParallelProcessor,
@@ -192,7 +185,6 @@ class TestScenarioBuilderExecute:
         assert isinstance(steps[0], MockParallelProcessor)
 
         assert mock_factory.create.call_count == 2
-        assert mock_step_argument_cls._put.call_count == 2
 
         parallel_processor = steps[0]
         assert len(parallel_processor.instances) == 2
@@ -200,9 +192,7 @@ class TestScenarioBuilderExecute:
         assert parallel_processor.instances[0].register_listener.call_count == 1
         assert parallel_processor.instances[1].register_listener.call_count == 1
 
-    def test_execute_mixed_steps(
-        self, mock_factory: MagicMock, mock_step_argument_cls: Type[MockStepArgument]
-    ):
+    def test_execute_mixed_steps(self, mock_factory: MagicMock):
         """
         Test execute with mixed simple and parallel steps.
         """
@@ -222,7 +212,6 @@ class TestScenarioBuilderExecute:
         builder = _ScenarioBuilder(
             scenario_file="main.yml",
             di_loader=DummyLoaderCls,
-            di_step_argument=mock_step_argument_cls,
             di_factory=mock_factory,
             di_step_executor=MockStepExecutor,
             di_parallel_processor=MockParallelProcessor,
@@ -237,15 +226,12 @@ class TestScenarioBuilderExecute:
         assert isinstance(steps[2], MockStepExecutor)
 
         assert mock_factory.create.call_count == 3
-        assert mock_step_argument_cls._put.call_count == 3
 
         assert steps[0].register_listener.call_count == 1
         assert steps[1].instances[0].register_listener.call_count == 1
         assert steps[2].register_listener.call_count == 1
 
-    def test_execute_merge_common_arguments(
-        self, mock_factory: MagicMock, mock_step_argument_cls: Type[MockStepArgument]
-    ):
+    def test_execute_merge_common_arguments(self, mock_factory: MagicMock):
         """
         Test: Common file arguments are merged correctly.
         """
@@ -274,7 +260,6 @@ class TestScenarioBuilderExecute:
             scenario_file="main.yml",
             common_file="common.yml",
             di_loader=DummyLoaderCls,
-            di_step_argument=mock_step_argument_cls,
             di_factory=mock_factory,
             di_step_executor=MockStepExecutor,
             di_parallel_processor=MockParallelProcessor,
@@ -296,7 +281,6 @@ class TestScenarioBuilderExecute:
     def test_execute_common_file_load_failure(
         self,
         mock_factory: MagicMock,
-        mock_step_argument_cls: Type[MockStepArgument],
         caplog: pytest.LogCaptureFixture,
     ):
         """
@@ -311,7 +295,6 @@ class TestScenarioBuilderExecute:
             scenario_file="main.yml",
             common_file=common_file_path,
             di_loader=DummyLoaderCls,
-            di_step_argument=mock_step_argument_cls,
             di_factory=mock_factory,
             di_step_executor=MockStepExecutor,
             di_parallel_processor=MockParallelProcessor,
@@ -328,9 +311,7 @@ class TestScenarioBuilderExecute:
         assert caplog.records[0].levelno == logging.WARNING
         assert f"Failed to load {common_file_path}" in caplog.records[0].message
 
-    def test_execute_with_single_listener(
-        self, mock_factory: MagicMock, mock_step_argument_cls: Type[MockStepArgument]
-    ):
+    def test_execute_with_single_listener(self, mock_factory: MagicMock):
         """
         Test: A step with a single listener (str). (Normal case)
         Checks factory calls and listener registration.
@@ -350,7 +331,6 @@ class TestScenarioBuilderExecute:
         builder = _ScenarioBuilder(
             scenario_file="main.yml",
             di_loader=DummyLoaderCls,
-            di_step_argument=mock_step_argument_cls,
             di_factory=mock_factory,
             di_step_executor=MockStepExecutor,
             di_parallel_processor=MockParallelProcessor,
@@ -363,16 +343,12 @@ class TestScenarioBuilderExecute:
         assert isinstance(steps[0], MockStepExecutor)
 
         assert mock_factory.create.call_count == 2
-        mock_factory.create.assert_any_call("DummyStep1")
-        mock_factory.create.assert_any_call("DummyListener")
+        self._assert_mock_called_at_least_once(mock_factory.create, "DummyStep1")
+        self._assert_mock_called_at_least_once(mock_factory.create, "DummyListener")
 
         assert steps[0].register_listener.call_count == 2
 
-        assert mock_step_argument_cls._put.call_count == 1
-
-    def test_execute_with_multiple_listeners(
-        self, mock_factory: MagicMock, mock_step_argument_cls: Type[MockStepArgument]
-    ):
+    def test_execute_with_multiple_listeners(self, mock_factory: MagicMock):
         """
         Test: A step with multiple listeners (list[str]). (Normal case)
         Checks factory calls and listener registration after code fix.
@@ -391,7 +367,6 @@ class TestScenarioBuilderExecute:
         builder = _ScenarioBuilder(
             scenario_file="main.yml",
             di_loader=DummyLoaderCls,
-            di_step_argument=mock_step_argument_cls,
             di_factory=mock_factory,
             di_step_executor=MockStepExecutor,
             di_parallel_processor=MockParallelProcessor,
@@ -405,11 +380,31 @@ class TestScenarioBuilderExecute:
 
         assert mock_factory.create.call_count == 3
 
-        mock_factory.create.assert_any_call("DummyStep1")
-        mock_factory.create.assert_any_call("DummyListener1")
-        mock_factory.create.assert_any_call("DummyListener2")
-
-        assert mock_step_argument_cls._put.call_count == 1
-        mock_step_argument_cls._put.assert_any_call("Step1", ANY)
+        self._assert_mock_called_at_least_once(mock_factory.create, "DummyStep1")
+        self._assert_mock_called_at_least_once(mock_factory.create, "DummyListener1")
+        self._assert_mock_called_at_least_once(mock_factory.create, "DummyListener2")
 
         assert steps[0].register_listener.call_count == 3
+
+    def test_execute_with_symbol(self):
+        main_scenario = {
+            "scenario": [
+                {"step": "Step1", "class": "SampleStepSub", "arguments": {"memo": "val1"}},
+                {"step": "Step2", "class": "SampleStepSub", "symbol": "Step1"},
+            ]
+        }
+        DummyLoaderCls = self._create_dummy_loader_cls(main_scenario)
+        mock_logger = MagicMock()
+
+        builder = _ScenarioBuilder(
+            scenario_file="main.yml",
+            di_loader=DummyLoaderCls,
+            di_factory=MockFactorySub(),
+            di_logger=mock_logger,
+        )
+
+        steps = builder.execute()
+        steps[1].execute()
+
+        print(mock_logger.info.call_args_list)
+        mock_logger.info.assert_any_call("Step1 symbol memo is val1")

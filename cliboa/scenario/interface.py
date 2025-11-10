@@ -11,36 +11,20 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-global _PROCESS_STORE_CACHE
-_PROCESS_STORE_CACHE = {}
+from abc import ABC, abstractmethod
+from typing import Any
 
 
-class ObjectStore(object):
+class IParentStep(ABC):
     """
-    Cache any object.
-    This cache class is used when same parameter uses from one STEP to the other.
+    Interface for the runtime parent class of a BaseStep subclass (not the inheritance parent).
     """
 
-    @staticmethod
-    def put(k, v):
+    @abstractmethod
+    def get_symbol_arguments(self) -> dict[str, Any]:
         """
-        Put value
-
-        Args:
-            k (str): Cache key
-            v (dict): Cache value
+        Returns the arguments dict for the step specified by symbol
+        (variables are already transformed).
+        Returns {} if symbol is not specified, and no exceptions are raised.
         """
-        _PROCESS_STORE_CACHE[k] = v
-
-    @staticmethod
-    def get(k):
-        """
-        Get value
-
-        Args:
-            k (str): Cache key
-
-        Returns:
-            dict: Value. Returns None if the key does not exist
-        """
-        return _PROCESS_STORE_CACHE.get(k)
+        raise NotImplementedError()

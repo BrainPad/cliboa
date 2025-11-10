@@ -22,7 +22,6 @@ from cliboa.core.processor import _ParallelProcessor
 from cliboa.listener.base import BaseStepListener
 from cliboa.listener.step import StepStatusListener
 from cliboa.util.base import _BaseObject
-from cliboa.util.cache import StepArgument
 from cliboa.util.exception import CliboaException
 
 
@@ -52,9 +51,9 @@ class _ScenarioBuilder(_BaseObject):
             "loader", _get_scenario_loader_class(file_format)
         )
         self._scenario_model_cls = self._resolve_cls("scenario_model", ScenarioModel)
-        self._step_argument_cls = self._resolve_cls("step_argument", StepArgument)
         self._factory = self._resolve("factory", _cliboa_factory)
         self._cmd_arg = cmd_arg
+        self._step_model_map = {}
 
     def execute(self) -> list[_IExecute]:
         """
@@ -96,10 +95,29 @@ class _ScenarioBuilder(_BaseObject):
         self._logger.info("Complete to parse scenario files.")
         return main_scenario
 
+    def _setup_step_model_map(self, scenario: ScenarioModel) -> None:
+        for step in scenario.scenario:
+            if isinstance(step, StepModel):
+                key = step.step
+                if key in self._step_model_map:
+                    self._logger.warning(f"Duplicate step: {key}")
+                # Last-one-wins if duplicated
+                self._step_model_map[key] = step
+            elif isinstance(step, ParallelStepModel):
+                for p_step in step.parallel:
+                    key = p_step.step
+                    if key in self._step_model_map:
+                        self._logger.warning(f"Duplicate step: {key}")
+                    # Last-one-wins if duplicated
+                    self._step_model_map[key] = p_step
+            else:
+                raise CliboaException(f"Unexpected step instance: {step.__class__.__name__}")
+
     def _create_steps(self, scenario: ScenarioModel) -> list[_IExecute]:
         """
         Add executable instance to the queue
         """
+        self._setup_step_model_map(scenario)
         steps = []
         for step in scenario.scenario:
             instance = self._create_step_instance(step)
@@ -114,16 +132,12 @@ class _ScenarioBuilder(_BaseObject):
         """
         if isinstance(step, StepModel):
             instance = self._create_executor(step)
-            # save arguments to refer by symbol as a global variables.
-            self._step_argument_cls._put(step.step, instance.step)
             return instance
         elif isinstance(step, ParallelStepModel):
             instances = []
             for p_step in step.parallel:
                 instance = self._create_executor(p_step)
                 instances.append(instance)
-                # save arguments to refer by symbol as a global variables.
-                self._step_argument_cls._put(p_step.step, instance.step)
             return self._resolve(
                 "parallel_processor", _ParallelProcessor, instances, step.parallel_config
             )
@@ -137,8 +151,13 @@ class _ScenarioBuilder(_BaseObject):
         cls_name = step.class_name
         self._logger.debug("Create %s instance" % cls_name)
 
-        instance = self._factory.create(cls_name)
-        executor = self._resolve("step_executor", _StepExecutor, instance, step, self._cmd_arg)
+        instance = self._factory.create(cls_name, **self._di_kwargs)
+        symbol_model = self._step_model_map.get(step.symbol) if step.symbol else None
+
+        executor = self._resolve(
+            "step_executor", _StepExecutor, instance, step, self._cmd_arg, symbol_model
+        )
+
         for lis in self._create_listeners(step):
             executor.register_listener(lis)
         return executor
@@ -157,7 +176,7 @@ class _ScenarioBuilder(_BaseObject):
                     ", neither a str, list, nor None."
                 )
             for lis_cls in lis_classes:
-                clz = self._factory.create(lis_cls)
+                clz = self._factory.create(lis_cls, **self._di_kwargs)
                 clz.__dict__.update(arguments)
                 listeners.append(clz)
         return listeners

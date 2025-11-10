@@ -19,8 +19,8 @@ class SampleStep(BaseStep):
     For unit test
     """
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self._retry_count = 3
         self._memo = None
 
@@ -41,8 +41,8 @@ class SampleStepSub(SampleStep):
     """
 
     def execute(self, *args):
-        self._logger.info("Start %s" % self.__class__.__name__)
-        self._logger.info("Finish %s" % self.__class__.__name__)
+        symbol_memo = self.get_step_argument("memo")
+        self._logger.info(f"{self._symbol} symbol memo is {symbol_memo}")
 
 
 class SampleCustomStep(BaseStep):
@@ -50,8 +50,8 @@ class SampleCustomStep(BaseStep):
     For unit test
     """
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self._password = None
         self._access_key = None
         self._secret_key = None
