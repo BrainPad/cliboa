@@ -15,7 +15,7 @@
 import os
 import shutil
 from contextlib import ExitStack
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from cliboa.conf import env
 from cliboa.scenario.extract.sftp import SftpDownload, SftpFileExistsCheck
@@ -23,7 +23,7 @@ from cliboa.util.cache import ObjectStore
 from cliboa.util.constant import StepStatus
 
 
-class TestSftpDownload(object):
+class TestSftpDownload:
     def setup_method(self, method):
         self._data_dir = os.path.join(env.BASE_DIR, "data")
 
@@ -32,15 +32,18 @@ class TestSftpDownload(object):
 
     def test_execute_with_files(self):
         instance = SftpDownload()
+        mock_parent = Mock(
+            step_name="sftp_class",
+        )
         instance._set_properties(
             {
+                "parent": mock_parent,
                 "host": "dummy.host",
                 "user": "dummy_user",
                 "password": "dummy_pass",
                 "src_dir": "/",
                 "src_pattern": ".*.txt",
                 "dest_dir": self._data_dir,
-                "step": "sftp_class",
             }
         )
 
@@ -55,15 +58,18 @@ class TestSftpDownload(object):
 
     def test_execute_nofiles_return(self):
         instance = SftpDownload()
+        mock_parent = Mock(
+            step_name="sftp_class",
+        )
         instance._set_properties(
             {
+                "parent": mock_parent,
                 "host": "dummy.host",
                 "user": "dummy_user",
                 "password": "dummy_pass",
                 "src_dir": "/",
                 "src_pattern": ".*.txt",
                 "dest_dir": self._data_dir,
-                "step": "sftp_class",
                 "quit": True,
             }
         )
@@ -79,15 +85,18 @@ class TestSftpDownload(object):
 
     def test_execute_nofiles_continue(self):
         instance = SftpDownload()
+        mock_parent = Mock(
+            step_name="sftp_class",
+        )
         instance._set_properties(
             {
+                "parent": mock_parent,
                 "host": "dummy.host",
                 "user": "dummy_user",
                 "password": "dummy_pass",
                 "src_dir": "/",
                 "src_pattern": ".*.txt",
                 "dest_dir": self._data_dir,
-                "step": "sftp_class",
                 "quit": False,
             }
         )
@@ -108,15 +117,18 @@ class TestSftpDownload(object):
             f.write("test")
 
         instance = SftpDownload()
+        mock_parent = Mock(
+            step_name="sftp_class",
+        )
         instance._set_properties(
             {
+                "parent": mock_parent,
                 "host": "dummy.host",
                 "user": "dummy_user",
                 "key": dummy_pass,
                 "src_dir": "/",
                 "src_pattern": ".*.txt",
                 "dest_dir": self._data_dir,
-                "step": "sftp_class",
             }
         )
 
@@ -128,15 +140,18 @@ class TestSftpDownload(object):
 
     def test_execute_with_key_content(self):
         instance = SftpDownload()
+        mock_parent = Mock(
+            step_name="sftp_class",
+        )
         instance._set_properties(
             {
+                "parent": mock_parent,
                 "host": "dummy.host",
                 "user": "dummy_user",
                 "key": {"content": "dummy_rsa"},
                 "src_dir": "/",
                 "src_pattern": ".*.txt",
                 "dest_dir": self._data_dir,
-                "step": "sftp_class",
             }
         )
 

@@ -18,7 +18,7 @@ import re
 from typing import List
 
 
-class File(object):
+class File:
     def remove_csv_col(self, input_file, output_file, remains, enc="utf-8"):
         """
         Extract only the necessary columns from the CSV data and output a new CSV
@@ -44,7 +44,7 @@ class File(object):
                 writer.writerow(contents)
             out_f.flush()
 
-    def get_target_files(self, src_dir, src_pattern, tree=True) -> List[str]:
+    def get_target_files(self, src_dir: str, src_pattern: str, tree=True) -> List[str]:
         """
         Get files which matches to the regular expression
 

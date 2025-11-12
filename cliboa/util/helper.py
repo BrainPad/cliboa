@@ -41,7 +41,7 @@ class Helper(object):
         """
         _warn_deprecated(
             "cliboa.util.helper.Helepr.set_property",
-            "cliboa.scenario.base.BaseStep._set_properties",
+            "cliboa.scenario.base.AbstractStep._set_properties",
             "3.0",
         )
         attr = getattr(type(cls), method, None)

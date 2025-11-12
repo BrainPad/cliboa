@@ -95,15 +95,15 @@ class S3DownloadFileDelete(BaseS3):
         keys = stored.get("keys")
 
         if keys is not None and len(keys) > 0:
-            self._region = super().get_step_argument("region")
-            self._access_key = super().get_step_argument("access_key")
-            self._secret_key = super().get_step_argument("secret_key")
-            self._profile = super().get_step_argument("profile")
-            self._bucket = super().get_step_argument("bucket")
-            self._key = super().get_step_argument("key")
-            self._prefix = super().get_step_argument("prefix")
-            self._delimiter = super().get_step_argument("delimiter")
-            self._src_pattern = super().get_step_argument("src_pattern")
+            self._region = self.get_symbol_argument("region")
+            self._access_key = self.get_symbol_argument("access_key")
+            self._secret_key = self.get_symbol_argument("secret_key")
+            self._profile = self.get_symbol_argument("profile")
+            self._bucket = self.get_symbol_argument("bucket")
+            self._key = self.get_symbol_argument("key")
+            self._prefix = self.get_symbol_argument("prefix")
+            self._delimiter = self.get_symbol_argument("delimiter")
+            self._src_pattern = self.get_symbol_argument("src_pattern")
 
             adapter = S3Adapter(
                 self._access_key, self._secret_key, self._profile, self._role_arn, self._external_id

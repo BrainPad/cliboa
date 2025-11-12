@@ -18,7 +18,7 @@ from typing import Any
 from cliboa.core.interface import _IExecute
 from cliboa.core.model import CommandArgument, StepModel
 from cliboa.listener.interface import IScenarioExecutor
-from cliboa.scenario.base import BaseStep
+from cliboa.scenario.base import AbstractStep
 from cliboa.scenario.interface import IParentStep
 from cliboa.util.base import _BaseObject
 from cliboa.util.constant import StepStatus
@@ -30,8 +30,8 @@ class _BaseExecutor(_BaseObject, _IExecute):
     Execute main logic with handling listeners.
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self._listeners = []
 
     def register_listener(self, listener) -> None:
@@ -86,8 +86,8 @@ class _ScenarioExecutor(_BaseExecutor, IScenarioExecutor):
     Executor for scenario
     """
 
-    def __init__(self, steps: list[_IExecute], *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, steps: list[_IExecute], **kwargs):
+        super().__init__(**kwargs)
         self._steps = steps
         self._max_steps_size = len(steps)
 
@@ -134,22 +134,14 @@ class _StepExecutor(_BaseExecutor, IParentStep):
 
     def __init__(
         self,
-        step: BaseStep,
+        step: AbstractStep,
         model: StepModel,
         cmd_arg: CommandArgument | None = None,
         symbol_model: StepModel | None = None,
-        *args,
         **kwargs,
     ):
-        super().__init__(*args, **kwargs)
-        step._set_properties(
-            {
-                "step": model.step,
-                "symbol": model.symbol,
-                "parent": self,
-            }
-        )
-        step._set_properties(model.arguments)
+        super().__init__(**kwargs)
+        step._set_properties({"parent": self} | model.arguments)
         self._step = step
         self._model = model
         self._symbol_model = symbol_model
@@ -157,8 +149,16 @@ class _StepExecutor(_BaseExecutor, IParentStep):
         self._kwargs = copy.deepcopy(cmd_arg.kwargs) if cmd_arg and cmd_arg.kwargs else {}
 
     @property
-    def step(self) -> BaseStep:
+    def step(self) -> AbstractStep:
         return self._step
+
+    @property
+    def step_name(self) -> str:
+        return self._model.step
+
+    @property
+    def symbol_name(self) -> str | None:
+        return self._model.symbol
 
     def get_symbol_arguments(self) -> dict[str, Any]:
         if self._symbol_model:

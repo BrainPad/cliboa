@@ -28,3 +28,13 @@ class IParentStep(ABC):
         Returns {} if symbol is not specified, and no exceptions are raised.
         """
         raise NotImplementedError()
+
+    @property
+    @abstractmethod
+    def step_name(self) -> str:
+        raise NotImplementedError()
+
+    @property
+    @abstractmethod
+    def symbol_name(self) -> str | None:
+        raise NotImplementedError()

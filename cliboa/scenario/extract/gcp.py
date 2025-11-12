@@ -221,11 +221,11 @@ class GcsDownloadFileDelete(BaseGcs):
         if len(dl_files) > 0:
             self._logger.info("Delete files %s" % dl_files)
             client = GcsAdapter().get_client(credentials=self.get_credentials())
-            bucket = client.bucket(super().get_step_argument("bucket"))
+            bucket = client.bucket(self.get_symbol_argument("bucket"))
             for blob in client.list_blobs(
                 bucket,
-                prefix=super().get_step_argument("prefix"),
-                delimiter=super().get_step_argument("delimiter"),
+                prefix=self.get_symbol_argument("prefix"),
+                delimiter=self.get_symbol_argument("delimiter"),
             ):
                 for dl_f in dl_files:
                     if dl_f == blob.name:
@@ -293,7 +293,7 @@ class GcsFileExistsCheck(BaseGcs):
 
         client = GcsAdapter().get_client(credentials=self.get_credentials())
         dl_files = []
-        bucket = client.bucket(super().get_step_argument("bucket"))
+        bucket = client.bucket(self.get_symbol_argument("bucket"))
 
         for blob in client.list_blobs(bucket, prefix=self._prefix, delimiter=self._delimiter):
             r = re.compile(self._src_pattern)

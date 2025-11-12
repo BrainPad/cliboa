@@ -17,7 +17,7 @@ import re
 from cliboa import state
 from cliboa.conf import env
 from cliboa.listener.base import BaseStepListener
-from cliboa.scenario.base import BaseStep
+from cliboa.scenario.base import AbstractStep
 
 
 class StepStatusListener(BaseStepListener):
@@ -42,7 +42,7 @@ class StepStatusListener(BaseStepListener):
         self._partial_pattern = partial_pattern
         self._partial_num = partial_num
 
-    def before(self, step: BaseStep) -> None:
+    def before(self, step: AbstractStep) -> None:
         state.set(step.__class__.__name__)
         props_dict = {}
         for k, v in step.__dict__.items():
@@ -69,8 +69,8 @@ class StepStatusListener(BaseStepListener):
         )
         self._logger.info("Start step execution. %s" % step.__class__.__name__)
 
-    def after(self, step: BaseStep) -> None:
+    def after(self, step: AbstractStep) -> None:
         self._logger.info("Finish step execution. %s" % step.__class__.__name__)
 
-    def completion(self, step: BaseStep) -> None:
+    def completion(self, step: AbstractStep) -> None:
         self._logger.info("Complete step execution. %s" % step.__class__.__name__)

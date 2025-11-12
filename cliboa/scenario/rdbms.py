@@ -49,7 +49,7 @@ class BaseRdbms(BaseStep):
     def port(self, port):
         self._port = port
 
-    def execute(self, *args):
+    def execute(self):
         valid = EssentialParameters(
             self.__class__.__name__,
             [self._host, self._dbname, self._user, self._password],
@@ -80,7 +80,21 @@ class BaseRdbmsRead(BaseRdbms):
     def encoding(self, encoding):
         self._encoding = encoding
 
-    def execute(self, *args):
+    def _property_path_reader(self, src, encoding="utf-8"):
+        """
+        Returns an resource contents from the path if src starts with "path:",
+        returns src if not
+        """
+        self._logger.warning("DeprecationWarning: Will be removed in the near future")
+        if src[:5].upper() == "PATH:":
+            fpath = src[5:]
+            if os.path.exists(fpath) is False:
+                raise FileNotFound(src)
+            with open(fpath, mode="r", encoding=encoding) as f:
+                return f.read()
+        return src
+
+    def execute(self):
         super().execute()
 
         valid = EssentialParameters(self.__class__.__name__, [self._dest_path])
@@ -105,7 +119,7 @@ class BaseRdbmsRead(BaseRdbms):
                             "the `query` will be changed to accept only dictionary types. "
                         )
                     )
-                    query = super()._property_path_reader(self._query)
+                    query = self._property_path_reader(self._query)
                 else:
                     query_filepath = self._source_path_reader(self._query)
                     with open(query_filepath, "r") as qf:
@@ -158,7 +172,7 @@ class BaseRdbmsWrite(BaseRdbms):
     def chunk_size(self, chunk_size):
         self._chunk_size = chunk_size
 
-    def execute(self, *args):
+    def execute(self):
         super().execute()
 
         valid = EssentialParameters(

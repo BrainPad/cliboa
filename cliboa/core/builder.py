@@ -146,7 +146,7 @@ class _ScenarioBuilder(_BaseObject):
 
     def _create_executor(self, step: StepModel) -> _StepExecutor:
         """
-        Create _StepExecutor instance - wraps BaseStep.
+        Create _StepExecutor instance - wraps AbstractStep.
         """
         cls_name = step.class_name
         self._logger.debug("Create %s instance" % cls_name)

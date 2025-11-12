@@ -14,7 +14,7 @@
 from functools import partial
 
 from cliboa.listener.base import BaseStepListener
-from cliboa.scenario.base import BaseStep
+from cliboa.scenario.base import AbstractStep
 from cliboa.util.base import _warn_deprecated
 
 _warn_deprecated_step_listener = partial(
@@ -34,22 +34,22 @@ class StepListener(BaseStepListener):
         _warn_deprecated_step_listener()
         super().__init__(*args, **kwargs)
 
-    def before(self, step: BaseStep) -> None:
+    def before(self, step: AbstractStep) -> None:
         if hasattr(self, "before_step"):
             _warn_deprecated_step_listener()
             self.before_step(step)
 
-    def after(self, step: BaseStep) -> None:
+    def after(self, step: AbstractStep) -> None:
         if hasattr(self, "after_step"):
             _warn_deprecated_step_listener()
             self.after_step(step)
 
-    def error(self, step: BaseStep, e: Exception) -> None:
+    def error(self, step: AbstractStep, e: Exception) -> None:
         if hasattr(self, "error_step"):
             _warn_deprecated_step_listener()
             self.error_step(step)
 
-    def completion(self, step: BaseStep) -> None:
+    def completion(self, step: AbstractStep) -> None:
         if hasattr(self, "after_completion"):
             _warn_deprecated_step_listener()
             self.after_completion(step)

@@ -50,9 +50,7 @@ class TestStepStatusListener(TestCase):
                 json_str = msg.replace("Step properties: ", "", 1)
                 try:
                     props = json.loads(json_str)
-                    self.assertEqual(props.get("_step"), "test_step")
                     self.assertEqual(props.get("_retry_count"), 5)
-                    self.assertEqual(props.get("_symbol"), None)
                     step_props_found = True
                     break
                 except json.JSONDecodeError:
