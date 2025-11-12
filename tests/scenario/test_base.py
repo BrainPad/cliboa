@@ -17,8 +17,6 @@ from unittest import TestCase
 
 from cliboa.conf import env
 from cliboa.scenario.sample_step import SampleCustomStep
-from cliboa.util.helper import Helper
-from cliboa.util.log import _get_logger
 
 
 class TestBase(TestCase):
@@ -27,7 +25,6 @@ class TestBase(TestCase):
 
     def test_source_path_reader_with_none(self):
         instance = SampleCustomStep()
-        Helper.set_property(instance, "logger", _get_logger(instance.__class__.__name__))
         ret = instance._source_path_reader(None)
 
         assert ret is None

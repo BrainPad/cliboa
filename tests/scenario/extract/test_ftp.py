@@ -14,30 +14,32 @@
 import os
 import shutil
 
+import pytest
+
 from cliboa.conf import env
 from cliboa.scenario.extract.ftp import FtpDownload
-from cliboa.util.helper import Helper
-from cliboa.util.log import _get_logger
 from tests import BaseCliboaTest
 
 
+@pytest.mark.skip(reason="The test result is not meaningful.")
 class TestFtpDownload(BaseCliboaTest):
     def setup_method(self, method):
         self._data_dir = os.path.join(env.BASE_DIR, "data")
 
     def test_execute_ok(self):
+        # TODO: Implement necessary tests using mocks.
         try:
             os.makedirs(self._data_dir)
-            instance = FtpDownload()
-            Helper.set_property(instance, "logger", _get_logger(__name__))
-            # use public ftp
+            instance = FtpDownload()  # noqa
             """
-            Helper.set_property(instance, "host", "test.rebex.net")
-            Helper.set_property(instance, "user", "demo")
-            Helper.set_property(instance, "password", "password")
-            Helper.set_property(instance, "src_dir", "/")
-            Helper.set_property(instance, "src_pattern", "(.*).txt")
-            Helper.set_property(instance, "dest_dir", self._data_dir)
+            instance._set_properties({
+                "host": "test.rebex.net",
+                "user": "demo",
+                "password": "password",
+                "src_dir": "/",
+                "src_pattern": "(.*).txt",
+                "dest_dir": self._data_dir,
+            }
             instance.execute()
             exists_file = os.path.exists(os.path.join(self._data_dir, "readme.txt"))
             """

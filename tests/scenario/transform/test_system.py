@@ -18,7 +18,6 @@ from glob import glob
 
 from cliboa.conf import env
 from cliboa.scenario.transform.system import ExecuteShellScript
-from cliboa.util.helper import Helper
 from tests import BaseCliboaTest
 
 
@@ -32,8 +31,13 @@ class TestExecuteShellScript(BaseCliboaTest):
 
     def test_inline_script(self):
         instance = ExecuteShellScript()
-        Helper.set_property(instance, "command", {"content": "touch foo.csv && touch test.csv"})
-        Helper.set_property(instance, "work_dir", self._data_dir)
+        instance._set_properties(
+            {
+                "command": {"content": "touch foo.csv && touch test.csv"},
+                "work_dir": self._data_dir,
+            }
+        )
+
         instance.execute()
 
         files = glob(os.path.join(self._data_dir, "*.csv"))
@@ -55,7 +59,7 @@ class TestExecuteShellScript(BaseCliboaTest):
         subprocess.call(["chmod", "0777", test_script_path])
 
         instance = ExecuteShellScript()
-        Helper.set_property(instance, "command", {"file": test_script_path})
+        instance._set_properties({"command": {"file": test_script_path}})
         instance.execute()
 
         files = glob(os.path.join(self._data_dir, "*.csv"))

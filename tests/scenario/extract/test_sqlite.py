@@ -18,8 +18,6 @@ import pytest
 
 from cliboa.adapter.sqlite import SqliteAdapter
 from cliboa.scenario.extract.sqlite import SqliteExport
-from cliboa.util.helper import Helper
-from cliboa.util.log import _get_logger
 
 
 class TestSqliteExport(object):
@@ -63,7 +61,11 @@ class TestSqliteExport(object):
             self._insert_test_data(test_data)
 
             instance = self._create_instance()
-            Helper.set_property(instance, "order", ["No"])
+            instance._set_properties(
+                {
+                    "order": ["No"],
+                }
+            )
             instance.execute()
 
             with open(self._RESULT_FILE, "r") as o:
@@ -99,8 +101,12 @@ class TestSqliteExport(object):
             self._insert_test_data(test_data)
 
             instance = self._create_instance()
-            Helper.set_property(instance, "order", ["No"])
-            Helper.set_property(instance, "no_duplicate", True)
+            instance._set_properties(
+                {
+                    "order": ["No"],
+                    "no_duplicate": True,
+                }
+            )
             instance.execute()
 
             with open(self._RESULT_FILE, "r") as o:
@@ -121,10 +127,13 @@ class TestSqliteExport(object):
 
     def _create_instance(self):
         instance = SqliteExport()
-        Helper.set_property(instance, "logger", _get_logger(__name__))
-        Helper.set_property(instance, "dbname", self._DB_NAME)
-        Helper.set_property(instance, "dest_path", self._RESULT_FILE)
-        Helper.set_property(instance, "tblname", self._TBL_NAME)
+        instance._set_properties(
+            {
+                "dbname": self._DB_NAME,
+                "dest_path": self._RESULT_FILE,
+                "tblname": self._TBL_NAME,
+            }
+        )
         return instance
 
     def _clean(self, path):
