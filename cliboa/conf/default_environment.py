@@ -13,37 +13,57 @@
 #
 import os
 
-# Directory name which scenario file is placed
+##################################################
+# 1. File/Directory - used only within this file, or cliboa.interface.
+##################################################
+
+# Directory name which scenario file is placed.
 SCENARIO_DIR_NAME = "scenario"
 
-# scenario file name excluding extension
+# scenario file name excluding extension.
 SCENARIO_FILE_NAME = "scenario"
 
-# cliboa project directory path
+# cliboa project directory path.
 BASE_DIR = os.getcwd()
 
-# Project directory path. Customization is available
+# Project directory path.
 PROJECT_DIR = os.path.join(BASE_DIR, "project")
 
-# Common scenario directory path. Customization is available
+# Common scenario directory path.
 COMMON_DIR = os.path.join(BASE_DIR, "common")
 
-# Common scenario directory path. Customization is available
+# Common scenario directory path.
 COMMON_SCENARIO_DIR = os.path.join(COMMON_DIR, "scenario")
 
-# the blow paths are appended to sys.path of python
-SYSTEM_APPEND_PATHS = [COMMON_SCENARIO_DIR]
+##################################################
+# 2. Scenario class
+##################################################
 
-# common custom classes to make available
+# common custom classes to make available.
 COMMON_CUSTOM_CLASSES = ["sample_step.SampleStep", "sample_step.SampleStepSub"]
 
-# project congenital classes to make available
+# project congenital classes to make available.
 PROJECT_CUSTOM_CLASSES = []
 
-# logging mask re pattern
+# the blow paths are appended to sys.path of python.
+SYSTEM_APPEND_PATHS = [COMMON_SCENARIO_DIR]
+
+##################################################
+# 3. Logging
+##################################################
+
+# logging config file used for logging.config.fileConfig.
+# This setting takes precedence over {BASE_DIR}/conf/logging.conf if defined.
+# LOGGING_CONFIG_PATH = os.path.join(BASE_DIR, "conf", "logging.conf")
+
+# logging config dict used for logging.config.dictConfig.
+# This setting takes precedence over LOGGING_CONFIG_PATH if defined.
+# LOGGING_CONFIG_DICT = {}
+
+# logging mask re pattern.
 # LOGGING_MASK = ".*password.*|.*secret_key.*"
 
-# logging parital mask re pattern
+# logging parital mask re pattern.
 # LOGGING_PARTIAL_MASK = ".*access_key.*|.*token.*"
 
 # logging partial mask config - expose the first and latest LOGGING_PARTIAL_NUM characters.
