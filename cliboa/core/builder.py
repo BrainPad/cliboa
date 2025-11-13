@@ -14,7 +14,7 @@
 import copy
 
 from cliboa.core.executor import _StepExecutor
-from cliboa.core.factory import _cliboa_factory, _get_scenario_loader_class
+from cliboa.core.factory import _CliboaFactory, _get_scenario_loader_class
 from cliboa.core.interface import _IExecute
 from cliboa.core.loader import _ScenarioLoader
 from cliboa.core.model import CommandArgument, ParallelStepModel, ScenarioModel, StepModel
@@ -36,6 +36,7 @@ class _ScenarioBuilder(_BaseObject):
         common_file: str | list[str] | None = None,
         file_format: str = "yaml",
         cmd_arg: CommandArgument | None = None,
+        project_name: str | None = None,
         *args,
         **kwargs,
     ):
@@ -51,7 +52,7 @@ class _ScenarioBuilder(_BaseObject):
             "loader", _get_scenario_loader_class(file_format)
         )
         self._scenario_model_cls = self._resolve_cls("scenario_model", ScenarioModel)
-        self._factory = self._resolve("factory", _cliboa_factory)
+        self._factory = self._resolve("factory", _CliboaFactory, project_name)
         self._cmd_arg = cmd_arg
         self._step_model_map = {}
 

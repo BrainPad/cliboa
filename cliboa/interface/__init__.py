@@ -15,14 +15,14 @@ import argparse
 import logging
 import logging.config
 import os
-import sys
 from typing import Tuple
 
 from cliboa.conf import env
 from cliboa.core.manager import ScenarioManager
 from cliboa.core.model import CommandArgument
+from cliboa.util.base import _warn_deprecated, _warn_removed
 from cliboa.util.exception import InvalidFormat
-from cliboa.util.log import CliboaLogRecord, _get_logger
+from cliboa.util.log import CliboaLogRecord
 
 
 def _parse_args():
@@ -43,20 +43,6 @@ def _parse_args():
     )
     args = parser.parse_args()
     return args
-
-
-def _add_system_path(project_name: str):
-    """
-    Deprecated: This is provided for v2 backward compatibility, but is no longer supported.
-
-    Adds project dir to system path for easy loading scenario classes.
-    """
-    pj_scenario_dir = os.path.join(env.PROJECT_DIR, project_name, env.SCENARIO_DIR_NAME)
-    add_target_paths = env.SYSTEM_APPEND_PATHS
-    add_target_paths.append(pj_scenario_dir)
-    for path in add_target_paths:
-        sys.path.append(path)
-    _get_logger(__name__).info(f"Appended cliboa's system path to sys.path: {sys.path}")
 
 
 def _initialize_cliboa_logging():
@@ -82,40 +68,49 @@ def _generate_scenario_path(project_name: str, scenario_format: str) -> Tuple[st
     generate project's scenario path and common scenario path from project_name and scenario_format.
     """
     if scenario_format == "yaml":
-        pj_scenario_file = (
-            os.path.join(env.PROJECT_DIR, project_name, env.SCENARIO_FILE_NAME) + ".yml"
-        )
-        cmn_scenario_file = os.path.join(env.COMMON_DIR, env.SCENARIO_FILE_NAME) + ".yml"
+        ext = env.get("SCENARIO_YAML_EXT", ".yml")
+        pj_scenario_file = os.path.join(env.PROJECT_DIR, project_name, env.SCENARIO_FILE_NAME) + ext
+        cmn_scenario_file = os.path.join(env.COMMON_DIR, env.SCENARIO_FILE_NAME) + ext
     elif scenario_format == "json":
-        pj_scenario_file = (
-            os.path.join(env.PROJECT_DIR, project_name, env.SCENARIO_FILE_NAME)
-            + "."
-            + scenario_format
-        )
-        cmn_scenario_file = (
-            os.path.join(env.COMMON_DIR, env.SCENARIO_FILE_NAME) + "." + scenario_format
-        )
+        ext = "." + scenario_format
+        pj_scenario_file = os.path.join(env.PROJECT_DIR, project_name, env.SCENARIO_FILE_NAME) + ext
+        cmn_scenario_file = os.path.join(env.COMMON_DIR, env.SCENARIO_FILE_NAME) + ext
     else:
         raise InvalidFormat(f"scenario format '{scenario_format}' is invalid.")
 
     return pj_scenario_file, cmn_scenario_file
 
 
-def run(add_system_path: bool = True):
+def _warn_backward_compatibility():
+    if env.get("SCENARIO_DIR_NAME"):
+        _warn_deprecated(
+            "{CLIBOA_ENV}.SCENARIO_DIR_NAME",
+            "{CLIBOA_ENV}.PROJECT_SCENARIO_DIR_NAME",
+            end_version="3.0",
+        )
+    if env.get("SYSTEM_APPEND_PATHS"):
+        _warn_removed("{CLIBOA_ENV}.SYSTEM_APPEND_PATHS", end_version="3.0")
+    base_dir = env.get("BASE_DIR")
+    if base_dir and os.path.exists(os.path.join(base_dir, "conf", "cliboa.ini")):
+        _warn_removed("configuration in cliboa.ini", end_version="3.0")
+
+
+def run():
     """
     The primary entry point function for cliboa.
 
     It's recommended to call this function if you want to use the cliboa application easily.
-    TODO: When change the factory logic to creating scenario classes without additional path
-          dependence, add_system_path's default value will be False.
     """
+    _warn_backward_compatibility()
     _initialize_cliboa_logging()
     cmd_args = _parse_args()
-    if add_system_path:
-        _add_system_path(cmd_args.project_name)
 
     pj, cmn = _generate_scenario_path(cmd_args.project_name, cmd_args.format)
     manager = ScenarioManager(
-        pj, cmn, cmd_args.format, CommandArgument(args=cmd_args.execute_method_argument)
+        pj,
+        cmn,
+        cmd_args.format,
+        CommandArgument(args=cmd_args.execute_method_argument),
+        project_name=cmd_args.project_name,
     )
     return manager.execute()

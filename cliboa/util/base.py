@@ -68,3 +68,22 @@ def _warn_deprecated(
         DeprecationWarning,
         stacklevel=stacklevel,
     )
+
+
+def _warn_removed(
+    deprecated: str, instead: str | None = None, end_version: str | None = None, stacklevel: int = 3
+) -> None:
+    err_mes = f"{deprecated} has been removed"
+    if end_version:
+        err_mes += f" in version {end_version}."
+    else:
+        err_mes += "."
+    if instead:
+        err_mes += f" Please use {instead}."
+    else:
+        err_mes += "Refer to the documentation for migration details."
+    warnings.warn(
+        err_mes,
+        DeprecationWarning,
+        stacklevel=stacklevel,
+    )
