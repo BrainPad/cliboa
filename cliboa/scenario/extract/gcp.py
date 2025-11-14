@@ -19,7 +19,6 @@ from datetime import datetime
 from cliboa.adapter.gcp import BigQueryAdapter, FireStoreAdapter, GcsAdapter
 from cliboa.scenario.gcp import BaseBigQuery, BaseFirestore, BaseGcs
 from cliboa.scenario.validator import EssentialParameters
-from cliboa.util.cache import ObjectStore
 from cliboa.util.constant import StepStatus
 from cliboa.util.exception import InvalidParameter
 from cliboa.util.string import StringUtil
@@ -85,7 +84,7 @@ class BigQueryRead(BaseBigQuery):
         query = self._query if self._query else query
 
         df = client.query(query).to_dataframe()
-        ObjectStore.put(self._key, df)
+        self.put_to_context({f"{self._key}": df})
 
     def _save_as_file_via_gcs(self):
         self._logger.info("Save data as a file via GCS")
@@ -204,7 +203,7 @@ class GcsDownload(BaseGcs):
             dl_files.append(blob.name)
             blob.download_to_filename(os.path.join(self._dest_dir, os.path.basename(blob.name)))
 
-        ObjectStore.put(self._step, dl_files)
+        self.put_to_context(dl_files)
 
 
 class GcsDownloadFileDelete(BaseGcs):
@@ -216,7 +215,7 @@ class GcsDownloadFileDelete(BaseGcs):
         super().__init__()
 
     def execute(self, *args):
-        dl_files = ObjectStore.get(self._symbol)
+        dl_files = self.get_from_context()
 
         if len(dl_files) > 0:
             self._logger.info("Delete files %s" % dl_files)

@@ -19,7 +19,6 @@ from unittest.mock import Mock, patch
 
 from cliboa.conf import env
 from cliboa.scenario.extract.sftp import SftpDownload, SftpFileExistsCheck
-from cliboa.util.cache import ObjectStore
 from cliboa.util.constant import StepStatus
 
 
@@ -35,9 +34,9 @@ class TestSftpDownload:
         mock_parent = Mock(
             step_name="sftp_class",
         )
+        instance.parent = mock_parent
         instance._set_properties(
             {
-                "parent": mock_parent,
                 "host": "dummy.host",
                 "user": "dummy_user",
                 "password": "dummy_pass",
@@ -54,7 +53,7 @@ class TestSftpDownload:
             instance.execute()
 
             assert mock_sftp.called
-            assert ObjectStore.get("sftp_class") == ["test.txt"]
+            mock_parent.put_to_context.assert_called_once_with(["test.txt"])
 
     def test_execute_nofiles_return(self):
         instance = SftpDownload()
@@ -88,9 +87,9 @@ class TestSftpDownload:
         mock_parent = Mock(
             step_name="sftp_class",
         )
+        instance.parent = mock_parent
         instance._set_properties(
             {
-                "parent": mock_parent,
                 "host": "dummy.host",
                 "user": "dummy_user",
                 "password": "dummy_pass",
@@ -109,7 +108,7 @@ class TestSftpDownload:
 
             assert mock_sftp.called
             assert ret is None
-            assert ObjectStore.get("sftp_class") == []
+            mock_parent.put_to_context.assert_called_once_with([])
 
     def test_execute_with_key(self):
         dummy_pass = os.path.join(self._data_dir, "id_rsa")
@@ -143,9 +142,9 @@ class TestSftpDownload:
         mock_parent = Mock(
             step_name="sftp_class",
         )
+        instance.parent = mock_parent
         instance._set_properties(
             {
-                "parent": mock_parent,
                 "host": "dummy.host",
                 "user": "dummy_user",
                 "key": {"content": "dummy_rsa"},
@@ -162,7 +161,7 @@ class TestSftpDownload:
             instance.execute()
 
             assert mock_sftp.called
-            assert ObjectStore.get("sftp_class") == ["test.txt"]
+            mock_parent.put_to_context.assert_called_once_with(["test.txt"])
 
 
 class TestSftpFileExistsCheck:

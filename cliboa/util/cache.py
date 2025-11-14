@@ -11,18 +11,20 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+from cliboa.util.base import _warn_deprecated
+
 global _PROCESS_STORE_CACHE
 _PROCESS_STORE_CACHE = {}
 
 
-class ObjectStore(object):
+class ObjectStore:
     """
     Cache any object.
     This cache class is used when same parameter uses from one STEP to the other.
     """
 
     @staticmethod
-    def put(k, v):
+    def put(k, v, quiet: bool = False):
         """
         Put value
 
@@ -30,6 +32,8 @@ class ObjectStore(object):
             k (str): Cache key
             v (dict): Cache value
         """
+        if not quiet:
+            _warn_deprecated("cliboa.util.cache.ObjectStore.put", end_version="3.0")
         _PROCESS_STORE_CACHE[k] = v
 
     @staticmethod
@@ -43,4 +47,5 @@ class ObjectStore(object):
         Returns:
             dict: Value. Returns None if the key does not exist
         """
+        _warn_deprecated("cliboa.util.cache.ObjectStore.get", end_version="3.0")
         return _PROCESS_STORE_CACHE.get(k)

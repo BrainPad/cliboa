@@ -23,7 +23,7 @@ class ScenarioStatusListener(BaseScenarioListener):
 
     def before(self, executor: IScenarioExecutor) -> None:
         state.set("_ExecuteScenario")
-        self._logger.info(f"Start scenario execution. StepQueue size is {executor.max_steps_size}")
+        self.logger.info(f"Start scenario execution. StepQueue size is {executor.max_steps_size}")
 
     def after(self, executor: IScenarioExecutor) -> None:
         state.set("_ExecuteScenario")
@@ -33,6 +33,6 @@ class ScenarioStatusListener(BaseScenarioListener):
 
     def completion(self, executor: IScenarioExecutor) -> None:
         state.set("_ExecuteScenario")
-        self._logger.info(
+        self.logger.info(
             f"Complete scenario execution. StepQueue size is {executor.current_steps_size}"
         )

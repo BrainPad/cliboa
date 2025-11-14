@@ -57,7 +57,7 @@ class _BaseObject(ABC):
 
 def _warn_deprecated(
     deprecated: str, instead: str | None = None, end_version: str | None = None, stacklevel: int = 3
-) -> None:
+) -> str:
     err_mes = f"{deprecated} is deprecated."
     if instead:
         err_mes += f" Use {instead} instead."
@@ -68,11 +68,12 @@ def _warn_deprecated(
         DeprecationWarning,
         stacklevel=stacklevel,
     )
+    return err_mes
 
 
 def _warn_removed(
     deprecated: str, instead: str | None = None, end_version: str | None = None, stacklevel: int = 3
-) -> None:
+) -> str:
     err_mes = f"{deprecated} has been removed"
     if end_version:
         err_mes += f" in version {end_version}."
@@ -87,3 +88,4 @@ def _warn_removed(
         DeprecationWarning,
         stacklevel=stacklevel,
     )
+    return err_mes

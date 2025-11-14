@@ -9,13 +9,7 @@ from cliboa.core.model import StepModel
 from cliboa.scenario.sample_step import SampleStepSub
 
 
-class _IExecute(object):
-    """Dummy interface for type checking."""
-
-    pass
-
-
-class MockStepExecutor(_IExecute):
+class MockStepExecutor:
     """Mock implementation of _StepExecutor."""
 
     def __init__(self, instance: Any, step: StepModel, cmd_arg: Any, *args, **kwargs):
@@ -25,7 +19,7 @@ class MockStepExecutor(_IExecute):
         self.register_listener = MagicMock()
 
 
-class MockParallelProcessor(_IExecute):
+class MockParallelProcessor:
     """Mock implementation of _ParallelProcessor."""
 
     def __init__(self, instances: list, parallel_config: Any, *args, **kwargs):
@@ -57,9 +51,9 @@ class MockFactory:
         return mock_instance
 
 
-class MockFactorySub:
-    def create(self, class_name: Any, **kwargs) -> SampleStepSub:
-        return SampleStepSub(**kwargs)
+# class MockFactorySub:
+#     def create(self, class_name: Any, **kwargs) -> SampleStepSub:
+#         return SampleStepSub(**kwargs)
 
 
 class TestScenarioBuilderExecute:
@@ -399,12 +393,16 @@ class TestScenarioBuilderExecute:
         builder = _ScenarioBuilder(
             scenario_file="main.yml",
             di_loader=DummyLoaderCls,
-            di_factory=MockFactorySub(),
+            # di_factory=MockFactorySub(),
             di_logger=mock_logger,
         )
 
         steps = builder.execute()
+        assert type(steps[1].step) is SampleStepSub
+        steps[0].step.put_to_context("xyz")
         steps[1].execute()
 
+        print(mock_logger)
         print(mock_logger.info.call_args_list)
-        mock_logger.info.assert_any_call("Step1 symbol memo is val1")
+        mock_logger.info.assert_any_call("symbol memo is val1")
+        mock_logger.info.assert_any_call("symbol context is xyz")

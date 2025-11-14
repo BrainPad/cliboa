@@ -13,6 +13,7 @@
 #
 import copy
 
+from cliboa.core.context import _CliboaContext
 from cliboa.core.executor import _StepExecutor
 from cliboa.core.factory import _CliboaFactory, _get_scenario_loader_class
 from cliboa.core.interface import _IExecute
@@ -55,6 +56,7 @@ class _ScenarioBuilder(_BaseObject):
         self._factory = self._resolve("factory", _CliboaFactory, project_name)
         self._cmd_arg = cmd_arg
         self._step_model_map = {}
+        self._context = self._resolve("context", _CliboaContext)
 
     def execute(self) -> list[_IExecute]:
         """
@@ -156,7 +158,13 @@ class _ScenarioBuilder(_BaseObject):
         symbol_model = self._step_model_map.get(step.symbol) if step.symbol else None
 
         executor = self._resolve(
-            "step_executor", _StepExecutor, instance, step, self._cmd_arg, symbol_model
+            "step_executor",
+            _StepExecutor,
+            instance,
+            step,
+            self._cmd_arg,
+            self._context,
+            symbol_model,
         )
 
         for lis in self._create_listeners(step):

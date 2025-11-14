@@ -11,6 +11,7 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+import logging
 import os
 import tempfile
 from abc import abstractmethod
@@ -34,7 +35,25 @@ class AbstractStep(_BaseObject):
         super().__init__(**kwargs)
         self._parent = None
 
+    @property
+    def logger(self) -> logging.Logger:
+        """
+        logger instance
+        """
+        return self._logger
+
+    @property
+    def parent(self) -> IParentStep | None:
+        """
+        parent instance which implements cliboa.scenario.interface.IParentStep
+        """
+        return self._parent
+
+    @parent.setter
     def parent(self, parent: IParentStep):
+        """
+        set parent instance - assumed to set by cliboa
+        """
         self._parent = parent
 
     def _set_properties(self, properties: dict[str, Any]) -> None:
@@ -75,10 +94,13 @@ class AbstractStep(_BaseObject):
                 if callable(call):
                     call(v)
                 else:
-                    self._logger.warning(f"Failed to set property {k}")
+                    self.logger.warning(f"Failed to set property {k}")
 
     @abstractmethod
     def execute(self, *args, **kwargs) -> Optional[int]:
+        """
+        Main logic of step
+        """
         pass
 
     def get_symbol_argument(self, name: str) -> Any | None:
@@ -86,10 +108,30 @@ class AbstractStep(_BaseObject):
         Returns a symbol's argument (variables are already transformed).
         Returns None if the argument cannot be retrieved, and no exceptions are raised.
         """
-        if not self._parent:
+        if not self.parent:
             return None
-        sa = self._parent.get_symbol_arguments()
+        sa = self.parent.get_symbol_arguments()
         return sa.get(name)
+
+    def put_to_context(self, value: Any) -> None:
+        """
+        Put any given value to cliboa's context.
+        The value is stored using the current step's name as the key.
+        """
+        if not self.parent:
+            return
+        self.parent.put_to_context(value)
+
+    def get_from_context(self, target: str | None = None) -> Any | None:
+        """
+        Get a value from cliboa's context.
+        This value is typically placed there by preceding step (the target).
+        If no target is specified, the method get the value associated with the step's symbol.
+        Returns None if the value is not found (not raise an exception).
+        """
+        if not self.parent:
+            return None
+        return self.parent.get_from_context(target)
 
 
 class BaseStep(AbstractStep):
@@ -107,23 +149,39 @@ class BaseStep(AbstractStep):
         """
         Deprecated: Kept for v2 backward compatibility.
         """
-        return self._parent.step_name if self._parent else ""
+        self.logger.warning(
+            _warn_deprecated(
+                "cliboa.scenario.base.BaseStep._step",
+                "cliboa.scenario.base.AbstractStep.put_to_context",
+                "3.0",
+            )
+        )
+        return self.parent.step_name if self.parent else ""
 
     @property
     def _symbol(self) -> str | None:
         """
         Deprecated: Kept for v2 backward compatibility.
         """
-        return self._parent.symbol_name if self._parent else None
+        self.logger.warning(
+            _warn_deprecated(
+                "cliboa.scenario.base.BaseStep._symbol",
+                "cliboa.scenario.base.AbstractStep.get_from_context",
+                "3.0",
+            )
+        )
+        return self.parent.symbol_name if self.parent else None
 
     def get_step_argument(self, name: str) -> Any | None:
         """
         Deprecated: kept for v2 backward compatibility.
         """
-        _warn_deprecated(
-            "cliboa.scenario.base.BaseStep.get_step_argument",
-            "cliboa.scenario.base.AbstractStep.get_symbol_argument",
-            "3.0",
+        self.logger.warning(
+            _warn_deprecated(
+                "cliboa.scenario.base.BaseStep.get_step_argument",
+                "cliboa.scenario.base.AbstractStep.get_symbol_argument",
+                "3.0",
+            )
         )
         return self.get_symbol_argument(name)
 
