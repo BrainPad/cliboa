@@ -13,29 +13,29 @@
 #
 from importlib import import_module
 
-from cliboa.core.strategy import MultiProcExecutor, MultiProcWithConfigExecutor, SingleProcExecutor
+from cliboa.core.strategy import MultiProcExecutor, SingleProcExecutor
+from cliboa.scenario.base import BaseStep
 from cliboa.util.class_util import ClassUtil
 from cliboa.util.parallel_with_config import ParallelWithConfig
 
 
-class StepExecutorFactory(object):
+class StepExecutorFactory:
     """
     Create step execution strategy instance
     """
 
     @staticmethod
-    def create(obj):
+    def create(obj: BaseStep | ParallelWithConfig):
         """
         Args:
             obj: queue which stores execution target steps
         Returns:
             step execution strategy instance
         """
-        if len(obj) > 1:
+        if isinstance(obj, ParallelWithConfig):
             return MultiProcExecutor(obj)
-        elif len(obj) == 1 and isinstance(obj[0], ParallelWithConfig):
-            return MultiProcWithConfigExecutor(obj)
-        return SingleProcExecutor(obj)
+        else:
+            return SingleProcExecutor(obj)
 
 
 class CustomInstanceFactory(object):

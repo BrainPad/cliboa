@@ -18,7 +18,7 @@ from collections import OrderedDict
 
 import yaml
 
-from cliboa.core.validator import EssentialKeys
+from cliboa.core.model import ScenarioModel
 from cliboa.util.base import _BaseObject
 from cliboa.util.exception import FileNotFound, InvalidFormat, ScenarioFileInvalid
 
@@ -40,71 +40,22 @@ class ScenarioParser(_BaseObject):
             raise InvalidFormat(f"scenario format '{scenario_format}' is invalid.")
         self._loader_class: _ScenarioLoader = loader_class
 
-    def parse(self) -> list[dict]:
+    def parse(self) -> ScenarioModel:
         """
         Parse scenario file
         """
         self._logger.info("Start to parse scenario file.")
 
         pj_top_dict = self._loader_class(self._pj_scenario_file, True)()
-        self._valid_scenario(pj_top_dict)
+        pj_scenario = ScenarioModel.model_validate(pj_top_dict)
 
         cmn_top_dict = self._loader_class(self._cmn_scenario_file, False)()
         if cmn_top_dict:
-            self._valid_scenario(cmn_top_dict)
-            scenario_list = self._merge_scenario(pj_top_dict["scenario"], cmn_top_dict["scenario"])
-        else:
-            scenario_list = pj_top_dict["scenario"]
+            cmn_scenario = ScenarioModel.model_validate(cmn_top_dict)
+            pj_scenario.merge(cmn_scenario)
 
         self._logger.info("Finish to parse scenario file.")
-        return scenario_list
-
-    def _valid_scenario(self, top_dict: dict) -> None:
-        """
-        validate instance type and essential key in scenario.yml
-        """
-        scenario_list = top_dict.get("scenario")
-        if not scenario_list:
-            raise ScenarioFileInvalid(
-                "scenario file is invalid. 'scenario' key does not exist, or 'scenario' key exists but content under 'scenario' key does not exist."  # noqa
-            )
-        valid = EssentialKeys(scenario_list)
-        valid()
-
-    def _merge_scenario(self, pj_list: list, cmn_list: list) -> list:
-        """
-        Merge project scenario.yml and common scenario.yml.
-        If the same class specification exists,
-        scenario.yml of projet is taken priority.
-        """
-        for pj_dict in pj_list:
-            # If same class exists, merge arguments
-            if pj_dict.get("parallel"):
-                for row in pj_dict.get("parallel"):
-                    self._merge(row, cmn_list)
-            elif pj_dict.get("parallel_with_config"):
-                steps = pj_dict.get("parallel_with_config").get("steps")
-                for row in steps:
-                    self._merge(row, cmn_list)
-            else:
-                self._merge(pj_dict, cmn_list)
-
-        return pj_list
-
-    def _merge(self, pj_dict: dict, cmn_list: list[dict]) -> None:
-        cmn_dict_in_list = [d for d in cmn_list if d.get("class") == pj_dict.get("class")]
-        if not cmn_dict_in_list:
-            return
-
-        pj_cls_attrs = pj_dict.get("arguments", "")
-        cmn_cls_attrs = cmn_dict_in_list[0].get("arguments")
-
-        # Merge arguments
-        if pj_cls_attrs and cmn_cls_attrs:
-            pj_cls_attrs = dict(cmn_cls_attrs, **pj_cls_attrs)
-        elif not pj_cls_attrs and cmn_cls_attrs:
-            pj_cls_attrs = cmn_cls_attrs
-        pj_dict["arguments"] = pj_cls_attrs
+        return pj_scenario
 
 
 class _ScenarioLoader(_BaseObject):

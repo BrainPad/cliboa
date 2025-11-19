@@ -22,7 +22,7 @@ from cliboa.conf import env
 from cliboa.core.listener import ScenarioStatusListener, StepListener, StepStatusListener
 from cliboa.core.scenario_queue import ScenarioQueue
 from cliboa.core.step_queue import StepQueue
-from cliboa.core.strategy import SingleProcExecutor, StepExecutor
+from cliboa.core.strategy import SingleProcExecutor, _StepExecutor
 from cliboa.core.worker import ScenarioWorker
 from cliboa.scenario.sample_step import SampleCustomStep
 from cliboa.util.constant import StepStatus
@@ -60,7 +60,7 @@ class TestScenarioStatusListener(BaseCliboaTest):
 class TestStepStatusListener(object):
     def setup_method(self, method):
         self._listener = StepStatusListener()
-        self._executor = StepExecutor(["1"])
+        self._executor = _StepExecutor(["1"])
         self._log_file = os.path.join(env.BASE_DIR, "logs", "app.log")
 
     def test_after_step(self):
@@ -103,7 +103,7 @@ class TestAppropriateListnerCall(unittest.TestCase):
             step = SampleCustomStep()
             Helper.set_property(step, "logger", _get_logger(step.__class__.__name__))
             Helper.set_property(step, "listeners", [StepStatusListener()])
-            executor = SingleProcExecutor([step])
+            executor = SingleProcExecutor(step)
             executor.execute_steps(None)
 
             mock_before_step.assert_called_once()
@@ -133,7 +133,7 @@ class TestAppropriateListnerCall(unittest.TestCase):
             step = ErrorSampleCustomStep()
             Helper.set_property(step, "logger", _get_logger(step.__class__.__name__))
             Helper.set_property(step, "listeners", [StepStatusListener()])
-            executor = SingleProcExecutor([step])
+            executor = SingleProcExecutor(step)
 
             res = executor.execute_steps(None)
 
@@ -156,7 +156,7 @@ class TestListenerArguments(unittest.TestCase):
         values = {"test_key": "test_value"}
         clz.__dict__.update(values)
         Helper.set_property(step, "listeners", [clz])
-        executor = SingleProcExecutor([step])
+        executor = SingleProcExecutor(step)
         executor.execute_steps(None)
 
 
