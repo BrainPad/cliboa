@@ -18,198 +18,130 @@ from collections import OrderedDict
 
 import yaml
 
-from cliboa.core.validator import (
-    EssentialKeys,
-    ScenarioJsonKey,
-    ScenarioJsonType,
-    ScenarioYamlKey,
-    ScenarioYamlType,
-)
-from cliboa.util.log import _get_logger
+from cliboa.core.validator import EssentialKeys
+from cliboa.util.base import _BaseObject
+from cliboa.util.exception import FileNotFound, InvalidFormat, ScenarioFileInvalid
 
 
-class ScenarioParser(object):
+class ScenarioParser(_BaseObject):
     """
     Base class of scenario file parser
     """
 
-    def __init__(self, pj_scenario_file, cmn_scenario_file):
-        self._logger = _get_logger(__name__)
+    def __init__(self, pj_scenario_file: str, cmn_scenario_file: str, scenario_format: str):
+        super().__init__()
         self._pj_scenario_file = pj_scenario_file
         self._cmn_scenario_file = cmn_scenario_file
+        if scenario_format == "yaml":
+            loader_class = _YamlScenarioLoader
+        elif scenario_format == "json":
+            loader_class = _JsonScenarioLoader
+        else:
+            raise InvalidFormat(f"scenario format '{scenario_format}' is invalid.")
+        self._loader_class: _ScenarioLoader = loader_class
 
-    @abstractmethod
-    def parse(self):
+    def parse(self) -> list[dict]:
         """
         Parse scenario file
         """
+        self._logger.info("Start to parse scenario file.")
 
+        pj_top_dict = self._loader_class(self._pj_scenario_file, True)()
+        self._valid_scenario(pj_top_dict)
 
-class YamlScenarioParser(ScenarioParser):
-    """
-    scenario.yml parser
-    """
-
-    def parse(self):
-        self._logger.info("Start to parse scenario.yml")
-
-        # Load projet scenario file
-        with open(self._pj_scenario_file, "r") as pj_f:
-            pj_yaml_dict = yaml.safe_load(pj_f)
-            self._valid_scenario_yaml(pj_yaml_dict)
-            self._exists_ess_keys(pj_yaml_dict["scenario"])
-
-        # Load common scenario file (if exist)
-        cmn_yaml_dict = None
-        if os.path.isfile(self._cmn_scenario_file):
-            with open(self._cmn_scenario_file, "r") as cmn_f:
-                cmn_yaml_dict = yaml.safe_load(cmn_f)
-                self._valid_scenario_yaml(cmn_yaml_dict)
-                self._exists_ess_keys(cmn_yaml_dict["scenario"])
-
-        if cmn_yaml_dict:
-            yaml_list = self._merge_scenario_yaml(
-                pj_yaml_dict["scenario"], cmn_yaml_dict["scenario"]
-            )
+        cmn_top_dict = self._loader_class(self._cmn_scenario_file, False)()
+        if cmn_top_dict:
+            self._valid_scenario(cmn_top_dict)
+            scenario_list = self._merge_scenario(pj_top_dict["scenario"], cmn_top_dict["scenario"])
         else:
-            yaml_list = pj_yaml_dict.get("scenario")
+            scenario_list = pj_top_dict["scenario"]
 
-        self._logger.info("Finish to parse scenario.yml")
-        return yaml_list
+        self._logger.info("Finish to parse scenario file.")
+        return scenario_list
 
-    def _valid_scenario_yaml(self, yaml_dict):
+    def _valid_scenario(self, top_dict: dict) -> None:
         """
         validate instance type and essential key in scenario.yml
         """
-        valids = [ScenarioYamlKey, ScenarioYamlType]
-        for valid in valids:
-            valid(yaml_dict)()
+        scenario_list = top_dict.get("scenario")
+        if not scenario_list:
+            raise ScenarioFileInvalid(
+                "scenario file is invalid. 'scenario' key does not exist, or 'scenario' key exists but content under 'scenario' key does not exist."  # noqa
+            )
+        valid = EssentialKeys(scenario_list)
+        valid()
 
-    def _merge_scenario_yaml(self, pj_yaml_list, cmn_yaml_list):
+    def _merge_scenario(self, pj_list: list, cmn_list: list) -> list:
         """
         Merge project scenario.yml and common scenario.yml.
         If the same class specification exists,
         scenario.yml of projet is taken priority.
         """
-        for pj_yaml_dict in pj_yaml_list:
+        for pj_dict in pj_list:
             # If same class exists, merge arguments
-            if pj_yaml_dict.get("parallel"):
-                for row in pj_yaml_dict.get("parallel"):
-                    self._merge(row, cmn_yaml_list)
-            elif pj_yaml_dict.get("parallel_with_config"):
-                steps = pj_yaml_dict.get("parallel_with_config").get("steps")
+            if pj_dict.get("parallel"):
+                for row in pj_dict.get("parallel"):
+                    self._merge(row, cmn_list)
+            elif pj_dict.get("parallel_with_config"):
+                steps = pj_dict.get("parallel_with_config").get("steps")
                 for row in steps:
-                    self._merge(row, cmn_yaml_list)
+                    self._merge(row, cmn_list)
             else:
-                self._merge(pj_yaml_dict, cmn_yaml_list)
+                self._merge(pj_dict, cmn_list)
 
-        return pj_yaml_list
+        return pj_list
 
-    def _merge(self, pj_yaml_dict, cmn_yaml_list):
-        cmn_yaml_dict_in_list = [
-            d for d in cmn_yaml_list if d.get("class") == pj_yaml_dict.get("class")
-        ]
-        if not cmn_yaml_dict_in_list:
+    def _merge(self, pj_dict: dict, cmn_list: list[dict]) -> None:
+        cmn_dict_in_list = [d for d in cmn_list if d.get("class") == pj_dict.get("class")]
+        if not cmn_dict_in_list:
             return
 
-        pj_cls_attrs = pj_yaml_dict.get("arguments", "")
-        cmn_cls_attrs = cmn_yaml_dict_in_list[0].get("arguments")
+        pj_cls_attrs = pj_dict.get("arguments", "")
+        cmn_cls_attrs = cmn_dict_in_list[0].get("arguments")
 
         # Merge arguments
         if pj_cls_attrs and cmn_cls_attrs:
             pj_cls_attrs = dict(cmn_cls_attrs, **pj_cls_attrs)
         elif not pj_cls_attrs and cmn_cls_attrs:
             pj_cls_attrs = cmn_cls_attrs
-        pj_yaml_dict["arguments"] = pj_cls_attrs
+        pj_dict["arguments"] = pj_cls_attrs
 
-    def _exists_ess_keys(self, scenario_yaml_list):
+
+class _ScenarioLoader(_BaseObject):
+    def __init__(self, scenario_file: str, is_required: bool = False):
+        super().__init__()
+        self._scenario_file = scenario_file
+        if is_required and not self._exists():
+            raise FileNotFound("File %s does not exist" % self._scenario_file)
+
+    def _exists(self) -> bool:
+        return os.path.isfile(self._scenario_file)
+
+    def __call__(self) -> dict | None:
         """
-        Check if the essential keys exist in scenario.yml
+        Load scenario file and return dict or None.
         """
-        valid = EssentialKeys(scenario_yaml_list)
-        valid()
-
-
-class JsonScenarioParser(ScenarioParser):
-    """
-    scenario.json parser
-    """
-
-    def parse(self):
-        self._logger.info("Start to parse scenario.json")
-
-        # Load projet scenario file
-        with open(self._pj_scenario_file, "r") as pj_f:
-            pj_json_dict = json.load(pj_f, object_pairs_hook=OrderedDict)
-            self._valid_scenario_json(pj_json_dict)
-            self._exists_ess_keys(pj_json_dict["scenario"])
-
-        # Load common scenario file (if exist)
-        cmn_json_dict = None
-        if os.path.isfile(self._cmn_scenario_file):
-            with open(self._cmn_scenario_file, "r") as cmn_f:
-                cmn_json_dict = json.load(cmn_f, object_pairs_hook=OrderedDict)
-                self._valid_scenario_json(cmn_json_dict)
-                self._exists_ess_keys(cmn_json_dict["scenario"])
-
-        if cmn_json_dict:
-            json_list = self._merge_scenario_json(
-                pj_json_dict["scenario"], cmn_json_dict["scenario"]
+        if not self._exists():
+            return None
+        top_dict = self._load()
+        if not isinstance(top_dict, dict):
+            raise ScenarioFileInvalid(
+                f"scenario file {self._scenario_file} is invalid. Check file format."
             )
-        else:
-            json_list = pj_json_dict.get("scenario")
+        return top_dict
 
-        self._logger.info("Finish to parse scenario.json")
-        return json_list
+    @abstractmethod
+    def _load(self) -> dict:
+        raise NotImplementedError()
 
-    def _valid_scenario_json(self, json_dict):
-        """
-        validate instance type and essential key in scenario.json
-        """
-        valids = [ScenarioJsonKey, ScenarioJsonType]
-        for valid in valids:
-            valid(json_dict)()
 
-    def _merge_scenario_json(self, pj_json_list, cmn_json_list):
-        """
-        Merge project scenario.json and common scenario.json.
-        If the same class specification exists,
-        scenario.yml of projet is taken priority.
-        """
-        for pj_json_dict in pj_json_list:
-            # If same class exists, merge arguments
-            if pj_json_dict.get("parallel"):
-                for row in pj_json_dict.get("parallel"):
-                    self._merge(row, cmn_json_list)
-            elif pj_json_dict.get("parallel_with_config"):
-                steps = pj_json_dict.get("parallel_with_config").get("steps")
-                for row in steps:
-                    self._merge(row, cmn_json_list)
-            else:
-                self._merge(pj_json_dict, cmn_json_list)
+class _YamlScenarioLoader(_ScenarioLoader):
+    def _load(self) -> dict:
+        with open(self._scenario_file, "r") as f:
+            return yaml.safe_load(f)
 
-        return pj_json_list
 
-    def _merge(self, pj_json_dict, cmn_json_list):
-        cmn_json_dict_in_list = [
-            d for d in cmn_json_list if d.get("class") == pj_json_dict.get("class")
-        ]
-        if not cmn_json_dict_in_list:
-            return
-
-        pj_cls_attrs = pj_json_dict.get("arguments", "")
-        cmn_cls_attrs = cmn_json_dict_in_list[0].get("arguments")
-
-        # Merge arguments
-        if pj_cls_attrs and cmn_cls_attrs:
-            pj_cls_attrs = dict(cmn_cls_attrs, **pj_cls_attrs)
-        elif not pj_cls_attrs and cmn_cls_attrs:
-            pj_cls_attrs = cmn_cls_attrs
-        pj_json_dict["arguments"] = pj_cls_attrs
-
-    def _exists_ess_keys(self, scenario_json_list):
-        """
-        Check if the essential keys exist in scenario.yml
-        """
-        valid = EssentialKeys(scenario_json_list)
-        valid()
+class _JsonScenarioLoader(_ScenarioLoader):
+    def _load(self) -> dict:
+        with open(self._scenario_file, "r") as f:
+            return json.load(f, object_pairs_hook=OrderedDict)

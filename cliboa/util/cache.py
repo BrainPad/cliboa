@@ -19,7 +19,7 @@ _PROCESS_STORE_CACHE = {}
 
 class StepArgument(object):
     """
-    Cache arguments defined in yaml with step name.
+    Cache step arguments to refer by symbol.
     """
 
     @staticmethod
