@@ -14,7 +14,7 @@
 from abc import abstractmethod
 
 from cliboa.listener.interface import IScenarioExecutor
-from cliboa.scenario.base import BaseStep
+from cliboa.scenario.base import AbstractStep
 from cliboa.util.base import _BaseObject
 
 
@@ -75,14 +75,14 @@ class BaseStepListener(BaseListener):
     Listener for step
     """
 
-    def before(self, step: BaseStep) -> None:
+    def before(self, step: AbstractStep) -> None:
         pass
 
-    def after(self, step: BaseStep) -> None:
+    def after(self, step: AbstractStep) -> None:
         pass
 
-    def error(self, step: BaseStep, e: Exception) -> None:
+    def error(self, step: AbstractStep, e: Exception) -> None:
         pass
 
-    def completion(self, step: BaseStep) -> None:
+    def completion(self, step: AbstractStep) -> None:
         pass

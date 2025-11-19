@@ -18,26 +18,21 @@ from typing import Any, List, Optional
 
 from cliboa.adapter.file import File
 from cliboa.scenario.interface import IParentStep
-from cliboa.util.base import _BaseObject
+from cliboa.util.base import _BaseObject, _warn_deprecated
 from cliboa.util.exception import FileNotFound, InvalidParameter
 
 
-class BaseStep(_BaseObject):
+class AbstractStep(_BaseObject):
     """
-    Base class of all the step classes
+    Abstract class of all the step classes.
+
+    ALL step classes are required to inherit this class.
+    This class is minimum implemented to be needed by core layer.
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._step = None
-        self._symbol = None
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self._parent = None
-
-    def step(self, step):
-        self._step = step
-
-    def symbol(self, symbol):
-        self._symbol = symbol
 
     def parent(self, parent: IParentStep):
         self._parent = parent
@@ -69,6 +64,8 @@ class BaseStep(_BaseObject):
             @bar.setter
             def bar(self, bar):
                 self._bar = bar
+
+        TODO: can specify pydantic arguments model.
         """
         for k, v in properties.items():
             if isinstance(getattr(type(self), k, None), property):
@@ -84,13 +81,7 @@ class BaseStep(_BaseObject):
     def execute(self, *args, **kwargs) -> Optional[int]:
         pass
 
-    def get_target_files(self, src_dir, src_pattern) -> List[str]:
-        """
-        Search files either with regular expression
-        """
-        return File().get_target_files(src_dir, src_pattern)
-
-    def get_step_argument(self, name: str) -> Any | None:
+    def get_symbol_argument(self, name: str) -> Any | None:
         """
         Returns a symbol's argument (variables are already transformed).
         Returns None if the argument cannot be retrieved, and no exceptions are raised.
@@ -100,19 +91,49 @@ class BaseStep(_BaseObject):
         sa = self._parent.get_symbol_arguments()
         return sa.get(name)
 
-    def _property_path_reader(self, src, encoding="utf-8"):
+
+class BaseStep(AbstractStep):
+    """
+    Base class of all the step classes.
+
+    This class has additional implement from AbstractStep to be useful on common cases.
+    """
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    @property
+    def _step(self) -> str:
         """
-        Returns an resource contents from the path if src starts with "path:",
-        returns src if not
+        Deprecated: Kept for v2 backward compatibility.
         """
-        self._logger.warning("DeprecationWarning: Will be removed in the near future")
-        if src[:5].upper() == "PATH:":
-            fpath = src[5:]
-            if os.path.exists(fpath) is False:
-                raise FileNotFound(src)
-            with open(fpath, mode="r", encoding=encoding) as f:
-                return f.read()
-        return src
+        return self._parent.step_name if self._parent else ""
+
+    @property
+    def _symbol(self) -> str | None:
+        """
+        Deprecated: Kept for v2 backward compatibility.
+        """
+        return self._parent.symbol_name if self._parent else None
+
+    def get_step_argument(self, name: str) -> Any | None:
+        """
+        Deprecated: kept for v2 backward compatibility.
+        """
+        _warn_deprecated(
+            "cliboa.scenario.base.BaseStep.get_step_argument",
+            "cliboa.scenario.base.AbstractStep.get_symbol_argument",
+            "3.0",
+        )
+        return self.get_symbol_argument(name)
+
+    def get_target_files(self, src_dir: str, src_pattern: str, *args, **kwargs) -> List[str]:
+        """
+        Alias of cliboa.adapter.File.get_target_files
+        """
+        return self._resolve("adapter_file", File).get_target_files(
+            src_dir, src_pattern, *args, **kwargs
+        )
 
     def _source_path_reader(self, src, encoding="utf-8"):
         """
@@ -121,7 +142,7 @@ class BaseStep(_BaseObject):
         """
         if src is None:
             return src
-        if isinstance(src, dict) and "content" in src:
+        elif isinstance(src, dict) and "content" in src:
             with tempfile.NamedTemporaryFile(mode="w", encoding=encoding, delete=False) as fp:
                 fp.write(src["content"])
                 return fp.name

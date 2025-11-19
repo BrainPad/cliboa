@@ -41,7 +41,7 @@ class SampleStepSub(SampleStep):
     """
 
     def execute(self, *args):
-        symbol_memo = self.get_step_argument("memo")
+        symbol_memo = self.get_symbol_argument("memo")
         self._logger.info(f"{self._symbol} symbol memo is {symbol_memo}")
 
 

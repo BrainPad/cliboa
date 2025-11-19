@@ -16,7 +16,7 @@ import json
 import os
 import tempfile
 from decimal import Decimal
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from cliboa.adapter.aws import S3Adapter
 from cliboa.scenario.extract.aws import (
@@ -179,11 +179,16 @@ class TestS3DownloadFileDelete(BaseCliboaTest):
         # Mock ObjectStore data (simulating previous S3Download step)
         from cliboa.util.cache import ObjectStore
 
-        ObjectStore.put("dl1", [{"Key": "test.txt"}])
+        ObjectStore.put("dl1", {"keys": ["test.txt"]})
 
         instance = S3DownloadFileDelete()
+        mock_parent = Mock(
+            symbol_name="dl1",
+        )
+        mock_parent.get_symbol_arguments.return_value = {}
         instance._set_properties(
             {
+                "parent": mock_parent,
                 "bucket": "test-bucket",
                 "role_arn": "arn:aws:iam::123456789012:role/TestRole",
                 "external_id": "test-external-id",
