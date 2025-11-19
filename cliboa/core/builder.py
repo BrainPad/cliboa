@@ -146,10 +146,7 @@ class _ScenarioBuilder(_BaseObject):
     def _create_listeners(self, step: StepModel) -> list[BaseStepListener]:
         listeners = [self._resolve("step_status_listener", StepStatusListener())]
         if step.listeners is not None:
-            if step.arguments:
-                arguments = copy.deepcopy(step.arguments)
-            else:
-                arguments = {}
+            arguments = copy.deepcopy(step.arguments)
             if isinstance(step.listeners, str):
                 lis_classes = [step.listeners]
             elif isinstance(step.listeners, list):

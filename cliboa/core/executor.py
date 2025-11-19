@@ -141,10 +141,9 @@ class _StepExecutor(_BaseExecutor):
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
-        # Set arguments to instance.
-        if hasattr(model, "arguments") and model.arguments:
-            for k, v in model.arguments.items():
-                Helper.set_property(step, k, v)
+        # Set arguments to step instance.
+        for k, v in model.arguments.items():
+            Helper.set_property(step, k, v)
         Helper.set_property(step, "step", model.step)
         Helper.set_property(step, "symbol", model.symbol)
         self._step = step

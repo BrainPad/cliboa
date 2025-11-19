@@ -25,12 +25,6 @@ class TestBaseWithVars:
         model.calc()
         assert model._with_static_vars == {"today": today_str}
 
-    def test_calc_none_ok(self):
-        # Test calc when with_vars is None
-        model = _BaseWithVars(with_vars=None)
-        model.calc()
-        assert model._with_static_vars == {}
-
     def test_merge_static_vars_ok(self):
         # Test merging static vars
         model = _BaseWithVars()
@@ -210,8 +204,6 @@ class TestParallelStepModel:
             ]
         }
         model = ParallelStepModel.model_validate(step_data)
-        assert model.parallel_config is None
-
         config = ParallelConfigModel(multi_process_count=4)
         model._merge_parallel_config(config)
         assert model.parallel_config == config
@@ -295,7 +287,7 @@ class TestScenarioModel:
         step2 = model.scenario[1]
         assert isinstance(step1, StepModel)
         assert step1.arguments == {"arg1": "step_val", "arg2": "cmn_val2"}
-        assert step2.arguments is None
+        assert step2.arguments == {}
 
     def test_setup_ok(self):
         # Test the full setup process
