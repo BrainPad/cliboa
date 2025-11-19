@@ -50,8 +50,6 @@ def _add_system_path(project_name: str):
     Deprecated: This is provided for v2 backward compatibility, but is no longer supported.
 
     Adds project dir to system path for easy loading scenario classes.
-
-    Depends on envs: PROJECT_DIR, SCENARIO_DIR_NAME, SYSTEM_APPEND_PATHS
     """
     pj_scenario_dir = os.path.join(env.PROJECT_DIR, project_name, env.SCENARIO_DIR_NAME)
     add_target_paths = env.SYSTEM_APPEND_PATHS
@@ -64,18 +62,24 @@ def _add_system_path(project_name: str):
 def _initialize_cliboa_logging():
     """
     initialize cliboa logging - load logging.conf and set CliboaLogRecord.
-
-    Depends on envs: BASE_DIR
     """
-    logging.config.fileConfig(env.BASE_DIR + "/conf/logging.conf", disable_existing_loggers=False)
+    config_dict = env.get("LOGGING_CONFIG_DICT")
+    if config_dict:
+        logging.config.dictConfig(config_dict)
+    else:
+        base_dir = env.get("BASE_DIR")
+        config_path = env.get(
+            "LOGGING_CONFIG_PATH",
+            os.path.join(base_dir, "conf", "logging.conf") if base_dir is not None else None,
+        )
+        if config_path:
+            logging.config.fileConfig(config_path, disable_existing_loggers=False)
     logging.setLogRecordFactory(CliboaLogRecord)
 
 
 def _generate_scenario_path(project_name: str, scenario_format: str) -> Tuple[str, str]:
     """
     generate project's scenario path and common scenario path from project_name and scenario_format.
-
-    Depends on envs: PROJECT_DIR, COMMON_DIR, SCENARIO_FILE_NAME
     """
     if scenario_format == "yaml":
         pj_scenario_file = (
