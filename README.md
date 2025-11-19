@@ -8,6 +8,12 @@ black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-squ
 [![Repo Size](https://img.shields.io/github/repo-size/BrainPad/cliboa)](https://github.com/BrainPad/cliboa)
 [![Gitter](https://badges.gitter.im/cliboa/users.svg)](https://gitter.im/cliboa/users?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
+> [!IMPORTANT]
+> **Note on Future Development**
+> We are preparing for the release of **cliboa v3**.
+> New features are no longer being accepted for v2.
+> Support for v2 will end immediately upon the release of v3.
+> See [Issue #584](https://github.com/BrainPad/cliboa/issues/584) for details.
 
 # Table of Contents
 * [Introduction](#introduction)
