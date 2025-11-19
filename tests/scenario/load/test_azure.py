@@ -21,7 +21,7 @@ from cliboa.adapter.azure import BlobServiceAdapter
 from cliboa.conf import env
 from cliboa.scenario.load.azure import AzureBlobUpload
 from cliboa.util.helper import Helper
-from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.log import _get_logger
 
 
 class TestAzureBlobUpload(object):
@@ -45,7 +45,7 @@ class TestAzureBlobUpload(object):
 
         # Act
         instance = AzureBlobUpload()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         # use Postman echo
         Helper.set_property(
             instance,

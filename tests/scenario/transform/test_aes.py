@@ -17,7 +17,7 @@ import shutil
 from cliboa.conf import env
 from cliboa.scenario.transform.aes import AesDecrypt, AesEncrypt
 from cliboa.util.helper import Helper
-from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.log import _get_logger
 from tests import BaseCliboaTest
 
 
@@ -49,7 +49,7 @@ class TestAes(BaseCliboaTest):
     def test_encrypt_decrypt_ok(self):
         # Encryption
         instance = AesEncrypt()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test\.txt")
         Helper.set_property(instance, "dest_dir", self._result_dir)
@@ -59,7 +59,7 @@ class TestAes(BaseCliboaTest):
 
         # Decryption
         instance = AesDecrypt()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._result_dir)
         Helper.set_property(instance, "src_pattern", r"test\.txt")
         Helper.set_property(instance, "dest_dir", self._result_dir)
@@ -74,7 +74,7 @@ class TestAes(BaseCliboaTest):
     def test_by_multiple_encrypt_decrypt_ok(self):
         # Encryption
         instance = AesEncrypt()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"(.*)\.txt")
         Helper.set_property(instance, "dest_dir", self._result_dir)
@@ -84,7 +84,7 @@ class TestAes(BaseCliboaTest):
 
         # Decryption
         instance = AesDecrypt()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._result_dir)
         Helper.set_property(instance, "src_pattern", r"(.*)\.txt")
         Helper.set_property(instance, "dest_dir", self._result_dir)

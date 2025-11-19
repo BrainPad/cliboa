@@ -21,7 +21,7 @@ from unittest.mock import patch
 from cliboa.conf import env
 from cliboa.scenario.load.sftp import SftpUpload
 from cliboa.util.helper import Helper
-from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.log import _get_logger
 
 
 class TestSftpUpload(object):
@@ -39,7 +39,7 @@ class TestSftpUpload(object):
         (dir_path / "c.exe").touch()
 
         instance = SftpUpload()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "host", "dummy.host")
         Helper.set_property(instance, "user", "dummy_user")
         Helper.set_property(instance, "password", "dummy_pass")
@@ -65,7 +65,7 @@ class TestSftpUpload(object):
         (dir_path / "c.exe").touch()
 
         instance = SftpUpload()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "host", "dummy.host")
         Helper.set_property(instance, "user", "dummy_user")
         Helper.set_property(instance, "key", dummy_pass)
@@ -87,7 +87,7 @@ class TestSftpUpload(object):
         (dir_path / "b.txt").touch()
         (dir_path / "c.exe").touch()
         instance = SftpUpload()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "host", "dummy.host")
         Helper.set_property(instance, "user", "dummy_user")
         Helper.set_property(instance, "key", {"content": "dummy_rsa"})

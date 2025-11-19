@@ -23,7 +23,7 @@ from cliboa.conf import env
 from cliboa.scenario.transform.json import JsonlAddKeyValue, JsonlToCsv, JsonlToCsvBase
 from cliboa.util.exception import InvalidParameter
 from cliboa.util.helper import Helper
-from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.log import _get_logger
 from tests import BaseCliboaTest
 
 
@@ -66,7 +66,7 @@ class TestJsonlToCsvBase(TestJsonTransform):
 
         # set the essential attributes
         instance = JsonlToCsv()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.json")
         Helper.set_property(instance, "dest_dir", self._result_dir)
@@ -100,7 +100,7 @@ class TestJsonlToCsv(TestJsonTransform):
 
         # set the essential attributes
         instance = JsonlToCsv()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.*.json")
         Helper.set_property(instance, "dest_dir", self._result_dir)
@@ -144,7 +144,7 @@ class TestJsonlToCsv(TestJsonTransform):
 
         # set the essential attributes
         instance = JsonlToCsv()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.*.json")
         Helper.set_property(instance, "dest_dir", self._result_dir)
@@ -183,7 +183,7 @@ class TestJsonlToCsv(TestJsonTransform):
 
         # set the essential attributes
         instance = JsonlToCsv()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.*.json")
         Helper.set_property(instance, "dest_dir", self._result_dir)
@@ -212,7 +212,7 @@ class TestJsonlToCsv(TestJsonTransform):
 
         # set the essential attributes
         instance = JsonlToCsv()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.*.json")
         Helper.set_property(instance, "dest_dir", self._result_dir)
@@ -238,7 +238,7 @@ class TestJsonlAddKeyValue(TestJsonTransform):
 
         # set the essential attributes
         instance = JsonlAddKeyValue()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.*.json")
         Helper.set_property(instance, "dest_dir", self._result_dir)
@@ -282,7 +282,7 @@ class TestJsonlAddKeyValue(TestJsonTransform):
 
         # set the essential attributes
         instance = JsonlAddKeyValue()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.*.json")
         Helper.set_property(instance, "dest_dir", self._result_dir)
@@ -328,7 +328,7 @@ class TestJsonlAddKeyValue(TestJsonTransform):
 
         # set the essential attributes
         instance = JsonlAddKeyValue()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.*.json")
         Helper.set_property(instance, "dest_dir", self._result_dir)
@@ -352,7 +352,7 @@ class TestJsonlAddKeyValue(TestJsonTransform):
 
         # set the essential attributes
         instance = JsonlAddKeyValue()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", "test.*.json")
         Helper.set_property(instance, "dest_dir", self._result_dir)

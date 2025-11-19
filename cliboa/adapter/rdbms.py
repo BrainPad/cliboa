@@ -1,7 +1,7 @@
 from abc import abstractmethod
 
 from cliboa.util.exception import DatabaseException
-from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.log import _get_logger
 
 
 class RdbmsSupport:
@@ -22,7 +22,7 @@ class RdbmsSupport:
     """
 
     def __init__(self, host, user, password, dbname, port=None, encoding="UTF8"):
-        self._logger = LisboaLog.get_logger(__name__)
+        self._logger = _get_logger(__name__)
 
         self._host = host
         self._user = user

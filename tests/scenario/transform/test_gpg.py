@@ -18,7 +18,7 @@ from cliboa.conf import env
 from cliboa.scenario.transform.gpg import GpgDecrypt, GpgEncrypt
 from cliboa.util.gpg import Gpg
 from cliboa.util.helper import Helper
-from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.log import _get_logger
 from tests import BaseCliboaTest
 
 
@@ -48,7 +48,7 @@ class TestGpg(BaseCliboaTest):
 
         # Encryption
         instance = GpgEncrypt()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "gnupghome", self._gpg_dir)
         Helper.set_property(instance, "src_dir", self._data_dir)
         Helper.set_property(instance, "src_pattern", r"test\.txt")
@@ -58,7 +58,7 @@ class TestGpg(BaseCliboaTest):
 
         # Decryption
         instance = GpgDecrypt()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "gnupghome", self._gpg_dir)
         Helper.set_property(instance, "src_dir", self._result_dir)
         Helper.set_property(instance, "src_pattern", r"test\.txt\.gpg")

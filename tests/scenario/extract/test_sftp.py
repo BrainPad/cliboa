@@ -22,7 +22,7 @@ from cliboa.scenario.extract.sftp import SftpDownload, SftpFileExistsCheck
 from cliboa.util.cache import ObjectStore
 from cliboa.util.constant import StepStatus
 from cliboa.util.helper import Helper
-from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.log import _get_logger
 
 
 class TestSftpDownload(object):
@@ -34,7 +34,7 @@ class TestSftpDownload(object):
 
     def test_execute_with_files(self):
         instance = SftpDownload()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "host", "dummy.host")
         Helper.set_property(instance, "user", "dummy_user")
         Helper.set_property(instance, "password", "dummy_pass")
@@ -54,7 +54,7 @@ class TestSftpDownload(object):
 
     def test_execute_nofiles_return(self):
         instance = SftpDownload()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "host", "dummy.host")
         Helper.set_property(instance, "user", "dummy_user")
         Helper.set_property(instance, "password", "dummy_pass")
@@ -75,7 +75,7 @@ class TestSftpDownload(object):
 
     def test_execute_nofiles_continue(self):
         instance = SftpDownload()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "host", "dummy.host")
         Helper.set_property(instance, "user", "dummy_user")
         Helper.set_property(instance, "password", "dummy_pass")
@@ -101,7 +101,7 @@ class TestSftpDownload(object):
             f.write("test")
 
         instance = SftpDownload()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "host", "dummy.host")
         Helper.set_property(instance, "user", "dummy_user")
         Helper.set_property(instance, "key", dummy_pass)
@@ -118,7 +118,7 @@ class TestSftpDownload(object):
 
     def test_execute_with_key_content(self):
         instance = SftpDownload()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "host", "dummy.host")
         Helper.set_property(instance, "user", "dummy_user")
         Helper.set_property(instance, "key", {"content": "dummy_rsa"})
@@ -140,7 +140,7 @@ class TestSftpDownload(object):
 class TestSftpFileExistsCheck:
     def test_execute_file_found(self):
         instance = SftpFileExistsCheck()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "host", "dummy.host")
         Helper.set_property(instance, "user", "dummy_user")
         Helper.set_property(instance, "password", "dummy_pass")
@@ -155,7 +155,7 @@ class TestSftpFileExistsCheck:
 
     def test_execute_file_not_found(self):
         instance = SftpFileExistsCheck()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "host", "dummy.host")
         Helper.set_property(instance, "user", "dummy_user")
         Helper.set_property(instance, "password", "dummy_pass")

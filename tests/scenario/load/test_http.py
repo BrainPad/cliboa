@@ -21,7 +21,7 @@ from requests.exceptions import HTTPError
 from cliboa.conf import env
 from cliboa.scenario.load.http import HttpDelete, HttpPost, HttpPut
 from cliboa.util.helper import Helper
-from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.log import _get_logger
 
 
 class TestHttpPost(object):
@@ -41,7 +41,7 @@ class TestHttpPost(object):
         try:
             os.makedirs(self._data_dir, exist_ok=True)
             instance = HttpPost()
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "logger", _get_logger(__name__))
             # use Postman echo
             Helper.set_property(instance, "src_url", "https://postman-echo.com/post")
             Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -62,7 +62,7 @@ class TestHttpPost(object):
         mock_post.side_effect = HTTPError("Http request failed. HTTP Status code: 404")
 
         instance = HttpPost()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         # use Postman echo
         Helper.set_property(instance, "src_url", "https://spam.com/post")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -92,7 +92,7 @@ class TestHttpPut(object):
         try:
             os.makedirs(self._data_dir, exist_ok=True)
             instance = HttpPut()
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "logger", _get_logger(__name__))
             # use Postman echo
             Helper.set_property(instance, "src_url", "https://postman-echo.com/put")
             Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -113,7 +113,7 @@ class TestHttpPut(object):
         mock_put.side_effect = HTTPError("Http request failed. HTTP Status code: 404")
 
         instance = HttpPut()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         # use Postman echo
         Helper.set_property(instance, "src_url", "https://spam.com/put")
         Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -143,7 +143,7 @@ class TestHttpDelete(object):
         try:
             os.makedirs(self._data_dir, exist_ok=True)
             instance = HttpDelete()
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "logger", _get_logger(__name__))
             # use Postman echo
             Helper.set_property(instance, "src_url", "https://postman-echo.com/delete")
             Helper.set_property(instance, "dest_dir", self._data_dir)
@@ -163,7 +163,7 @@ class TestHttpDelete(object):
         mock_delete.side_effect = HTTPError("Http request failed. HTTP Status code: 404")
 
         instance = HttpDelete()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         # use Postman echo
         Helper.set_property(instance, "src_url", "https://spam.com/delete")
         Helper.set_property(instance, "dest_dir", self._data_dir)

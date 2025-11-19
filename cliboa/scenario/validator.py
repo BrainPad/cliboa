@@ -13,7 +13,7 @@
 #
 from cliboa.adapter.sqlite import SqliteAdapter
 from cliboa.util.exception import InvalidParameter, SqliteInvalid
-from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.log import _get_logger
 
 
 class EssentialParameters(object):
@@ -54,7 +54,7 @@ class SqliteTableExistence(object):
         self._dbname = dbname
         self._tblname = tblname
         self._returns_bool = returns_bool
-        self._logger = LisboaLog.get_logger(__name__)
+        self._logger = _get_logger(__name__)
 
     def __call__(self):
         try:

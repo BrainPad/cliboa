@@ -27,7 +27,7 @@ from cliboa.scenario.extract.aws import (
     S3FileExistsCheck,
 )
 from cliboa.util.helper import Helper
-from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.log import _get_logger
 from tests import BaseCliboaTest
 
 
@@ -109,7 +109,7 @@ class TestS3FileExistsCheck(BaseCliboaTest):
         m_pagenate.return_value = [{"Contents": [{"Key": "spam"}]}]
         # テスト処理
         instance = S3FileExistsCheck()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "bucket", "spam")
         Helper.set_property(instance, "src_pattern", "spam")
         instance.execute()
@@ -123,7 +123,7 @@ class TestS3FileExistsCheck(BaseCliboaTest):
         m_pagenate.return_value = [{"Contents": [{"Key": "spam"}]}]
         # テスト処理
         instance = S3FileExistsCheck()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "bucket", "spam")
         Helper.set_property(instance, "src_pattern", "hoge")
         instance.execute()
@@ -137,7 +137,7 @@ class TestS3FileExistsCheck(BaseCliboaTest):
         m_pagenate.return_value = [{"Contents": [{"Key": "test.txt"}]}]
 
         instance = S3FileExistsCheck()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "bucket", "test-bucket")
         Helper.set_property(instance, "src_pattern", "test.*")
         Helper.set_property(instance, "role_arn", "arn:aws:iam::123456789012:role/TestRole")
@@ -159,7 +159,7 @@ class TestS3DownloadFileDelete(BaseCliboaTest):
         ObjectStore.put("dl1", [{"Key": "test.txt"}])
 
         instance = S3DownloadFileDelete()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        Helper.set_property(instance, "logger", _get_logger(__name__))
         Helper.set_property(instance, "bucket", "test-bucket")
         Helper.set_property(instance, "role_arn", "arn:aws:iam::123456789012:role/TestRole")
         Helper.set_property(instance, "external_id", "test-external-id")
@@ -291,7 +291,7 @@ class TestDynamoDBRead(BaseCliboaTest):
             Helper.set_property(instance, "file_name", f"output.{file_format}")
             Helper.set_property(instance, "dest_dir", temp_dir)
             Helper.set_property(instance, "file_format", file_format)
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+            Helper.set_property(instance, "logger", _get_logger(__name__))
             Helper.set_property(instance, "region", "us-east-1")
             instance.execute()
 

@@ -14,7 +14,7 @@
 import csv
 import sqlite3
 
-from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.log import _get_logger
 
 
 class SqliteAdapter(object):
@@ -26,7 +26,7 @@ class SqliteAdapter(object):
     """
 
     def __init__(self):
-        self._logger = LisboaLog.get_logger(__name__)
+        self._logger = _get_logger(__name__)
         self._cur = None
         self._con = None
 
