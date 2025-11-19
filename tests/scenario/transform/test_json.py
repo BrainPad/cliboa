@@ -22,8 +22,6 @@ import pytest
 from cliboa.conf import env
 from cliboa.scenario.transform.json import JsonlAddKeyValue, JsonlToCsv, JsonlToCsvBase
 from cliboa.util.exception import InvalidParameter
-from cliboa.util.helper import Helper
-from cliboa.util.log import _get_logger
 from tests import BaseCliboaTest
 
 
@@ -66,10 +64,13 @@ class TestJsonlToCsvBase(TestJsonTransform):
 
         # set the essential attributes
         instance = JsonlToCsv()
-        Helper.set_property(instance, "logger", _get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", "test.json")
-        Helper.set_property(instance, "dest_dir", self._result_dir)
+        instance._set_properties(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": "test.json",
+                "dest_dir": self._result_dir,
+            }
+        )
         instance.execute()
         dest = os.path.join(self._result_dir, "test.csv")
         with open(dest, mode="r") as f:
@@ -100,10 +101,13 @@ class TestJsonlToCsv(TestJsonTransform):
 
         # set the essential attributes
         instance = JsonlToCsv()
-        Helper.set_property(instance, "logger", _get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", "test.*.json")
-        Helper.set_property(instance, "dest_dir", self._result_dir)
+        instance._set_properties(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": "test.*.json",
+                "dest_dir": self._result_dir,
+            }
+        )
         instance.execute()
         files = glob(os.path.join(self._result_dir, "*.csv"))
         assert 2 == len(files)
@@ -144,12 +148,15 @@ class TestJsonlToCsv(TestJsonTransform):
 
         # set the essential attributes
         instance = JsonlToCsv()
-        Helper.set_property(instance, "logger", _get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", "test.*.json")
-        Helper.set_property(instance, "dest_dir", self._result_dir)
-        Helper.set_property(instance, "quote", "QUOTE_NONE")
-        Helper.set_property(instance, "escape_char", ",")
+        instance._set_properties(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": "test.*.json",
+                "dest_dir": self._result_dir,
+                "quote": "QUOTE_NONE",
+                "escape_char": ",",
+            }
+        )
         instance.execute()
         files = glob(os.path.join(self._result_dir, "*.csv"))
         assert 2 == len(files)
@@ -183,11 +190,14 @@ class TestJsonlToCsv(TestJsonTransform):
 
         # set the essential attributes
         instance = JsonlToCsv()
-        Helper.set_property(instance, "logger", _get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", "test.*.json")
-        Helper.set_property(instance, "dest_dir", self._result_dir)
-        Helper.set_property(instance, "after_nl", "CRLF")
+        instance._set_properties(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": "test.*.json",
+                "dest_dir": self._result_dir,
+                "after_nl": "CRLF",
+            }
+        )
         instance.execute()
         files = glob(os.path.join(self._result_dir, "*.csv"))
         assert 2 == len(files)
@@ -212,10 +222,13 @@ class TestJsonlToCsv(TestJsonTransform):
 
         # set the essential attributes
         instance = JsonlToCsv()
-        Helper.set_property(instance, "logger", _get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", "test.*.json")
-        Helper.set_property(instance, "dest_dir", self._result_dir)
+        instance._set_properties(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": "test.*.json",
+                "dest_dir": self._result_dir,
+            }
+        )
         with pytest.raises(ValueError) as e:
             instance.execute()
         assert "dict contains fields not in fieldnames: 'value'" == str(e.value)
@@ -238,11 +251,14 @@ class TestJsonlAddKeyValue(TestJsonTransform):
 
         # set the essential attributes
         instance = JsonlAddKeyValue()
-        Helper.set_property(instance, "logger", _get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", "test.*.json")
-        Helper.set_property(instance, "dest_dir", self._result_dir)
-        Helper.set_property(instance, "pairs", {"number": 1})
+        instance._set_properties(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": "test.*.json",
+                "dest_dir": self._result_dir,
+                "pairs": {"number": 1},
+            }
+        )
         instance.execute()
         files = glob(os.path.join(self._result_dir, "*.json"))
         assert 2 == len(files)
@@ -282,11 +298,14 @@ class TestJsonlAddKeyValue(TestJsonTransform):
 
         # set the essential attributes
         instance = JsonlAddKeyValue()
-        Helper.set_property(instance, "logger", _get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", "test.*.json")
-        Helper.set_property(instance, "dest_dir", self._result_dir)
-        Helper.set_property(instance, "pairs", {"number": 1, "data": "first"})
+        instance._set_properties(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": "test.*.json",
+                "dest_dir": self._result_dir,
+                "pairs": {"number": 1, "data": "first"},
+            }
+        )
         instance.execute()
         files = glob(os.path.join(self._result_dir, "*.json"))
         assert 2 == len(files)
@@ -328,10 +347,13 @@ class TestJsonlAddKeyValue(TestJsonTransform):
 
         # set the essential attributes
         instance = JsonlAddKeyValue()
-        Helper.set_property(instance, "logger", _get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", "test.*.json")
-        Helper.set_property(instance, "dest_dir", self._result_dir)
+        instance._set_properties(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": "test.*.json",
+                "dest_dir": self._result_dir,
+            }
+        )
         with pytest.raises(Exception) as e:
             instance.execute()
         assert "The essential parameter is not specified in JsonlAddKeyValue." == str(e.value)
@@ -352,11 +374,14 @@ class TestJsonlAddKeyValue(TestJsonTransform):
 
         # set the essential attributes
         instance = JsonlAddKeyValue()
-        Helper.set_property(instance, "logger", _get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", "test.*.json")
-        Helper.set_property(instance, "dest_dir", self._result_dir)
-        Helper.set_property(instance, "pairs", "dummy")
+        instance._set_properties(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": "test.*.json",
+                "dest_dir": self._result_dir,
+                "pairs": "dummy",
+            }
+        )
         with pytest.raises(InvalidParameter) as e:
             instance.execute()
         assert "argument 'pairs' only allow dict format." == str(e.value)

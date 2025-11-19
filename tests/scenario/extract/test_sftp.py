@@ -21,8 +21,6 @@ from cliboa.conf import env
 from cliboa.scenario.extract.sftp import SftpDownload, SftpFileExistsCheck
 from cliboa.util.cache import ObjectStore
 from cliboa.util.constant import StepStatus
-from cliboa.util.helper import Helper
-from cliboa.util.log import _get_logger
 
 
 class TestSftpDownload(object):
@@ -34,14 +32,17 @@ class TestSftpDownload(object):
 
     def test_execute_with_files(self):
         instance = SftpDownload()
-        Helper.set_property(instance, "logger", _get_logger(__name__))
-        Helper.set_property(instance, "host", "dummy.host")
-        Helper.set_property(instance, "user", "dummy_user")
-        Helper.set_property(instance, "password", "dummy_pass")
-        Helper.set_property(instance, "src_dir", "/")
-        Helper.set_property(instance, "src_pattern", ".*.txt")
-        Helper.set_property(instance, "dest_dir", self._data_dir)
-        Helper.set_property(instance, "step", "sftp_class")
+        instance._set_properties(
+            {
+                "host": "dummy.host",
+                "user": "dummy_user",
+                "password": "dummy_pass",
+                "src_dir": "/",
+                "src_pattern": ".*.txt",
+                "dest_dir": self._data_dir,
+                "step": "sftp_class",
+            }
+        )
 
         with ExitStack() as stack:
             mock_sftp = stack.enter_context(patch("cliboa.adapter.sftp.SftpAdapter.execute"))
@@ -54,15 +55,18 @@ class TestSftpDownload(object):
 
     def test_execute_nofiles_return(self):
         instance = SftpDownload()
-        Helper.set_property(instance, "logger", _get_logger(__name__))
-        Helper.set_property(instance, "host", "dummy.host")
-        Helper.set_property(instance, "user", "dummy_user")
-        Helper.set_property(instance, "password", "dummy_pass")
-        Helper.set_property(instance, "src_dir", "/")
-        Helper.set_property(instance, "src_pattern", ".*.txt")
-        Helper.set_property(instance, "dest_dir", self._data_dir)
-        Helper.set_property(instance, "step", "sftp_class")
-        Helper.set_property(instance, "quit", True)
+        instance._set_properties(
+            {
+                "host": "dummy.host",
+                "user": "dummy_user",
+                "password": "dummy_pass",
+                "src_dir": "/",
+                "src_pattern": ".*.txt",
+                "dest_dir": self._data_dir,
+                "step": "sftp_class",
+                "quit": True,
+            }
+        )
 
         with ExitStack() as stack:
             mock_sftp = stack.enter_context(patch("cliboa.adapter.sftp.SftpAdapter.execute"))
@@ -75,15 +79,18 @@ class TestSftpDownload(object):
 
     def test_execute_nofiles_continue(self):
         instance = SftpDownload()
-        Helper.set_property(instance, "logger", _get_logger(__name__))
-        Helper.set_property(instance, "host", "dummy.host")
-        Helper.set_property(instance, "user", "dummy_user")
-        Helper.set_property(instance, "password", "dummy_pass")
-        Helper.set_property(instance, "src_dir", "/")
-        Helper.set_property(instance, "src_pattern", ".*.txt")
-        Helper.set_property(instance, "dest_dir", self._data_dir)
-        Helper.set_property(instance, "step", "sftp_class")
-        Helper.set_property(instance, "quit", False)
+        instance._set_properties(
+            {
+                "host": "dummy.host",
+                "user": "dummy_user",
+                "password": "dummy_pass",
+                "src_dir": "/",
+                "src_pattern": ".*.txt",
+                "dest_dir": self._data_dir,
+                "step": "sftp_class",
+                "quit": False,
+            }
+        )
 
         with ExitStack() as stack:
             mock_sftp = stack.enter_context(patch("cliboa.adapter.sftp.SftpAdapter.execute"))
@@ -101,14 +108,17 @@ class TestSftpDownload(object):
             f.write("test")
 
         instance = SftpDownload()
-        Helper.set_property(instance, "logger", _get_logger(__name__))
-        Helper.set_property(instance, "host", "dummy.host")
-        Helper.set_property(instance, "user", "dummy_user")
-        Helper.set_property(instance, "key", dummy_pass)
-        Helper.set_property(instance, "src_dir", "/")
-        Helper.set_property(instance, "src_pattern", ".*.txt")
-        Helper.set_property(instance, "dest_dir", self._data_dir)
-        Helper.set_property(instance, "step", "sftp_class")
+        instance._set_properties(
+            {
+                "host": "dummy.host",
+                "user": "dummy_user",
+                "key": dummy_pass,
+                "src_dir": "/",
+                "src_pattern": ".*.txt",
+                "dest_dir": self._data_dir,
+                "step": "sftp_class",
+            }
+        )
 
         with ExitStack() as stack:
             mock_sftp = stack.enter_context(patch("cliboa.adapter.sftp.SftpAdapter.execute"))
@@ -118,14 +128,17 @@ class TestSftpDownload(object):
 
     def test_execute_with_key_content(self):
         instance = SftpDownload()
-        Helper.set_property(instance, "logger", _get_logger(__name__))
-        Helper.set_property(instance, "host", "dummy.host")
-        Helper.set_property(instance, "user", "dummy_user")
-        Helper.set_property(instance, "key", {"content": "dummy_rsa"})
-        Helper.set_property(instance, "src_dir", "/")
-        Helper.set_property(instance, "src_pattern", ".*.txt")
-        Helper.set_property(instance, "dest_dir", self._data_dir)
-        Helper.set_property(instance, "step", "sftp_class")
+        instance._set_properties(
+            {
+                "host": "dummy.host",
+                "user": "dummy_user",
+                "key": {"content": "dummy_rsa"},
+                "src_dir": "/",
+                "src_pattern": ".*.txt",
+                "dest_dir": self._data_dir,
+                "step": "sftp_class",
+            }
+        )
 
         with ExitStack() as stack:
             mock_sftp = stack.enter_context(patch("cliboa.adapter.sftp.SftpAdapter.execute"))
@@ -140,12 +153,15 @@ class TestSftpDownload(object):
 class TestSftpFileExistsCheck:
     def test_execute_file_found(self):
         instance = SftpFileExistsCheck()
-        Helper.set_property(instance, "logger", _get_logger(__name__))
-        Helper.set_property(instance, "host", "dummy.host")
-        Helper.set_property(instance, "user", "dummy_user")
-        Helper.set_property(instance, "password", "dummy_pass")
-        Helper.set_property(instance, "src_dir", "/")
-        Helper.set_property(instance, "src_pattern", ".*.txt")
+        instance._set_properties(
+            {
+                "host": "dummy.host",
+                "user": "dummy_user",
+                "password": "dummy_pass",
+                "src_dir": "/",
+                "src_pattern": ".*.txt",
+            }
+        )
         with ExitStack() as stack:
             mock_sftp = stack.enter_context(patch("cliboa.adapter.sftp.SftpAdapter.execute"))
             mock_sftp.return_value = ["test.txt"]
@@ -155,12 +171,15 @@ class TestSftpFileExistsCheck:
 
     def test_execute_file_not_found(self):
         instance = SftpFileExistsCheck()
-        Helper.set_property(instance, "logger", _get_logger(__name__))
-        Helper.set_property(instance, "host", "dummy.host")
-        Helper.set_property(instance, "user", "dummy_user")
-        Helper.set_property(instance, "password", "dummy_pass")
-        Helper.set_property(instance, "src_dir", "/")
-        Helper.set_property(instance, "src_pattern", ".*.txt")
+        instance._set_properties(
+            {
+                "host": "dummy.host",
+                "user": "dummy_user",
+                "password": "dummy_pass",
+                "src_dir": "/",
+                "src_pattern": ".*.txt",
+            }
+        )
         with ExitStack() as stack:
             mock_sftp = stack.enter_context(patch("cliboa.adapter.sftp.SftpAdapter.execute"))
             mock_sftp.return_value = []

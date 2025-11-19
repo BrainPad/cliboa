@@ -20,8 +20,6 @@ from requests.exceptions import HTTPError
 
 from cliboa.conf import env
 from cliboa.scenario.extract.http import HttpDownload, HttpDownloadViaBasicAuth, HttpGet
-from cliboa.util.helper import Helper
-from cliboa.util.log import _get_logger
 from tests import BaseCliboaTest
 
 
@@ -45,12 +43,15 @@ class TestHttpDownload(object):
 
         try:
             instance = HttpDownload()
-            Helper.set_property(instance, "logger", _get_logger(__name__))
-            # use Postman echo
-            Helper.set_property(instance, "src_url", "https://postman-echo.com")
-            Helper.set_property(instance, "src_pattern", "get?foo1=bar1&foo2=bar2")
-            Helper.set_property(instance, "dest_dir", self._data_dir)
-            Helper.set_property(instance, "dest_pattern", "test.result")
+            instance._set_properties(
+                {
+                    # use Postman echo
+                    "src_url": "https://postman-echo.com",
+                    "src_pattern": "get?foo1=bar1&foo2=bar2",
+                    "dest_dir": self._data_dir,
+                    "dest_pattern": "test.result",
+                }
+            )
             instance.execute()
             f = open(os.path.join(self._data_dir, "test.result"), "r")
             result = f.read()
@@ -78,14 +79,17 @@ class TestDownloadViaBasicAuth(BaseCliboaTest):
         try:
             os.makedirs(self._data_dir, exist_ok=True)
             instance = HttpDownloadViaBasicAuth()
-            Helper.set_property(instance, "logger", _get_logger(__name__))
-            # use Postman echo
-            Helper.set_property(instance, "src_url", "https://postman-echo.com")
-            Helper.set_property(instance, "src_pattern", "basic-auth")
-            Helper.set_property(instance, "dest_dir", self._data_dir)
-            Helper.set_property(instance, "dest_pattern", "test.result")
-            Helper.set_property(instance, "user", "postman")
-            Helper.set_property(instance, "password", "password")
+            instance._set_properties(
+                {
+                    # use Postman echo
+                    "src_url": "https://postman-echo.com",
+                    "src_pattern": "basic-auth",
+                    "dest_dir": self._data_dir,
+                    "dest_pattern": "test.result",
+                    "user": "postman",
+                    "password": "password",
+                }
+            )
 
             instance.execute()
             f = open(os.path.join(self._data_dir, "test.result"), "r")
@@ -102,14 +106,19 @@ class TestDownloadViaBasicAuth(BaseCliboaTest):
         mock_get.side_effect = HTTPError("Http request failed. HTTP Status code: 401")
 
         instance = HttpDownloadViaBasicAuth()
-        Helper.set_property(instance, "logger", _get_logger(__name__))
-        # use Postman echo
-        Helper.set_property(instance, "src_url", "https://postman-echo.com")
-        Helper.set_property(instance, "src_pattern", "basic-auth")
-        Helper.set_property(instance, "dest_dir", self._data_dir)
-        Helper.set_property(instance, "dest_pattern", "test.result")
-        Helper.set_property(instance, "user", "postman")
-        Helper.set_property(instance, "password", "xxxxx")
+        instance._set_properties(
+            {
+                # use Postman echo
+                "src_url": "https://postman-echo.com",
+                "src_pattern": "basic-auth",
+                "dest_dir": self._data_dir,
+                "dest_pattern": "test.result",
+                "timeout": 1,
+                "retry_count": 1,
+                "user": "postman",
+                "password": "xxxxx",
+            }
+        )
 
         with pytest.raises(HTTPError) as execinfo:
             instance.execute()
@@ -137,13 +146,14 @@ class TestHttpGet(object):
         try:
             os.makedirs(self._data_dir, exist_ok=True)
             instance = HttpGet()
-            Helper.set_property(instance, "logger", _get_logger(__name__))
-            # use Postman echo
-            Helper.set_property(
-                instance, "src_url", "https://postman-echo.com/get?foo1=bar1&foo2=bar2"
+            instance._set_properties(
+                {
+                    # use Postman echo
+                    "src_url": "https://postman-echo.com/get?foo1=bar1&foo2=bar2",
+                    "dest_dir": self._data_dir,
+                    "dest_name": "test.result",
+                }
             )
-            Helper.set_property(instance, "dest_dir", self._data_dir)
-            Helper.set_property(instance, "dest_name", "test.result")
             instance.execute()
             f = open(os.path.join(self._data_dir, "test.result"), "r")
             result = f.read()
@@ -166,14 +176,17 @@ class TestHttpGet(object):
         try:
             os.makedirs(self._data_dir, exist_ok=True)
             instance = HttpGet()
-            Helper.set_property(instance, "logger", _get_logger(__name__))
-            # use Postman echo
-            Helper.set_property(instance, "src_url", "https://postman-echo.com/basic-auth")  # noqa
-            Helper.set_property(instance, "dest_dir", self._data_dir)
-            Helper.set_property(instance, "dest_name", "test.result")
-            Helper.set_property(instance, "user", "postman")
-            Helper.set_property(instance, "password", "password")
-            Helper.set_property(instance, "basic_auth", True)
+            instance._set_properties(
+                {
+                    # use Postman echo
+                    "src_url": "https://postman-echo.com/basic-auth",
+                    "dest_dir": self._data_dir,
+                    "dest_name": "test.result",
+                    "user": "postman",
+                    "password": "password",
+                    "basic_auth": True,
+                }
+            )
 
             instance.execute()
             f = open(os.path.join(self._data_dir, "test.result"), "r")
@@ -190,13 +203,16 @@ class TestHttpGet(object):
         mock_get.side_effect = HTTPError("Http request failed. HTTP Status code: 404")
 
         instance = HttpGet()
-        Helper.set_property(instance, "logger", _get_logger(__name__))
-        # use Postman echo
-        Helper.set_property(instance, "src_url", "https://spam.com/get?foo1=bar1&foo2=bar2")
-        Helper.set_property(instance, "dest_dir", self._data_dir)
-        Helper.set_property(instance, "dest_name", "test.result")
-        Helper.set_property(instance, "retry_count", 1)
-        Helper.set_property(instance, "retry_intvl_sec", 1)
+        instance._set_properties(
+            {
+                # use Postman echo
+                "src_url": "https://spam.com/get?foo1=bar1&foo2=bar2",
+                "dest_dir": self._data_dir,
+                "dest_name": "test.result",
+                "retry_count": 1,
+                "retry_intvl_sec": 1,
+            }
+        )
         with pytest.raises(HTTPError) as execinfo:
             instance.execute()
         assert "Http request failed" in str(execinfo.value)
@@ -207,16 +223,19 @@ class TestHttpGet(object):
         mock_get.side_effect = HTTPError("Http request failed. HTTP Status code: 401")
 
         instance = HttpGet()
-        Helper.set_property(instance, "logger", _get_logger(__name__))
-        # use Postman echo
-        Helper.set_property(instance, "src_url", "https://postman-echo.com/basic-auth")  # noqa
-        Helper.set_property(instance, "dest_dir", self._data_dir)
-        Helper.set_property(instance, "dest_name", "test.result")
-        Helper.set_property(instance, "retry_count", 1)
-        Helper.set_property(instance, "retry_intvl_sec", 1)
-        Helper.set_property(instance, "user", "postman")
-        Helper.set_property(instance, "password", "xxxxx")
-        Helper.set_property(instance, "basic_auth", True)
+        instance._set_properties(
+            {
+                # use Postman echo
+                "src_url": "https://postman-echo.com/basic-auth",
+                "dest_dir": self._data_dir,
+                "dest_name": "test.result",
+                "retry_count": 1,
+                "retry_intvl_sec": 1,
+                "user": "postman",
+                "password": "xxxxx",
+                "basic_auth": True,
+            }
+        )
 
         with pytest.raises(HTTPError) as execinfo:
             instance.execute()

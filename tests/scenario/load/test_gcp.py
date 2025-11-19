@@ -15,7 +15,6 @@ from unittest.mock import patch
 
 from cliboa.adapter.gcp import BigQueryAdapter
 from cliboa.scenario.load.gcp import BigQueryCopy
-from cliboa.util.helper import Helper
 
 
 class TestBigQueryCopy(object):
@@ -26,13 +25,17 @@ class TestBigQueryCopy(object):
         gbq_client = m_get_bigquery_client.return_value
 
         instance = BigQueryCopy()
-        Helper.set_property(instance, "project_id", "awesome-project")
-        Helper.set_property(instance, "location", "asia-northeast1")
-        Helper.set_property(instance, "credentials", {"file": "/awesome-path/key.json"})
-        Helper.set_property(instance, "dataset", "awesome_dataset")
-        Helper.set_property(instance, "tblname", "awesome_table")
-        Helper.set_property(instance, "dest_dataset", "copy_awesome_dataset")
-        Helper.set_property(instance, "dest_tblname", "copy_awesome_table")
+        instance._set_properties(
+            {
+                "project_id": "awesome-project",
+                "location": "asia-northeast1",
+                "credentials": {"file": "/awesome-path/key.json"},
+                "dataset": "awesome_dataset",
+                "tblname": "awesome_table",
+                "dest_dataset": "copy_awesome_dataset",
+                "dest_tblname": "copy_awesome_table",
+            }
+        )
         instance.execute()
 
         # Tests

@@ -20,8 +20,6 @@ from mock import patch
 from cliboa.adapter.azure import BlobServiceAdapter
 from cliboa.conf import env
 from cliboa.scenario.load.azure import AzureBlobUpload
-from cliboa.util.helper import Helper
-from cliboa.util.log import _get_logger
 
 
 class TestAzureBlobUpload(object):
@@ -45,18 +43,17 @@ class TestAzureBlobUpload(object):
 
         # Act
         instance = AzureBlobUpload()
-        Helper.set_property(instance, "logger", _get_logger(__name__))
-        # use Postman echo
-        Helper.set_property(
-            instance,
-            "account_url",
-            "https://testtesttest.blob.core.windows.example/",
+        instance._set_properties(
+            {
+                # use Postman echo
+                "account_url": "https://testtesttest.blob.core.windows.example/",
+                "account_access_key": "dummy",
+                "container_name": "test",
+                "src_dir": self._data_dir,
+                "src_pattern": r"(.*)\.txt",
+                "dest_dir": "out",
+            }
         )
-        Helper.set_property(instance, "account_access_key", "dummy")
-        Helper.set_property(instance, "container_name", "test")
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"(.*)\.txt")
-        Helper.set_property(instance, "dest_dir", "out")
         instance.execute()
 
         # Assert

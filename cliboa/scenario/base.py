@@ -42,6 +42,44 @@ class BaseStep(_BaseObject):
     def parent(self, parent: IParentStep):
         self._parent = parent
 
+    def _set_properties(self, properties: dict[str, Any]) -> None:
+        """
+        This method allows you to set a value
+        to the class with either method directly or via property setter.
+        Either way, the method must be implemented
+        to set the value for the class parameter like below.
+
+        -- eg1 --
+        class Foo(BaseStep):
+            def __init__(self):
+                self._bar = None
+
+            def bar(self, bar):
+                self._bar = bar
+
+        -- eg2 --
+        class Foo2(BaseStep):
+            def __init__(self):
+                self._bar = None
+
+            @property
+            def bar(self):
+                return self._bar
+
+            @bar.setter
+            def bar(self, bar):
+                self._bar = bar
+        """
+        for k, v in properties.items():
+            if isinstance(getattr(type(self), k, None), property):
+                setattr(self, k, v)
+            else:
+                call = getattr(self, k, None)
+                if callable(call):
+                    call(v)
+                else:
+                    self._logger.warning(f"Failed to set property {k}")
+
     @abstractmethod
     def execute(self, *args, **kwargs) -> Optional[int]:
         pass

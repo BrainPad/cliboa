@@ -22,7 +22,6 @@ from cliboa.scenario.base import BaseStep
 from cliboa.scenario.interface import IParentStep
 from cliboa.util.base import _BaseObject
 from cliboa.util.constant import StepStatus
-from cliboa.util.helper import Helper
 
 
 class _BaseExecutor(_BaseObject, _IExecute):
@@ -143,12 +142,14 @@ class _StepExecutor(_BaseExecutor, IParentStep):
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
-        # Set arguments to step instance.
-        for k, v in model.arguments.items():
-            Helper.set_property(step, k, v)
-        Helper.set_property(step, "step", model.step)
-        Helper.set_property(step, "symbol", model.symbol)
-        Helper.set_property(step, "parent", self)
+        step._set_properties(
+            {
+                "step": model.step,
+                "symbol": model.symbol,
+                "parent": self,
+            }
+        )
+        step._set_properties(model.arguments)
         self._step = step
         self._model = model
         self._symbol_model = symbol_model

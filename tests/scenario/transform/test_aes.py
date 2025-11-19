@@ -16,8 +16,6 @@ import shutil
 
 from cliboa.conf import env
 from cliboa.scenario.transform.aes import AesDecrypt, AesEncrypt
-from cliboa.util.helper import Helper
-from cliboa.util.log import _get_logger
 from tests import BaseCliboaTest
 
 
@@ -49,22 +47,28 @@ class TestAes(BaseCliboaTest):
     def test_encrypt_decrypt_ok(self):
         # Encryption
         instance = AesEncrypt()
-        Helper.set_property(instance, "logger", _get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test\.txt")
-        Helper.set_property(instance, "dest_dir", self._result_dir)
-        Helper.set_property(instance, "key_dir", self._data_dir)
-        Helper.set_property(instance, "key_pattern", r"test\.key")
+        instance._set_properties(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test\.txt",
+                "dest_dir": self._result_dir,
+                "key_dir": self._data_dir,
+                "key_pattern": r"test\.key",
+            }
+        )
         instance.execute()
 
         # Decryption
         instance = AesDecrypt()
-        Helper.set_property(instance, "logger", _get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._result_dir)
-        Helper.set_property(instance, "src_pattern", r"test\.txt")
-        Helper.set_property(instance, "dest_dir", self._result_dir)
-        Helper.set_property(instance, "key_dir", self._data_dir)
-        Helper.set_property(instance, "key_pattern", r"test\.key")
+        instance._set_properties(
+            {
+                "src_dir": self._result_dir,
+                "src_pattern": r"test\.txt",
+                "dest_dir": self._result_dir,
+                "key_dir": self._data_dir,
+                "key_pattern": r"test\.key",
+            }
+        )
         instance.execute()
 
         with open(os.path.join(self._result_dir, self._file_name), mode="r", encoding="utf-8") as f:
@@ -74,22 +78,28 @@ class TestAes(BaseCliboaTest):
     def test_by_multiple_encrypt_decrypt_ok(self):
         # Encryption
         instance = AesEncrypt()
-        Helper.set_property(instance, "logger", _get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"(.*)\.txt")
-        Helper.set_property(instance, "dest_dir", self._result_dir)
-        Helper.set_property(instance, "key_dir", self._data_dir)
-        Helper.set_property(instance, "key_pattern", r"test\.key")
+        instance._set_properties(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"(.*)\.txt",
+                "dest_dir": self._result_dir,
+                "key_dir": self._data_dir,
+                "key_pattern": r"test\.key",
+            }
+        )
         instance.execute()
 
         # Decryption
         instance = AesDecrypt()
-        Helper.set_property(instance, "logger", _get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._result_dir)
-        Helper.set_property(instance, "src_pattern", r"(.*)\.txt")
-        Helper.set_property(instance, "dest_dir", self._result_dir)
-        Helper.set_property(instance, "key_dir", self._data_dir)
-        Helper.set_property(instance, "key_pattern", r"test\.key")
+        instance._set_properties(
+            {
+                "src_dir": self._result_dir,
+                "src_pattern": r"(.*)\.txt",
+                "dest_dir": self._result_dir,
+                "key_dir": self._data_dir,
+                "key_pattern": r"test\.key",
+            }
+        )
         instance.execute()
 
         with open(
