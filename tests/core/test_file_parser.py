@@ -14,25 +14,18 @@
 import json
 import os
 import shutil
-import sys
 
 import pytest
 import yaml
 
 from cliboa.conf import env
 from cliboa.core.file_parser import JsonScenarioParser, YamlScenarioParser
-from cliboa.interface import CommandArgumentParser
 from cliboa.util.exception import ScenarioFileInvalid
 from tests import BaseCliboaTest
 
 
 class TestYamlScenarioParser(BaseCliboaTest):
     def setUp(self):
-        cmd_parser = CommandArgumentParser()
-        sys.argv.clear()
-        sys.argv.append("spam")
-        sys.argv.append("spam")
-        self._cmd_args = cmd_parser.parse()
         self._pj_dir = os.path.join(env.BASE_DIR, "project", "spam")
         self._cmn_dir = env.COMMON_DIR
         self._pj_scenario_file = os.path.join(env.BASE_DIR, "project", "spam", "scenario.yml")
@@ -379,13 +372,6 @@ class TestYamlScenarioParser(BaseCliboaTest):
 
 class TestJsonScenarioParser(BaseCliboaTest):
     def setUp(self):
-        cmd_parser = CommandArgumentParser()
-        sys.argv.clear()
-        sys.argv.append("project_name")
-        sys.argv.append("spam")
-        sys.argv.append("--format")
-        sys.argv.append("json")
-        self._cmd_args = cmd_parser.parse()
         self._pj_dir = os.path.join(env.BASE_DIR, "project", "spam")
         self._cmn_dir = env.COMMON_DIR
         self._pj_scenario_file = os.path.join(env.BASE_DIR, "project", "spam", "scenario.json")

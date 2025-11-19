@@ -13,7 +13,6 @@
 #
 import os
 import shutil
-import sys
 
 import pytest
 
@@ -27,16 +26,11 @@ from cliboa.core.validator import (
     ScenarioYamlKey,
     ScenarioYamlType,
 )
-from cliboa.interface import CommandArgumentParser
 from cliboa.util.exception import DirStructureInvalid, FileNotFound, ScenarioFileInvalid
 
 
 class TestValidators(object):
     def setup_method(self, method):
-        CommandArgumentParser()
-        sys.argv.clear()
-        sys.argv.append("spam")
-        sys.argv.append("spam")
         self._pj_dir = os.path.join(env.BASE_DIR, "project", "spam")
         self._scenario_file = os.path.join(env.BASE_DIR, "project", "spam", "scenario.yml")
         os.makedirs(self._pj_dir, exist_ok=True)

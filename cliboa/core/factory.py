@@ -25,7 +25,7 @@ class ScenarioManagerFactory(object):
     """
 
     @staticmethod
-    def create(cmd_args):
+    def create(project_name: str, scenario_format: str):
         """
         Create ScenarioManager Instance(YamlScenarioManager or JsonScenarioManager)
         Args:
@@ -33,10 +33,9 @@ class ScenarioManagerFactory(object):
         Returns:
             scenario manager instance
         """
-        scenario_file_format = cmd_args.format
-        scenario_manager_cls = scenario_file_format.capitalize() + "ScenarioManager"
+        scenario_manager_cls = scenario_format.capitalize() + "ScenarioManager"
         instance = globals()[scenario_manager_cls]
-        return instance(cmd_args)
+        return instance(project_name, scenario_format)
 
 
 class StepExecutorFactory(object):
