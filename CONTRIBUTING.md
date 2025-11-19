@@ -10,6 +10,8 @@
     * [3-1. Branch Strategy](#3-1-branch-strategy)
     * [3-2. Architecture and Coding Style Guide](#3-2-architecture-and-coding-style-guide)
     * [3-3. Review Process](#3-3-review-process)
+    * [3-4. Core Maintainer Definition](#3-4-core-maintainer-definition)
+    * [3-5. Review Process Exception](#3-5-review-process-exception)
 * [4. Licensing](#4-licensing)
 
 ## 1. Welcome
@@ -72,6 +74,28 @@ Please follow these expectations:
     * PRs with failing CI tests may be put **on hold** until all checks are green, unless there are special circumstances.
 2. A core maintainer will review your code. This process may involve feedback, discussion, and requests for further revisions or modifications.
 3. Your PR will be merged once it receives approval from at least one core maintainer.
+
+### 3-4. Core Maintainer Definition
+
+A **Core Maintainer** is defined as an individual who possesses **Admin** or **Maintain** privileges for this repository on GitHub.
+Core Maintainers are responsible for the long-term health and stability of the project.
+
+### 3-5. Review Process Exception
+
+To expedite the merging of low-risk changes, Core Maintainers are permitted to **self-merge (self-approve and merge)** a Pull Request (PR) **without waiting for an additional reviewer** when the core logic remains unchanged.
+
+**Note:** All changes, regardless of self-merge status, **must be submitted via a Pull Request** to maintain a complete modification history.
+
+The details of self-merging are as follows.
+
+1.  **Core Logic Changes (`cliboa/`):**
+    * Any changes within the `cliboa/` directory **must** be reviewed and approved by at least one other Core Maintainer. Self-merge is **not** permitted.
+    * However, self-merge is **permitted** if the changes involve only code comments, without changing the logic.
+2.  **Other Changes:**
+    * Changes to all other files are considered low-risk and can be **self-merged**.
+    * However if you, as the Core Maintainer, **feel a review is necessary, you may request a review** from another Core Maintainer.
+3.  **CI Requirement:**
+    * All PRs, regardless of the path, **must have all continuous integration (CI) checks in a passing (green) state** before merging.
 
 ## 4. Licensing
 

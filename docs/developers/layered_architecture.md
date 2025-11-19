@@ -1,6 +1,6 @@
 # Layered Architecture
 
-<img width="452" alt="Layered-Architecture-Image" src="https://github.com/BrainPad/cliboa/refs/heads/master/img/layer.png">
+<img width="452" alt="Layered-Architecture-Image" src="/img/layer.png">
 
 Cliboa uses a layered architecture.
 

@@ -37,15 +37,6 @@ class BaseGcp(BaseStep):
 
     def get_credentials(self):
         if isinstance(self._credentials, str):
-            self._logger.warning(
-                (
-                    "DeprecationWarning: "
-                    "In the near future, "
-                    "the `key` will be changed to accept only dictionary types. "
-                    "Please see more information "
-                    "https://github.com/BrainPad/cliboa/blob/master/docs/modules/sftp_download.md"
-                )
-            )
             return self._credentials
         else:
             return self._source_path_reader(self._credentials)
