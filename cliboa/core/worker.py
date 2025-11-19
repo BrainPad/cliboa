@@ -12,7 +12,7 @@
 # all copies or substantial portions of the Software.
 #
 from cliboa import state
-from cliboa.core.factory import StepExecutorFactory
+from cliboa.core.factory import _create_step_executor
 from cliboa.core.scenario_queue import ScenarioQueue
 from cliboa.util.constant import StepStatus
 from cliboa.util.log import _get_logger
@@ -81,7 +81,7 @@ class ScenarioWorker(object):
         """
         res = None
         while not self._scenario_queue.step_queue.is_empty():
-            strategy = StepExecutorFactory.create(self._scenario_queue.step_queue.pop())
+            strategy = _create_step_executor(self._scenario_queue.step_queue.pop())
             res = strategy.execute_steps(self._cmd_args)
             if res is None:
                 continue

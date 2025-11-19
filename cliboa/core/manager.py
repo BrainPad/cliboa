@@ -119,9 +119,9 @@ class ScenarioManager(_BaseObject):
 
         # Create BaseStep instance.
         if ClassUtil().is_custom_cls(cls_name) is True:
-            from cliboa.core.factory import CustomInstanceFactory
+            from cliboa.core.factory import _create_custom_instance
 
-            instance = CustomInstanceFactory.create(cls_name)
+            instance = _create_custom_instance(cls_name)
         else:
             cls = globals()[cls_name]
             instance = cls()
@@ -142,16 +142,16 @@ class ScenarioManager(_BaseObject):
     def _append_listeners(self, step: StepModel):
         listeners = [StepStatusListener()]
         if step.listeners is not None:
-            from cliboa.core.factory import CustomInstanceFactory
+            from cliboa.core.factory import _create_custom_instance
 
             arguments = copy.deepcopy(step.arguments)
             if type(step.listeners) is str:
-                clz = CustomInstanceFactory.create(step.listeners)
+                clz = _create_custom_instance(step.listeners)
                 clz.__dict__.update(arguments)
                 listeners.append(clz)
             elif type(step.listeners) is list:
                 for listener_cls in step.listeners:
-                    clz = CustomInstanceFactory.create(listener_cls)
+                    clz = _create_custom_instance(listener_cls)
                     clz.__dict__.update(arguments)
-                    listeners.append(CustomInstanceFactory.create(clz))
+                    listeners.append(_create_custom_instance(clz))
         return listeners

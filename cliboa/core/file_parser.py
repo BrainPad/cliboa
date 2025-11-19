@@ -11,16 +11,10 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import json
-import os
-from abc import abstractmethod
-from collections import OrderedDict
-
-import yaml
-
+from cliboa.core.factory import _get_scenario_loader_class
+from cliboa.core.loader import _ScenarioLoader
 from cliboa.core.model import ScenarioModel
 from cliboa.util.base import _BaseObject
-from cliboa.util.exception import FileNotFound, InvalidFormat, ScenarioFileInvalid
 
 
 class ScenarioParser(_BaseObject):
@@ -32,13 +26,7 @@ class ScenarioParser(_BaseObject):
         super().__init__()
         self._pj_scenario_file = pj_scenario_file
         self._cmn_scenario_file = cmn_scenario_file
-        if scenario_format == "yaml":
-            loader_class = _YamlScenarioLoader
-        elif scenario_format == "json":
-            loader_class = _JsonScenarioLoader
-        else:
-            raise InvalidFormat(f"scenario format '{scenario_format}' is invalid.")
-        self._loader_class: _ScenarioLoader = loader_class
+        self._loader_class: _ScenarioLoader = _get_scenario_loader_class(scenario_format)
 
     def parse(self) -> ScenarioModel:
         """
@@ -56,43 +44,3 @@ class ScenarioParser(_BaseObject):
 
         self._logger.info("Finish to parse scenario file.")
         return pj_scenario
-
-
-class _ScenarioLoader(_BaseObject):
-    def __init__(self, scenario_file: str, is_required: bool = False):
-        super().__init__()
-        self._scenario_file = scenario_file
-        if is_required and not self._exists():
-            raise FileNotFound("File %s does not exist" % self._scenario_file)
-
-    def _exists(self) -> bool:
-        return os.path.isfile(self._scenario_file)
-
-    def __call__(self) -> dict | None:
-        """
-        Load scenario file and return dict or None.
-        """
-        if not self._exists():
-            return None
-        top_dict = self._load()
-        if not isinstance(top_dict, dict):
-            raise ScenarioFileInvalid(
-                f"scenario file {self._scenario_file} is invalid. Check file format."
-            )
-        return top_dict
-
-    @abstractmethod
-    def _load(self) -> dict:
-        raise NotImplementedError()
-
-
-class _YamlScenarioLoader(_ScenarioLoader):
-    def _load(self) -> dict:
-        with open(self._scenario_file, "r") as f:
-            return yaml.safe_load(f)
-
-
-class _JsonScenarioLoader(_ScenarioLoader):
-    def _load(self) -> dict:
-        with open(self._scenario_file, "r") as f:
-            return json.load(f, object_pairs_hook=OrderedDict)
