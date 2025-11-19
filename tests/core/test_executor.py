@@ -16,8 +16,8 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from cliboa.core.executor import _ScenarioExecutor, _StepExecutor
-from cliboa.core.listener import StepStatusListener
 from cliboa.core.model import CommandArgument, StepModel
+from cliboa.listener.step import StepStatusListener
 from cliboa.scenario.sample_step import SampleCustomStep, SampleStep
 from cliboa.util.constant import StepStatus
 from cliboa.util.exception import CliboaException
@@ -37,12 +37,12 @@ class TestAppropriateListnerCall(TestCase):
     def test_end_with_noerror(self):
         with ExitStack() as stack:
             mock_before = stack.enter_context(
-                patch("cliboa.core.listener.StepStatusListener.before")
+                patch("cliboa.listener.step.StepStatusListener.before")
             )
-            mock_error = stack.enter_context(patch("cliboa.core.listener.StepStatusListener.error"))
-            mock_after = stack.enter_context(patch("cliboa.core.listener.StepStatusListener.after"))
+            mock_error = stack.enter_context(patch("cliboa.listener.step.StepStatusListener.error"))
+            mock_after = stack.enter_context(patch("cliboa.listener.step.StepStatusListener.after"))
             mock_post_step = stack.enter_context(
-                patch("cliboa.core.listener.StepStatusListener.completion")
+                patch("cliboa.listener.step.StepStatusListener.completion")
             )
 
             step = SampleCustomStep()
@@ -59,12 +59,12 @@ class TestAppropriateListnerCall(TestCase):
     def test_end_with_error(self):
         with ExitStack() as stack:
             mock_before = stack.enter_context(
-                patch("cliboa.core.listener.StepStatusListener.before")
+                patch("cliboa.listener.step.StepStatusListener.before")
             )
-            mock_error = stack.enter_context(patch("cliboa.core.listener.StepStatusListener.error"))
-            mock_after = stack.enter_context(patch("cliboa.core.listener.StepStatusListener.after"))
+            mock_error = stack.enter_context(patch("cliboa.listener.step.StepStatusListener.error"))
+            mock_after = stack.enter_context(patch("cliboa.listener.step.StepStatusListener.after"))
             mock_post_step = stack.enter_context(
-                patch("cliboa.core.listener.StepStatusListener.completion")
+                patch("cliboa.listener.step.StepStatusListener.completion")
             )
 
             step = ErrorSampleCustomStep()

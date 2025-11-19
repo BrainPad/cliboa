@@ -14,8 +14,8 @@
 from cliboa import state
 from cliboa.core.builder import _ScenarioBuilder
 from cliboa.core.executor import _ScenarioExecutor
-from cliboa.core.listener import ScenarioStatusListener
 from cliboa.core.model import CommandArgument
+from cliboa.listener.scenario import ScenarioStatusListener
 from cliboa.util.base import _BaseObject
 
 
