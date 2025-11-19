@@ -45,7 +45,6 @@ sample
 |   |-- scenario
 |   `-- scenario.yml
 |-- conf
-|   |-- cliboa.ini
 |   `-- logging.conf
 |-- logs
 `-- project
@@ -70,7 +69,6 @@ $ tree .
 |   |-- scenario
 |   `-- scenario.yml
 |-- conf
-|   |-- cliboa.ini
 |   `-- logging.conf
 |-- logs
 `-- project

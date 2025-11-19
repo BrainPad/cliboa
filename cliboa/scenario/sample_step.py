@@ -55,6 +55,7 @@ class SampleCustomStep(BaseStep):
         self._password = None
         self._access_key = None
         self._secret_key = None
+        self._access_token = None
         self._retry_count = 3
 
     def password(self, password):
@@ -65,6 +66,9 @@ class SampleCustomStep(BaseStep):
 
     def secret_key(self, secret_key):
         self._secret_key = secret_key
+
+    def access_token(self, access_token):
+        self._access_token = access_token
 
     def retry_count(self, retry_count):
         self._retry_count = retry_count

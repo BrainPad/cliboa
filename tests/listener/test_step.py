@@ -90,6 +90,12 @@ class TestStepStatusListener(TestCase):
                     self.assertEqual(
                         props.get("_password"), "****", "Password should be masked as ****"
                     )
+                    # assert None parameter
+                    self.assertEqual(
+                        props.get("_access_key"),
+                        None,
+                        "Access key should NOT be masked when it is None.",
+                    )
                     step_props_found = True
                     break
                 except json.JSONDecodeError:
@@ -107,7 +113,11 @@ class TestStepStatusListener(TestCase):
             {
                 "step": "test_step",
                 "class": "SampleCustomStep",
-                "arguments": {"access_key": "test", "secret_key": "test"},
+                "arguments": {
+                    "access_key": "test_access",
+                    "secret_key": "test_secret",
+                    "access_token": "token",
+                },
             }
         )
         executor = _StepExecutor(instance, model)
@@ -129,10 +139,17 @@ class TestStepStatusListener(TestCase):
                 try:
                     props = json.loads(json_str)
                     self.assertEqual(
-                        props.get("_access_key"), "****", "Access key should be masked as ****"
+                        props.get("_access_key"),
+                        "tes****ess",
+                        "Access key should be partial masked as ???****???",
                     )
                     self.assertEqual(
-                        props.get("_secret_key"), "****", "Secret key should be masked as ****"
+                        props.get("_secret_key"), "****", "Secret key should be full masked as ****"
+                    )
+                    self.assertEqual(
+                        props.get("_access_token"),
+                        "****ken",
+                        "Short access token should be partial masked as ****???",
                     )
                     step_props_found = True
                     break

@@ -87,10 +87,6 @@ class CliboAdmin(object):
         conf_path = os.path.join(cliboa_install_path, "cliboa", "conf", "logging.conf")
         copyfile(conf_path, os.path.join(ini_dir, "conf", "logging.conf"))
 
-        # copy cliboa.ini
-        conf_path = os.path.join(cliboa_install_path, "cliboa", "conf", "cliboa.ini")
-        copyfile(conf_path, os.path.join(ini_dir, "conf", "cliboa.ini"))
-
         # create __init__.py
         cmn_ini_path = os.path.join(ini_dir, "common", "__init__.py")
         open(cmn_ini_path, "w").close()

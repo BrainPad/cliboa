@@ -11,9 +11,7 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import configparser
 import json
-import os
 import re
 
 from cliboa import state
@@ -30,25 +28,40 @@ class StepStatusListener(BaseStepListener):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        mask = pattern = None
-        # TODO: refactor
-        path = os.path.join(env.BASE_DIR, "conf", "cliboa.ini")
-        if os.path.exists(path):
-            try:
-                conf = configparser.ConfigParser()
-                conf.read(path, encoding="utf-8")
-                mask = conf.get("logging", "mask")
-                pattern = re.compile(mask)
-            except Exception as e:
-                self._logger.warning(e)
+        mask = partial_mask = pattern = partial_pattern = None
+        partial_num = 3
+        try:
+            mask = env.get("LOGGING_MASK", ".*password.*|.*secret_key.*")
+            partial_mask = env.get("LOGGING_PARTIAL_MASK", ".*access_key.*|.*token.*")
+            partial_num = int(env.get("LOGGING_PARTIAL_NUM", 3))
+            pattern = re.compile(mask)
+            partial_pattern = re.compile(partial_mask)
+        except Exception as e:
+            self._logger.warning(e)
         self._pattern = pattern
+        self._partial_pattern = partial_pattern
+        self._partial_num = partial_num
 
     def before(self, step: BaseStep) -> None:
         state.set(step.__class__.__name__)
         props_dict = {}
         for k, v in step.__dict__.items():
-            if self._pattern is not None and self._pattern.search(k):
+            if v is not None and self._pattern is not None and self._pattern.search(k):
                 props_dict[k] = "****"
+            elif (
+                v is not None
+                and self._partial_pattern is not None
+                and self._partial_pattern.search(k)
+            ):
+                orig_value = str(v)
+                if len(orig_value) > self._partial_num * 2:
+                    props_dict[k] = (
+                        orig_value[: self._partial_num] + "****" + orig_value[-self._partial_num :]
+                    )
+                elif len(orig_value) > self._partial_num:
+                    props_dict[k] = "****" + orig_value[-self._partial_num :]
+                else:
+                    props_dict[k] = "****"
             else:
                 props_dict[k] = v
         self._logger.info(
