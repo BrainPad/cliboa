@@ -142,7 +142,7 @@ class ParallelConfigModel(BaseModel):
 
 
 class ParallelStepModel(BaseModel):
-    step: str | None = Field(default=None, frozen=None)
+    step: str | None = Field(default=None, frozen=True)
     parallel: Tuple[StepModel, ...] = Field(min_length=1, frozen=True)
     parallel_config: ParallelConfigModel | None = None
 
@@ -230,3 +230,8 @@ class ScenarioModel(_BaseWithVars):
         exec 'replace_vars' method in all steps.
         """
         self._apply_steps("replace_vars")
+
+
+class CommandArgument(BaseModel):
+    args: list[str] = Field(default_factory=list)
+    kwargs: dict[str, Any] = Field(default_factory=dict)

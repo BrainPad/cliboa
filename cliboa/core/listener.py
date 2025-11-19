@@ -11,19 +11,51 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+import configparser
+import json
+import os
+import re
 from abc import abstractmethod
 
+from cliboa import state
+from cliboa.conf import env
+from cliboa.core.interface import IScenarioExecutor
 from cliboa.scenario.base import BaseStep
-from cliboa.util.log import _get_logger
+from cliboa.util.base import _BaseObject
 
 
-class BaseListener(object):
+class BaseListener(_BaseObject):
     """
     Base listener for all the listener classes
     """
 
-    def __init__(self):
-        self._logger = _get_logger(__name__)
+    @abstractmethod
+    def before(self, obj) -> None:
+        """
+        Execute before main logic start.
+        """
+        pass
+
+    @abstractmethod
+    def after(self, obj) -> None:
+        """
+        Execute after main logic end normally.
+        """
+        pass
+
+    @abstractmethod
+    def error(self, obj, e: Exception) -> None:
+        """
+        Execute after main logic raises Exception.
+        """
+        pass
+
+    @abstractmethod
+    def completion(self, obj) -> None:
+        """
+        Execute after main logic always.
+        """
+        pass
 
 
 class ScenarioListener(BaseListener):
@@ -31,66 +63,57 @@ class ScenarioListener(BaseListener):
     Listener for scenario
     """
 
-    @abstractmethod
-    def before_scenario(self, worker) -> None:
-        """
-        Execute before scenario start.
-        """
+    def before(self, executor: IScenarioExecutor) -> None:
+        pass
 
-    @abstractmethod
-    def after_scenario(self, worker) -> None:
-        """
-        Execute after scenario was finished, regardless of the outcome.
-        """
+    def after(self, executor: IScenarioExecutor) -> None:
+        pass
+
+    def error(self, executor: IScenarioExecutor, e: Exception) -> None:
+        pass
+
+    def completion(self, executor: IScenarioExecutor) -> None:
+        pass
 
 
 class StepListener(BaseListener):
     """
-    If you would like to add an extra action for a step,
-    create a custom listener class with extend this class,
-    and implement any methods below.
-    These are called when
-    1. before a step is called.
-    2. after a step is completed, or when error occured while executing the step.
-    3. Very end of the step.
+    Listener for step
     """
 
-    @abstractmethod
-    def before_step(self, step: BaseStep) -> None:
-        """
-        Execute before a step is called.
-        """
+    def before(self, step: BaseStep) -> None:
+        pass
 
-    @abstractmethod
-    def after_step(self, step: BaseStep) -> None:
-        """
-        Execute after a step is completed, regardless of the return value.
-        """
+    def after(self, step: BaseStep) -> None:
+        pass
 
-    @abstractmethod
-    def error_step(self, step: BaseStep, e: Exception) -> None:
-        """
-        Execute when exception occurred while executing a step.
-        """
+    def error(self, step: BaseStep, e: Exception) -> None:
+        pass
 
-    @abstractmethod
-    def after_completion(self, step: BaseStep) -> None:
-        """
-        Execute finally of a step
-        (no matter the step was successfully completed or ended with an error)
-        """
+    def completion(self, step: BaseStep) -> None:
+        pass
 
 
-class ScenarioStatusListener(BaseListener):
+class ScenarioStatusListener(ScenarioListener):
     """
     Listener for scenario execution status
     """
 
-    def before_scenario(self, worker) -> None:
-        self._logger.info("Start scenario execution. %s" % (worker.get_scenario_queue_status()))
+    def before(self, executor: IScenarioExecutor) -> None:
+        state.set("_ExecuteScenario")
+        self._logger.info(f"Start scenario execution. StepQueue size is {executor.max_steps_size}")
 
-    def after_scenario(self, worker) -> None:
-        self._logger.info("Finish scenario execution. %s" % (worker.get_scenario_queue_status()))
+    def after(self, executor: IScenarioExecutor) -> None:
+        state.set("_ExecuteScenario")
+
+    def error(self, executor: IScenarioExecutor, e: Exception) -> None:
+        state.set("_ExecuteScenario")
+
+    def completion(self, executor: IScenarioExecutor) -> None:
+        state.set("_ExecuteScenario")
+        self._logger.info(
+            f"Complete scenario execution. StepQueue size is {executor.current_steps_size}"
+        )
 
 
 class StepStatusListener(StepListener):
@@ -99,11 +122,36 @@ class StepStatusListener(StepListener):
     By default, Cliboa implements StepStatusListener in all steps.
     """
 
-    def before_step(self, step: BaseStep) -> None:
+    def __init__(self):
+        super().__init__()
+        mask = pattern = None
+        # TODO: refactor
+        path = os.path.join(env.BASE_DIR, "conf", "cliboa.ini")
+        if os.path.exists(path):
+            try:
+                conf = configparser.ConfigParser()
+                conf.read(path, encoding="utf-8")
+                mask = conf.get("logging", "mask")
+                pattern = re.compile(mask)
+            except Exception as e:
+                self._logger.warning(e)
+        self._pattern = pattern
+
+    def before(self, step: BaseStep) -> None:
+        state.set(step.__class__.__name__)
+        props_dict = {}
+        for k, v in step.__dict__.items():
+            if self._pattern is not None and self._pattern.search(k):
+                props_dict[k] = "****"
+            else:
+                props_dict[k] = v
+        self._logger.info(
+            "Step properties: %s" % json.dumps(props_dict, ensure_ascii=False, default=str)
+        )
         self._logger.info("Start step execution. %s" % step.__class__.__name__)
 
-    def after_step(self, step: BaseStep) -> None:
+    def after(self, step: BaseStep) -> None:
         self._logger.info("Finish step execution. %s" % step.__class__.__name__)
 
-    def after_completion(self, step: BaseStep) -> None:
+    def completion(self, step: BaseStep) -> None:
         self._logger.info("Complete step execution. %s" % step.__class__.__name__)

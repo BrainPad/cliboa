@@ -11,435 +11,158 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+
 import os
-import shutil
-import sys
-from datetime import datetime, timedelta
+from unittest.mock import MagicMock, patch
 
 import pytest
 import yaml
 
-from cliboa.conf import env
 from cliboa.core.manager import ScenarioManager
-from cliboa.core.scenario_queue import ScenarioQueue
-from cliboa.util.exception import ScenarioFileInvalid
-from cliboa.util.parallel_with_config import ParallelWithConfig
-from tests import BaseCliboaTest
+from cliboa.core.model import CommandArgument
 
 
-@pytest.mark.skip(reason="ScenarioManager is scheduled for a redesign for v3.")
-class TestYamlScenarioManager(BaseCliboaTest):
-    def setUp(self):
-        self._pj_dir = os.path.join(env.PROJECT_DIR, "spam")
-        os.makedirs(self._pj_dir, exist_ok=True)
-        self._pj_scenario_file = os.path.join(self._pj_dir, "scenario.yml")
+class TestScenarioManager:
+    """
+    Unit test cases for ScenarioManager
+    """
 
-    def tearDown(self):
-        shutil.rmtree(self._pj_dir, ignore_errors=True)
-
-    def _create_scenario_file(self, data):
-        with open(self._pj_scenario_file, mode="w", encoding="utf-8") as f:
-            f.write(yaml.dump(data, default_flow_style=False))
-
-    def test_create_scenario_queue_ok(self):
+    def test_init_ok(self):
         """
-        Valid scenario.yml
+        Test __init__: Verify that 'scenario_builder' is set correctly
+        using Dependency Injection (DI).
         """
-        pj_yaml_dict = {
-            "scenario": [
-                {"step": "sample_step", "class": "SampleStep", "arguments": {"retry_count": 10}}
-            ]
+
+        # A mock builder class to be injected via DI
+        class MockBuilder:
+            def __init__(self, file, cmn_file, fmt, cmd, *args, **kwargs):
+                self.file = file
+                self.cmn_file = cmn_file
+                self.fmt = fmt
+                self.cmd = cmd
+                self.args = args  # Inherited from _BaseObject
+                self.kwargs = kwargs  # Inherited from _BaseObject
+
+        dummy_cmd = CommandArgument()
+        dummy_args = ("pos_arg1",)
+        mock_logger = MagicMock()
+        dummy_kwargs = {
+            "kw_arg1": "val1",
+            "di_scenario_builder": MockBuilder,
+            "di_logger": mock_logger,
         }
-        self._create_scenario_file(pj_yaml_dict)
 
-        manager = ScenarioManager("spam", "yaml")
-        manager.create_scenario_queue()
-        instances = ScenarioQueue.step_queue.pop()
-        instance = instances[0]
-        assert instance._step == "sample_step"
-        assert instance._retry_count == 10
+        # Instantiate ScenarioManager using DI
+        # (di_scenario_builder and di_logger)
+        manager = ScenarioManager("test.yml", None, "yaml", dummy_cmd, *dummy_args, **dummy_kwargs)
 
-    def test_create_scenario_queue_ok_parallel(self):
+        # Verify that _builder is an instance of MockBuilder
+        assert isinstance(manager._builder, MockBuilder)
+
+        # Verify that the injected logger was assigned
+        assert manager._logger is mock_logger
+
+        # Verify that the arguments passed to ScenarioManager._resolve
+        # were correctly passed to MockBuilder.__init__
+        assert manager._builder.file == "test.yml"
+        assert manager._builder.fmt == "yaml"
+        assert manager._builder.cmd is dummy_cmd
+
+        assert len(manager._builder.args) == 0
+        assert manager._builder.kwargs == dummy_kwargs
+
+    def test_execute_ok(self):
         """
-        Valid scenario.yml
+        Test execute: Verify that the execution flow is correctly controlled
+        using the DI classes.
         """
-        pj_yaml_dict = {
-            "scenario": [
-                {"multi_process_count": 3},
-                {"force_continue": True},
-                {
-                    "parallel": [
-                        {
-                            "step": "sample_step_1",
-                            "class": "SampleStep",
-                            "arguments": {"retry_count": 1},
-                        },
-                        {
-                            "step": "sample_step_2",
-                            "class": "SampleStep",
-                            "arguments": {"retry_count": 2},
-                        },
-                    ]
-                },
-            ]
+        mock_steps = ["step_a", "step_b"]
+        mock_builder_execute = MagicMock(return_value=mock_steps)
+        mock_executor_register = MagicMock()
+        mock_executor_execute = MagicMock(return_value=0)
+        mock_logger_instance = MagicMock()
+
+        created_executor_instances = []
+
+        dummy_kwargs = {"kw_arg_exec": "val_exec"}
+
+        # --- Define Mock Classes ---
+        class MockBuilder:
+            def __init__(self, *args, **kwargs):
+                self.execute = mock_builder_execute
+
+        class MockExecutor:
+            def __init__(self, steps, *args, **kwargs):
+                # Checkpoint 2: Assert constructor argument
+                assert steps == mock_steps, "Executor did not receive correct steps"
+
+                assert "kw_arg_exec" in kwargs
+                assert kwargs["di_logger"] is mock_logger_instance
+
+                self.register_listener = mock_executor_register
+                self.execute = mock_executor_execute
+                created_executor_instances.append(self)
+
+        class MockListener:
+            def __init__(self, *args, **kwargs):
+                assert "kw_arg_exec" in kwargs
+                assert kwargs["di_logger"] is mock_logger_instance
+
+        sm_kwargs = dummy_kwargs | {
+            "di_scenario_builder": MockBuilder,
+            "di_scenario_executor": MockExecutor,
+            "di_scenario_status_listener": MockListener,
+            "di_logger": mock_logger_instance,
         }
-        self._create_scenario_file(pj_yaml_dict)
 
-        manager = ScenarioManager("spam", "yaml")
-        manager.create_scenario_queue()
-        instances = ScenarioQueue.step_queue.pop()
-        assert len(instances) == 2
-        assert ScenarioQueue.step_queue.multi_proc_cnt == 3
-        assert ScenarioQueue.step_queue.force_continue is True
-        for i, instance in enumerate(instances):
-            if i == 0:
-                assert instance._step == "sample_step_1"
-                assert instance._retry_count == 1
-            elif i == 1:
-                assert instance._step == "sample_step_2"
-                assert instance._retry_count == 2
+        # Mock state (outside test scope)
+        with patch("cliboa.core.manager.state", MagicMock()):
+            manager = ScenarioManager("scenario.yml", "yaml", None, **sm_kwargs)
 
-    def test_create_scenario_queue_ok_parallel_with_config(self):
-        """
-        Valid scenario.yml
-        """
-        pj_yaml_dict = {
-            "scenario": [
-                {"multi_process_count": 3},
-                {"force_continue": True},
-                {
-                    "parallel_with_config": {
-                        "config": {"multi_process_count": 3},
-                        "steps": [
-                            {
-                                "step": "sample_step_1",
-                                "class": "SampleStep",
-                                "arguments": {"retry_count": 1},
-                            },
-                            {
-                                "step": "sample_step_2",
-                                "class": "SampleStep",
-                                "arguments": {"retry_count": 2},
-                            },
-                        ],
-                    }
-                },
-            ]
-        }
-        self._create_scenario_file(pj_yaml_dict)
+            return_code = manager.execute()
 
-        manager = ScenarioManager("spam", "yaml")
-        manager.create_scenario_queue()
-        instances = ScenarioQueue.step_queue.pop()
+        assert len(created_executor_instances) == 1
 
-        assert len(instances) == 1
-        assert isinstance(instances[0], ParallelWithConfig)
-        assert ScenarioQueue.step_queue.multi_proc_cnt == 3
-        assert ScenarioQueue.step_queue.force_continue is True
-        print(instances)
-        assert instances[0].config["multi_process_count"] == 3
-        for i, instance in enumerate(instances[0].steps):
-            if i == 0:
-                assert instance._step == "sample_step_1"
-                assert instance._retry_count == 1
-            elif i == 1:
-                assert instance._step == "sample_step_2"
-                assert instance._retry_count == 2
+        # Checkpoint 1: builder.execute() was called once
+        mock_builder_execute.assert_called_once_with()
 
-    def test_create_scenario_queue_ok_with_no_args(self):
-        """
-        Valid scenario.yml with no arguments
-        """
-        pj_yaml_dict = {"scenario": [{"step": "sample_step", "class": "SampleStep"}]}
-        self._create_scenario_file(pj_yaml_dict)
+        # Checkpoint 3: executor.register_listener() was called
+        mock_executor_register.assert_called_once()
+        assert isinstance(mock_executor_register.call_args[0][0], MockListener)
 
-        manager = ScenarioManager("spam", "yaml")
-        manager.create_scenario_queue()
-        instances = ScenarioQueue.step_queue.pop()
-        instance = instances[0]
-        assert instance._step == "sample_step"
-        assert instance._retry_count == 3
+        # Checkpoint 4: executor.execute() was called once
+        mock_executor_execute.assert_called_once_with()
 
-    def test_create_scenario_queue_ok_with_vars(self):
-        """
-        Valid scenario.yml with {{ vars }}
-        """
-        pj_yaml_dict = {
+        # Verify return code
+        assert return_code == 0
+
+
+@pytest.fixture
+def scenario_environment(tmp_path):
+    pj_dir = tmp_path / "project" / "spam"
+    scenario_yaml_file = pj_dir / "scenario.yml"
+
+    os.makedirs(pj_dir)
+
+    yield pj_dir, scenario_yaml_file
+
+
+class TestScenarioManagerIntegrated:
+    def test_create_scenario_queue_ok(self, scenario_environment):
+        pj_dir, scenario_yaml_file = scenario_environment
+
+        test_data = {
             "scenario": [
                 {
-                    "step": "sample_step",
-                    "class": "SampleStep",
-                    "arguments": {
-                        "memo": "foo_{{ today }}.csv",
-                        "with_vars": {"today": "date '+%Y%m%d'"},
-                    },
+                    "arguments": {"src_dir": str(pj_dir), "src_pattern": r"(.*)\.csv"},
+                    "class": "FileRename",
+                    "step": "",
                 }
             ]
         }
-        self._create_scenario_file(pj_yaml_dict)
 
-        manager = ScenarioManager("spam", "yaml")
-        manager.create_scenario_queue()
-        instances = ScenarioQueue.step_queue.pop()
-        instance = instances[0]
+        with open(scenario_yaml_file, "w") as f:
+            f.write(yaml.dump(test_data, default_flow_style=False))
 
-        today = datetime.now().strftime("%Y%m%d")
-        assert instance._step == "sample_step"
-        assert instance._memo == "foo_%s.csv" % today
-
-    @pytest.mark.skipif(
-        sys.platform == "darwin",
-        reason="The date command on macOS is different from the GNU version,"
-        "so this test will skip on a Mac.",
-    )
-    def test_create_scenario_queue_ok_with_vars_plural(self):
-        """
-        Valid scenario.yml with {{ vars }}
-        """
-        pj_yaml_dict = {
-            "scenario": [
-                {
-                    "step": "sample_step",
-                    "class": "SampleStep",
-                    "arguments": {
-                        "memo": "foo_{{ yesterday }}_{{ today }}.csv",
-                        "with_vars": {
-                            "today": "date '+%Y%m%d'",
-                            "yesterday": "date '+%Y%m%d' --date='1 day ago'",
-                        },
-                    },
-                }
-            ]
-        }
-        self._create_scenario_file(pj_yaml_dict)
-
-        manager = ScenarioManager("spam", "yaml")
-        manager.create_scenario_queue()
-        instances = ScenarioQueue.step_queue.pop()
-        instance = instances[0]
-
-        today = datetime.now().strftime("%Y%m%d")
-        yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
-        assert instance._step == "sample_step"
-        assert instance._memo == "foo_%s_%s.csv" % (yesterday, today)
-
-    @pytest.mark.skipif(
-        sys.platform == "darwin",
-        reason="The date command on macOS is different from the GNU version,"
-        "so this test will skip on a Mac.",
-    )
-    def test_create_scenario_queue_ok_with_vars_list(self):
-        """
-        Valid scenario.yml with {{ vars }}
-        """
-        pj_yaml_dict = {
-            "scenario": [
-                {
-                    "step": "sample_step",
-                    "class": "SampleStep",
-                    "arguments": {
-                        "memo": ["foo_{{ today }}.csv", "foo_{{ yesterday }}.csv"],
-                        "with_vars": {
-                            "today": "date '+%Y%m%d'",
-                            "yesterday": "date '+%Y%m%d' --date='1 day ago'",
-                        },
-                    },
-                }
-            ]
-        }
-        self._create_scenario_file(pj_yaml_dict)
-
-        manager = ScenarioManager("spam", "yaml")
-        manager.create_scenario_queue()
-        instances = ScenarioQueue.step_queue.pop()
-        instance = instances[0]
-
-        today = datetime.now().strftime("%Y%m%d")
-        yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
-        assert instance._step == "sample_step"
-        assert isinstance(instance._memo, list)
-        assert len(instance._memo) == 2
-        for i, row in enumerate(instance._memo):
-            if i == 0:
-                assert row == "foo_%s.csv" % today
-            elif i == 1:
-                assert row == "foo_%s.csv" % yesterday
-
-    @pytest.mark.skipif(
-        sys.platform == "darwin",
-        reason="The date command on macOS is different from the GNU version,"
-        "so this test will skip on a Mac.",
-    )
-    def test_create_scenario_queue_ok_with_vars_dict(self):
-        """
-        Valid scenario.yml with {{ vars }}
-        """
-        pj_yaml_dict = {
-            "scenario": [
-                {
-                    "step": "sample_step",
-                    "class": "SampleStep",
-                    "arguments": {
-                        "memo": {"one": "foo_{{ today }}.csv", "two": "foo_{{ yesterday }}.csv"},
-                        "with_vars": {
-                            "today": "date '+%Y%m%d'",
-                            "yesterday": "date '+%Y%m%d' --date='1 day ago'",
-                        },
-                    },
-                }
-            ]
-        }
-        self._create_scenario_file(pj_yaml_dict)
-
-        manager = ScenarioManager("spam", "yaml")
-        manager.create_scenario_queue()
-        instances = ScenarioQueue.step_queue.pop()
-        instance = instances[0]
-
-        today = datetime.now().strftime("%Y%m%d")
-        yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
-        assert instance._step == "sample_step"
-        assert isinstance(instance._memo, dict)
-        for k, v in instance._memo.items():
-            if k == "one":
-                assert v == "foo_%s.csv" % today
-            elif k == "two":
-                assert v == "foo_%s.csv" % yesterday
-
-    def test_create_scenario_queue_ok_with_vars_datetime(self):
-        """
-        Valid scenario.yml with {{ vars }}
-        """
-        now_datetime = datetime.now()
-        pj_yaml_dict = {
-            "scenario": [
-                {
-                    "step": "sample_step",
-                    "class": "SampleStep",
-                    "arguments": {
-                        "memo": now_datetime,
-                        "with_vars": {
-                            "today": "date '+%Y%m%d'",
-                            "yesterday": "date '+%Y%m%d' --date='1 day ago'",
-                        },
-                    },
-                }
-            ]
-        }
-        self._create_scenario_file(pj_yaml_dict)
-
-        manager = ScenarioManager("spam", "yaml")
-        manager.create_scenario_queue()
-        instances = ScenarioQueue.step_queue.pop()
-        instance = instances[0]
-
-        assert instance._step == "sample_step"
-        assert isinstance(instance._memo, datetime)
-        assert instance._memo == now_datetime
-
-    @pytest.mark.skipif(
-        sys.platform == "darwin",
-        reason="The date command on macOS is different from the GNU version,"
-        "so this test will skip on a Mac.",
-    )
-    def test_create_scenario_queue_ok_with_vars_complicated(self):
-        """
-        Valid scenario.yml with {{ vars }}
-        """
-        now_datetime = datetime.now()
-        pj_yaml_dict = {
-            "scenario": [
-                {
-                    "step": "sample_step",
-                    "class": "SampleStep",
-                    "arguments": {
-                        "memo": [
-                            {"one": "foo_{{ today }}.csv", "two": "foo_{{ yesterday }}.csv"},
-                            {"one": "foo_{{ today }}.txt", "two": "foo_{{ yesterday }}.txt"},
-                            {"now_time": now_datetime},
-                        ],
-                        "with_vars": {
-                            "today": "date '+%Y%m%d'",
-                            "yesterday": "date '+%Y%m%d' --date='1 day ago'",
-                        },
-                    },
-                }
-            ]
-        }
-        self._create_scenario_file(pj_yaml_dict)
-
-        manager = ScenarioManager("spam", "yaml")
-        manager.create_scenario_queue()
-        instances = ScenarioQueue.step_queue.pop()
-        instance = instances[0]
-
-        today = datetime.now().strftime("%Y%m%d")
-        yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
-        assert instance._step == "sample_step"
-        assert isinstance(instance._memo, list)
-        assert len(instance._memo) == 3
-        for i, row in enumerate(instance._memo):
-            if i == 0:
-                ext = "csv"
-            elif i == 1:
-                ext = "txt"
-            for k, v in row.items():
-                if k == "one":
-                    assert v == "foo_%s.%s" % (today, ext)
-                elif k == "two":
-                    assert v == "foo_%s.%s" % (yesterday, ext)
-                elif k == "now_time":
-                    assert v == now_datetime
-
-    def test_create_scenario_queue_ng(self):
-        """
-        Invalid scenario.yml
-
-        scenario:
-          - arguments
-          - spam
-        """
-        pj_yaml_dict = {"scenario": ["arguments", "spam"]}
-        self._create_scenario_file(pj_yaml_dict)
-
-        with pytest.raises(AttributeError) as excinfo:
-            manager = ScenarioManager("spam", "yaml")
-            manager.create_scenario_queue()
-        assert "object has no attribute" in str(excinfo.value)
-
-    def test_create_scenario_queue_with_no_list_ng(self):
-        """
-        Invalid scenario.yml
-
-        scenario:
-          arguments:
-            spam: test
-        """
-        pj_yaml_dict = {"scenario": {"arguments": {"spam": "test"}}}
-        self._create_scenario_file(pj_yaml_dict)
-
-        with pytest.raises(ScenarioFileInvalid) as excinfo:
-            manager = ScenarioManager("spam", "yaml")
-            manager.create_scenario_queue()
-        assert "invalid" in str(excinfo.value)
-
-    def test_replace_environment_values(self):
-        os.environ["CLIBOA_TEST_ENV"] = "ABC"
-        pj_yaml_dict = {
-            "scenario": [
-                {
-                    "step": "sample_step",
-                    "class": "SampleStep",
-                    "arguments": {"memo": "foo_{{ env.CLIBOA_TEST_ENV }}_bar"},
-                }
-            ]
-        }
-        self._create_scenario_file(pj_yaml_dict)
-
-        manager = ScenarioManager("spam", "yaml")
-        manager.create_scenario_queue()
-        instances = ScenarioQueue.step_queue.pop()
-        instance = instances[0]
-
-        assert instance._step == "sample_step"
-        assert instance._memo == "foo_ABC_bar"
+        manager = ScenarioManager(str(scenario_yaml_file))
+        manager.execute()
