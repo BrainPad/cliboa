@@ -19,6 +19,7 @@ from cliboa.core.interface import _IExecute
 from cliboa.core.model import CommandArgument, StepModel
 from cliboa.listener.interface import IScenarioExecutor
 from cliboa.scenario.base import BaseStep
+from cliboa.scenario.interface import IParentStep
 from cliboa.util.base import _BaseObject
 from cliboa.util.constant import StepStatus
 from cliboa.util.helper import Helper
@@ -127,7 +128,7 @@ class _ScenarioExecutor(_BaseExecutor, IScenarioExecutor):
         return StepStatus.SUCCESSFUL_TERMINATION if res is None else res
 
 
-class _StepExecutor(_BaseExecutor):
+class _StepExecutor(_BaseExecutor, IParentStep):
     """
     Executor for step
     """
@@ -137,6 +138,7 @@ class _StepExecutor(_BaseExecutor):
         step: BaseStep,
         model: StepModel,
         cmd_arg: CommandArgument | None = None,
+        symbol_model: StepModel | None = None,
         *args,
         **kwargs,
     ):
@@ -146,14 +148,22 @@ class _StepExecutor(_BaseExecutor):
             Helper.set_property(step, k, v)
         Helper.set_property(step, "step", model.step)
         Helper.set_property(step, "symbol", model.symbol)
+        Helper.set_property(step, "parent", self)
         self._step = step
         self._model = model
+        self._symbol_model = symbol_model
         self._args = copy.deepcopy(cmd_arg.args) if cmd_arg and cmd_arg.args else []
         self._kwargs = copy.deepcopy(cmd_arg.kwargs) if cmd_arg and cmd_arg.kwargs else {}
 
     @property
     def step(self) -> BaseStep:
         return self._step
+
+    def get_symbol_arguments(self) -> dict[str, Any]:
+        if self._symbol_model:
+            return self._symbol_model.arguments
+        else:
+            return {}
 
     def _get_listener_arg(self) -> Any:
         return self._step

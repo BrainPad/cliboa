@@ -14,11 +14,11 @@
 import os
 import tempfile
 from abc import abstractmethod
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from cliboa.adapter.file import File
+from cliboa.scenario.interface import IParentStep
 from cliboa.util.base import _BaseObject
-from cliboa.util.cache import StepArgument
 from cliboa.util.exception import FileNotFound, InvalidParameter
 
 
@@ -31,12 +31,16 @@ class BaseStep(_BaseObject):
         super().__init__(*args, **kwargs)
         self._step = None
         self._symbol = None
+        self._parent = None
 
     def step(self, step):
         self._step = step
 
     def symbol(self, symbol):
         self._symbol = symbol
+
+    def parent(self, parent: IParentStep):
+        self._parent = parent
 
     @abstractmethod
     def execute(self, *args, **kwargs) -> Optional[int]:
@@ -48,13 +52,15 @@ class BaseStep(_BaseObject):
         """
         return File().get_target_files(src_dir, src_pattern)
 
-    def get_step_argument(self, name):
+    def get_step_argument(self, name: str) -> Any | None:
         """
-        Returns an argument from scenario.yaml definitions
+        Returns a symbol's argument (variables are already transformed).
+        Returns None if the argument cannot be retrieved, and no exceptions are raised.
         """
-        sa = StepArgument.get(self._symbol)
-        if sa:
-            return sa.get(name)
+        if not self._parent:
+            return None
+        sa = self._parent.get_symbol_arguments()
+        return sa.get(name)
 
     def _property_path_reader(self, src, encoding="utf-8"):
         """

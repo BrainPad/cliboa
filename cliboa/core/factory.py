@@ -72,7 +72,7 @@ class _CliboaFactory(_BaseObject):
 
         return root, mod_name
 
-    def _create_custom_instance(self, cls_name: str) -> object | None:
+    def _create_custom_instance(self, cls_name: str, **kwargs) -> object | None:
         """
         Import python module and create instance dynamically
 
@@ -85,17 +85,17 @@ class _CliboaFactory(_BaseObject):
             return None
         (root, mod_name) = ret
         instance = getattr(import_module(root), mod_name)
-        return instance()
+        return instance(**kwargs)
 
-    def create(self, cls_name: str) -> object:
+    def create(self, cls_name: str, **kwargs) -> object:
         """
         Create cliboa step|listener instance.
         """
         try:
-            instance = self._create_custom_instance(cls_name)
+            instance = self._create_custom_instance(cls_name, **kwargs)
             if instance is None:
                 cls = globals()[cls_name]
-                instance = cls()
+                instance = cls(**kwargs)
             return instance
         except Exception:
             self._logger.exception(f"Failed to create an instance of {cls_name}")
