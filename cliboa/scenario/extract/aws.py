@@ -22,7 +22,6 @@ import boto3
 from cliboa.adapter.aws import S3Adapter
 from cliboa.scenario.aws import BaseAws, BaseS3
 from cliboa.scenario.validator import EssentialParameters
-from cliboa.util.cache import ObjectStore
 from cliboa.util.constant import StepStatus
 from cliboa.util.exception import InvalidParameter
 
@@ -78,7 +77,7 @@ class S3Download(BaseS3):
                 keys.append(path)
 
         # cache
-        ObjectStore.put(self._step, {"bucket": self._bucket, "keys": keys})
+        self.put_to_context({"bucket": self._bucket, "keys": keys})
 
 
 class S3DownloadFileDelete(BaseS3):
@@ -90,7 +89,7 @@ class S3DownloadFileDelete(BaseS3):
         super().__init__()
 
     def execute(self, *args):
-        stored = ObjectStore.get(self._symbol)
+        stored = self.get_from_context()
         bucket = stored.get("bucket")
         keys = stored.get("keys")
 

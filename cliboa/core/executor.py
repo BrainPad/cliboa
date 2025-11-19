@@ -15,12 +15,13 @@ import copy
 from abc import abstractmethod
 from typing import Any
 
-from cliboa.core.interface import _IExecute
+from cliboa.core.interface import _IContext, _IExecute
 from cliboa.core.model import CommandArgument, StepModel
 from cliboa.listener.interface import IScenarioExecutor
 from cliboa.scenario.base import AbstractStep
 from cliboa.scenario.interface import IParentStep
 from cliboa.util.base import _BaseObject
+from cliboa.util.cache import ObjectStore
 from cliboa.util.constant import StepStatus
 
 
@@ -137,16 +138,19 @@ class _StepExecutor(_BaseExecutor, IParentStep):
         step: AbstractStep,
         model: StepModel,
         cmd_arg: CommandArgument | None = None,
+        context: _IContext | None = None,
         symbol_model: StepModel | None = None,
         **kwargs,
     ):
         super().__init__(**kwargs)
-        step._set_properties({"parent": self} | model.arguments)
+        step.parent = self
+        step._set_properties(model.arguments)
         self._step = step
         self._model = model
+        self._context = context
         self._symbol_model = symbol_model
-        self._args = copy.deepcopy(cmd_arg.args) if cmd_arg and cmd_arg.args else []
-        self._kwargs = copy.deepcopy(cmd_arg.kwargs) if cmd_arg and cmd_arg.kwargs else {}
+        self._exec_args = copy.deepcopy(cmd_arg.args) if cmd_arg and cmd_arg.args else []
+        self._exec_kwargs = copy.deepcopy(cmd_arg.kwargs) if cmd_arg and cmd_arg.kwargs else {}
 
     @property
     def step(self) -> AbstractStep:
@@ -166,8 +170,20 @@ class _StepExecutor(_BaseExecutor, IParentStep):
         else:
             return {}
 
+    def put_to_context(self, value: Any) -> None:
+        if self._context:
+            self._context.put(self.step_name, value)
+        # v2 backward compability
+        ObjectStore.put(self.step_name, value, quiet=True)
+
+    def get_from_context(self, target: str | None = None) -> Any:
+        if target is None:
+            target = self.symbol_name
+        if self._context:
+            return self._context.get(target)
+
     def _get_listener_arg(self) -> Any:
-        return self._step
+        return self.step
 
     def _execute_main(self) -> int | None:
-        return self._step.execute(*self._args, **self._kwargs)
+        return self.step.execute(*self._exec_args, **self._exec_kwargs)

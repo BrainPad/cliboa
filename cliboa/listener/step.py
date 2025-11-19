@@ -37,7 +37,7 @@ class StepStatusListener(BaseStepListener):
             pattern = re.compile(mask)
             partial_pattern = re.compile(partial_mask)
         except Exception as e:
-            self._logger.warning(e)
+            self.logger.warning(e)
         self._pattern = pattern
         self._partial_pattern = partial_pattern
         self._partial_num = partial_num
@@ -64,13 +64,13 @@ class StepStatusListener(BaseStepListener):
                     props_dict[k] = "****"
             else:
                 props_dict[k] = v
-        self._logger.info(
+        self.logger.info(
             "Step properties: %s" % json.dumps(props_dict, ensure_ascii=False, default=str)
         )
-        self._logger.info("Start step execution. %s" % step.__class__.__name__)
+        self.logger.info("Start step execution. %s" % step.__class__.__name__)
 
     def after(self, step: AbstractStep) -> None:
-        self._logger.info("Finish step execution. %s" % step.__class__.__name__)
+        self.logger.info("Finish step execution. %s" % step.__class__.__name__)
 
     def completion(self, step: AbstractStep) -> None:
-        self._logger.info("Complete step execution. %s" % step.__class__.__name__)
+        self.logger.info("Complete step execution. %s" % step.__class__.__name__)

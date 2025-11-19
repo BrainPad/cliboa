@@ -11,29 +11,19 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-from abc import ABC, abstractmethod
 from typing import Any
 
-
-class _IExecute(ABC):
-    """
-    Interface of executable step instance.
-    """
-
-    @abstractmethod
-    def execute(self) -> int | None:
-        pass
+from cliboa.core.interface import _IContext
+from cliboa.util.base import _BaseObject
 
 
-class _IContext(ABC):
-    """
-    Interface of context
-    """
+class _CliboaContext(_BaseObject, _IContext):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._data = {}
 
-    @abstractmethod
     def put(self, key: str, value: Any) -> None:
-        pass
+        self._data[key] = value
 
-    @abstractmethod
     def get(self, key: str) -> Any:
-        pass
+        return self._data.get(key)

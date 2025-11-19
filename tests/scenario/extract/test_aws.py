@@ -176,19 +176,16 @@ class TestS3DownloadFileDelete(BaseCliboaTest):
     @patch.object(S3Adapter, "get_client")
     def test_cross_account_role_properties(self, m_get_client):
         """Test S3DownloadFileDelete with cross-account IAM role properties"""
-        # Mock ObjectStore data (simulating previous S3Download step)
-        from cliboa.util.cache import ObjectStore
-
-        ObjectStore.put("dl1", {"keys": ["test.txt"]})
 
         instance = S3DownloadFileDelete()
         mock_parent = Mock(
             symbol_name="dl1",
         )
+        mock_parent.get_from_context.return_value = {"keys": ["test.txt"]}
         mock_parent.get_symbol_arguments.return_value = {}
+        instance.parent = mock_parent
         instance._set_properties(
             {
-                "parent": mock_parent,
                 "bucket": "test-bucket",
                 "role_arn": "arn:aws:iam::123456789012:role/TestRole",
                 "external_id": "test-external-id",

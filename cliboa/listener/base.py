@@ -11,6 +11,7 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+import logging
 from abc import abstractmethod
 
 from cliboa.listener.interface import IScenarioExecutor
@@ -22,6 +23,10 @@ class BaseListener(_BaseObject):
     """
     Base listener for all the listener classes
     """
+
+    @property
+    def logger(self) -> logging.Logger:
+        return self._logger
 
     @abstractmethod
     def before(self, obj) -> None:

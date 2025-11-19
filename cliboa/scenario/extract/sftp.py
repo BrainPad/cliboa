@@ -17,7 +17,6 @@ import re
 from cliboa.adapter.sftp import SftpAdapter
 from cliboa.scenario.sftp import BaseSftp
 from cliboa.scenario.validator import EssentialParameters
-from cliboa.util.cache import ObjectStore
 from cliboa.util.constant import StepStatus
 
 
@@ -72,7 +71,7 @@ class SftpDownload(SftpExtract):
         self._logger.info("Files downloaded %s" % files)
 
         # cache downloaded file names
-        ObjectStore.put(self._step, files)
+        self.put_to_context(files)
 
 
 class SftpDelete(SftpExtract):
@@ -116,24 +115,24 @@ class SftpDownloadFileDelete(SftpExtract):
         super().__init__()
 
     def execute(self, *args):
-        files = ObjectStore.get(self._symbol)
+        files = self.get_from_context()
 
         if files is not None and len(files) > 0:
             self._logger.info("Delete files %s" % files)
 
-            self._host = super().get_step_argument("host")
-            self._user = super().get_step_argument("user")
-            self._password = super().get_step_argument("password")
-            self._key = super().get_step_argument("key")
-            self._timeout = super().get_step_argument("timeout")
-            self._retry_count = super().get_step_argument("retry_count")
-            self._port = super().get_step_argument("port")
-            self._endfile_suffix = super().get_step_argument("endfile_suffix")
-            self._src_dir = super().get_step_argument("src_dir")
+            self._host = self.get_symbol_argument("host")
+            self._user = self.get_symbol_argument("user")
+            self._password = self.get_symbol_argument("password")
+            self._key = self.get_symbol_argument("key")
+            self._timeout = self.get_symbol_argument("timeout")
+            self._retry_count = self.get_symbol_argument("retry_count")
+            self._port = self.get_symbol_argument("port")
+            self._endfile_suffix = self.get_symbol_argument("endfile_suffix")
+            self._src_dir = self.get_symbol_argument("src_dir")
 
             adaptor = super().get_adaptor()
 
-            endfile_suffix = super().get_step_argument("endfile_suffix")
+            endfile_suffix = self.get_symbol_argument("endfile_suffix")
             for file in files:
                 obj = SftpAdapter(
                     host=self._host,

@@ -30,7 +30,7 @@ class SampleStep(BaseStep):
     def memo(self, memo):
         self._memo = memo
 
-    def execute(self, *args):
+    def execute(self):
         self._logger.info("Start %s" % self.__class__.__name__)
         self._logger.info("Finish %s" % self.__class__.__name__)
 
@@ -40,9 +40,11 @@ class SampleStepSub(SampleStep):
     For unit test
     """
 
-    def execute(self, *args):
+    def execute(self):
         symbol_memo = self.get_symbol_argument("memo")
-        self._logger.info(f"{self._symbol} symbol memo is {symbol_memo}")
+        self._logger.info(f"symbol memo is {symbol_memo}")
+        symbol_context = self.get_from_context()
+        self._logger.info(f"symbol context is {symbol_context}")
 
 
 class SampleCustomStep(BaseStep):
@@ -73,5 +75,5 @@ class SampleCustomStep(BaseStep):
     def retry_count(self, retry_count):
         self._retry_count = retry_count
 
-    def execute(self, *args):
+    def execute(self):
         self._logger.info("unit test")

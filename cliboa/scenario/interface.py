@@ -29,6 +29,14 @@ class IParentStep(ABC):
         """
         raise NotImplementedError()
 
+    @abstractmethod
+    def put_to_context(self) -> None:
+        raise NotImplementedError()
+
+    @abstractmethod
+    def get_from_context(self, step_name: str | None = None) -> Any:
+        raise NotImplementedError()
+
     @property
     @abstractmethod
     def step_name(self) -> str:
