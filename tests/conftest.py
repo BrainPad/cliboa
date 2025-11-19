@@ -32,7 +32,7 @@ def setup_cliboa_env(tmpdir_factory):
     os.makedirs("logs", exist_ok=True)
 
     # copy environment.py
-    cmn_env_path = os.path.join("cliboa", "common", "environment.py")
+    cmn_env_path = os.path.join("cliboa", "conf", "default_environment.py")
     copyfile(cmn_env_path, os.path.join("common", "environment.py"))
 
     # copy logging.conf
