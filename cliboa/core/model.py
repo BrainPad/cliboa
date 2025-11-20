@@ -232,5 +232,5 @@ class ScenarioModel(_BaseWithVars):
 
 
 class CommandArgument(BaseModel):
-    args: list[str] = Field(default_factory=list)
+    args: list[Any] = Field(default_factory=list)
     kwargs: dict[str, Any] = Field(default_factory=dict)

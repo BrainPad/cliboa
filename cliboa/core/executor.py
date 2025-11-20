@@ -12,6 +12,7 @@
 # all copies or substantial portions of the Software.
 #
 import copy
+import inspect
 from abc import abstractmethod
 from typing import Any
 
@@ -193,4 +194,16 @@ class _StepExecutor(_BaseExecutor, IParentStep):
         return self.step
 
     def _execute_main(self) -> int | None:
-        return self.step.execute(*self._exec_args, **self._exec_kwargs)
+        candidates = (
+            (self._exec_args, self._exec_kwargs),
+            ([], self._exec_kwargs),
+            (self._exec_args, {}),
+        )
+        sig = inspect.signature(self.step.execute)
+        for args, kwargs in candidates:
+            try:
+                sig.bind(*args, **kwargs)
+            except TypeError:
+                continue
+            return self.step.execute(*args, **kwargs)
+        return self.step.execute()

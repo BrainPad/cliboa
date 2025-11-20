@@ -56,6 +56,69 @@ class TestScenarioExecutor:
         mock_logger.info.assert_any_call("my memo is aaa")
 
 
+class TestStepExecutor:
+    def test_execute_ok(self):
+        mock_logger = Mock()
+        model = StepModel.model_validate(
+            {
+                "step": "sample",
+                "class": "SampleStep",
+                "arguments": {"retry_count": 1, "memo": "aaa"},
+            }
+        )
+        instance = SampleStep(di_logger=mock_logger)
+        executor = _StepExecutor(instance, model)
+        executor.execute()
+        mock_logger.warning.assert_not_called()
+
+    def test_execute_with_ignored_both_ok(self):
+        mock_logger = Mock()
+        model = StepModel.model_validate(
+            {
+                "step": "sample",
+                "class": "SampleStep",
+                "arguments": {"retry_count": 1, "memo": "aaa"},
+            }
+        )
+        instance = SampleStep(di_logger=mock_logger)
+        cmd_args = CommandArgument.model_validate(
+            {"args": [1, 2, "hoge"], "kwargs": {"key_aaa": 12345}}
+        )
+        executor = _StepExecutor(instance, model, cmd_args)
+        executor.execute()
+        mock_logger.warning.assert_not_called()
+
+    def test_execute_with_kwargs_ok(self):
+        mock_logger = Mock()
+        model = StepModel.model_validate(
+            {
+                "step": "sample",
+                "class": "SampleStepSub",
+                "arguments": {"retry_count": 1, "memo": "aaa", "name": "Alice"},
+            }
+        )
+        instance = SampleStepSub(di_logger=mock_logger)
+        cmd_args = CommandArgument.model_validate({"kwargs": {"key_aaa": 12345}})
+        executor = _StepExecutor(instance, model, cmd_args)
+        executor.execute()
+        mock_logger.info.assert_any_call("kwargs is {'key_aaa': 12345}")
+
+    def test_execute_with_ignored_args_ok(self):
+        mock_logger = Mock()
+        model = StepModel.model_validate(
+            {
+                "step": "sample",
+                "class": "SampleStepSub",
+                "arguments": {"retry_count": 1, "memo": "aaa", "name": "Alice"},
+            }
+        )
+        instance = SampleStepSub(di_logger=mock_logger)
+        cmd_args = CommandArgument.model_validate({"args": [1, 2, "hoge"]})
+        executor = _StepExecutor(instance, model, cmd_args)
+        executor.execute()
+        mock_logger.info.assert_any_call("kwargs is {}")
+
+
 class TestAppropriateListnerCall(TestCase):
     def test_end_with_noerror(self):
         with ExitStack() as stack:
