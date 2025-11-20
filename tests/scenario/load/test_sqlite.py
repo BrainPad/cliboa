@@ -190,7 +190,7 @@ class TestSqliteImport(object):
             instance.execute()
 
             instance = self._create_instance(TEST_FILE_2, False)
-            instance._set_properties(
+            instance._set_arguments(
                 {
                     "force_insert": True,
                 }
@@ -297,7 +297,7 @@ class TestSqliteImport(object):
 
     def _create_instance(self, pattern, refresh):
         instance = SqliteImport()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "dbname": self.DB_NAME,
                 "src_dir": ".",

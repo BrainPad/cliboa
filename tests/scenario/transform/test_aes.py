@@ -47,7 +47,7 @@ class TestAes(BaseCliboaTest):
     def test_encrypt_decrypt_ok(self):
         # Encryption
         instance = AesEncrypt()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test\.txt",
@@ -60,7 +60,7 @@ class TestAes(BaseCliboaTest):
 
         # Decryption
         instance = AesDecrypt()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._result_dir,
                 "src_pattern": r"test\.txt",
@@ -78,7 +78,7 @@ class TestAes(BaseCliboaTest):
     def test_by_multiple_encrypt_decrypt_ok(self):
         # Encryption
         instance = AesEncrypt()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"(.*)\.txt",
@@ -91,7 +91,7 @@ class TestAes(BaseCliboaTest):
 
         # Decryption
         instance = AesDecrypt()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._result_dir,
                 "src_pattern": r"(.*)\.txt",

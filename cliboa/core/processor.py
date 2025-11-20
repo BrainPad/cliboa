@@ -50,7 +50,7 @@ class _ParallelProcessor(_BaseObject, _IExecute):
             else:
                 return "OK"
         except Exception as e:
-            _get_logger(__name__).error(e)
+            _get_logger(__name__).exception(e)
             return "NG"
 
     def execute(self) -> int | None:

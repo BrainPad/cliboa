@@ -11,8 +11,6 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import copy
-
 from cliboa.core.context import _CliboaContext
 from cliboa.core.executor import _StepExecutor
 from cliboa.core.factory import _CliboaFactory, _get_scenario_loader_class
@@ -173,19 +171,7 @@ class _ScenarioBuilder(_BaseObject):
 
     def _create_listeners(self, step: StepModel) -> list[BaseStepListener]:
         listeners = [self._resolve("step_status_listener", StepStatusListener())]
-        if step.listeners is not None:
-            arguments = copy.deepcopy(step.arguments)
-            if isinstance(step.listeners, str):
-                lis_classes = [step.listeners]
-            elif isinstance(step.listeners, list):
-                lis_classes = step.listeners
-            else:
-                raise CliboaException(
-                    f"Unexpectedly, the scenario step's 'listeners' was {type(step.listeners)}"
-                    ", neither a str, list, nor None."
-                )
-            for lis_cls in lis_classes:
-                clz = self._factory.create(lis_cls, **self._di_kwargs)
-                clz.__dict__.update(arguments)
-                listeners.append(clz)
+        for lis_cls in step.get_listeners():
+            clz = self._factory.create(lis_cls, **self._di_kwargs)
+            listeners.append(clz)
         return listeners

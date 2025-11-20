@@ -61,7 +61,7 @@ class TestSqliteExport(object):
             self._insert_test_data(test_data)
 
             instance = self._create_instance()
-            instance._set_properties(
+            instance._set_arguments(
                 {
                     "order": ["No"],
                 }
@@ -101,7 +101,7 @@ class TestSqliteExport(object):
             self._insert_test_data(test_data)
 
             instance = self._create_instance()
-            instance._set_properties(
+            instance._set_arguments(
                 {
                     "order": ["No"],
                     "no_duplicate": True,
@@ -127,7 +127,7 @@ class TestSqliteExport(object):
 
     def _create_instance(self):
         instance = SqliteExport()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "dbname": self._DB_NAME,
                 "dest_path": self._RESULT_FILE,

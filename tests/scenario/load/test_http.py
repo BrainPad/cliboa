@@ -39,7 +39,7 @@ class TestHttpPost(object):
         try:
             os.makedirs(self._data_dir, exist_ok=True)
             instance = HttpPost()
-            instance._set_properties(
+            instance._set_arguments(
                 {
                     # use Postman echo
                     "src_url": "https://postman-echo.com/post",
@@ -63,7 +63,7 @@ class TestHttpPost(object):
         mock_post.side_effect = HTTPError("Http request failed. HTTP Status code: 404")
 
         instance = HttpPost()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 # use Postman echo
                 "src_url": "https://spam.com/post",
@@ -96,7 +96,7 @@ class TestHttpPut(object):
         try:
             os.makedirs(self._data_dir, exist_ok=True)
             instance = HttpPut()
-            instance._set_properties(
+            instance._set_arguments(
                 {
                     # use Postman echo
                     "src_url": "https://postman-echo.com/put",
@@ -120,7 +120,7 @@ class TestHttpPut(object):
         mock_put.side_effect = HTTPError("Http request failed. HTTP Status code: 404")
 
         instance = HttpPut()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 # use Postman echo
                 "src_url": "https://spam.com/put",
@@ -153,7 +153,7 @@ class TestHttpDelete(object):
         try:
             os.makedirs(self._data_dir, exist_ok=True)
             instance = HttpDelete()
-            instance._set_properties(
+            instance._set_arguments(
                 {
                     # use Postman echo
                     "src_url": "https://postman-echo.com/delete",
@@ -176,7 +176,7 @@ class TestHttpDelete(object):
         mock_delete.side_effect = HTTPError("Http request failed. HTTP Status code: 404")
 
         instance = HttpDelete()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 # use Postman echo
                 "src_url": "https://spam.com/delete",

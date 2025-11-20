@@ -50,7 +50,7 @@ class TestStepStatusListener(TestCase):
                 json_str = msg.replace("Step properties: ", "", 1)
                 try:
                     props = json.loads(json_str)
-                    self.assertEqual(props.get("_retry_count"), 5)
+                    self.assertEqual(props.get("retry_count"), 5)
                     step_props_found = True
                     break
                 except json.JSONDecodeError:
@@ -86,11 +86,11 @@ class TestStepStatusListener(TestCase):
                 try:
                     props = json.loads(json_str)
                     self.assertEqual(
-                        props.get("_password"), "****", "Password should be masked as ****"
+                        props.get("password"), "****", "Password should be masked as ****"
                     )
                     # assert None parameter
                     self.assertEqual(
-                        props.get("_access_key"),
+                        props.get("access_key"),
                         None,
                         "Access key should NOT be masked when it is None.",
                     )
@@ -137,15 +137,15 @@ class TestStepStatusListener(TestCase):
                 try:
                     props = json.loads(json_str)
                     self.assertEqual(
-                        props.get("_access_key"),
+                        props.get("access_key"),
                         "tes****ess",
                         "Access key should be partial masked as ???****???",
                     )
                     self.assertEqual(
-                        props.get("_secret_key"), "****", "Secret key should be full masked as ****"
+                        props.get("secret_key"), "****", "Secret key should be full masked as ****"
                     )
                     self.assertEqual(
-                        props.get("_access_token"),
+                        props.get("access_token"),
                         "****ken",
                         "Short access token should be partial masked as ****???",
                     )
