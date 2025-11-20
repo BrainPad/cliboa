@@ -39,8 +39,9 @@ class SampleStepSub(SampleStep):
     class Arguments(SampleStep.Arguments):
         name: str | None = None
 
-    def execute(self):
+    def execute(self, **kwargs):
         self.logger.info(f"Start {self}")
+        self.logger.info(f"kwargs is {kwargs}")
         self.logger.info(f"my name is {self.args.name}")
         self.logger.info(f"my memo is {self.args.memo}")
         symbol_memo = self.get_symbol_argument("memo")
