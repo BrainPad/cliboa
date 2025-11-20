@@ -15,6 +15,7 @@ import copy
 from abc import abstractmethod
 from typing import Any
 
+from cliboa import state
 from cliboa.core.interface import _IContext, _IExecute
 from cliboa.core.model import CommandArgument, StepModel
 from cliboa.listener.interface import IScenarioExecutor
@@ -112,9 +113,13 @@ class _ScenarioExecutor(_BaseExecutor, IScenarioExecutor):
         """
         Wrap steps with _StepExecutor and execute.
         """
+        state.set_steps_max(self.current_steps_size)
+        state.set_steps_current(0)
+        state.set_in_steps(True)
         res = None
-        while len(self._steps) > 0:
+        while self.current_steps_size > 0:
             step = self._steps.pop(0)
+            state.set_steps_current(state.steps_max - self.current_steps_size)
             res = step.execute()
             if res is None:
                 continue
@@ -126,7 +131,7 @@ class _ScenarioExecutor(_BaseExecutor, IScenarioExecutor):
                     f"Step response [abnormal termination: {res}]. Scenario will be end."
                 )
                 break
-
+        state.set_in_steps(False)
         return StepStatus.SUCCESSFUL_TERMINATION if res is None else res
 
 
