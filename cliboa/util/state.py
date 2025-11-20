@@ -1,4 +1,4 @@
-class StateManager:
+class _StateManager:
     def __init__(self):
         self._state: str = "_Initialized"
         self._steps_max: int = 0
@@ -37,4 +37,4 @@ class StateManager:
         self._in_steps = value
 
 
-state = StateManager()
+state = _StateManager()
