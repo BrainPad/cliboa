@@ -52,7 +52,7 @@ class StepStatusListener(BaseStepListener):
             args = props_values.pop("_args")
             props_values.update(args.model_dump())
         for k, v in props_values.items():
-            if k in ("_di_map", "_di_kwargs", "_parent", "_args"):
+            if k in ("_di_map", "_di_kwargs", "_logger", "_parent", "_args"):
                 continue
             if v is not None and self._pattern is not None and self._pattern.search(k):
                 props_dict[k] = "****"
