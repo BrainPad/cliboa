@@ -14,7 +14,7 @@
 import inspect
 import warnings
 from abc import ABC
-from typing import Type, TypeVar
+from typing import TypeVar
 
 from cliboa.util.exception import CliboaException
 from cliboa.util.log import _get_logger
@@ -41,13 +41,13 @@ class _BaseObject(ABC):
             "logger", _get_logger(self.__class__.__module__ + "." + self.__class__.__name__)
         )
 
-    def _resolve_cls(self, key: str, default_cls: Type[T], *args, **kwargs) -> Type[T]:
+    def _resolve_cls(self, key: str, default_cls: type[T], *args, **kwargs) -> type[T]:
         dependency = self._di_map.get(key, default_cls)
         if not inspect.isclass(dependency):
             raise CliboaException(f"Failed to resolve cliboa class. {key}:{type(dependency)}")
         return dependency
 
-    def _resolve(self, key: str, default_cls: Type[T], *args, **kwargs) -> T:
+    def _resolve(self, key: str, default_cls: type[T], *args, **kwargs) -> T:
         dependency = self._di_map.get(key, default_cls)
         if not inspect.isclass(dependency):
             return dependency

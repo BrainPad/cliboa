@@ -37,7 +37,7 @@ class TestSftpUpload(object):
         (dir_path / "c.exe").touch()
 
         instance = SftpUpload()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "host": "dummy.host",
                 "user": "dummy_user",
@@ -66,7 +66,7 @@ class TestSftpUpload(object):
         (dir_path / "c.exe").touch()
 
         instance = SftpUpload()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "host": "dummy.host",
                 "user": "dummy_user",
@@ -91,7 +91,7 @@ class TestSftpUpload(object):
         (dir_path / "b.txt").touch()
         (dir_path / "c.exe").touch()
         instance = SftpUpload()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "host": "dummy.host",
                 "user": "dummy_user",

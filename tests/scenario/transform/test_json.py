@@ -64,7 +64,7 @@ class TestJsonlToCsvBase(TestJsonTransform):
 
         # set the essential attributes
         instance = JsonlToCsv()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.json",
@@ -101,7 +101,7 @@ class TestJsonlToCsv(TestJsonTransform):
 
         # set the essential attributes
         instance = JsonlToCsv()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.*.json",
@@ -148,7 +148,7 @@ class TestJsonlToCsv(TestJsonTransform):
 
         # set the essential attributes
         instance = JsonlToCsv()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.*.json",
@@ -190,7 +190,7 @@ class TestJsonlToCsv(TestJsonTransform):
 
         # set the essential attributes
         instance = JsonlToCsv()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.*.json",
@@ -222,7 +222,7 @@ class TestJsonlToCsv(TestJsonTransform):
 
         # set the essential attributes
         instance = JsonlToCsv()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.*.json",
@@ -251,7 +251,7 @@ class TestJsonlAddKeyValue(TestJsonTransform):
 
         # set the essential attributes
         instance = JsonlAddKeyValue()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.*.json",
@@ -298,7 +298,7 @@ class TestJsonlAddKeyValue(TestJsonTransform):
 
         # set the essential attributes
         instance = JsonlAddKeyValue()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.*.json",
@@ -347,7 +347,7 @@ class TestJsonlAddKeyValue(TestJsonTransform):
 
         # set the essential attributes
         instance = JsonlAddKeyValue()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.*.json",
@@ -374,7 +374,7 @@ class TestJsonlAddKeyValue(TestJsonTransform):
 
         # set the essential attributes
         instance = JsonlAddKeyValue()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.*.json",

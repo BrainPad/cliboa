@@ -46,7 +46,7 @@ class TestGpg(BaseCliboaTest):
 
         # Encryption
         instance = GpgEncrypt()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "gnupghome": self._gpg_dir,
                 "src_dir": self._data_dir,
@@ -59,7 +59,7 @@ class TestGpg(BaseCliboaTest):
 
         # Decryption
         instance = GpgDecrypt()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "gnupghome": self._gpg_dir,
                 "src_dir": self._result_dir,

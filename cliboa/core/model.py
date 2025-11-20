@@ -78,6 +78,17 @@ class StepModel(_BaseWithVars):
             data["with_vars"] = arguments.pop("with_vars")
         return data
 
+    def get_listeners(self) -> list[str]:
+        """
+        Get the listeners in list format.
+        """
+        if isinstance(self.listeners, str):
+            return [self.listeners]
+        elif isinstance(self.listeners, list):
+            return self.listeners
+        else:
+            return []
+
     def replace_vars(self) -> None:
         """
         Replace variable expressions in arguments.

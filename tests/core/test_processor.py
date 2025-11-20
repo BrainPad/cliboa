@@ -11,7 +11,8 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-from cliboa.core.model import ParallelConfigModel
+from cliboa.core.executor import _StepExecutor
+from cliboa.core.model import ParallelConfigModel, StepModel
 from cliboa.core.processor import _ParallelProcessor
 from cliboa.scenario.sample_step import SampleStep
 from cliboa.util.constant import StepStatus
@@ -25,11 +26,17 @@ class TestParallelProcessor(BaseCliboaTest):
     """
 
     def _get_multi_process_executor(self, force_continue: bool, has_error: bool = True):
-        step1 = SampleStep()
+        model = StepModel.model_validate(
+            {
+                "step": "sample",
+                "class": "SampleStep",
+            }
+        )
+        step1 = _StepExecutor(SampleStep(), model)
         if has_error:
-            step2 = ErrorSampleStep()
+            step2 = _StepExecutor(ErrorSampleStep(), model)
         else:
-            step2 = SampleStep()
+            step2 = _StepExecutor(SampleStep(), model)
         return _ParallelProcessor(
             [step1, step2], ParallelConfigModel(force_continue=force_continue)
         )

@@ -64,7 +64,7 @@ class TestFileTransform(BaseCliboaTest):
 class TestFileTransformFunctions(TestFileTransform):
     def test_execute(self):
         instance = FileBaseTransform()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": "in",
                 "src_pattern": r".*",
@@ -85,7 +85,7 @@ class TestFileTransformFunctions(TestFileTransform):
 
     def test_io_files_same_directory(self):
         instance = FileBaseTransform()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "dest_dir": self._data_dir,
             }
@@ -97,7 +97,7 @@ class TestFileTransformFunctions(TestFileTransform):
 
     def test_io_files_different_directory(self):
         instance = FileBaseTransform()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "dest_dir": self._out_dir,
             }
@@ -111,7 +111,7 @@ class TestFileTransformFunctions(TestFileTransform):
 
     def test_io_files_secret_file_name(self):
         instance = FileBaseTransform()
-        instance._set_properties({"dest_dir": self._out_dir})
+        instance._set_arguments({"dest_dir": self._out_dir})
         files = []
         for file in self._create_files():
             root, name = os.path.split(file)
@@ -197,14 +197,14 @@ class TestFileTransformFunctions(TestFileTransform):
 
     def test_file_check_nofile_error(self):
         instance = FileBaseTransform()
-        instance._set_properties({"nonfile_error": True})
+        instance._set_arguments({"nonfile_error": True})
         with pytest.raises(FileNotFound) as execinfo:
             instance.check_file_existence([])
         assert "No files are found." == str(execinfo.value)
 
     def test_file_check_nofile_noerror(self):
         instance = FileBaseTransform()
-        instance._set_properties({"nonfile_error": False})
+        instance._set_arguments({"nonfile_error": False})
         ret = instance.check_file_existence([])
         assert ret is None
 
@@ -224,7 +224,7 @@ class TestFileDecompress(TestFileTransform):
                 o.write(file, arcname=os.path.basename(file))
 
         instance = FileDecompress()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.txt\.zip",
@@ -254,7 +254,7 @@ class TestFileDecompress(TestFileTransform):
                     o.write(buf)
 
         instance = FileDecompress()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.txt\.gz",
@@ -285,7 +285,7 @@ class TestFileDecompress(TestFileTransform):
                     o.write(buf)
 
         instance = FileDecompress()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.txt\.bz2",
@@ -310,7 +310,7 @@ class TestFileDecompress(TestFileTransform):
             f.add(self._data_dir, arcname="/")
 
         instance = FileDecompress()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test\.tar",
@@ -334,7 +334,7 @@ class TestFileDecompress(TestFileTransform):
             f.write("This is test 1")
 
         instance = FileDecompress()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test\.rar",
@@ -351,7 +351,7 @@ class TestFileCompress(TestFileTransform):
         self._create_files()
 
         instance = FileCompress()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.txt",
@@ -381,7 +381,7 @@ class TestFileCompress(TestFileTransform):
         self._create_files()
 
         instance = FileCompress()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.txt",
@@ -421,7 +421,7 @@ class TestFileCompress(TestFileTransform):
         self._create_files()
 
         instance = FileCompress()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.txt",
@@ -471,7 +471,7 @@ class TestDateFormatConvert(TestFileTransform):
                 writer.writerow(r)
 
         instance = DateFormatConvert()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test\.csv",
@@ -498,7 +498,7 @@ class TestExcelConvert(TestFileTransform):
 
         # set the essential attributes
         instance = ExcelConvert()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test\.xlxs",
@@ -515,7 +515,7 @@ class TestFileCopy(TestFileTransform):
         self._create_files()
 
         instance = FileCopy()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.txt",
@@ -542,7 +542,7 @@ class TestFileCopy(TestFileTransform):
             os.rename(file, os.path.join(root, name + ".12345"))
 
         instance = FileCopy()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*",
@@ -566,7 +566,7 @@ class TestFileCopy(TestFileTransform):
         self._create_files()
 
         instance = FileCopy()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.txt",
@@ -586,7 +586,7 @@ class TestFileDivide(TestFileTransform):
                 f.write("%s\n" % str(i))
 
         instance = FileDivide()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test\.txt",
@@ -617,7 +617,7 @@ class TestFileDivide(TestFileTransform):
                 f.write("%s\n" % str(i))
 
         instance = FileDivide()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"\.test\.txt",
@@ -647,7 +647,7 @@ class TestFileDivide(TestFileTransform):
                 f.write("%s\n" % str(i))
 
         instance = FileDivide()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test\.txt.12345",
@@ -677,7 +677,7 @@ class TestFileDivide(TestFileTransform):
                 f.write("%s\n" % str(i))
 
         instance = FileDivide()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test",
@@ -708,7 +708,7 @@ class TestFileDivide(TestFileTransform):
                 f.write("%s\n" % str(i))
 
         instance = FileDivide()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test\.txt",
@@ -741,7 +741,7 @@ class TestFileDivide(TestFileTransform):
                 f.write("%s\n" % str(i))
 
         instance = FileDivide()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test\.txt",
@@ -777,7 +777,7 @@ class TestFileDivide(TestFileTransform):
                 f.write("%s\n" % str(i))
 
         instance = FileDivide()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test\.txt",
@@ -808,7 +808,7 @@ class TestFileRename(TestFileTransform):
         self._create_files()
 
         instance = FileRename()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.txt",
@@ -828,7 +828,7 @@ class TestFileRename(TestFileTransform):
             os.rename(file, os.path.join(root, "." + name))
 
         instance = FileRename()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"\.test.*\.txt",
@@ -849,7 +849,7 @@ class TestFileRename(TestFileTransform):
             os.rename(file, os.path.join(root, name + ".12345"))
 
         instance = FileRename()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.txt\.12345",
@@ -870,7 +870,7 @@ class TestFileRename(TestFileTransform):
             os.rename(file, os.path.join(root, os.path.splitext(name)[0]))
 
         instance = FileRename()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*",
@@ -887,7 +887,7 @@ class TestFileRename(TestFileTransform):
         self._create_files()
 
         instance = FileRename()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.txt",
@@ -904,7 +904,7 @@ class TestFileRename(TestFileTransform):
         self._create_files()
 
         instance = FileRename()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.txt",
@@ -923,7 +923,7 @@ class TestFileRename(TestFileTransform):
         self._create_files()
 
         instance = FileRename()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.txt",
@@ -943,7 +943,7 @@ class TestFileRename(TestFileTransform):
         self._create_files()
 
         instance = FileRename()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.txt",
@@ -960,7 +960,7 @@ class TestFileRename(TestFileTransform):
         self._create_files()
 
         instance = FileRename()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.txt",
@@ -977,7 +977,7 @@ class TestFileRename(TestFileTransform):
         self._create_files()
 
         instance = FileRename()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.txt",
@@ -994,7 +994,7 @@ class TestFileRename(TestFileTransform):
         self._create_files()
 
         instance = FileRename()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.txt",
@@ -1016,7 +1016,7 @@ class TestFileRename(TestFileTransform):
             os.rename(file, os.path.join(root, name + ".12345"))
 
         instance = FileRename()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.txt\.12345",
@@ -1034,7 +1034,7 @@ class TestFileRename(TestFileTransform):
         self._create_files()
 
         instance = FileRename()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.txt",
@@ -1051,7 +1051,7 @@ class TestFileRename(TestFileTransform):
         self._create_files()
 
         instance = FileRename()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.txt",
@@ -1070,7 +1070,7 @@ class TestFileRename(TestFileTransform):
         self._create_files()
 
         instance = FileRename()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.txt",
@@ -1087,7 +1087,7 @@ class TestFileRename(TestFileTransform):
         self._create_files()
 
         instance = FileRename()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.txt",
@@ -1106,7 +1106,7 @@ class TestFileRename(TestFileTransform):
         self._create_files()
 
         instance = FileRename()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.txt",
@@ -1122,7 +1122,7 @@ class TestFileRename(TestFileTransform):
         self._create_files()
 
         instance = FileRename()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.txt",
@@ -1138,7 +1138,7 @@ class TestFileRename(TestFileTransform):
         self._create_files()
 
         instance = FileRename()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.txt",
@@ -1161,7 +1161,7 @@ class TestFileConvert(TestFileTransform):
 
         # set the essential attributes
         instance = FileConvert()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test\.txt",
@@ -1190,7 +1190,7 @@ class TestFileConvert(TestFileTransform):
 
         # set the essential attributes
         instance = FileConvert()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test\.txt",
@@ -1216,7 +1216,7 @@ class TestFileConvert(TestFileTransform):
 
         # set the essential attributes
         instance = FileConvert()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test\.txt",
@@ -1238,7 +1238,7 @@ class TestFileArchive(TestFileTransform):
 
         # set the essential attributes
         instance = FileArchive()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test\.txt",
@@ -1260,7 +1260,7 @@ class TestFileArchive(TestFileTransform):
 
         # set the essential attributes
         instance = FileArchive()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test\.txt",
@@ -1284,7 +1284,7 @@ class TestFileArchive(TestFileTransform):
 
         # set the essential attributes
         instance = FileArchive()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test\.txt",

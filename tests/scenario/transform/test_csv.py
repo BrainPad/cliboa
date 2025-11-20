@@ -72,7 +72,7 @@ class TestCsvColumnHash(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnHash()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -98,7 +98,7 @@ class TestCsvColumnHash(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnHash()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -127,7 +127,7 @@ class TestCsvColumnHash(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnHash()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -160,7 +160,7 @@ class TestCsvColumnHash(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnHash()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -189,7 +189,7 @@ class TestCsvColumnExtract(TestCsvTransform):
         # set the essential attributes
         instance = CsvColumnExtract()
         remain_columns = ["key"]
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -214,7 +214,7 @@ class TestCsvColumnExtract(TestCsvTransform):
         # set the essential attributes
         instance = CsvColumnExtract()
         remain_column_number = 1
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -244,7 +244,7 @@ class TestCsvColumnExtract(TestCsvTransform):
         # set the essential attributes
         instance = CsvColumnExtract()
         remain_column_numbers = "1,3"
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -283,7 +283,7 @@ class TestCsvColumnExtract(TestCsvTransform):
         # set the essential attributes
         instance = CsvColumnExtract()
         remain_column_numbers = 3
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -318,7 +318,7 @@ class TestCsvColumnDelete(TestCsvTransform):
         # set the essential attributes
         instance = CsvColumnDelete()
         regex_pattern = "^.*_2$"
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -349,7 +349,7 @@ class TestCsvColumnDelete(TestCsvTransform):
         # set the essential attributes
         instance = CsvColumnDelete()
         regex_pattern = "^.*_2$"
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -381,7 +381,7 @@ class TestCsvColumnDelete(TestCsvTransform):
         # set the essential attributes
         instance = CsvColumnDelete()
         regex_pattern = "^target_.*$"
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -411,7 +411,7 @@ class TestCsvColumnDelete(TestCsvTransform):
         # set the essential attributes
         instance = CsvColumnDelete()
         regex_pattern = "^.*$"
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -440,7 +440,7 @@ class TestCsvColumnDelete(TestCsvTransform):
         # set the essential attributes
         instance = CsvColumnDelete()
         regex_pattern = "^.*_1$"
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -469,7 +469,7 @@ class TestCsvColumnDelete(TestCsvTransform):
         self._create_csv(test_csv_data)
         # set the essential attributes
         instance = CsvColumnDelete()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -492,7 +492,7 @@ class TestCsvValueExtract(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvValueExtract()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -525,7 +525,7 @@ class TestCsvValueExtract(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvValueExtract()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -555,7 +555,7 @@ class TestCsvValueExtract(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvValueExtract()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -589,7 +589,7 @@ class TestCsvColumnSelect(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnSelect()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -623,7 +623,7 @@ class TestCsvColumnSelect(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnSelect()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -658,7 +658,7 @@ class TestCsvColumnSelect(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnSelect()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -691,7 +691,7 @@ class TestCsvColumnSelect(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnSelect()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -716,7 +716,7 @@ class TestCsvColumnConcat(TestCsvTransform):
         # set the essential attributes
         instance = CsvColumnConcat()
         concat_columns = ["key", "data"]
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -745,7 +745,7 @@ class TestCsvColumnConcat(TestCsvTransform):
         # set the essential attributes
         instance = CsvColumnConcat()
         concat_columns = ["key", "data"]
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -774,7 +774,7 @@ class TestCsvColumnConcat(TestCsvTransform):
         # set the essential attributes
         instance = CsvColumnConcat()
         concat_columns = ["key", "data"]
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -804,7 +804,7 @@ class TestCsvColumnConcat(TestCsvTransform):
         # set the essential attributes
         instance = CsvColumnConcat()
         concat_columns = ["key", "data", "data1"]
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -834,7 +834,7 @@ class TestCsvColumnConcat(TestCsvTransform):
         # set the essential attributes
         instance = CsvColumnConcat()
         concat_columns = ["key", "data"]
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -863,7 +863,7 @@ class TestCsvColumnConcat(TestCsvTransform):
         # set the essential attributes
         instance = CsvColumnConcat()
         concat_columns = ["key", "test"]
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -886,7 +886,7 @@ class TestCsvTypeConvert(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvTypeConvert()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -915,7 +915,7 @@ class TestCsvTypeConvert(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvTypeConvert()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -944,7 +944,7 @@ class TestCsvTypeConvert(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvTypeConvert()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -977,7 +977,7 @@ class TestCsvTypeConvert(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvTypeConvert()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -1006,7 +1006,7 @@ class TestCsvTypeConvert(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvTypeConvert()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -1037,7 +1037,7 @@ class TestCsvTypeConvert(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvTypeConvert()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.*.csv",
@@ -1077,7 +1077,7 @@ class TestCsvTypeConvert(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvTypeConvert()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -1102,7 +1102,7 @@ class TestCsvMergeExclusive(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvMergeExclusive()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -1132,7 +1132,7 @@ class TestCsvMergeExclusive(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvMergeExclusive()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -1162,7 +1162,7 @@ class TestCsvMergeExclusive(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvMergeExclusive()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -1196,7 +1196,7 @@ class TestCsvMergeExclusive(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvMergeExclusive()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -1229,7 +1229,7 @@ class TestCsvMergeExclusive(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvMergeExclusive()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -1252,7 +1252,7 @@ class TestCsvMergeExclusive(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvMergeExclusive()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -1275,7 +1275,7 @@ class TestCsvMergeExclusive(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvMergeExclusive()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -1298,7 +1298,7 @@ class TestCsvMergeExclusive(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvMergeExclusive()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -1321,7 +1321,7 @@ class TestCsvMergeExclusive(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvMergeExclusive()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -1344,7 +1344,7 @@ class TestColumnLengthAdjust(TestCsvTransform):
         file2 = self._create_csv(test_csv_data, fname="test2.csv")
 
         instance = ColumnLengthAdjust()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.*.csv",
@@ -1387,7 +1387,7 @@ class TestCsvMerge(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvMerge()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test\.csv",
@@ -1436,7 +1436,7 @@ class TestCsvMerge(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvMerge()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test\.csv",
@@ -1481,7 +1481,7 @@ class TestCsvConcat(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvConcat()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_filenames": ["test1.csv", "test2.csv", "test3.csv"],
@@ -1517,7 +1517,7 @@ class TestCsvConcat(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvConcat()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.csv",
@@ -1545,7 +1545,7 @@ class TestCsvConcat(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvConcat()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.csv",
@@ -1577,7 +1577,7 @@ class TestCsvConcat(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvConcat()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.csv",
@@ -1613,7 +1613,7 @@ class TestCsvConcat(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvConcat()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_filenames": ["test1.csv", "test2.csv", "test3.csv"],
@@ -1643,7 +1643,7 @@ class TestCsvConcat(TestCsvTransform):
         with pytest.raises(InvalidParameter) as execinfo:
             # set the essential attributes
             instance = CsvConcat()
-            instance._set_properties(
+            instance._set_arguments(
                 {
                     "src_dir": self._data_dir,
                     "src_pattern": r"test.*\.csv",
@@ -1664,7 +1664,7 @@ class TestCsvConvert(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvConvert()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test\.csv",
@@ -1685,7 +1685,7 @@ class TestCsvConvert(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvConvert()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test\.csv",
@@ -1718,7 +1718,7 @@ class TestCsvConvert(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvConvert()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test\.csv",
@@ -1742,7 +1742,7 @@ class TestCsvConvert(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvConvert()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -1770,7 +1770,7 @@ class TestCsvConvert(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvConvert()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test\.csv",
@@ -1791,7 +1791,7 @@ class TestCsvConvert(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvConvert()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test\.csv",
@@ -1814,7 +1814,7 @@ class TestCsvConvert(TestCsvTransform):
 
         # set attributes
         instance = CsvConvert()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -1844,7 +1844,7 @@ class TestCsvDuplicateRowDelete(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvDuplicateRowDelete()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.csv",
@@ -1878,7 +1878,7 @@ class TestCsvDuplicateRowDelete(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvDuplicateRowDelete()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -1913,7 +1913,7 @@ class TestCsvDuplicateRowDelete(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvDuplicateRowDelete()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.csv",
@@ -1947,7 +1947,7 @@ class TestCsvDuplicateRowDelete(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvDuplicateRowDelete()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -1983,7 +1983,7 @@ class TestCsvDuplicateRowDelete(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvDuplicateRowDelete()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.tsv",
@@ -2025,7 +2025,7 @@ class TestCsvDuplicateRowDelete(TestCsvTransform):
         self._create_csv(test_csv_data)
 
         instance = CsvDuplicateRowDelete()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -2067,7 +2067,7 @@ class TestCsvDuplicateRowDelete(TestCsvTransform):
         # Test invalid engine parameter
         instance = CsvDuplicateRowDelete()
         with pytest.raises(InvalidParameter):
-            instance._set_properties({"engine": "invalid_engine"})
+            instance._set_arguments({"engine": "invalid_engine"})
 
 
 class TestCsvRowDelete(TestCsvTransform):
@@ -2080,7 +2080,7 @@ class TestCsvRowDelete(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvRowDelete()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.csv",
@@ -2112,7 +2112,7 @@ class TestCsvRowDelete(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvRowDelete()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.csv",
@@ -2141,7 +2141,7 @@ class TestCsvRowDelete(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvRowDelete()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.csv",
@@ -2173,7 +2173,7 @@ class TestCsvRowDelete(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvRowDelete()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.csv",
@@ -2207,7 +2207,7 @@ class TestCsvRowDelete(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvRowDelete()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.csv",
@@ -2239,7 +2239,7 @@ class TestCsvRowDelete(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvRowDelete()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.csv",
@@ -2273,7 +2273,7 @@ class TestCsvRowDelete(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvRowDelete()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.csv",
@@ -2305,7 +2305,7 @@ class TestCsvRowDelete(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvRowDelete()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.csv",
@@ -2336,7 +2336,7 @@ class TestCsvSort(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvSort()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.csv",
@@ -2371,7 +2371,7 @@ class TestCsvSort(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvSort()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.csv",
@@ -2409,7 +2409,7 @@ class TestCsvToJsonl(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvToJsonl()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test.*\.csv",
@@ -2439,7 +2439,7 @@ class TestCsvColumnCopy(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnCopy()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -2470,7 +2470,7 @@ class TestCsvColumnCopy(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnCopy()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -2501,7 +2501,7 @@ class TestCsvColumnCopy(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnCopy()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -2527,7 +2527,7 @@ class TestCsvColumnCopy(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnCopy()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -2547,7 +2547,7 @@ class TestCsvColumnCopy(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnCopy()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -2569,7 +2569,7 @@ class TestCsvColumnReplace(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnReplace()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -2599,7 +2599,7 @@ class TestCsvColumnReplace(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnReplace()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -2629,7 +2629,7 @@ class TestCsvColumnReplace(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnReplace()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -2659,7 +2659,7 @@ class TestCsvColumnReplace(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnReplace()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -2689,7 +2689,7 @@ class TestCsvColumnReplace(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnReplace()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -2711,7 +2711,7 @@ class TestCsvColumnReplace(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvColumnReplace()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": "test.csv",
@@ -2738,7 +2738,7 @@ class TestCsvSplitRows(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvSplit()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test1\.csv",
@@ -2781,7 +2781,7 @@ class TestCsvSplitRows(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvSplit()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test1\.csv",
@@ -2828,7 +2828,7 @@ class TestCsvSplitGrouped(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvSplit()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test1\.csv",
@@ -2871,7 +2871,7 @@ class TestCsvSplitGrouped(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvSplit()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r"test1\.csv",
@@ -2919,7 +2919,7 @@ class TestCsvSplitGrouped(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvSplit()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r".*\.csv",
@@ -2966,7 +2966,7 @@ class TestCsvSplitGrouped(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvSplit()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r".*\.csv",
@@ -3014,7 +3014,7 @@ class TestCsvSplitGrouped(TestCsvTransform):
 
         # set the essential attributes
         instance = CsvSplit()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "src_dir": self._data_dir,
                 "src_pattern": r".*\.csv",

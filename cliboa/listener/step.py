@@ -14,6 +14,8 @@
 import json
 import re
 
+from pydantic import BaseModel
+
 from cliboa import state
 from cliboa.conf import env
 from cliboa.listener.base import BaseStepListener
@@ -45,7 +47,13 @@ class StepStatusListener(BaseStepListener):
     def before(self, step: AbstractStep) -> None:
         state.set(step.__class__.__name__)
         props_dict = {}
-        for k, v in step.__dict__.items():
+        props_values = step.__dict__.copy()
+        if isinstance(props_values.get("_args"), BaseModel):
+            args = props_values.pop("_args")
+            props_values.update(args.model_dump())
+        for k, v in props_values.items():
+            if k in ("_di_map", "_di_kwargs", "_parent", "_args"):
+                continue
             if v is not None and self._pattern is not None and self._pattern.search(k):
                 props_dict[k] = "****"
             elif (

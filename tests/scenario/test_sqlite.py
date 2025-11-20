@@ -29,7 +29,7 @@ class TestBaseSqlite(object):
         try:
             instance = BaseSqlite()
             db_file = os.path.join(self._db_dir, "spam.db")
-            instance._set_properties(
+            instance._set_arguments(
                 {
                     "dbname": db_file,
                     "tblname": "spam_table",

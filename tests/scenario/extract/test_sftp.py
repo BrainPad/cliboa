@@ -35,7 +35,7 @@ class TestSftpDownload:
             step_name="sftp_class",
         )
         instance.parent = mock_parent
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "host": "dummy.host",
                 "user": "dummy_user",
@@ -60,7 +60,7 @@ class TestSftpDownload:
         mock_parent = Mock(
             step_name="sftp_class",
         )
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "parent": mock_parent,
                 "host": "dummy.host",
@@ -88,7 +88,7 @@ class TestSftpDownload:
             step_name="sftp_class",
         )
         instance.parent = mock_parent
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "host": "dummy.host",
                 "user": "dummy_user",
@@ -119,7 +119,7 @@ class TestSftpDownload:
         mock_parent = Mock(
             step_name="sftp_class",
         )
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "parent": mock_parent,
                 "host": "dummy.host",
@@ -143,7 +143,7 @@ class TestSftpDownload:
             step_name="sftp_class",
         )
         instance.parent = mock_parent
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "host": "dummy.host",
                 "user": "dummy_user",
@@ -167,7 +167,7 @@ class TestSftpDownload:
 class TestSftpFileExistsCheck:
     def test_execute_file_found(self):
         instance = SftpFileExistsCheck()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "host": "dummy.host",
                 "user": "dummy_user",
@@ -185,7 +185,7 @@ class TestSftpFileExistsCheck:
 
     def test_execute_file_not_found(self):
         instance = SftpFileExistsCheck()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "host": "dummy.host",
                 "user": "dummy_user",

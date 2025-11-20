@@ -39,7 +39,7 @@ class TestS3Download(BaseCliboaTest):
             m_pagenate.return_value = m_contents
 
             instance = S3Download()
-            instance._set_properties(
+            instance._set_arguments(
                 {
                     "bucket": "spam",
                     "src_pattern": "spam",
@@ -58,7 +58,7 @@ class TestS3Download(BaseCliboaTest):
             m_pagenate.return_value = [{"Contents": [{"Key": "test.txt"}]}]
 
             instance = S3Download()
-            instance._set_properties(
+            instance._set_arguments(
                 {
                     "bucket": "test-bucket",
                     "src_pattern": "test.*",
@@ -83,7 +83,7 @@ class TestS3Delete(BaseCliboaTest):
         m_pagenate.return_value = m_contents
 
         instance = S3Delete()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "bucket": "spam",
                 "src_pattern": "spam",
@@ -100,7 +100,7 @@ class TestS3Delete(BaseCliboaTest):
         m_pagenate.return_value = [{"Contents": [{"Key": "test.txt"}]}]
 
         instance = S3Delete()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "bucket": "test-bucket",
                 "src_pattern": "test.*",
@@ -123,7 +123,7 @@ class TestS3FileExistsCheck(BaseCliboaTest):
         m_pagenate.return_value = [{"Contents": [{"Key": "spam"}]}]
         # テスト処理
         instance = S3FileExistsCheck()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "bucket": "spam",
                 "src_pattern": "spam",
@@ -140,7 +140,7 @@ class TestS3FileExistsCheck(BaseCliboaTest):
         m_pagenate.return_value = [{"Contents": [{"Key": "spam"}]}]
         # テスト処理
         instance = S3FileExistsCheck()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "bucket": "spam",
                 "src_pattern": "hoge",
@@ -157,7 +157,7 @@ class TestS3FileExistsCheck(BaseCliboaTest):
         m_pagenate.return_value = [{"Contents": [{"Key": "test.txt"}]}]
 
         instance = S3FileExistsCheck()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "bucket": "test-bucket",
                 "src_pattern": "test.*",
@@ -184,7 +184,7 @@ class TestS3DownloadFileDelete(BaseCliboaTest):
         mock_parent.get_from_context.return_value = {"keys": ["test.txt"]}
         mock_parent.get_symbol_arguments.return_value = {}
         instance.parent = mock_parent
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "bucket": "test-bucket",
                 "role_arn": "arn:aws:iam::123456789012:role/TestRole",
@@ -315,7 +315,7 @@ class TestDynamoDBRead(BaseCliboaTest):
 
         with tempfile.TemporaryDirectory() as temp_dir:
             instance = DynamoDBRead()
-            instance._set_properties(
+            instance._set_arguments(
                 {
                     "table_name": "test_table",
                     "file_name": f"output.{file_format}",

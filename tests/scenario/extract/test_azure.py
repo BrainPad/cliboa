@@ -45,7 +45,7 @@ class TestAzureBlobDownload(object):
         try:
             # Act
             instance = AzureBlobDownload()
-            instance._set_properties(
+            instance._set_arguments(
                 {
                     # use Postman echo
                     "account_url": "https://testtesttest.blob.core.windows.example/",

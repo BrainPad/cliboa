@@ -13,24 +13,47 @@
 #
 from contextlib import ExitStack
 from unittest import TestCase
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from cliboa.core.executor import _ScenarioExecutor, _StepExecutor
 from cliboa.core.model import CommandArgument, StepModel
 from cliboa.listener.step import StepStatusListener
-from cliboa.scenario.sample_step import SampleCustomStep, SampleStep
+from cliboa.scenario.sample_step import SampleCustomStep, SampleStep, SampleStepSub
 from cliboa.util.constant import StepStatus
 from cliboa.util.exception import CliboaException
 
 
 class TestScenarioExecutor:
     def test_execute_scenario_ok(self):
-        """
-        Test ScenarioWorker::execute_scenario
-        """
-        instance = SampleStep()
-        worker = _ScenarioExecutor([instance])
+        mock_logger = Mock()
+        model = StepModel.model_validate(
+            {
+                "step": "sample",
+                "class": "SampleStep",
+                "arguments": {"retry_count": 1, "memo": "aaa"},
+            }
+        )
+        instance = SampleStep(di_logger=mock_logger)
+        executor = _StepExecutor(instance, model)
+        worker = _ScenarioExecutor([executor])
         worker.execute()
+        mock_logger.warning.assert_not_called()
+
+    def test_execute_scenario_sub_ok(self):
+        mock_logger = Mock()
+        model = StepModel.model_validate(
+            {
+                "step": "sample",
+                "class": "SampleStepSub",
+                "arguments": {"retry_count": 1, "memo": "aaa", "name": "Alice"},
+            }
+        )
+        instance = SampleStepSub(di_logger=mock_logger)
+        executor = _StepExecutor(instance, model)
+        worker = _ScenarioExecutor([executor])
+        worker.execute()
+        mock_logger.info.assert_any_call("my name is Alice")
+        mock_logger.info.assert_any_call("my memo is aaa")
 
 
 class TestAppropriateListnerCall(TestCase):

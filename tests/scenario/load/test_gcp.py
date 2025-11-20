@@ -25,7 +25,7 @@ class TestBigQueryCopy(object):
         gbq_client = m_get_bigquery_client.return_value
 
         instance = BigQueryCopy()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "project_id": "awesome-project",
                 "location": "asia-northeast1",

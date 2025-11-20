@@ -13,7 +13,7 @@
 #
 import os
 from importlib import import_module
-from typing import Type
+from typing import Any
 
 from cliboa.conf import env
 from cliboa.core.loader import _JsonScenarioLoader, _ScenarioLoader, _YamlScenarioLoader
@@ -93,7 +93,7 @@ class _CliboaFactory(_BaseObject):
         sliced_paths: list[str],
         root_paths: list[str],
         is_prj: bool,
-    ) -> Type:
+    ) -> type[Any]:
         errors: list[str] = []
         for root_path in root_paths:
             try:
@@ -115,7 +115,7 @@ class _CliboaFactory(_BaseObject):
 
     def _get_custom_cls(
         self, cls_name: str, root_paths: list[str], custom_classes: list[str], is_prj: bool = False
-    ) -> Type | None:
+    ) -> type[Any] | None:
         for custom_class_path in custom_classes:
             sliced_paths = custom_class_path.split(".")
             mod_name = sliced_paths.pop()

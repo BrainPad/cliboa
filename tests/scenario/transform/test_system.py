@@ -31,7 +31,7 @@ class TestExecuteShellScript(BaseCliboaTest):
 
     def test_inline_script(self):
         instance = ExecuteShellScript()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "command": {"content": "touch foo.csv && touch test.csv"},
                 "work_dir": self._data_dir,
@@ -59,7 +59,7 @@ class TestExecuteShellScript(BaseCliboaTest):
         subprocess.call(["chmod", "0777", test_script_path])
 
         instance = ExecuteShellScript()
-        instance._set_properties({"command": {"file": test_script_path}})
+        instance._set_arguments({"command": {"file": test_script_path}})
         instance.execute()
 
         files = glob(os.path.join(self._data_dir, "*.csv"))

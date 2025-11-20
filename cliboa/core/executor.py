@@ -67,7 +67,9 @@ class _BaseExecutor(_BaseObject, _IExecute):
             return res
         except Exception as e:
             self._logger.exception(
-                "Error occurred during the execution of {}.{}".format(
+                "{}({}) occurred during the execution of {}.{}".format(
+                    e.__class__.__name__,
+                    str(e),
                     self.__class__.__module__,
                     self.__class__.__name__,
                 )
@@ -144,7 +146,7 @@ class _StepExecutor(_BaseExecutor, IParentStep):
     ):
         super().__init__(**kwargs)
         step.parent = self
-        step._set_properties(model.arguments)
+        step._set_arguments(model.arguments)
         self._step = step
         self._model = model
         self._context = context
