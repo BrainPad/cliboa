@@ -32,9 +32,10 @@ class _BaseObject(ABC):
             else:
                 raise e
         self._di_map = {}
-        self._di_kwargs = kwargs
+        self._di_kwargs = {}
         for k, v in kwargs.items():
             if k.startswith("di_"):
+                self._di_kwargs[k] = v
                 key = k[3:]
                 self._di_map[key] = v
         self._logger = self._resolve(

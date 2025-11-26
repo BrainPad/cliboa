@@ -14,10 +14,10 @@
 import csv
 import os
 
+from pydantic import BaseModel
+
 from cliboa.scenario.base import BaseStep
-from cliboa.scenario.validator import EssentialParameters
 from cliboa.util.exception import FileNotFound, InvalidParameter
-from cliboa.util.rdbms_util import Rdbms_Util
 
 
 class BaseRdbms(BaseStep):
@@ -25,67 +25,94 @@ class BaseRdbms(BaseStep):
     Base class of relational database class.
     """
 
-    def __init__(self):
-        super().__init__()
-
-        self._host = None
-        self._dbname = None
-        self._user = None
-        self._password = None
-        self._port = None
-
-    def host(self, host):
-        self._host = host
-
-    def dbname(self, dbname):
-        self._dbname = dbname
-
-    def user(self, user):
-        self._user = user
-
-    def password(self, password):
-        self._password = password
-
-    def port(self, port):
-        self._port = port
+    class Arguments(BaseModel):
+        host: str
+        dbname: str
+        user: str
+        password: str
+        port: int | None = None
 
     def execute(self):
-        valid = EssentialParameters(
-            self.__class__.__name__,
-            [self._host, self._dbname, self._user, self._password],
-        )
-        valid()
+        pass
 
     def get_adaptor(self):
         raise NotImplementedError("get_adaptor must be implemented in a subclass")
 
+    def select_sql(self, tblname):
+        """
+        Create select sql.
+
+        Arguments:
+            tblname (str): table name
+
+        Returns:
+            str: SELECT * FROM {tblname}
+        """
+        return "SELECT * FROM %s" % tblname
+
+    def insert_sql(self, tblname, columns):
+        """
+        Create insert sql from csv file.
+
+        Arguments:
+            tblname (str): table name
+            columns (array): db column names
+
+        Returns:
+            str: INSERT INTO {tblname} (columns) VALUES (%s,%s,%s...)
+        """
+        item = ""
+        for i, row in enumerate(columns):
+            if i != 0:
+                item = item + ","
+            item = item + row
+        place_holders = "%s," * (i + 1)
+        return "INSERT INTO {} ({}) VALUES ({})".format(tblname, item, place_holders[:-1])
+
+    def csv_as_params(self, path, chunk_size=100, encoding="utf-8"):
+        """
+        Divide csv records into small-blocked parameter.
+        Basically it uses for paramer of insert query.
+
+        Arguments:
+            path (str): Csv file path
+            chunk_size=100 (int): Number of row in a single block
+
+        Returns:
+            array: [
+                    [(row1), (row2), (row3)]
+                    [(row4), (row5), (row6)]
+                    [(row7), (row8)]
+                ]
+        """
+        tuples = []
+        with open(path, mode="r", encoding=encoding) as f:
+            reader = csv.reader(f)
+            next(reader)  # ignore header
+            rows = []
+            for i, row in enumerate(reader, 1):
+                rows.append(tuple(row))
+                if i % chunk_size == 0:
+                    tuples.append(rows)
+                    rows = []
+        if rows:
+            tuples.append(rows)
+        return tuples
+
 
 class BaseRdbmsRead(BaseRdbms):
-    def __init__(self):
-        super().__init__()
-        self._query = None
-        self._tblname = None
-        self._dest_path = None
-        self._encoding = "UTF-8"
-
-    def query(self, query):
-        self._query = query
-
-    def tblname(self, tblname):
-        self._tblname = tblname
-
-    def dest_path(self, dest_path):
-        self._dest_path = dest_path
-
-    def encoding(self, encoding):
-        self._encoding = encoding
+    class Arguments(BaseRdbms.Arguments):
+        dest_path: str
+        query: str | None = None
+        tblname: str | None = None
+        encoding: str = "UTF-8"
 
     def _property_path_reader(self, src, encoding="utf-8"):
         """
         Returns an resource contents from the path if src starts with "path:",
         returns src if not
         """
-        self._logger.warning("DeprecationWarning: Will be removed in the near future")
+        self.logger.warning("DeprecationWarning: Will be removed in the near future")
         if src[:5].upper() == "PATH:":
             fpath = src[5:]
             if os.path.exists(fpath) is False:
@@ -95,33 +122,30 @@ class BaseRdbmsRead(BaseRdbms):
         return src
 
     def execute(self):
-        super().execute()
-
-        valid = EssentialParameters(self.__class__.__name__, [self._dest_path])
-        valid()
-
-        if (self._query and self._tblname) or (not self._query and not self._tblname):
+        if (self.args.query and self.args.tblname) or (
+            not self.args.query and not self.args.tblname
+        ):
             raise InvalidParameter("Either query or tblname is required.")
 
-        dest_dir = os.path.dirname(self._dest_path)
+        dest_dir = os.path.dirname(self.args.dest_path)
         if dest_dir:
             os.makedirs(dest_dir, exist_ok=True)
 
         with self.get_adaptor() as adaptor:
-            with open(self._dest_path, mode="w", encoding=self._encoding, newline="") as f:
-                if self._tblname:
-                    query = Rdbms_Util().select_sql(self._tblname)
-                elif isinstance(self._query, str):
-                    self._logger.warning(
+            with open(self.args.dest_path, mode="w", encoding=self.args.encoding, newline="") as f:
+                if self.args.tblname:
+                    query = self.select_sql(self.args.tblname)
+                elif isinstance(self.args.query, str):
+                    self.logger.warning(
                         (
                             "DeprecationWarning: "
                             "In the near future, "
                             "the `query` will be changed to accept only dictionary types. "
                         )
                     )
-                    query = self._property_path_reader(self._query)
+                    query = self.args.property_path_reader(self.args.query)
                 else:
-                    query_filepath = self._source_path_reader(self._query)
+                    query_filepath = self.args.source_path_reader(self.args.query)
                     with open(query_filepath, "r") as qf:
                         query = qf.read()
                 cur = adaptor.select(query)
@@ -149,57 +173,33 @@ class BaseRdbmsRead(BaseRdbms):
 
 
 class BaseRdbmsWrite(BaseRdbms):
-    def __init__(self):
-        super().__init__()
-        self._src_dir = None
-        self._src_pattern = None
-        self._tblname = None
-        self._encoding = "UTF-8"
-        self._chunk_size = 100
-
-    def src_dir(self, src_dir):
-        self._src_dir = src_dir
-
-    def src_pattern(self, src_pattern):
-        self._src_pattern = src_pattern
-
-    def tblname(self, tblname):
-        self._tblname = tblname
-
-    def encoding(self, encoding):
-        self._encoding = encoding
-
-    def chunk_size(self, chunk_size):
-        self._chunk_size = chunk_size
+    class Arguments(BaseRdbms.Arguments):
+        src_dir: str
+        src_pattern: str
+        tblname: str
+        encoding: str = "UTF-8"
+        chunk_size: int = 100
 
     def execute(self):
-        super().execute()
-
-        valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir, self._src_pattern, self._tblname]
-        )
-        valid()
-
         # Plural files are allowed to insert at the same time,
         # but all files must be the same csv format.
-        files = super().get_target_files(self._src_dir, self._src_pattern)
+        files = super().get_target_files(self.args.src_dir, self.args.src_pattern)
         if len(files) == 0:
             raise FileNotFound("No csv file was found.")
-        self._logger.info("Files found %s" % files)
+        self.logger.info("Files found %s" % files)
 
-        with open(files[0], mode="r", encoding=self._encoding) as f:
+        with open(files[0], mode="r", encoding=self.args.encoding) as f:
             reader = csv.DictReader(f)
             fieldnames = reader.fieldnames
 
-        rdbmsUtil = Rdbms_Util()
-        query = rdbmsUtil.insert_sql(self._tblname, fieldnames)
-        self._logger.info("query: %s" % query)
+        query = self.insert_sql(self.args.tblname, fieldnames)
+        self.logger.info("query: %s" % query)
         for file in files:
             with self.get_adaptor() as adaptor:
-                tuples = rdbmsUtil.csv_as_params(
-                    file, chunk_size=self._chunk_size, encoding=self._encoding
+                tuples = self.csv_as_params(
+                    file, chunk_size=self.args.chunk_size, encoding=self.args.encoding
                 )
-                self._logger.info("tuples: %s" % tuples)
+                self.logger.info("tuples: %s" % tuples)
                 for params in tuples:
-                    self._logger.info("params: %s" % params)
+                    self.logger.info("params: %s" % params)
                     adaptor.insert(query, params)

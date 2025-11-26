@@ -1,10 +1,10 @@
 from abc import abstractmethod
 
+from cliboa.util.base import _BaseObject
 from cliboa.util.exception import DatabaseException
-from cliboa.util.log import _get_logger
 
 
-class RdbmsSupport:
+class RdbmsSupport(_BaseObject):
     """
     This class allows you to access a database and
     provides database transaction by context manager.
@@ -21,9 +21,8 @@ class RdbmsSupport:
 
     """
 
-    def __init__(self, host, user, password, dbname, port=None, encoding="UTF8"):
-        self._logger = _get_logger(__name__)
-
+    def __init__(self, host, user, password, dbname, port=None, encoding="UTF8", **kwargs):
+        super().__init__(**kwargs)
         self._host = host
         self._user = user
         self._password = password

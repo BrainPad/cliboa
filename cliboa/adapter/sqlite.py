@@ -14,10 +14,10 @@
 import csv
 import sqlite3
 
-from cliboa.util.log import _get_logger
+from cliboa.util.base import _BaseObject
 
 
-class SqliteAdapter(object):
+class SqliteAdapter(_BaseObject):
 
     _COMMIT_COUNT = 500
 
@@ -25,8 +25,8 @@ class SqliteAdapter(object):
     Adapter class of sqlite3
     """
 
-    def __init__(self):
-        self._logger = _get_logger(__name__)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self._cur = None
         self._con = None
 

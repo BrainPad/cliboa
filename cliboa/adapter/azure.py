@@ -14,8 +14,10 @@
 
 from azure.storage.blob import BlobServiceClient
 
+from cliboa.util.base import _BaseObject
 
-class BlobServiceAdapter(object):
+
+class BlobServiceAdapter(_BaseObject):
     def get_client(self, account_url, account_access_key, connection_string):
         if connection_string:
             return BlobServiceClient.from_connection_string(connection_string)

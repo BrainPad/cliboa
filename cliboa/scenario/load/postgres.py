@@ -16,8 +16,13 @@ from cliboa.scenario.rdbms import BaseRdbmsWrite
 
 
 class PostgresqlWrite(BaseRdbmsWrite):
-    def __init__(self):
-        super().__init__()
-
     def get_adaptor(self):
-        return PostgresqlAdaptor(self._host, self._user, self._password, self._dbname, self._port)
+        return self._resolve(
+            "adaptor_db",
+            PostgresqlAdaptor,
+            self.args.host,
+            self.args.user,
+            self.args.password,
+            self.args.dbname,
+            self.args.port,
+        )
