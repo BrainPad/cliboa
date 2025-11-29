@@ -110,13 +110,13 @@ class TestS3FileExistsCheck(BaseCliboaTest):
         m_get_object = m_get_client.return_value.get_object
         m_pagenate = m_get_client.return_value.get_paginator.return_value.paginate
         m_pagenate.return_value = [{"Contents": [{"Key": "spam"}]}]
-        # テスト処理
+        # Execute test
         instance = S3FileExistsCheck()
         Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
         Helper.set_property(instance, "bucket", "spam")
         Helper.set_property(instance, "src_pattern", "spam")
         instance.execute()
-        # 処理の正常終了を確認
+        # Verify successful execution
         assert m_get_object.call_args_list == []
 
     @patch.object(S3Adapter, "get_client")
@@ -124,13 +124,13 @@ class TestS3FileExistsCheck(BaseCliboaTest):
         m_get_object = m_get_client.return_value.get_object
         m_pagenate = m_get_client.return_value.get_paginator.return_value.paginate
         m_pagenate.return_value = [{"Contents": [{"Key": "spam"}]}]
-        # テスト処理
+        # Execute test
         instance = S3FileExistsCheck()
         Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
         Helper.set_property(instance, "bucket", "spam")
         Helper.set_property(instance, "src_pattern", "hoge")
         instance.execute()
-        # 処理の正常終了を確認
+        # Verify successful execution
         assert m_get_object.call_args_list == []
 
     @patch.object(S3Adapter, "get_client")
@@ -360,16 +360,16 @@ class TestDynamoDBRead(BaseCliboaTest):
 
         assert len(actual_data) == len(
             expected_data
-        ), f"期待される行数 {len(expected_data)} に対し、実際の行数は {len(actual_data)} です"
+        ), f"Expected {len(expected_data)} rows, got {len(actual_data)} rows"
 
         for expected_row, actual_row in zip(expected_data, actual_data):
             assert len(expected_row) == len(
                 actual_row
-            ), f"列数が一致しません。期待値: {len(expected_row)}, 実際の値: {len(actual_row)}"
+            ), f"Column count mismatch. Expected: {len(expected_row)}, Actual: {len(actual_row)}"
             for expected_value, actual_value in zip(expected_row, actual_row):
                 assert str(actual_value) == str(
                     expected_value
-                ), f"値が一致しません。期待値: {expected_value}, 実際の値: {actual_value}"
+                ), f"Value mismatch. Expected: {expected_value}, Actual: {actual_value}"
 
     def _verify_jsonl(self, file_path, expected_data):
         with open(file_path, "r") as jsonl_file:

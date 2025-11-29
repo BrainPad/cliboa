@@ -238,7 +238,7 @@ class DynamoDBRead(BaseAws):
 
     def execute(self, *args):
         """
-        DynamoDBからデータをダウンロードし、指定されたフォーマットでファイルに保存します。
+        Download data from DynamoDB and save it to a file in the specified format.
         """
         super().execute()
 
@@ -255,7 +255,7 @@ class DynamoDBRead(BaseAws):
         )
         table = dynamodb.Table(self._table_name)
 
-        # filter_conditionsとテーブルのキー情報に基づいてquery/scanを選択
+        # Select query/scan based on filter_conditions and table key information
         if self._filter_conditions:
             items_generator = self._read_with_filter(table)
         else:
@@ -271,27 +271,27 @@ class DynamoDBRead(BaseAws):
 
     def _scan_table(self, table):
         """
-        DynamoDBテーブルをスキャンし、全アイテムを取得するジェネレータ関数。
+        Generator function that scans a DynamoDB table and retrieves all items.
 
         Args:
-            table (boto3.resources.factory.dynamodb.Table): スキャン対象のDynamoDBテーブル
+            table (boto3.resources.factory.dynamodb.Table): DynamoDB table to scan
 
         Yields:
-            dict: テーブルの各アイテム
+            dict: Each item from the table
         """
         yield from self._execute_with_pagination(table, "scan")
 
     def _read_with_filter(self, table):
         """
-        フィルター条件に基づいてquery操作またはscan操作を実行
+        Execute query or scan operation based on filter conditions
 
         Args:
-            table: DynamoDBテーブルオブジェクト
+            table: DynamoDB table object
 
         Yields:
-            dict: テーブルの各アイテム
+            dict: Each item from the table
         """
-        # テーブルのキー情報を取得
+        # Get table key information
         key_schema = table.key_schema
         partition_key_name = None
         sort_key_name = None
@@ -302,11 +302,11 @@ class DynamoDBRead(BaseAws):
             elif key["KeyType"] == "RANGE":
                 sort_key_name = key["AttributeName"]
 
-        # パーティションキーが条件に含まれているかチェック
+        # Check if partition key is included in conditions
         partition_key_value = self._filter_conditions.get(partition_key_name)
 
         if partition_key_value is not None:
-            # Query操作
+            # Query operation
             self._logger.info(
                 f"Using query operation with partition key: "
                 f"{partition_key_name}={partition_key_value}"
@@ -315,16 +315,16 @@ class DynamoDBRead(BaseAws):
                 table, partition_key_name, partition_key_value, sort_key_name
             )
         else:
-            # Scan操作
+            # Scan operation
             self._logger.info("Using scan operation with filter")
             yield from self._scan_with_filter(table)
 
     def _build_filter_expression(self, exclude_keys: list[str] = []):
         """
-        FilterExpression構築
+        Build FilterExpression
 
         Args:
-            exclude_keys: 除外するキーのリスト（パーティションキー、ソートキーなど）
+            exclude_keys: List of keys to exclude (partition key, sort key, etc.)
 
         Returns:
             filter_expression or None
@@ -343,15 +343,15 @@ class DynamoDBRead(BaseAws):
 
     def _execute_with_pagination(self, table, operation_name, **base_kwargs):
         """
-        DynamoDB操作をページネーション付きで実行
+        Execute DynamoDB operation with pagination
 
         Args:
-            table: DynamoDBテーブルオブジェクト
+            table: DynamoDB table object
             operation_name: 'query' or 'scan'
-            **base_kwargs: 操作固有のパラメータ（KeyConditionExpression等）
+            **base_kwargs: Operation-specific parameters (KeyConditionExpression, etc.)
 
         Yields:
-            dict: 各アイテム
+            dict: Each item
         """
         operation = getattr(table, operation_name)
         last_evaluated_key = None
@@ -371,20 +371,20 @@ class DynamoDBRead(BaseAws):
                 break
 
     def _query_with_filter(self, table, partition_key_name, partition_key_value, sort_key_name):
-        """Query操作でデータを取得"""
-        # KeyConditionExpression構築
+        """Retrieve data using query operation"""
+        # Build KeyConditionExpression
         key_condition = Key(partition_key_name).eq(partition_key_value)
         if sort_key_name and sort_key_name in self._filter_conditions:
             sort_key_value = self._filter_conditions[sort_key_name]
             key_condition = key_condition & Key(sort_key_name).eq(sort_key_value)
 
-        # FilterExpression構築（パーティション/ソートキーを除外）
+        # Build FilterExpression (exclude partition/sort keys)
         exclude_keys = [partition_key_name]
         if sort_key_name:
             exclude_keys.append(sort_key_name)
         filter_expression = self._build_filter_expression(exclude_keys)
 
-        # Query実行
+        # Execute query
         query_kwargs = {"KeyConditionExpression": key_condition}
         if filter_expression is not None:
             query_kwargs["FilterExpression"] = filter_expression
@@ -392,11 +392,11 @@ class DynamoDBRead(BaseAws):
         yield from self._execute_with_pagination(table, "query", **query_kwargs)
 
     def _scan_with_filter(self, table):
-        """Scan操作でデータを取得"""
-        # FilterExpression構築（全条件）
+        """Retrieve data using scan operation"""
+        # Build FilterExpression (all conditions)
         filter_expression = self._build_filter_expression()
 
-        # Scan実行
+        # Execute scan
         scan_kwargs = {}
         if filter_expression is not None:
             scan_kwargs["FilterExpression"] = filter_expression
@@ -405,10 +405,10 @@ class DynamoDBRead(BaseAws):
 
     def _write_jsonl(self, items, file_path):
         """
-        アイテムをJSONL形式でファイルに書き込みます。
+        Write items to a file in JSONL format.
         Args:
-            items (iterator): 書き込むアイテムのイテレータ
-            file_path (str): 書き込み先のファイルパス
+            items (iterator): Iterator of items to write
+            file_path (str): Path to the file to write to
         """
         with open(file_path, "w") as f:
             for item in items:
@@ -419,7 +419,7 @@ class DynamoDBRead(BaseAws):
 
     def _json_serial(self, obj):
         """
-        JSONシリアライズ関数
+        JSON serialization function
         """
         if isinstance(obj, Decimal):
             return int(obj) if obj % 1 == 0 else float(obj)
@@ -427,11 +427,11 @@ class DynamoDBRead(BaseAws):
 
     def _write_csv(self, items, file_path):
         """
-        アイテムをCSV形式でファイルに書き込みます。
+        Write items to a file in CSV format.
 
         Args:
-            items (iterator): 書き込むアイテムのイテレータ
-            file_path (str): 書き込み先のファイルパス
+            items (iterator): Iterator of items to write
+            file_path (str): Path to the file to write to
         """
         with open(file_path, "w", newline="") as f:
             writer = None
@@ -442,7 +442,7 @@ class DynamoDBRead(BaseAws):
 
                 for key, value in item.items():
                     if isinstance(value, (dict, list)):
-                        # ネストされた属性値はJSON形式に変換
+                        # Convert nested attribute values to JSON format
                         item[key] = json.dumps(
                             value, default=self._json_serial, sort_keys=False, ensure_ascii=False
                         )
