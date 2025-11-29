@@ -243,12 +243,15 @@ class TestDynamoDBRead(BaseCliboaTest):
 
         with tempfile.TemporaryDirectory() as temp_dir:
             instance = DynamoDBRead()
-            Helper.set_property(instance, "table_name", "test_table")
-            Helper.set_property(instance, "file_name", "output.csv")
-            Helper.set_property(instance, "dest_dir", temp_dir)
-            Helper.set_property(instance, "file_format", "csv")
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-            Helper.set_property(instance, "region", "us-east-1")
+            instance._set_properties(
+                {
+                    "table_name": "test_table",
+                    "file_name": "output.csv",
+                    "dest_dir": temp_dir,
+                    "file_format": "csv",
+                    "region": "us-east-1",
+                }
+            )
             instance.execute()
 
             output_file_path = os.path.join(temp_dir, instance._file_name)
@@ -277,12 +280,15 @@ class TestDynamoDBRead(BaseCliboaTest):
 
         with tempfile.TemporaryDirectory() as temp_dir:
             instance = DynamoDBRead()
-            Helper.set_property(instance, "table_name", "test_table")
-            Helper.set_property(instance, "file_name", "output.csv")
-            Helper.set_property(instance, "dest_dir", temp_dir)
-            Helper.set_property(instance, "file_format", "csv")
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-            Helper.set_property(instance, "region", "us-east-1")
+            instance._set_properties(
+                {
+                    "table_name": "test_table",
+                    "file_name": "output.csv",
+                    "dest_dir": temp_dir,
+                    "file_format": "csv",
+                    "region": "us-east-1",
+                }
+            )
             instance.execute()
 
             output_file_path = os.path.join(temp_dir, instance._file_name)
@@ -372,12 +378,15 @@ class TestDynamoDBRead(BaseCliboaTest):
 
         with tempfile.TemporaryDirectory() as temp_dir:
             instance = DynamoDBRead()
-            Helper.set_property(instance, "table_name", "test_table")
-            Helper.set_property(instance, "file_name", "output.jsonl")
-            Helper.set_property(instance, "dest_dir", temp_dir)
-            Helper.set_property(instance, "file_format", "jsonl")
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-            Helper.set_property(instance, "region", "us-east-1")
+            instance._set_properties(
+                {
+                    "table_name": "test_table",
+                    "file_name": "output.jsonl",
+                    "dest_dir": temp_dir,
+                    "file_format": "jsonl",
+                    "region": "us-east-1",
+                }
+            )
             instance.execute()
 
             output_file_path = os.path.join(temp_dir, instance._file_name)
@@ -429,12 +438,15 @@ class TestDynamoDBRead(BaseCliboaTest):
 
         with tempfile.TemporaryDirectory() as temp_dir:
             instance = DynamoDBRead()
-            Helper.set_property(instance, "table_name", "test_table")
-            Helper.set_property(instance, "file_name", "output.csv")
-            Helper.set_property(instance, "dest_dir", temp_dir)
-            Helper.set_property(instance, "filter_conditions", {"user_id": "12345"})
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-            Helper.set_property(instance, "region", "us-east-1")
+            instance._set_properties(
+                {
+                    "table_name": "test_table",
+                    "file_name": "output.csv",
+                    "dest_dir": temp_dir,
+                    "filter_conditions": {"user_id": "12345"},
+                    "region": "us-east-1",
+                }
+            )
             instance.execute()
 
             output_file_path = os.path.join(temp_dir, instance._file_name)
@@ -481,14 +493,15 @@ class TestDynamoDBRead(BaseCliboaTest):
 
         with tempfile.TemporaryDirectory() as temp_dir:
             instance = DynamoDBRead()
-            Helper.set_property(instance, "table_name", "test_table")
-            Helper.set_property(instance, "file_name", "output.csv")
-            Helper.set_property(instance, "dest_dir", temp_dir)
-            Helper.set_property(
-                instance, "filter_conditions", {"user_id": "12345", "order_date": "2025-10-25"}
+            instance._set_properties(
+                {
+                    "table_name": "test_table",
+                    "file_name": "output.csv",
+                    "dest_dir": temp_dir,
+                    "filter_conditions": {"user_id": "12345", "order_date": "2025-10-25"},
+                    "region": "us-east-1",
+                }
             )
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-            Helper.set_property(instance, "region", "us-east-1")
             instance.execute()
 
             output_file_path = os.path.join(temp_dir, instance._file_name)
@@ -518,14 +531,15 @@ class TestDynamoDBRead(BaseCliboaTest):
 
         with tempfile.TemporaryDirectory() as temp_dir:
             instance = DynamoDBRead()
-            Helper.set_property(instance, "table_name", "test_table")
-            Helper.set_property(instance, "file_name", "output.csv")
-            Helper.set_property(instance, "dest_dir", temp_dir)
-            Helper.set_property(
-                instance, "filter_conditions", {"user_id": "12345", "non_existent_field": "value"}
+            instance._set_properties(
+                {
+                    "table_name": "test_table",
+                    "file_name": "output.csv",
+                    "dest_dir": temp_dir,
+                    "filter_conditions": {"user_id": "12345", "non_existent_field": "value"},
+                    "region": "us-east-1",
+                }
             )
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-            Helper.set_property(instance, "region", "us-east-1")
             instance.execute()
 
             # Should not raise error, just return empty results
@@ -593,14 +607,15 @@ class TestDynamoDBRead(BaseCliboaTest):
         # Execute DynamoDBRead with filter: user_id="123" AND status="active"
         with tempfile.TemporaryDirectory() as temp_dir:
             instance = DynamoDBRead()
-            Helper.set_property(instance, "table_name", "test_table")
-            Helper.set_property(instance, "file_name", "output.csv")
-            Helper.set_property(instance, "dest_dir", temp_dir)
-            Helper.set_property(
-                instance, "filter_conditions", {"user_id": "123", "status": "active"}
+            instance._set_properties(
+                {
+                    "table_name": "test_table",
+                    "file_name": "output.csv",
+                    "dest_dir": temp_dir,
+                    "filter_conditions": {"user_id": "123", "status": "active"},
+                    "region": "us-east-1",
+                }
             )
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-            Helper.set_property(instance, "region", "us-east-1")
             instance.execute()
 
             # Verify: only 2 items with user_id=123 and status=active
@@ -643,12 +658,15 @@ class TestDynamoDBRead(BaseCliboaTest):
         # Execute DynamoDBRead with filter: status="active"
         with tempfile.TemporaryDirectory() as temp_dir:
             instance = DynamoDBRead()
-            Helper.set_property(instance, "table_name", "test_table")
-            Helper.set_property(instance, "file_name", "output.csv")
-            Helper.set_property(instance, "dest_dir", temp_dir)
-            Helper.set_property(instance, "filter_conditions", {"status": "active"})
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-            Helper.set_property(instance, "region", "us-east-1")
+            instance._set_properties(
+                {
+                    "table_name": "test_table",
+                    "file_name": "output.csv",
+                    "dest_dir": temp_dir,
+                    "filter_conditions": {"status": "active"},
+                    "region": "us-east-1",
+                }
+            )
             instance.execute()
 
             # Verify: only active items are retrieved
@@ -690,11 +708,14 @@ class TestDynamoDBRead(BaseCliboaTest):
         # Execute DynamoDBRead without filter
         with tempfile.TemporaryDirectory() as temp_dir:
             instance = DynamoDBRead()
-            Helper.set_property(instance, "table_name", "test_table")
-            Helper.set_property(instance, "file_name", "output.csv")
-            Helper.set_property(instance, "dest_dir", temp_dir)
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-            Helper.set_property(instance, "region", "us-east-1")
+            instance._set_properties(
+                {
+                    "table_name": "test_table",
+                    "file_name": "output.csv",
+                    "dest_dir": temp_dir,
+                    "region": "us-east-1",
+                }
+            )
             instance.execute()
 
             # Verify: all items are retrieved
