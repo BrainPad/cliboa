@@ -33,9 +33,6 @@ ChangeLog = "https://github.com/BrainPad/cliboa/releases"
 cliboadmin = "cliboa.cli.cliboadmin:main"
 
 [tool.poetry]
-name = "cliboa"
-description = "application framework for ETL(ELT) processing"
-authors = ["BrainPad <cliboa@brainpad.co.jp>"]
 version = "0.0.0" # overwritten by poetry-dynamic-versioning
 
 [tool.poetry.dependencies]
