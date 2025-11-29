@@ -19,8 +19,7 @@ classifiers = [
 ]
 
 include = [
-  "cliboa/conf/logging.conf",
-  "cliboa/conf/cliboa.ini",
+  "cliboa/cli/template/logging.conf",
 ]
 
 [project.urls]
@@ -34,6 +33,9 @@ ChangeLog = "https://github.com/BrainPad/cliboa/releases"
 cliboadmin = "cliboa.cli.cliboadmin:main"
 
 [tool.poetry]
+name = "cliboa"
+description = "application framework for ETL(ELT) processing"
+authors = ["BrainPad <cliboa@brainpad.co.jp>"]
 version = "0.0.0" # overwritten by poetry-dynamic-versioning
 
 [tool.poetry.dependencies]
@@ -65,6 +67,8 @@ psycopg2-binary = "^2.9.1"
 multiprocessing-logging = "^0.3.1"
 python-gnupg = "^0.5.4"
 cryptography = "^44.0.1"
+pydantic = "^2.12.3"
+typing-extensions = "^4.15.0"
 
 [tool.poetry.group.dev.dependencies]
 autoflake = "^2.0"
@@ -80,6 +84,8 @@ XlsxWriter = "^3.0"
 safety = "^3.0"
 pyproject-flake8 = "^7.0.0"
 moto = {extras = ["dynamodb"], version = "^5.1.15"}
+pytest-timeout = "^2.4.0"
+pytest-mock = "^3.15.1"
 
 [tool.black]
 line-length = 100

@@ -11,61 +11,20 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-global _STEP_ARGUMENT_CACHE
+from cliboa.util.base import _warn_deprecated
+
 global _PROCESS_STORE_CACHE
-_STEP_ARGUMENT_CACHE = {}
 _PROCESS_STORE_CACHE = {}
 
 
-class StepArgument(object):
-    """
-    Cache arguments defined in yaml with step name.
-    """
-
-    @staticmethod
-    def _put(step, instance):
-        """
-        Store step arguments
-
-        Args:
-            step (str): Cache key (step name)
-            instance (class): Step class
-        """
-        props = instance.__dict__
-        items = {}
-        for k, v in props.items():
-            # By default, property keys are changed by python language specification.
-            # Adjust key names to the scenario.yaml defined name
-            # (both removed underscore and manglinged prefix)
-            sp = "_%s_" % instance.__class__.__name__
-            if k.startswith(sp):
-                k = k.split(sp)[1]
-            k = k[1:] if k.startswith("_") else k
-            items[k] = v
-        _STEP_ARGUMENT_CACHE[step] = items
-
-    @staticmethod
-    def get(k):
-        """
-        Get value
-
-        Args:
-            k (str): Cache key
-
-        Returns:
-            dict: Value (underscore removed). Returns None if the key does not exist
-        """
-        return _STEP_ARGUMENT_CACHE.get(k)
-
-
-class ObjectStore(object):
+class ObjectStore:
     """
     Cache any object.
     This cache class is used when same parameter uses from one STEP to the other.
     """
 
     @staticmethod
-    def put(k, v):
+    def put(k, v, quiet: bool = False):
         """
         Put value
 
@@ -73,6 +32,8 @@ class ObjectStore(object):
             k (str): Cache key
             v (dict): Cache value
         """
+        if not quiet:
+            _warn_deprecated("cliboa.util.cache.ObjectStore.put", end_version="3.0")
         _PROCESS_STORE_CACHE[k] = v
 
     @staticmethod
@@ -86,4 +47,5 @@ class ObjectStore(object):
         Returns:
             dict: Value. Returns None if the key does not exist
         """
+        _warn_deprecated("cliboa.util.cache.ObjectStore.get", end_version="3.0")
         return _PROCESS_STORE_CACHE.get(k)

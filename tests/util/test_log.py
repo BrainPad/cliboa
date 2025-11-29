@@ -11,20 +11,12 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+import logging
+
+from cliboa.util.log import _get_logger
 
 
-class ScenarioQueue(object):
-    """
-    Composition of extract, transform, load queues
-    """
-
-    step_queue = None
-
-    class __metaclass__(type):
-        @property
-        def step_queue(cls):
-            return cls.step_queue  # pragma: no cover
-
-        @step_queue.setter
-        def step_queue(cls, q):
-            cls.step_queue = q  # pragma: no cover
+class TestGetLogger(object):
+    def test_get_logger(self):
+        logger = _get_logger(__name__)
+        assert isinstance(logger, logging.Logger)

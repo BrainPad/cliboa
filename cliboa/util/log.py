@@ -1,9 +1,35 @@
+#
+# Copyright BrainPad Inc. All Rights Reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
 import logging
 import os
 import sys
 from typing import List
 
 from cliboa import state
+
+
+def _get_logger(modname: str):
+    """
+    Get logger
+
+    Args:
+        modname (str): module name
+    Returns:
+        logger instance
+    """
+    return logging.getLogger(modname)
+
 
 _sys_uniq_path = []
 _last_sys_path_count = -1
@@ -70,6 +96,8 @@ def _create_module_path(record_path) -> str:
 
     module_path, _ = os.path.splitext(rel_path)
     parts = module_path.split(os.sep)
+    if len(parts) >= 2 and parts[-1] == "__init__":
+        parts.pop()
 
     s_parts = []
     full_flg = False
@@ -98,7 +126,10 @@ class CliboaLogRecord(logging.LogRecord):
         self.cliboaPath = self.module
         # set values
         try:
-            self.cliboaState = str(state)
+            if not self.processName or self.processName == "MainProcess":
+                self.cliboaState = str(state)
+            else:
+                self.cliboaState = self.processName + "." + str(state)
             self.cliboaPath = _create_module_path(self.pathname)
         except Exception:
             pass

@@ -48,7 +48,6 @@ sample
 │   ├── environment.py
 │   └── scenario
 ├── conf
-│   ├── cliboa.ini
 │   └── logging.conf
 ├── logs
 ├── project

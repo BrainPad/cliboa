@@ -12,7 +12,6 @@
 # all copies or substantial portions of the Software.
 #
 from cliboa.scenario.base import BaseStep
-from cliboa.util.lisboa_log import LisboaLog
 
 
 class SampleStep(BaseStep):
@@ -20,11 +19,10 @@ class SampleStep(BaseStep):
     For unit test
     """
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self._retry_count = 3
         self._memo = None
-        self._logger = LisboaLog.get_logger(__name__)
 
     def retry_count(self, retry_count):
         self._retry_count = retry_count
@@ -32,7 +30,7 @@ class SampleStep(BaseStep):
     def memo(self, memo):
         self._memo = memo
 
-    def execute(self, *args):
+    def execute(self):
         self._logger.info("Start %s" % self.__class__.__name__)
         self._logger.info("Finish %s" % self.__class__.__name__)
 
@@ -42,12 +40,11 @@ class SampleStepSub(SampleStep):
     For unit test
     """
 
-    def __init__(self):
-        super().__init__()
-
-    def execute(self, *args):
-        self._logger.info("Start %s" % self.__class__.__name__)
-        self._logger.info("Finish %s" % self.__class__.__name__)
+    def execute(self):
+        symbol_memo = self.get_symbol_argument("memo")
+        self._logger.info(f"symbol memo is {symbol_memo}")
+        symbol_context = self.get_from_context()
+        self._logger.info(f"symbol context is {symbol_context}")
 
 
 class SampleCustomStep(BaseStep):
@@ -55,11 +52,12 @@ class SampleCustomStep(BaseStep):
     For unit test
     """
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self._password = None
         self._access_key = None
         self._secret_key = None
+        self._access_token = None
         self._retry_count = 3
 
     def password(self, password):
@@ -71,8 +69,11 @@ class SampleCustomStep(BaseStep):
     def secret_key(self, secret_key):
         self._secret_key = secret_key
 
+    def access_token(self, access_token):
+        self._access_token = access_token
+
     def retry_count(self, retry_count):
         self._retry_count = retry_count
 
-    def execute(self, *args):
+    def execute(self):
         self._logger.info("unit test")

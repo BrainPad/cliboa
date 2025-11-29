@@ -20,8 +20,6 @@ from requests.exceptions import HTTPError
 
 from cliboa.conf import env
 from cliboa.scenario.load.http import HttpDelete, HttpPost, HttpPut
-from cliboa.util.helper import Helper
-from cliboa.util.lisboa_log import LisboaLog
 
 
 class TestHttpPost(object):
@@ -41,12 +39,15 @@ class TestHttpPost(object):
         try:
             os.makedirs(self._data_dir, exist_ok=True)
             instance = HttpPost()
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-            # use Postman echo
-            Helper.set_property(instance, "src_url", "https://postman-echo.com/post")
-            Helper.set_property(instance, "dest_dir", self._data_dir)
-            Helper.set_property(instance, "dest_name", "test.result")
-            Helper.set_property(instance, "payload", {"key": "value"})
+            instance._set_properties(
+                {
+                    # use Postman echo
+                    "src_url": "https://postman-echo.com/post",
+                    "dest_dir": self._data_dir,
+                    "dest_name": "test.result",
+                    "payload": {"key": "value"},
+                }
+            )
             instance.execute()
             f = open(os.path.join(self._data_dir, "test.result"), "r")
             result = f.read()
@@ -62,14 +63,17 @@ class TestHttpPost(object):
         mock_post.side_effect = HTTPError("Http request failed. HTTP Status code: 404")
 
         instance = HttpPost()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        # use Postman echo
-        Helper.set_property(instance, "src_url", "https://spam.com/post")
-        Helper.set_property(instance, "dest_dir", self._data_dir)
-        Helper.set_property(instance, "dest_name", "test.result")
-        Helper.set_property(instance, "payload", {"key": "value"})
-        Helper.set_property(instance, "retry_count", 1)
-        Helper.set_property(instance, "retry_intvl_sec", 1)
+        instance._set_properties(
+            {
+                # use Postman echo
+                "src_url": "https://spam.com/post",
+                "dest_dir": self._data_dir,
+                "dest_name": "test.result",
+                "payload": {"key": "value"},
+                "retry_count": 1,
+                "retry_intvl_sec": 1,
+            }
+        )
         with pytest.raises(HTTPError) as execinfo:
             instance.execute()
         assert "Http request failed" in str(execinfo.value)
@@ -92,12 +96,15 @@ class TestHttpPut(object):
         try:
             os.makedirs(self._data_dir, exist_ok=True)
             instance = HttpPut()
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-            # use Postman echo
-            Helper.set_property(instance, "src_url", "https://postman-echo.com/put")
-            Helper.set_property(instance, "dest_dir", self._data_dir)
-            Helper.set_property(instance, "dest_name", "test.result")
-            Helper.set_property(instance, "payload", {"key": "value"})
+            instance._set_properties(
+                {
+                    # use Postman echo
+                    "src_url": "https://postman-echo.com/put",
+                    "dest_dir": self._data_dir,
+                    "dest_name": "test.result",
+                    "payload": {"key": "value"},
+                }
+            )
             instance.execute()
             f = open(os.path.join(self._data_dir, "test.result"), "r")
             result = f.read()
@@ -113,14 +120,17 @@ class TestHttpPut(object):
         mock_put.side_effect = HTTPError("Http request failed. HTTP Status code: 404")
 
         instance = HttpPut()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        # use Postman echo
-        Helper.set_property(instance, "src_url", "https://spam.com/put")
-        Helper.set_property(instance, "dest_dir", self._data_dir)
-        Helper.set_property(instance, "dest_name", "test.result")
-        Helper.set_property(instance, "payload", {"key": "value"})
-        Helper.set_property(instance, "retry_count", 1)
-        Helper.set_property(instance, "retry_intvl_sec", 1)
+        instance._set_properties(
+            {
+                # use Postman echo
+                "src_url": "https://spam.com/put",
+                "dest_dir": self._data_dir,
+                "dest_name": "test.result",
+                "payload": {"key": "value"},
+                "retry_count": 1,
+                "retry_intvl_sec": 1,
+            }
+        )
         with pytest.raises(HTTPError) as execinfo:
             instance.execute()
         assert "Http request failed" in str(execinfo.value)
@@ -143,11 +153,14 @@ class TestHttpDelete(object):
         try:
             os.makedirs(self._data_dir, exist_ok=True)
             instance = HttpDelete()
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-            # use Postman echo
-            Helper.set_property(instance, "src_url", "https://postman-echo.com/delete")
-            Helper.set_property(instance, "dest_dir", self._data_dir)
-            Helper.set_property(instance, "dest_name", "test.result")
+            instance._set_properties(
+                {
+                    # use Postman echo
+                    "src_url": "https://postman-echo.com/delete",
+                    "dest_dir": self._data_dir,
+                    "dest_name": "test.result",
+                }
+            )
             instance.execute()
             f = open(os.path.join(self._data_dir, "test.result"), "r")
             result = f.read()
@@ -163,13 +176,16 @@ class TestHttpDelete(object):
         mock_delete.side_effect = HTTPError("Http request failed. HTTP Status code: 404")
 
         instance = HttpDelete()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        # use Postman echo
-        Helper.set_property(instance, "src_url", "https://spam.com/delete")
-        Helper.set_property(instance, "dest_dir", self._data_dir)
-        Helper.set_property(instance, "dest_name", "test.result")
-        Helper.set_property(instance, "retry_count", 1)
-        Helper.set_property(instance, "retry_intvl_sec", 1)
+        instance._set_properties(
+            {
+                # use Postman echo
+                "src_url": "https://spam.com/delete",
+                "dest_dir": self._data_dir,
+                "dest_name": "test.result",
+                "retry_count": 1,
+                "retry_intvl_sec": 1,
+            }
+        )
         with pytest.raises(HTTPError) as execinfo:
             instance.execute()
         assert "Http request failed" in str(execinfo.value)

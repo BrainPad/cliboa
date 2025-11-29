@@ -11,23 +11,23 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import logging
-import os
 import sys
 
-from cliboa.conf import env
-from cliboa.interface import CommandArgumentParser
-from cliboa.util.lisboa_log import LisboaLog
+from cliboa.interface import _parse_args
 
 
-class TestLisboaLog(object):
-    def setup_method(self, method):
-        CommandArgumentParser()
-        sys.argv.clear()
-        sys.argv.append("hoge")
-        sys.argv.append("hoge")
-        self._log_file = os.path.join(env.BASE_DIR, "logs", "app.log")
+class TestCommandArgumentParser:
+    def test_yaml_parse(self, monkeypatch):
+        test_args = ["", "spam"]
+        monkeypatch.setattr(sys, "argv", test_args)
 
-    def test_get_logger(self):
-        logger = LisboaLog().get_logger(__name__)
-        assert isinstance(logger, logging.Logger)
+        cmd_args = _parse_args()
+        assert cmd_args.project_name == "spam"
+
+    def test_json_parse(self, monkeypatch):
+        test_args = ["project_name", "spam", "--format", "json"]
+        monkeypatch.setattr(sys, "argv", test_args)
+
+        cmd_args = _parse_args()
+        assert cmd_args.project_name == "spam"
+        assert cmd_args.format == "json"

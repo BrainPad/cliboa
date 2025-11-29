@@ -11,6 +11,29 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-from collections import namedtuple
+from abc import ABC, abstractmethod
+from typing import Any
 
-ParallelWithConfig = namedtuple("ParallelWithConfig", ["steps", "config"])
+
+class _IExecute(ABC):
+    """
+    Interface of executable step instance.
+    """
+
+    @abstractmethod
+    def execute(self) -> int | None:
+        pass
+
+
+class _IContext(ABC):
+    """
+    Interface of context
+    """
+
+    @abstractmethod
+    def put(self, key: str, value: Any) -> None:
+        pass
+
+    @abstractmethod
+    def get(self, key: str) -> Any:
+        pass

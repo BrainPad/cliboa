@@ -17,8 +17,6 @@ import shutil
 from cliboa.conf import env
 from cliboa.scenario.transform.gpg import GpgDecrypt, GpgEncrypt
 from cliboa.util.gpg import Gpg
-from cliboa.util.helper import Helper
-from cliboa.util.lisboa_log import LisboaLog
 from tests import BaseCliboaTest
 
 
@@ -48,21 +46,27 @@ class TestGpg(BaseCliboaTest):
 
         # Encryption
         instance = GpgEncrypt()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "gnupghome", self._gpg_dir)
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test\.txt")
-        Helper.set_property(instance, "dest_dir", self._result_dir)
-        Helper.set_property(instance, "recipients", ["test@email.com"])
+        instance._set_properties(
+            {
+                "gnupghome": self._gpg_dir,
+                "src_dir": self._data_dir,
+                "src_pattern": r"test\.txt",
+                "dest_dir": self._result_dir,
+                "recipients": ["test@email.com"],
+            }
+        )
         instance.execute()
 
         # Decryption
         instance = GpgDecrypt()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "gnupghome", self._gpg_dir)
-        Helper.set_property(instance, "src_dir", self._result_dir)
-        Helper.set_property(instance, "src_pattern", r"test\.txt\.gpg")
-        Helper.set_property(instance, "passphrase", "password")
+        instance._set_properties(
+            {
+                "gnupghome": self._gpg_dir,
+                "src_dir": self._result_dir,
+                "src_pattern": r"test\.txt\.gpg",
+                "passphrase": "password",
+            }
+        )
         instance.execute()
 
         with open(os.path.join(self._result_dir, self._file_name), mode="r", encoding="utf-8") as f:

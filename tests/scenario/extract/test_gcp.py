@@ -16,8 +16,6 @@ from mock import call, patch
 
 from cliboa.adapter.gcp import BigQueryAdapter, GcsAdapter
 from cliboa.scenario.extract.gcp import BigQueryRead, GcsFileExistsCheck
-from cliboa.util.helper import Helper
-from cliboa.util.lisboa_log import LisboaLog
 from tests import BaseCliboaTest
 
 
@@ -25,16 +23,19 @@ class TestBigQueryRead(BaseCliboaTest):
     @patch.object(BigQueryAdapter, "get_client")
     def test_execute_with_only_key(self, m_get_client):
         instance = BigQueryRead()
-        Helper.set_property(instance, "project_id", "test_dataset")
-        Helper.set_property(instance, "credentials", "test_tblname")
-        Helper.set_property(instance, "dataset", "test_dataset")
-        Helper.set_property(instance, "tblname", "test_tblname")
-        Helper.set_property(instance, "location", "location")
-        Helper.set_property(instance, "key", "test_key")
-        Helper.set_property(instance, "query", "select * from *")
-        Helper.set_property(instance, "dest_dir", "test_Dir")
-        Helper.set_property(instance, "filename", "test_filename")
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        instance._set_properties(
+            {
+                "project_id": "test_dataset",
+                "credentials": "test_tblname",
+                "dataset": "test_dataset",
+                "tblname": "test_tblname",
+                "location": "location",
+                "key": "test_key",
+                "query": "select * from *",
+                "dest_dir": "test_Dir",
+                "filename": "test_filename",
+            }
+        )
         instance.execute()
         assert m_get_client.call_args_list == [
             call(credentials="test_tblname", project="test_dataset", location="location")
@@ -56,16 +57,19 @@ class TestBigQueryRead(BaseCliboaTest):
         m_get_write_disposition,
     ):
         instance = BigQueryRead()
-        Helper.set_property(instance, "project_id", "test_dataset")
-        Helper.set_property(instance, "credentials", "test_tblname")
-        Helper.set_property(instance, "dataset", "test_dataset")
-        Helper.set_property(instance, "tblname", "test_tblname")
-        Helper.set_property(instance, "location", "location")
-        Helper.set_property(instance, "query", "select * from *")
-        Helper.set_property(instance, "bucket", "test_bucket")
-        Helper.set_property(instance, "dest_dir", "test_Dir")
-        Helper.set_property(instance, "filename", "test_filename.csv")
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        instance._set_properties(
+            {
+                "project_id": "test_dataset",
+                "credentials": "test_tblname",
+                "dataset": "test_dataset",
+                "tblname": "test_tblname",
+                "location": "location",
+                "query": "select * from *",
+                "bucket": "test_bucket",
+                "dest_dir": "test_Dir",
+                "filename": "test_filename.csv",
+            }
+        )
         instance.execute()
         assert m_bq_client.call_args_list == [call()]
         assert m_gcs_client.call_args_list == [call()]
@@ -80,10 +84,13 @@ class TestGcsFileExistsCheck(BaseCliboaTest):
         m_pagenate.return_value = m_contents
         # テスト処理
         instance = GcsFileExistsCheck()
-        Helper.set_property(instance, "project_id", "hoge")
-        Helper.set_property(instance, "bucket", "piyo")
-        Helper.set_property(instance, "src_pattern", "spam")
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        instance._set_properties(
+            {
+                "project_id": "hoge",
+                "bucket": "piyo",
+                "src_pattern": "spam",
+            }
+        )
         instance.execute()
         # 処理の正常終了を確認
         assert m_get_object.call_args_list == []
@@ -96,10 +103,13 @@ class TestGcsFileExistsCheck(BaseCliboaTest):
         m_pagenate.return_value = m_contents
         # テスト処理
         instance = GcsFileExistsCheck()
-        Helper.set_property(instance, "project_id", "hoge")
-        Helper.set_property(instance, "bucket", "piyo")
-        Helper.set_property(instance, "src_pattern", "spam1")
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        instance._set_properties(
+            {
+                "project_id": "hoge",
+                "bucket": "piyo",
+                "src_pattern": "spam1",
+            }
+        )
         instance.execute()
         # 処理の正常終了を確認
         assert m_get_object.call_args_list == []

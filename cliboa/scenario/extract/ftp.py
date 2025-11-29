@@ -17,7 +17,6 @@ import re
 from cliboa.adapter.ftp import FtpAdapter
 from cliboa.scenario.ftp import BaseFtp
 from cliboa.scenario.validator import EssentialParameters
-from cliboa.util.cache import ObjectStore
 from cliboa.util.constant import StepStatus
 
 
@@ -62,7 +61,7 @@ class FtpDownload(FtpExtract):
             return StepStatus.SUCCESSFUL_TERMINATION
 
         # cache downloaded file names
-        ObjectStore.put(self._step, files)
+        self.put_to_context(files)
 
 
 class FtpDownloadFileDelete(FtpExtract):
@@ -74,7 +73,7 @@ class FtpDownloadFileDelete(FtpExtract):
         super().__init__()
 
     def execute(self, *args):
-        files = ObjectStore.get(self._symbol)
+        files = self.get_from_context()
 
         if files is not None and len(files) > 0:
             self._logger.info("Delete files %s" % files)

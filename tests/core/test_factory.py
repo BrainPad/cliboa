@@ -12,86 +12,110 @@
 # all copies or substantial portions of the Software.
 #
 
-import sys
-
 import pytest
 
-from cliboa.core.factory import CustomInstanceFactory, ScenarioManagerFactory, StepExecutorFactory
-from cliboa.core.manager import JsonScenarioManager, YamlScenarioManager
-from cliboa.core.strategy import MultiProcExecutor, MultiProcWithConfigExecutor, SingleProcExecutor
-from cliboa.interface import CommandArgumentParser
-from cliboa.util.parallel_with_config import ParallelWithConfig
-from tests import BaseCliboaTest
+from cliboa.core.factory import _CliboaFactory
+from cliboa.scenario import ExecuteShellScript
+from cliboa.scenario.sample_step import SampleStep
+from cliboa.util.exception import InvalidScenarioClass
 
 
-class TestFactory(BaseCliboaTest):
-    def setup_method(self, method):
-        cmd_parser = CommandArgumentParser()
-        self._cmd_args = cmd_parser.parse()
-
-    def setup_json_argv(self):
-        sys.argv.clear()
-        sys.argv.append("project_name")
-        sys.argv.append("spam")
-        sys.argv.append("--format")
-        sys.argv.append("json")
-        cmd_parser = CommandArgumentParser()
-        return cmd_parser.parse()
+class AttrDict(dict):
+    def __getattr__(self, key):
+        try:
+            return self[key]
+        except KeyError:
+            raise AttributeError(f"'AttrDict' object has no attribute '{key}'")
 
 
-class TestScenarioManagerFactory(TestFactory):
+class TestCliboaFactory:
     def test_create_ok(self):
-        """
-        Succeeded to create instance with yml and json
-        """
-        manager = ScenarioManagerFactory.create(self._cmd_args)
-        self.assertTrue(isinstance(manager, type(YamlScenarioManager(self._cmd_args))))
-
-        cmd_args = self.setup_json_argv()
-        manager = ScenarioManagerFactory.create(cmd_args)
-        self.assertTrue(isinstance(manager, type(JsonScenarioManager(cmd_args))))
+        instance = _CliboaFactory().create("ExecuteShellScript")
+        assert type(instance) is ExecuteShellScript
 
     def test_create_ng(self):
-        """
-        Failed to create instance
-        """
-        with pytest.raises(AttributeError) as excinfo:
-            ScenarioManagerFactory.create("")
-        assert "object has no attribute" in str(excinfo.value)
+        with pytest.raises(InvalidScenarioClass):
+            _CliboaFactory().create("NotFoundClass")
 
+    def test_create_custom_ok(self):
+        mock_env = AttrDict(
+            {
+                "COMMON_CUSTOM_CLASSES": ["sample_step.SampleStep"],
+                "PROJECT_CUSTOM_CLASSES": [],
+                "COMMON_CUSTOM_ROOT_PATHS": ["cliboa.scenario"],
+            }
+        )
+        instance = _CliboaFactory(di_env=mock_env).create("SampleStep")
+        assert type(instance) is SampleStep
 
-class TestStepExecutorFactory(TestFactory):
-    def test_create_single(self):
-        """
-        Succeeded to create SingleProcess instance
-        """
+    def test_create_custom_multi_root_ok(self):
+        mock_env = AttrDict(
+            {
+                "COMMON_CUSTOM_CLASSES": ["sample_step.SampleStep"],
+                "PROJECT_CUSTOM_CLASSES": [],
+                "COMMON_CUSTOM_ROOT_PATHS": ["hoge.fuga", "sample", "cliboa.scenario"],
+            }
+        )
+        instance = _CliboaFactory(di_env=mock_env).create("SampleStep")
+        assert type(instance) is SampleStep
 
-        s = StepExecutorFactory.create(["1"])
-        self.assertTrue(isinstance(s, type(SingleProcExecutor(None))))
+    def test_create_custom_empty_root_paths_ok(self):
+        mock_env = AttrDict(
+            {
+                "COMMON_CUSTOM_CLASSES": ["cliboa.scenario.sample_step.SampleStep"],
+                "PROJECT_CUSTOM_CLASSES": [],
+                "COMMON_CUSTOM_ROOT_PATHS": [""],
+            }
+        )
+        instance = _CliboaFactory(di_env=mock_env).create("SampleStep")
+        assert type(instance) is SampleStep
 
-    def test_create_multi(self):
-        """
-        Succeeded to create MultiProcess instance
-        """
-        s = StepExecutorFactory.create(["1", "2"])
-        self.assertTrue(isinstance(s, type(MultiProcExecutor(None))))
+    def test_create_custom_ng(self):
+        mock_env = AttrDict(
+            {
+                "COMMON_CUSTOM_CLASSES": [],
+                "PROJECT_CUSTOM_CLASSES": [],
+                "COMMON_CUSTOM_ROOT_PATHS": ["cliboa.scenario"],
+            }
+        )
+        with pytest.raises(InvalidScenarioClass):
+            _CliboaFactory(di_env=mock_env).create("SampleStep")
 
-    def test_create_multi_with_config(self):
-        """
-        Succeeded to create MultiProcess instance with config
-        """
-        instance = [ParallelWithConfig(["1", "2"], {"multi_process_count": 2})]
-        s = StepExecutorFactory.create(instance)
-        print(s)
-        self.assertTrue(isinstance(s, type(MultiProcWithConfigExecutor(instance))))
+    def test_create_prj_ng(self):
+        mock_env = AttrDict(
+            {
+                "COMMON_CUSTOM_CLASSES": [],
+                "PROJECT_CUSTOM_CLASSES": ["sample_step.SampleStep"],
+                "COMMON_CUSTOM_ROOT_PATHS": [],
+                "PROJECT_CUSTOM_ROOT_PATHS": ["project"],
+                "PROJECT_SCENARIO_DIR_NAME": None,
+            }
+        )
+        with pytest.raises(InvalidScenarioClass):
+            _CliboaFactory("scenario", di_env=mock_env).create("SampleStep")
 
+    def test_create_prj_dir_none_ok(self):
+        mock_env = AttrDict(
+            {
+                "COMMON_CUSTOM_CLASSES": [],
+                "PROJECT_CUSTOM_CLASSES": ["sample_step.SampleStep"],
+                "COMMON_CUSTOM_ROOT_PATHS": [],
+                "PROJECT_CUSTOM_ROOT_PATHS": ["cliboa"],
+                "PROJECT_SCENARIO_DIR_NAME": None,
+            }
+        )
+        instance = _CliboaFactory("scenario", di_env=mock_env).create("SampleStep")
+        assert type(instance) is SampleStep
 
-class TestCustomInstanceFactory(TestFactory):
-    def test_execute_no_candidates(self):
-        custom_instance = CustomInstanceFactory.create("NotCustomClass")
-        assert custom_instance is None
-
-    def test_execute_with_candidates(self):
-        sys.path.append("cliboa/scenario")
-        custom_instance = CustomInstanceFactory.create("SampleStep")
-        assert custom_instance is not None
+    def test_create_prj_dir_scenario_ok(self):
+        mock_env = AttrDict(
+            {
+                "COMMON_CUSTOM_CLASSES": [],
+                "PROJECT_CUSTOM_CLASSES": ["SampleStep"],
+                "COMMON_CUSTOM_ROOT_PATHS": [],
+                "PROJECT_CUSTOM_ROOT_PATHS": ["cliboa"],
+                "PROJECT_SCENARIO_DIR_NAME": "sample_step",
+            }
+        )
+        instance = _CliboaFactory("scenario", di_env=mock_env).create("SampleStep")
+        assert type(instance) is SampleStep

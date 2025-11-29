@@ -21,8 +21,6 @@ from mock import patch
 from cliboa.adapter.azure import BlobServiceAdapter
 from cliboa.conf import env
 from cliboa.scenario.extract.azure import AzureBlobDownload
-from cliboa.util.helper import Helper
-from cliboa.util.lisboa_log import LisboaLog
 
 Blob = namedtuple("Blob", "name")
 
@@ -47,18 +45,17 @@ class TestAzureBlobDownload(object):
         try:
             # Act
             instance = AzureBlobDownload()
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-            # use Postman echo
-            Helper.set_property(
-                instance,
-                "account_url",
-                "https://testtesttest.blob.core.windows.example/",
+            instance._set_properties(
+                {
+                    # use Postman echo
+                    "account_url": "https://testtesttest.blob.core.windows.example/",
+                    "account_access_key": "dummy",
+                    "container_name": "test",
+                    "prefix": "sample/",
+                    "src_pattern": r"(.*)\.txt",
+                    "dest_dir": self._data_dir,
+                }
             )
-            Helper.set_property(instance, "account_access_key", "dummy")
-            Helper.set_property(instance, "container_name", "test")
-            Helper.set_property(instance, "prefix", "sample/")
-            Helper.set_property(instance, "src_pattern", r"(.*)\.txt")
-            Helper.set_property(instance, "dest_dir", self._data_dir)
             instance.execute()
 
             # Assert

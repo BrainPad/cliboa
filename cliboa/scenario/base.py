@@ -11,129 +11,187 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import configparser
-import json
+import logging
 import os
-import re
 import tempfile
 from abc import abstractmethod
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from cliboa.adapter.file import File
-from cliboa.conf import env
-from cliboa.util.cache import StepArgument
-from cliboa.util.constant import StepStatus
+from cliboa.scenario.interface import IParentStep
+from cliboa.util.base import _BaseObject, _warn_deprecated
 from cliboa.util.exception import FileNotFound, InvalidParameter
 
 
-class BaseStep:
+class AbstractStep(_BaseObject):
     """
-    Base class of all the step classes
+    Abstract class of all the step classes.
+
+    ALL step classes are required to inherit this class.
+    This class is minimum implemented to be needed by core layer.
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._step = None
-        self._symbol = None
-        self._parallel = None
-        self._logger = None
-        self._listeners = []
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._parent = None
 
-    def step(self, step):
-        self._step = step
+    @property
+    def logger(self) -> logging.Logger:
+        """
+        logger instance
+        """
+        return self._logger
 
-    def symbol(self, symbol):
-        self._symbol = symbol
+    @property
+    def parent(self) -> IParentStep | None:
+        """
+        parent instance which implements cliboa.scenario.interface.IParentStep
+        """
+        return self._parent
 
-    def parallel(self, parallel):
-        self._parallel = parallel
+    @parent.setter
+    def parent(self, parent: IParentStep):
+        """
+        set parent instance - assumed to set by cliboa
+        """
+        self._parent = parent
 
-    def logger(self, logger):
-        self._logger = logger
+    def _set_properties(self, properties: dict[str, Any]) -> None:
+        """
+        This method allows you to set a value
+        to the class with either method directly or via property setter.
+        Either way, the method must be implemented
+        to set the value for the class parameter like below.
 
-    def listeners(self, listeners):
-        self._listeners = listeners
+        -- eg1 --
+        class Foo(BaseStep):
+            def __init__(self):
+                self._bar = None
 
-    def trigger(self, *args) -> Optional[int]:
-        mask = None
-        path = os.path.join(env.BASE_DIR, "conf", "cliboa.ini")
-        if os.path.exists(path):
-            try:
-                conf = configparser.ConfigParser()
-                conf.read(path, encoding="utf-8")
-                mask = conf.get("logging", "mask")
-                pattern = re.compile(mask)
-            except Exception as e:
-                self._logger.warning(e)
+            def bar(self, bar):
+                self._bar = bar
 
-        props_dict = {}
-        for k, v in self.__dict__.items():
-            if mask is not None and pattern.search(k):
-                props_dict[k] = "****"
+        -- eg2 --
+        class Foo2(BaseStep):
+            def __init__(self):
+                self._bar = None
+
+            @property
+            def bar(self):
+                return self._bar
+
+            @bar.setter
+            def bar(self, bar):
+                self._bar = bar
+
+        TODO: can specify pydantic arguments model.
+        """
+        for k, v in properties.items():
+            if isinstance(getattr(type(self), k, None), property):
+                setattr(self, k, v)
             else:
-                props_dict[k] = v
-        self._logger.info(
-            "Step properties: %s" % json.dumps(props_dict, ensure_ascii=False, default=str)
-        )
-        try:
-            for listener in self._listeners:
-                listener.before_step(self)
-
-            ret = self.execute(args)
-
-            for listener in self._listeners:
-                listener.after_step(self)
-
-            return ret
-
-        except Exception as e:
-            self._logger.exception(
-                "Error occurred during the execution of {}.{}".format(
-                    self.__class__.__module__,
-                    self.__class__.__name__,
-                )
-            )
-
-            for listener in self._listeners:
-                listener.error_step(self, e)
-
-            return StepStatus.ABNORMAL_TERMINATION
-        finally:
-            for listener in self._listeners:
-                listener.after_completion(self)
+                call = getattr(self, k, None)
+                if callable(call):
+                    call(v)
+                else:
+                    self.logger.warning(f"Failed to set property {k}")
 
     @abstractmethod
-    def execute(self, *args) -> Optional[int]:
+    def execute(self, *args, **kwargs) -> Optional[int]:
+        """
+        Main logic of step
+        """
         pass
 
-    def get_target_files(self, src_dir, src_pattern) -> List[str]:
+    def get_symbol_argument(self, name: str) -> Any | None:
         """
-        Search files either with regular expression
+        Returns a symbol's argument (variables are already transformed).
+        Returns None if the argument cannot be retrieved, and no exceptions are raised.
         """
-        return File().get_target_files(src_dir, src_pattern)
+        if not self.parent:
+            return None
+        sa = self.parent.get_symbol_arguments()
+        return sa.get(name)
 
-    def get_step_argument(self, name):
+    def put_to_context(self, value: Any) -> None:
         """
-        Returns an argument from scenario.yaml definitions
+        Put any given value to cliboa's context.
+        The value is stored using the current step's name as the key.
         """
-        sa = StepArgument.get(self._symbol)
-        if sa:
-            return sa.get(name)
+        if not self.parent:
+            return
+        self.parent.put_to_context(value)
 
-    def _property_path_reader(self, src, encoding="utf-8"):
+    def get_from_context(self, target: str | None = None) -> Any | None:
         """
-        Returns an resource contents from the path if src starts with "path:",
+        Get a value from cliboa's context.
+        This value is typically placed there by preceding step (the target).
+        If no target is specified, the method get the value associated with the step's symbol.
+        Returns None if the value is not found (not raise an exception).
+        """
+        if not self.parent:
+            return None
+        return self.parent.get_from_context(target)
 
-        DeprecationWarning: Will be removed in the near future
-        returns src if not
+
+class BaseStep(AbstractStep):
+    """
+    Base class of all the step classes.
+
+    This class has additional implement from AbstractStep to be useful on common cases.
+    """
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    @property
+    def _step(self) -> str:
         """
-        if src[:5].upper() == "PATH:":
-            fpath = src[5:]
-            if os.path.exists(fpath) is False:
-                raise FileNotFound(src)
-            with open(fpath, mode="r", encoding=encoding) as f:
-                return f.read()
-        return src
+        Deprecated: Kept for v2 backward compatibility.
+        """
+        self.logger.warning(
+            _warn_deprecated(
+                "cliboa.scenario.base.BaseStep._step",
+                "cliboa.scenario.base.AbstractStep.put_to_context",
+                "3.0",
+            )
+        )
+        return self.parent.step_name if self.parent else ""
+
+    @property
+    def _symbol(self) -> str | None:
+        """
+        Deprecated: Kept for v2 backward compatibility.
+        """
+        self.logger.warning(
+            _warn_deprecated(
+                "cliboa.scenario.base.BaseStep._symbol",
+                "cliboa.scenario.base.AbstractStep.get_from_context",
+                "3.0",
+            )
+        )
+        return self.parent.symbol_name if self.parent else None
+
+    def get_step_argument(self, name: str) -> Any | None:
+        """
+        Deprecated: kept for v2 backward compatibility.
+        """
+        self.logger.warning(
+            _warn_deprecated(
+                "cliboa.scenario.base.BaseStep.get_step_argument",
+                "cliboa.scenario.base.AbstractStep.get_symbol_argument",
+                "3.0",
+            )
+        )
+        return self.get_symbol_argument(name)
+
+    def get_target_files(self, src_dir: str, src_pattern: str, *args, **kwargs) -> List[str]:
+        """
+        Alias of cliboa.adapter.File.get_target_files
+        """
+        return self._resolve("adapter_file", File).get_target_files(
+            src_dir, src_pattern, *args, **kwargs
+        )
 
     def _source_path_reader(self, src, encoding="utf-8"):
         """
@@ -142,7 +200,7 @@ class BaseStep:
         """
         if src is None:
             return src
-        if isinstance(src, dict) and "content" in src:
+        elif isinstance(src, dict) and "content" in src:
             with tempfile.NamedTemporaryFile(mode="w", encoding=encoding, delete=False) as fp:
                 fp.write(src["content"])
                 return fp.name

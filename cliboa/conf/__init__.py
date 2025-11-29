@@ -14,6 +14,7 @@
 
 import os
 from importlib import import_module
+from typing import Any
 
 
 class Environment:
@@ -23,13 +24,13 @@ class Environment:
 
     def __init__(self):
         """
-        Load environment.py in project
-        If values are not set in environment.py, default values are used
+        Load environment in project
+        If values are not set in environment, default values are used
         """
         env_module = os.environ.get("CLIBOA_ENV")
         if not env_module:
             # Assume executing unit test codes
-            mod = import_module("cliboa.common.environment")
+            mod = import_module("cliboa.conf.default_environment")
         else:
             # Assume executing cfmanager.py
             mod = import_module(env_module)
@@ -37,6 +38,12 @@ class Environment:
         for env in dir(mod):
             val = getattr(mod, env)
             setattr(self, env, val)
+
+    def get(self, key: str, default: Any | None = None) -> Any | None:
+        if hasattr(self, key):
+            return getattr(self, key, default)
+        else:
+            return default
 
 
 env = Environment()
