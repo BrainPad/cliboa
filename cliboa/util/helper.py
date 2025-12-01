@@ -1,6 +1,6 @@
 from cliboa.util.base import _warn_deprecated
 
-_warn_deprecated("cliboa.util.helper", end_version="3.0")
+_warn_deprecated("cliboa.util.helper", "3.0", "4.0")
 
 
 class Helper(object):
@@ -41,8 +41,9 @@ class Helper(object):
         """
         _warn_deprecated(
             "cliboa.util.helper.Helepr.set_property",
-            "cliboa.scenario.base.AbstractStep._set_arguments",
             "3.0",
+            "4.0",
+            "cliboa.scenario.base.AbstractStep._set_arguments",
         )
         attr = getattr(type(cls), method, None)
         if isinstance(attr, property):

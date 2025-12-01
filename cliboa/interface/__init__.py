@@ -85,14 +85,15 @@ def _warn_backward_compatibility():
     if env.get("SCENARIO_DIR_NAME"):
         _warn_deprecated(
             "{CLIBOA_ENV}.SCENARIO_DIR_NAME",
+            "3.0",
+            "4.0",
             "{CLIBOA_ENV}.PROJECT_SCENARIO_DIR_NAME",
-            end_version="3.0",
         )
     if env.get("SYSTEM_APPEND_PATHS"):
-        _warn_removed("{CLIBOA_ENV}.SYSTEM_APPEND_PATHS", end_version="3.0")
+        _warn_removed("{CLIBOA_ENV}.SYSTEM_APPEND_PATHS", "3.0")
     base_dir = env.get("BASE_DIR")
     if base_dir and os.path.exists(os.path.join(base_dir, "conf", "cliboa.ini")):
-        _warn_removed("configuration in cliboa.ini", end_version="3.0")
+        _warn_removed("configuration in cliboa.ini", "3.0")
 
 
 def run():

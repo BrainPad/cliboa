@@ -14,7 +14,7 @@
 from cliboa.scenario.validator import EssentialParameters as _ValidEP
 from cliboa.util.base import _warn_deprecated
 
-_warn_deprecated("cliboa.core.validator", end_version="3.0")
+_warn_deprecated("cliboa.core.validator", "3.0", "4.0")
 
 
 class EssentialParameters(_ValidEP):
@@ -26,7 +26,8 @@ class EssentialParameters(_ValidEP):
     def __init__(self, *args, **kwargs):
         _warn_deprecated(
             ".".join(("cliboa.core.validator", self.__class__.__name__)),
+            "2.6.0beta",
+            "4.0",
             ".".join(("cliboa.scenario.validator", self.__class__.__name__)),
-            "3.0",
         )
         super().__init__(*args, **kwargs)
