@@ -84,28 +84,3 @@ class TestSftpUpload(object):
             instance.execute()
 
             assert mock_sftp.called
-
-    def test_execute_with_key_content(self):
-        dir_path = Path(self._data_dir)
-        (dir_path / "a.txt").touch()
-        (dir_path / "b.txt").touch()
-        (dir_path / "c.exe").touch()
-        instance = SftpUpload()
-        instance._set_arguments(
-            {
-                "host": "dummy.host",
-                "user": "dummy_user",
-                "key": {"content": "dummy_rsa"},
-                "src_dir": self._data_dir,
-                "src_pattern": ".*.txt",
-                "dest_dir": self._data_dir,
-                "step": "sftp_class",
-            }
-        )
-
-        with ExitStack() as stack:
-            mock_sftp = stack.enter_context(patch("cliboa.adapter.sftp.SftpAdapter.execute"))
-
-            instance.execute()
-
-            assert mock_sftp.called

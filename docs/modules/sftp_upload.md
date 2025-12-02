@@ -44,21 +44,4 @@ scenario:
     dest_dir: /usr/local
     timeout: 100
     retry_count: 10
-
-- step: Embed contents of key at scenario.yml
-  class: SftpUpload
-  arguments:
-    host: 127.0.0.1
-    user: root
-    key:
-      content: |
-        -----BEGIN RSA PRIVATE KEY-----
-        .......
-        -----END RSA PRIVATE KEY-----
-    passphrase: 1234
-    src_dir: /root
-    src_pattern: *\.tsv
-    dest_dir: /usr/local
-    timeout: 100
-    retry_count: 10
 ```

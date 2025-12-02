@@ -7,8 +7,7 @@ Copy Bigquery table to another table (or create a new one)
 |src_dir|Directory of files |Yes|None||
 |project_id|GCP project id|Yes|None||
 |location|GCP location|Yes|None||
-|credentials.file|A service account .json file path|No|None||
-|credentials.content|A dictionary containing service account info in Google format|No|None||
+|credentials|A service account .json file path|No|None||
 |dataset|Copy source BigQuery dataset|Yes|None||
 |tblname|Copy source BigQuery table name to insert|Yes|None||
 |dest_dataset|Copy destination BigQuery dataset|Yes|None||
@@ -22,8 +21,7 @@ scenario:
   arguments:
     project_id: pb-intern-2021-team4
     location: asia-northeast1
-    credentials:
-      file: /usr/local/cliboa/key.json
+    credentials: /usr/local/cliboa/key.json
     dataset: caffeine_bigquery
     tblname: covid_de_vaccine
     dest_dataset: copy_test_bigquery
