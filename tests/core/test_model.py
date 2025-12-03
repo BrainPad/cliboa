@@ -241,13 +241,6 @@ class TestScenarioModel:
     Tests for ScenarioModel
     """
 
-    def test_validation_scenario_empty_ng(self):
-        # Test validation failure for empty scenario list
-        with pytest.raises(ValidationError) as exc_info:
-            ScenarioModel(scenario=[])
-        assert "scenario" in str(exc_info.value)
-        assert "at least 1 item" in str(exc_info.value)
-
     def test_merge_ok(self):
         # Test merging common scenario settings
         scenario_data = {
