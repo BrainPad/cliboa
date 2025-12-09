@@ -11,35 +11,25 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-from cliboa.scenario.base import BaseStep
-from cliboa.scenario.validator import EssentialParameters
+from cliboa.scenario.file import FileRead as _FR
+from cliboa.util.base import _warn_deprecated
+
+_warn_deprecated(
+    "cliboa.scenario.load.file",
+    "3.0",
+    "4.0",
+    "cliboa.scenario.file",
+)
 
 
-class FileRead(BaseStep):
-    """
-    The parent class to read the specified file
-    """
-
-    def __init__(self):
-        super().__init__()
-        self._src_path = None
-        self._src_dir = None
-        self._src_pattern = None
-        self._encoding = "utf-8"
-
-    def src_path(self, src_path):
-        self._src_path = src_path
-
-    def src_dir(self, src_dir):
-        self._src_dir = src_dir
-
-    def src_pattern(self, src_pattern):
-        self._src_pattern = src_pattern
-
-    def encoding(self, encoding):
-        self._encoding = encoding
-
-    def execute(self, *args):
-        # essential parameters check
-        valid = EssentialParameters(self.__class__.__name__, [self._src_dir, self._src_pattern])
-        valid()
+class FileRead(_FR):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.logger.warning(
+            _warn_deprecated(
+                "cliboa.scenario.load.file.FileRead",
+                "3.0",
+                "4.0",
+                "cliboa.scenario.file.FileRead",
+            )
+        )

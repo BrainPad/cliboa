@@ -18,13 +18,13 @@ import os
 import pandas
 
 from cliboa.adapter.gcp import BigQueryAdapter, FireStoreAdapter, GcsAdapter, ServiceAccount
+from cliboa.scenario.file import FileRead
 from cliboa.scenario.gcp import BaseBigQuery, BaseFirestore, BaseGcs
-from cliboa.scenario.load.file import FileWrite
 from cliboa.scenario.validator import EssentialParameters
 from cliboa.util.exception import FileNotFound, InvalidFormat
 
 
-class BigQueryWrite(BaseBigQuery, FileWrite):
+class BigQueryWrite(BaseBigQuery, FileRead):
     """
     Read csv and Insert data into BigQuery table
     """
@@ -58,10 +58,10 @@ class BigQueryWrite(BaseBigQuery, FileWrite):
         param_valid = EssentialParameters(self.__class__.__name__, [self._table_schema])
         param_valid()
 
-        files = super().get_target_files(self._src_dir, self._src_pattern)
-        if len(files) == 0:
-            raise FileNotFound("The specified csv file not found.")
-        self._logger.info("insert target files %s" % files)
+        files = self.get_src_files()
+        if not self.check_file_existence(files):
+            return 1
+        self.logger.info("insert target files %s" % files)
 
         is_inserted = False
         # initial if_exists

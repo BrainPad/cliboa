@@ -36,6 +36,7 @@ class AbstractStep(_BaseObject):
         super().__init__(**kwargs)
         self._parent = None
         self._args = None
+        self._deprecated_warn_log = []
 
     @property
     def logger(self) -> logging.Logger:
@@ -221,20 +222,18 @@ class BaseStep(AbstractStep):
         )
         return self.get_symbol_argument(name)
 
-    def _warn_deprecated_args(
-        self, module_name: str, class_name: str, end_version: str, removal_version: str
-    ) -> None:
-        _warn_deprecated(
-            f"directly arguments of {module_name}.{class_name}",
-            end_version,
-            removal_version,
-            f"definition of {module_name}.{class_name}.Arguments",
-        )
-
     def get_target_files(self, src_dir: str, src_pattern: str, *args, **kwargs) -> List[str]:
         """
-        Alias of cliboa.adapter.File.get_target_files
+        Deprecated: kept for v2 backward compatibility.
         """
+        self.logger.warning(
+            _warn_deprecated(
+                "cliboa.scenario.base.BaseStep.get_target_files",
+                "3.0",
+                "4.0",
+                "cliboa.scenario.extract.file.FileRead.get_src_files",
+            )
+        )
         return self._resolve("adaptor_file", File).get_target_files(
             src_dir, src_pattern, *args, **kwargs
         )

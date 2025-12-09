@@ -18,6 +18,7 @@ from glob import glob
 
 import jsonlines
 import pytest
+from pydantic import ValidationError
 
 from cliboa.conf import env
 from cliboa.scenario.transform.csv import (
@@ -2066,8 +2067,10 @@ class TestCsvDuplicateRowDelete(TestCsvTransform):
     def test_engine_invalid_parameter(self):
         # Test invalid engine parameter
         instance = CsvDuplicateRowDelete()
-        with pytest.raises(InvalidParameter):
-            instance._set_arguments({"engine": "invalid_engine"})
+        with pytest.raises(ValidationError):
+            instance._set_arguments(
+                {"src_dir": "/path", "src_pattern": "hoge", "engine": "invalid_engine"}
+            )
 
 
 class TestCsvRowDelete(TestCsvTransform):

@@ -78,6 +78,12 @@ class TestFileTransformFunctions(TestFileTransform):
 
     def test_io_files_unset_directory(self):
         instance = FileBaseTransform()
+        instance._set_arguments(
+            {
+                "src_dir": "",
+                "src_pattern": "",
+            }
+        )
         files = self._create_files()
         instance.io_files(files, func=self._func)
         assert os.path.exists(os.path.join(self._data_dir, "test1.txt")) is True
@@ -87,6 +93,8 @@ class TestFileTransformFunctions(TestFileTransform):
         instance = FileBaseTransform()
         instance._set_arguments(
             {
+                "src_dir": "",
+                "src_pattern": "",
                 "dest_dir": self._data_dir,
             }
         )
@@ -99,6 +107,8 @@ class TestFileTransformFunctions(TestFileTransform):
         instance = FileBaseTransform()
         instance._set_arguments(
             {
+                "src_dir": "",
+                "src_pattern": "",
                 "dest_dir": self._out_dir,
             }
         )
@@ -111,7 +121,7 @@ class TestFileTransformFunctions(TestFileTransform):
 
     def test_io_files_secret_file_name(self):
         instance = FileBaseTransform()
-        instance._set_arguments({"dest_dir": self._out_dir})
+        instance._set_arguments({"src_dir": "", "src_pattern": "", "dest_dir": self._out_dir})
         files = []
         for file in self._create_files():
             root, name = os.path.split(file)
@@ -126,6 +136,12 @@ class TestFileTransformFunctions(TestFileTransform):
 
     def test_io_files_specify_ext(self):
         instance = FileBaseTransform()
+        instance._set_arguments(
+            {
+                "src_dir": "",
+                "src_pattern": "",
+            }
+        )
         files = self._create_files()
         instance.io_files(files, ext="csv", func=self._func)
         assert os.path.exists(os.path.join(self._data_dir, "test1.txt")) is True
@@ -135,6 +151,12 @@ class TestFileTransformFunctions(TestFileTransform):
 
     def test_io_files_specify_ext_2(self):
         instance = FileBaseTransform()
+        instance._set_arguments(
+            {
+                "src_dir": "",
+                "src_pattern": "",
+            }
+        )
         files = self._create_files()
         instance.io_files(files, ext=".csv", func=self._func)
         assert os.path.exists(os.path.join(self._data_dir, "test1.txt")) is True
@@ -144,6 +166,12 @@ class TestFileTransformFunctions(TestFileTransform):
 
     def test_io_writers_write_text(self):
         instance = FileBaseTransform()
+        instance._set_arguments(
+            {
+                "src_dir": "",
+                "src_pattern": "",
+            }
+        )
         files = self._create_files()
         for reader, writer in instance.io_writers(files):
             writer.write(reader.read())
@@ -157,6 +185,12 @@ class TestFileTransformFunctions(TestFileTransform):
 
     def test_io_writers_write_binary(self):
         instance = FileBaseTransform()
+        instance._set_arguments(
+            {
+                "src_dir": "",
+                "src_pattern": "",
+            }
+        )
         files = self._create_files()
         for reader, writer in instance.io_writers(files, mode="b"):
             writer.write(reader.read())
@@ -170,6 +204,12 @@ class TestFileTransformFunctions(TestFileTransform):
 
     def test_io_writers_overwrite_text(self):
         instance = FileBaseTransform()
+        instance._set_arguments(
+            {
+                "src_dir": "",
+                "src_pattern": "",
+            }
+        )
         files = self._create_files()
         for reader, writer in instance.io_writers(files):
             writer.write(reader.read())
@@ -193,20 +233,20 @@ class TestFileTransformFunctions(TestFileTransform):
     def test_file_check_exist(self):
         instance = FileBaseTransform()
         ret = instance.check_file_existence(["test.txt"])
-        assert ret is None
+        assert ret is True
 
     def test_file_check_nofile_error(self):
         instance = FileBaseTransform()
-        instance._set_arguments({"nonfile_error": True})
+        instance._set_arguments({"src_dir": "", "src_pattern": "", "nonfile_error": True})
         with pytest.raises(FileNotFound) as execinfo:
             instance.check_file_existence([])
         assert "No files are found." == str(execinfo.value)
 
     def test_file_check_nofile_noerror(self):
         instance = FileBaseTransform()
-        instance._set_arguments({"nonfile_error": False})
+        instance._set_arguments({"src_dir": "", "src_pattern": "", "nonfile_error": False})
         ret = instance.check_file_existence([])
-        assert ret is None
+        assert ret is False
 
     def _func(self, fi, fo):
         pass

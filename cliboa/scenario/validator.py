@@ -11,9 +11,8 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-from cliboa.adapter.sqlite import SqliteAdapter
 from cliboa.util.base import _BaseObject
-from cliboa.util.exception import InvalidParameter, SqliteInvalid
+from cliboa.util.exception import InvalidParameter
 
 
 class EssentialParameters(_BaseObject):
@@ -37,38 +36,3 @@ class EssentialParameters(_BaseObject):
                 raise InvalidParameter(
                     "The essential parameter is not specified in %s." % self._cls_name
                 )
-
-
-class SqliteTableExistence(_BaseObject):
-    """
-    Validation for the table of sqlite
-    """
-
-    def __init__(self, dbname, tblname, returns_bool=False):
-        """
-        Args:
-            dbname: database name
-            tblname: table name
-            returns_bool: return bool or not
-        """
-        super().__init__()
-        self._sqlite_adptr = SqliteAdapter()
-        self._dbname = dbname
-        self._tblname = tblname
-        self._returns_bool = returns_bool
-
-    def __call__(self):
-        try:
-            self._sqlite_adptr.connect(self._dbname)
-            cur = self._sqlite_adptr.fetch(
-                'SELECT name FROM sqlite_master WHERE type="table" AND name="%s"' % self._tblname
-            )
-            result = cur.fetchall()
-            if self._returns_bool is True:
-                return True if result else False
-
-            if not result and self._returns_bool is False:
-                raise SqliteInvalid("Sqlite table %s not found" % self._tblname)
-
-        finally:
-            self._sqlite_adptr.close()

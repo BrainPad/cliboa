@@ -11,7 +11,6 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-
 import csv
 import glob
 import hashlib
@@ -19,18 +18,19 @@ import os
 import re
 import shutil
 from datetime import datetime
-from enum import Enum
-from typing import Any, List, Set, Tuple
+from typing import List, Literal, Set, Tuple
 
 import dask.dataframe as dask_df
 import jsonlines
 import pandas
+from pydantic import model_validator
 
 from cliboa.adapter.csv import Csv
 from cliboa.adapter.file import File
 from cliboa.adapter.sqlite import SqliteAdapter
 from cliboa.scenario.transform.file import FileBaseTransform
 from cliboa.scenario.validator import EssentialParameters
+from cliboa.util.base import _BaseObject  # _warn_deprecated_args
 from cliboa.util.exception import FileNotFound, InvalidCount, InvalidParameter
 from cliboa.util.string import StringUtil
 
@@ -654,52 +654,51 @@ class CsvConcat(FileBaseTransform):
     Concat csv files
     """
 
-    def __init__(self):
-        super().__init__()
-        self._src_filenames = None
+    class Arguments(FileBaseTransform.Arguments):
+        src_pattern: str | None = None
+        src_filenames: list[str] | None = None
+        dest_dir: str
+        dest_name: str
 
-    def src_filenames(self, src_filenames):
-        self._src_filenames = src_filenames
+        @model_validator(mode="before")
+        def check_exclusive_fields(cls, data: dict) -> dict:
+            if not isinstance(data, dict):
+                raise ValueError(f"arguments is not dict: {data}")
+
+            filenames_present = "src_filenames" in data
+            pattern_present = "src_pattern" in data
+            if not pattern_present and not filenames_present:
+                raise InvalidParameter(
+                    "Specifying either 'src_pattern' or 'src_filenames' is essential."
+                )
+            elif pattern_present and filenames_present:
+                raise InvalidParameter("Cannot specify both 'src_pattern' and 'src_filenames'.")
+            return data
 
     def execute(self, *args):
-        # essential parameters check
-        valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir, self._dest_dir, self._dest_name]
-        )
-        valid()
-
-        os.makedirs(self._dest_dir, exist_ok=True)
-
-        if not self._src_pattern and not self._src_filenames:
-            raise InvalidParameter(
-                "Specifying either 'src_pattern' or 'src_filenames' is essential."
-            )
-        if self._src_pattern and self._src_filenames:
-            raise InvalidParameter("Cannot specify both 'src_pattern' and 'src_filenames'.")
-
-        if self._src_pattern:
-            files = File().get_target_files(self._src_dir, self._src_pattern)
+        if self.args.src_pattern:
+            files = self.get_src_files()
         else:
             files = []
-            for file in self._src_filenames:
-                files.append(os.path.join(self._src_dir, file))
+            for file in self.args.src_filenames:
+                files.append(os.path.join(self.args.src_dir, file))
 
         if len(files) == 0:
             raise FileNotFound("No files are found.")
         elif len(files) == 1:
-            self._logger.warning("Two or more input files are required.")
+            self.logger.warning("Two or more input files are required.")
 
         # Create output headers to conform to the concat specification.
         file_1 = files[0]
         output_header = pandas.read_csv(
-            file_1, dtype=str, encoding=self._encoding, nrows=0, na_filter=False
+            file_1, dtype=str, encoding=self.args.encoding, nrows=0, na_filter=False
         )
         for file in files[1:]:
             output_header = pandas.concat(
                 [
                     output_header,
                     pandas.read_csv(
-                        file, dtype=str, encoding=self._encoding, nrows=0, na_filter=False
+                        file, dtype=str, encoding=self.args.encoding, nrows=0, na_filter=False
                     ),
                 ]
             )
@@ -713,7 +712,7 @@ class CsvConcat(FileBaseTransform):
             tfr = pandas.read_csv(
                 file,
                 dtype=str,
-                encoding=self._encoding,
+                encoding=self.args.encoding,
                 chunksize=chunksize,
                 na_filter=False,
             )
@@ -721,8 +720,8 @@ class CsvConcat(FileBaseTransform):
                 # Change the header order to the one you plan to output.
                 df = pandas.concat([output_header, df])
                 df.to_csv(
-                    os.path.join(self._dest_dir, self._dest_name),
-                    encoding=self._encoding,
+                    os.path.join(self.args.resolve_dest_dir(), self.args.dest_name),
+                    encoding=self.args.encoding,
                     header=True if first_write else False,
                     index=False,
                     mode="w" if first_write else "a",
@@ -741,7 +740,7 @@ class CsvConvert(FileBaseTransform):
         self._headers_existence = True
         self._add_headers = None
         self._before_format = "csv"
-        self._before_enc = self._encoding
+        self._before_enc = "utf-8"
         self._before_escapechar = None
         self._after_format = None
         self._after_enc = None
@@ -1081,45 +1080,19 @@ class CsvColumnReplace(FileBaseTransform):
 
 
 class CsvDuplicateRowDelete(FileBaseTransform):
-    def __init__(self):
-        super().__init__()
-        self._delimiter = ","
-        self._engine = "pandas"  # 'pandas' or 'dask' for large files
 
-    def delimiter(self, delimiter):
-        self._delimiter = delimiter
-
-    def engine(self, engine):
-        """
-        Set processing engine.
-
-        Args:
-            engine (str): 'pandas' for memory-efficient processing with
-                         preserved order, 'dask' for very large files
-                         (may not preserve original order)
-        """
-        if engine not in ["pandas", "dask"]:
-            raise InvalidParameter("Engine must be 'pandas' or 'dask'")
-        self._engine = engine
+    class Arguments(FileBaseTransform.Arguments):
+        delimiter: str = ","
+        engine: Literal["pandas", "dask"] = "pandas"
 
     def execute(self, *args):
-        # essential parameters check
-        valid = EssentialParameters(
-            self.__class__.__name__,
-            [self._src_dir, self._src_pattern],
-        )
-        valid()
-
-        if self._dest_dir:
-            os.makedirs(self._dest_dir, exist_ok=True)
-
-        files = super().get_target_files(self._src_dir, self._src_pattern)
-
+        files = self.get_src_files()
         self.check_file_existence(files)
-        super().io_files(files, func=self.convert)
+
+        self.io_files(files, func=self.convert)
 
     def convert(self, fi, fo):
-        if self._engine == "dask":
+        if self.args.engine == "dask":
             self._convert_with_dask(fi, fo)
         else:
             self._convert_with_pandas(fi, fo)
@@ -1145,12 +1118,12 @@ class CsvDuplicateRowDelete(FileBaseTransform):
 
         for chunk in pandas.read_csv(
             fi,
-            delimiter=self._delimiter,
+            delimiter=self.args.delimiter,
             dtype=str,
             na_filter=False,
             chunksize=chunksize,
             header=None,
-            encoding=self._encoding,
+            encoding=self.args.encoding,
         ):
             # Convert DataFrame to list of tuples for hashability
             unique_rows = []
@@ -1168,8 +1141,8 @@ class CsvDuplicateRowDelete(FileBaseTransform):
                     mode="w" if first_write else "a",
                     header=False,
                     index=False,
-                    sep=self._delimiter,
-                    encoding=self._encoding,
+                    sep=self.args.delimiter,
+                    encoding=self.args.encoding,
                 )
                 first_write = False
 
@@ -1180,15 +1153,15 @@ class CsvDuplicateRowDelete(FileBaseTransform):
         May not preserve original row order but provides better memory
         efficiency for extremely large datasets.
         """
-        self._logger.info("Using dask engine - original row order may not be preserved")
+        self.logger.info("Using dask engine - original row order may not be preserved")
 
         # Read CSV with dask
         df = dask_df.read_csv(
             fi,
-            delimiter=self._delimiter,
+            delimiter=self.args.delimiter,
             dtype=str,
             na_filter=False,
-            encoding=self._encoding,
+            encoding=self.args.encoding,
             header=None,
         )
 
@@ -1201,8 +1174,8 @@ class CsvDuplicateRowDelete(FileBaseTransform):
             single_file=True,
             header=False,
             index=False,
-            sep=self._delimiter,
-            encoding=self._encoding,
+            sep=self.args.delimiter,
+            encoding=self.args.encoding,
         )
 
 
@@ -1268,11 +1241,6 @@ class CsvRowDelete(FileBaseTransform):
                         writer.writerow(row)
 
 
-class _CsvSplitMethodEnum(Enum):
-    ROWS = "rows"
-    GROUPED = "grouped"
-
-
 class CsvSplit(FileBaseTransform):
     """
     Split csv files, using the value of a specific column as the output filename.
@@ -1282,71 +1250,31 @@ class CsvSplit(FileBaseTransform):
     - When multiple source files exist, the column definitions must all be the same.
     """
 
-    def __init__(self):
-        super().__init__()
-        self._method = None
-        self._key_column = None
-        self._rows = None
-        self._suffix_format = ".{:02d}"
-
-    def method(self, value: str) -> None:
-        self._method = _CsvSplitMethodEnum(value)
-
-    def key_column(self, value) -> None:
-        self._key_column = value
-
-    def rows(self, value) -> None:
-        self._rows = value
-
-    def suffix_format(self, value) -> None:
-        self._suffix_format = value
-
-    @property
-    def output_dir(self) -> str:
-        if self._dest_dir:
-            return self._dest_dir
-        else:
-            return self._src_dir
+    class Arguments(FileBaseTransform.Arguments):
+        method: Literal["rows", "grouped"]
+        key_column: str | None = None
+        rows: int | None = None
+        suffix_format: str = ".{:02d}"
 
     def execute(self, *args) -> None:
-        # essential parameters check
-        valid = EssentialParameters(
-            self.__class__.__name__,
-            [
-                self._src_dir,
-                self._src_pattern,
-                self._method,
-            ],
-        )
-        valid()
-
-        files = super().get_target_files(self._src_dir, self._src_pattern)
+        files = self.get_src_files()
         self.check_file_existence(files)
-        os.makedirs(self.output_dir, exist_ok=True)
 
-        properties = vars(self)
-        properties["output_dir"] = self.output_dir
-        if self._method.value == "rows":
-            executeInstance = _CsvSplitMethodRows(properties)
-        elif self._method.value == "grouped":
-            executeInstance = _CsvSplitMethodGrouped(properties)
+        if self.args.method == "rows":
+            executeInstance = _CsvSplitMethodRows(self.args)
+        elif self.args.method == "grouped":
+            executeInstance = _CsvSplitMethodGrouped(self.args)
         else:
             raise NotImplementedError(
-                f"Defined {self._method.value} in _CsvSplitMethodEnum,"
-                " but not implemented logic in execute."
+                f"Defined {self.args.method} is not implemented logic in execute."
             )
         executeInstance.execute(files)
 
 
-class _CsvSplitMethodBase:
-    def __init__(self, properties):
-        self._caller_properties = properties
-
-    def __getattr__(self, name) -> Any:
-        try:
-            return self._caller_properties[name]
-        except KeyError:
-            raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
+class _CsvSplitMethodBase(_BaseObject):
+    def __init__(self, args):
+        super().__init__()
+        self.args = args
 
     def execute(self, files: List[str]) -> None:
         raise NotImplementedError("Please implement execute method.")
@@ -1357,7 +1285,7 @@ class _CsvSplitMethodRows(_CsvSplitMethodBase):
         valid2 = EssentialParameters(
             self.__class__.__name__,
             [
-                self._rows,
+                self.args.rows,
             ],
         )
         valid2()
@@ -1365,9 +1293,9 @@ class _CsvSplitMethodRows(_CsvSplitMethodBase):
             self._split_one(filepath)
 
     def _split_one(self, filepath: str) -> None:
-        self._logger.info("Split {:s} per {:d} rows".format(filepath, self._rows))
+        self._logger.info("Split {:s} per {:d} rows".format(filepath, self.args.rows))
         file_name, ext = os.path.splitext(os.path.basename(filepath))
-        with open(filepath, "r", encoding=self._encoding, newline="") as f_in:
+        with open(filepath, "r", encoding=self.args.encoding, newline="") as f_in:
             reader = csv.reader(f_in)
             try:
                 header = next(reader)
@@ -1382,19 +1310,21 @@ class _CsvSplitMethodRows(_CsvSplitMethodBase):
             output_filepath = None
 
             for line in reader:
-                # new file per self._rows
-                if rows_count % self._rows == 0:
+                # new file per self.args.rows
+                if rows_count % self.args.rows == 0:
                     # close file-pointer if exists
                     if f_out:
                         f_out.close()
                         self._logger.info(
-                            f"Generated {output_filepath} with {self._rows} rows"
+                            f"Generated {output_filepath} with {self.args.rows} rows"
                             f" by read up to line {rows_count} of the original."
                         )
                     # open new file-pointer
-                    suffix = self._suffix_format.format(file_index)
-                    output_filepath = os.path.join(self.output_dir, f"{file_name}{suffix}{ext}")
-                    f_out = open(output_filepath, "w", encoding=self._encoding, newline="")
+                    suffix = self.args.suffix_format.format(file_index)
+                    output_filepath = os.path.join(
+                        self.args.resolve_dest_dir(), f"{file_name}{suffix}{ext}"
+                    )
+                    f_out = open(output_filepath, "w", encoding=self.args.encoding, newline="")
                     writer = csv.writer(f_out)
                     writer.writerow(header)
                     file_index += 1
@@ -1404,9 +1334,9 @@ class _CsvSplitMethodRows(_CsvSplitMethodBase):
             # close last file-pointer if exists
             if f_out:
                 f_out.close()
-                last_rows = rows_count % self._rows
+                last_rows = rows_count % self.args.rows
                 if last_rows == 0:
-                    last_rows = self._rows
+                    last_rows = self.args.rows
                 self._logger.info(
                     f"Generated {output_filepath} with {last_rows} rows"
                     f" by read up to line {rows_count} of the original."
@@ -1418,7 +1348,7 @@ class _CsvSplitMethodGrouped(_CsvSplitMethodBase):
         valid2 = EssentialParameters(
             self.__class__.__name__,
             [
-                self._key_column,
+                self.args.key_column,
             ],
         )
         valid2()
@@ -1440,12 +1370,12 @@ class _CsvSplitMethodGrouped(_CsvSplitMethodBase):
 
     def _validate_headers(self, files: List[str]) -> None:
         reference_header = pandas.read_csv(
-            files[0], nrows=0, encoding=self._encoding
+            files[0], nrows=0, encoding=self.args.encoding
         ).columns.tolist()
 
         for file_path in files[1:]:
             current_header = pandas.read_csv(
-                file_path, nrows=0, encoding=self._encoding
+                file_path, nrows=0, encoding=self.args.encoding
             ).columns.tolist()
             if current_header != reference_header:
                 raise ValueError(
@@ -1460,12 +1390,12 @@ class _CsvSplitMethodGrouped(_CsvSplitMethodBase):
             with pandas.read_csv(
                 file_path,
                 chunksize=chunksize,
-                usecols=[self._key_column],
+                usecols=[self.args.key_column],
                 keep_default_na=False,
-                encoding=self._encoding,
+                encoding=self.args.encoding,
             ) as reader:
                 for chunk in reader:
-                    cleaned_keys = chunk[self._key_column].astype(str).str.strip()
+                    cleaned_keys = chunk[self.args.key_column].astype(str).str.strip()
                     if not found_empty and (cleaned_keys == "").any():
                         found_empty = True
                     non_empty_keys = cleaned_keys[cleaned_keys != ""].unique()
@@ -1477,7 +1407,7 @@ class _CsvSplitMethodGrouped(_CsvSplitMethodBase):
     ) -> None:
         self._logger.info(f"Processing in single-key mode. Outputting to '{key}.csv'.")
         output_filename = f"{key}.csv"
-        output_path = os.path.join(self.output_dir, output_filename)
+        output_path = os.path.join(self.args.resolve_dest_dir(), output_filename)
 
         write_mode = "w"
         if found_empty is False:
@@ -1490,22 +1420,27 @@ class _CsvSplitMethodGrouped(_CsvSplitMethodBase):
             write_mode = "a"
 
         is_first_write = True
-        with open(output_path, write_mode, newline="", encoding=self._encoding) as f_out:
+        with open(output_path, write_mode, newline="", encoding=self.args.encoding) as f_out:
             for file_path in files:
                 with pandas.read_csv(
-                    file_path, chunksize=chunksize, keep_default_na=False, encoding=self._encoding
+                    file_path,
+                    chunksize=chunksize,
+                    keep_default_na=False,
+                    encoding=self.args.encoding,
                 ) as reader:
                     for chunk in reader:
                         if found_empty is False:
-                            chunk.to_csv(f_out, header=False, index=False, encoding=self._encoding)
+                            chunk.to_csv(
+                                f_out, header=False, index=False, encoding=self.args.encoding
+                            )
                         else:
-                            filtered_chunk = chunk[chunk[self._key_column].astype(str) == key]
+                            filtered_chunk = chunk[chunk[self.args.key_column].astype(str) == key]
                             if not filtered_chunk.empty:
                                 filtered_chunk.to_csv(
                                     f_out,
                                     header=is_first_write,
                                     index=False,
-                                    encoding=self._encoding,
+                                    encoding=self.args.encoding,
                                 )
                                 is_first_write = False
 
@@ -1515,26 +1450,29 @@ class _CsvSplitMethodGrouped(_CsvSplitMethodBase):
         try:
             for file_path in files:
                 with pandas.read_csv(
-                    file_path, chunksize=chunksize, keep_default_na=False, encoding=self._encoding
+                    file_path,
+                    chunksize=chunksize,
+                    keep_default_na=False,
+                    encoding=self.args.encoding,
                 ) as reader:
                     for chunk in reader:
                         if found_empty:
-                            chunk.dropna(subset=[self._key_column], inplace=True)
-                            chunk[self._key_column] = (
-                                chunk[self._key_column].astype(str).str.strip()
+                            chunk.dropna(subset=[self.args.key_column], inplace=True)
+                            chunk[self.args.key_column] = (
+                                chunk[self.args.key_column].astype(str).str.strip()
                             )
-                            chunk = chunk[chunk[self._key_column] != ""]
+                            chunk = chunk[chunk[self.args.key_column] != ""]
                         if chunk.empty:
                             continue
 
-                        for key, group_df in chunk.groupby(self._key_column):
+                        for key, group_df in chunk.groupby(self.args.key_column):
                             output_filename = f"{key}.csv"
                             if output_filename not in file_pointers:
                                 file_pointers[output_filename] = open(
-                                    os.path.join(self.output_dir, output_filename),
+                                    os.path.join(self.args.resolve_dest_dir(), output_filename),
                                     "w",
                                     newline="",
-                                    encoding=self._encoding,
+                                    encoding=self.args.encoding,
                                 )
                                 group_df.to_csv(
                                     file_pointers[output_filename], header=True, index=False

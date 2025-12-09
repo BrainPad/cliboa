@@ -24,14 +24,14 @@ import zipfile
 import pandas
 
 from cliboa.adapter.file import File
-from cliboa.scenario.base import BaseStep
-from cliboa.scenario.extras import ExceptionHandler
+from cliboa.scenario.file import FileRead, FileWrite
 from cliboa.scenario.validator import EssentialParameters
+from cliboa.util.base import _warn_deprecated_args
 from cliboa.util.date import DateUtil
-from cliboa.util.exception import CliboaException, FileNotFound, InvalidParameter
+from cliboa.util.exception import CliboaException, InvalidParameter
 
 
-class FileBaseTransform(BaseStep, ExceptionHandler):
+class FileBaseTransform(FileRead, FileWrite):
     """
     Base class of file transform classes
 
@@ -48,53 +48,23 @@ class FileBaseTransform(BaseStep, ExceptionHandler):
     See documentation for individual classes for details.
     """
 
-    def __init__(self):
-        super().__init__()
-        self._src_dir = None
-        self._src_pattern = None
-        self._dest_dir = None
-        self._dest_name = None
-        self._encoding = "utf-8"
-        self._nonfile_error = False
-        self._force_continue = False
+    class Arguments(FileRead.Arguments, FileWrite.Arguments):
+        force_continue: bool = False
 
-    def src_dir(self, src_dir):
-        self._src_dir = src_dir
-
-    def src_pattern(self, src_pattern):
-        self._src_pattern = src_pattern
-
-    def dest_dir(self, dest_dir):
-        self._dest_dir = dest_dir
-
-    def dest_name(self, dest_name):
-        self._dest_name = dest_name
-
-    def encoding(self, encoding):
-        self._encoding = encoding
-
-    def nonfile_error(self, nonfile_error):
-        self._nonfile_error = nonfile_error
-
-    def force_continue(self, force_continue):
-        self._force_continue = force_continue
-
-    def execute(self, *args):
-        pass
-
-    def check_file_existence(self, files):
-        """
-        Check whether files exist.
-        If no files, the scenario will continue or an error is raised,
-        depends on parameter[nonfile_error].
-        """
-        if len(files) == 0:
-            if self._nonfile_error is True:
-                raise FileNotFound("No files are found.")
+        def resolve_dest_dir(self) -> str:
+            if self.dest_dir:
+                os.makedirs(self.dest_dir, exist_ok=True)
+                return self.dest_dir
             else:
-                self._logger.info("No files are found. Nothing to do.")
-                return
-        self._logger.info("Files found %s" % files)
+                return self.src_dir
+
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _force_continue(self):
+        return self.args.force_continue
+
+    def execute(self):
+        pass
 
     def check_output_path(self, input_path, ext):
         root, name = os.path.split(input_path)
@@ -107,9 +77,9 @@ class FileBaseTransform(BaseStep, ExceptionHandler):
         else:
             output_name = name
 
-        if self._dest_dir:
-            os.makedirs(self._dest_dir, exist_ok=True)
-            output_dir = self._dest_dir
+        if self.args.dest_dir:
+            os.makedirs(self.args.dest_dir, exist_ok=True)
+            output_dir = self.args.dest_dir
         else:
             output_dir = root
 
@@ -143,7 +113,7 @@ class FileBaseTransform(BaseStep, ExceptionHandler):
             try:
                 func(input_path, temp_file)
             except Exception as e:
-                if self._force_continue is True:
+                if self.args.force_continue is True:
                     self.handle_error(e, input_path)
                 else:
                     raise e
@@ -185,6 +155,15 @@ class FileBaseTransform(BaseStep, ExceptionHandler):
                     yield i, o
 
             self.overwrite_output_path(input_path, output_path, temp_file)
+
+    def handle_error(self, e: Exception, input_path: str):
+        # Please implement in a subclass if you would like to do something.
+        self.logger.warning(
+            (
+                e,
+                input_path,
+            )
+        )
 
 
 class FileDecompress(FileBaseTransform):
