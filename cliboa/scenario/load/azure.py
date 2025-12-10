@@ -15,60 +15,38 @@ import os
 
 from cliboa.adapter.azure import BlobServiceAdapter
 from cliboa.scenario.azure import BaseAzureBlob
-from cliboa.scenario.validator import EssentialParameters
+from cliboa.scenario.file import FileRead
 from cliboa.util.constant import StepStatus
 
 
-class AzureBlobUpload(BaseAzureBlob):
+class AzureBlobUpload(BaseAzureBlob, FileRead):
     """
     Upload to Azure Blob storage
     """
 
-    def __init__(self):
-        super().__init__()
-        self._src_dir = ""
-        self._src_pattern = None
-        self._dest_dir = None
-        self._quit = False
-
-    def src_dir(self, src_dir):
-        self._src_dir = src_dir
-
-    def src_pattern(self, src_pattern):
-        self._src_pattern = src_pattern
-
-    def dest_dir(self, dest_dir):
-        self._dest_dir = dest_dir
-
-    def quit(self, quit):
-        self._quit = quit
+    class Arguments(BaseAzureBlob.Arguments, FileRead.Arguments):
+        dest_dir: str
+        quit: bool = False
 
     def execute(self, *args):
-        super().execute()
-
-        valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir, self._src_pattern, self._dest_dir]
-        )
-        valid()
-
         service = BlobServiceAdapter().get_client(
-            account_url=self._account_url,
-            account_access_key=self._account_access_key,
-            connection_string=self._connection_string,
+            account_url=self.args.account_url,
+            account_access_key=self.args.account_access_key,
+            connection_string=self.args.connection_string,
         )
-        files = super().get_target_files(self._src_dir, self._src_pattern)
+        files = self.get_src_files()
 
         if len(files) > 0:
             for f in files:
-                path = os.path.join(self._dest_dir, os.path.basename(f))
-                blob_client = service.get_blob_client(container=self._container_name, blob=path)
+                path = os.path.join(self.args.dest_dir, os.path.basename(f))
+                blob_client = service.get_blob_client(container=self.args.container_name, blob=path)
                 with open(f, "rb") as data:
                     blob_client.upload_blob(data, overwrite=True)
         else:
-            self._logger.info(
+            self.logger.info(
                 "Files to upload do not exist. File pattern: {}".format(
-                    os.path.join(self._src_dir, self._src_pattern)
+                    os.path.join(self.args.src_dir, self.args.src_pattern)
                 )
             )
-            if self._quit is True:
+            if self.args.quit is True:
                 return StepStatus.SUCCESSFUL_TERMINATION

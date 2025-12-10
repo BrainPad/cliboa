@@ -49,8 +49,8 @@ class _BaseObject(ABC):
             raise CliboaException(f"Failed to resolve cliboa class. {key}:{type(dependency)}")
         return dependency
 
-    def _resolve(self, key: str, default_cls: type[T], *args, **kwargs) -> T:
-        dependency = self._di_map.get(key, default_cls)
+    def _resolve(self, _di_key: str, _default_cls: type[T], *args, **kwargs) -> T:
+        dependency = self._di_map.get(_di_key, _default_cls)
         if not inspect.isclass(dependency):
             return dependency
         merged_kwargs = self._di_kwargs | kwargs

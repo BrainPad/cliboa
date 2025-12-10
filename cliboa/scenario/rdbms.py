@@ -17,6 +17,7 @@ import os
 from pydantic import BaseModel
 
 from cliboa.scenario.base import BaseStep
+from cliboa.scenario.file import FileRead
 from cliboa.util.exception import FileNotFound, InvalidParameter
 
 
@@ -172,10 +173,8 @@ class BaseRdbmsRead(BaseRdbms):
         return row
 
 
-class BaseRdbmsWrite(BaseRdbms):
-    class Arguments(BaseRdbms.Arguments):
-        src_dir: str
-        src_pattern: str
+class BaseRdbmsWrite(BaseRdbms, FileRead):
+    class Arguments(BaseRdbms.Arguments, FileRead.Arguments):
         tblname: str
         encoding: str = "UTF-8"
         chunk_size: int = 100
@@ -183,10 +182,9 @@ class BaseRdbmsWrite(BaseRdbms):
     def execute(self):
         # Plural files are allowed to insert at the same time,
         # but all files must be the same csv format.
-        files = super().get_target_files(self.args.src_dir, self.args.src_pattern)
-        if len(files) == 0:
+        files = self.get_src_files()
+        if not self.check_file_existence(files):
             raise FileNotFound("No csv file was found.")
-        self.logger.info("Files found %s" % files)
 
         with open(files[0], mode="r", encoding=self.args.encoding) as f:
             reader = csv.DictReader(f)

@@ -20,12 +20,12 @@ import shutil
 import tarfile
 import tempfile
 import zipfile
+from typing import Literal
 
 import pandas
 
 from cliboa.adapter.file import File
 from cliboa.scenario.file import FileRead, FileWrite
-from cliboa.scenario.validator import EssentialParameters
 from cliboa.util.base import _warn_deprecated_args
 from cliboa.util.date import DateUtil
 from cliboa.util.exception import CliboaException, InvalidParameter
@@ -171,68 +171,45 @@ class FileDecompress(FileBaseTransform):
     Decompress the specified file
     """
 
-    def __init__(self):
-        super().__init__()
-        self._chunk_size = None
-        self._password = None
-
-    def chunk_size(self, chunk_size):
-        self._chunk_size = chunk_size
-
-    def password(self, password):
-        self._password = password
+    class Arguments(FileBaseTransform.Arguments):
+        chunk_size: int | None = None
+        password: str | None = None
 
     def execute(self, *args):
-        # essential parameters check
-        valid = EssentialParameters(self.__class__.__name__, [self._src_dir, self._src_pattern])
-        valid()
-
-        files = super().get_target_files(self._src_dir, self._src_pattern)
+        files = self.get_src_files()
         self.check_file_existence(files)
 
         for f in files:
             _, ext = os.path.splitext(f)
             if ext == ".zip":
-                self._logger.info("Decompress zip file %s" % f)
-                if self._password is not None:
-                    pwd = self._password.encode(self._encoding)
+                self.logger.info("Decompress zip file %s" % f)
+                if self.args.password is not None:
+                    pwd = self.args.password.encode(self.args.encoding)
                 else:
-                    pwd = self._password
+                    pwd = self.args.password
                 with zipfile.ZipFile(f) as zp:
-                    zp.extractall(  # nosec
-                        self._dest_dir if self._dest_dir is not None else self._src_dir, pwd=pwd
-                    ),
+                    zp.extractall(self.args.resolve_dest_dir(), pwd=pwd),  # nosec
             elif ext == ".tar":
-                self._logger.info("Decompress tar file %s" % f)
+                self.logger.info("Decompress tar file %s" % f)
                 with tarfile.open(f, "r:*") as tf:
-                    tf.extractall(
-                        self._dest_dir if self._dest_dir is not None else self._src_dir
-                    )  # nosec
+                    tf.extractall(self.args.resolve_dest_dir())  # nosec
             elif ext == ".bz2":
-                self._logger.info("Decompress bz2 file %s" % f)
+                self.logger.info("Decompress bz2 file %s" % f)
                 dcom_name = os.path.splitext(os.path.basename(f))[0]
-                if self._dest_dir:
-                    os.makedirs(self._dest_dir, exist_ok=True)
-                    decom_path = os.path.join(self._dest_dir, dcom_name)
-                else:
-                    decom_path = os.path.join(self._src_dir, dcom_name)
+                decom_path = os.path.join(self.args.resolve_dest_dir(), dcom_name)
                 with bz2.open(f, mode="rb") as i, open(decom_path, mode="wb") as o:
                     while True:
-                        buf = i.read(self._chunk_size)
+                        buf = i.read(self.args.chunk_size)
                         if buf == b"":
                             break
                         o.write(buf)
             elif ext == ".gz":
-                self._logger.info("Decompress gz file %s" % f)
+                self.logger.info("Decompress gz file %s" % f)
                 dcom_name = os.path.splitext(os.path.basename(f))[0]
-                if self._dest_dir:
-                    os.makedirs(self._dest_dir, exist_ok=True)
-                    decom_path = os.path.join(self._dest_dir, dcom_name)
-                else:
-                    decom_path = os.path.join(self._src_dir, dcom_name)
+                decom_path = os.path.join(self.args.resolve_dest_dir(), dcom_name)
                 with gzip.open(f, "rb") as i, open(decom_path, "wb") as o:
                     while True:
-                        buf = i.read(self._chunk_size)
+                        buf = i.read(self.args.chunk_size)
                         if buf == b"":
                             break
                         o.write(buf)
@@ -245,57 +222,39 @@ class FileCompress(FileBaseTransform):
     Compress files
     """
 
-    def __init__(self):
-        super().__init__()
-        self._format = None
-        self._chunk_size = 1048576
-
-    def format(self, format):
-        self._format = format.lower()
-
-    def chunk_size(self, chunk_size):
-        self._chunk_size = chunk_size
+    class Arguments(FileBaseTransform.Arguments):
+        format: Literal["zip", "gz", "gzip", "bz2", "bzip2"]
+        chunk_size: int = 1048576
 
     def execute(self, *args):
-        # essential parameters check
-        valid = EssentialParameters(
-            self.__class__.__name__,
-            [self._src_dir, self._src_pattern, self._format],
-        )
-        valid()
-
-        files = super().get_target_files(self._src_dir, self._src_pattern)
+        files = self.get_src_files()
         self.check_file_existence(files)
 
-        if self._dest_dir:
-            os.makedirs(self._dest_dir, exist_ok=True)
-            dir = self._dest_dir
-        else:
-            dir = self._src_dir
+        dest_dir = self.args.resolve_dest_dir()
         for f in files:
-            if self._format == "zip":
-                self._logger.info("Compress file %s to zip." % f)
+            if self.args.format == "zip":
+                self.logger.info("Compress file %s to zip." % f)
                 with zipfile.ZipFile(
-                    os.path.join(dir, (os.path.basename(f) + ".zip")),
+                    os.path.join(dest_dir, (os.path.basename(f) + ".zip")),
                     "w",
                     zipfile.ZIP_DEFLATED,
                 ) as o:
                     o.write(f, arcname=os.path.basename(f))
-            elif self._format in ("gz", "gzip"):
-                self._logger.info("Compress file %s to gzip." % f)
-                com_path = os.path.join(dir, (os.path.basename(f) + ".gz"))
+            elif self.args.format in ("gz", "gzip"):
+                self.logger.info("Compress file %s to gzip." % f)
+                com_path = os.path.join(dest_dir, (os.path.basename(f) + ".gz"))
                 with open(f, "rb") as i, gzip.open(com_path, "wb") as o:
                     while True:
-                        buf = i.read(self._chunk_size)
+                        buf = i.read(self.args.chunk_size)
                         if buf == b"":
                             break
                         o.write(buf)
-            elif self._format in ("bz2", "bzip2"):
-                self._logger.info("Compress file %s to bzip2." % f)
-                com_path = os.path.join(dir, (os.path.basename(f) + ".bz2"))
+            elif self.args.format in ("bz2", "bzip2"):
+                self.logger.info("Compress file %s to bzip2." % f)
+                com_path = os.path.join(dest_dir, (os.path.basename(f) + ".bz2"))
                 with open(f, "rb") as i, bz2.open(com_path, "wb") as o:
                     while True:
-                        buf = i.read(self._chunk_size)
+                        buf = i.read(self.args.chunk_size)
                         if buf == b"":
                             break
                         o.write(buf)
@@ -306,25 +265,12 @@ class DateFormatConvert(FileBaseTransform):
     Convert csv (tsv) date field columns to another date field format columns
     """
 
-    def __init__(self):
-        super().__init__()
-        self._columns = []
-        self._formatter = None
-
-    def columns(self, columns):
-        self._columns = columns
-
-    def formatter(self, formatter):
-        self._formatter = formatter
+    class Arguments(FileBaseTransform.Arguments):
+        columns: list[str]
+        formatter: str
 
     def execute(self, *args):
-        valid = EssentialParameters(
-            self.__class__.__name__,
-            [self._src_dir, self._src_pattern, self._columns, self._formatter],
-        )
-        valid()
-
-        files = super().get_target_files(self._src_dir, self._src_pattern)
+        files = self.get_src_files()
         self.check_file_existence(files)
 
         _, ext = os.path.splitext(files[0])
@@ -333,17 +279,17 @@ class DateFormatConvert(FileBaseTransform):
         elif ext == ".tsv":
             delimiter = "\t"
 
-        for ins, ous in super().io_writers(files, encoding=self._encoding):
+        for ins, ous in self.io_writers(files, encoding=self.args.encoding):
             reader = csv.DictReader(ins, delimiter=delimiter)
             writer = csv.DictWriter(ous, reader.fieldnames)
             writer.writeheader()
             date_util = DateUtil()
             for row in reader:
-                for column in self._columns:
+                for column in self.args.columns:
                     r = row.get(column)
                     if not r:
                         continue
-                    row[column] = date_util.convert_date_format(r, self._formatter)
+                    row[column] = date_util.convert_date_format(r, self.args.formatter)
                 writer.writerow(row)
 
 
@@ -352,23 +298,20 @@ class ExcelConvert(FileBaseTransform):
     Convert excel to other format
     """
 
-    def __init__(self):
-        super().__init__()
+    class Arguments(FileBaseTransform.Arguments):
+        pass
 
     def execute(self, *args):
-        valid = EssentialParameters(self.__class__.__name__, [self._src_dir, self._src_pattern])
-        valid()
-
-        files = super().get_target_files(self._src_dir, self._src_pattern)
+        files = self.get_src_files()
         self.check_file_existence(files)
 
         # TODO Currently only excel to csv is supported.
-        super().io_files(files, ext="csv", func=self.convert)
+        self.io_files(files, ext="csv", func=self.convert)
 
     def convert(self, fi, fo):
-        self._logger.info("Convert %s to %s" % (fi, fo))
+        self.logger.info("Convert %s to %s" % (fi, fo))
         df = pandas.read_excel(fi)
-        df.to_csv(fo, encoding=self._encoding)
+        df.to_csv(fo, encoding=self.args.encoding)
 
 
 class FileCopy(FileBaseTransform):
@@ -376,23 +319,16 @@ class FileCopy(FileBaseTransform):
     Copy the file
     """
 
-    def __init__(self):
-        super().__init__()
+    class Arguments(FileBaseTransform.Arguments):
+        dest_dir: str
 
     def execute(self, *args):
-        valid = EssentialParameters(
-            self.__class__.__name__,
-            [self._src_dir, self._src_pattern, self._dest_dir],
-        )
-        valid()
-
-        files = super().get_target_files(self._src_dir, self._src_pattern)
+        files = self.get_src_files()
         self.check_file_existence(files)
 
-        os.makedirs(self._dest_dir, exist_ok=True)
-
+        dest_dir = self.args.resolve_dest_dir()
         for file in files:
-            shutil.copy(file, self._dest_dir)
+            shutil.copy(file, dest_dir)
 
 
 class FileDivide(FileBaseTransform):
@@ -400,11 +336,10 @@ class FileDivide(FileBaseTransform):
     Divide a file to plural files
     """
 
-    def __init__(self):
-        super().__init__()
-        self._divide_rows = None
-        self._header = False
-        self._suffix_pattern = ".%d"
+    class Arguments(FileBaseTransform.Arguments):
+        divide_rows: int
+        header: bool = False
+        suffix_pattern: str = ".%d"
 
     def divide_rows(self, divide_rows):
         self._divide_rows = divide_rows
@@ -416,13 +351,7 @@ class FileDivide(FileBaseTransform):
         self._suffix_pattern = suffix_pattern
 
     def execute(self, *args):
-        valid = EssentialParameters(
-            self.__class__.__name__,
-            [self._src_dir, self._src_pattern, self._divide_rows],
-        )
-        valid()
-
-        files = super().get_target_files(self._src_dir, self._src_pattern)
+        files = self.get_src_files()
         self.check_file_existence(files)
 
         for file in files:
@@ -440,18 +369,14 @@ class FileDivide(FileBaseTransform):
                 nameonly = fname
                 ext = ""
 
-            if self._header:
-                with open(file, encoding=self._encoding) as i:
+            if self.args.header:
+                with open(file, encoding=self.args.encoding) as i:
                     self._header_row = i.readline()
 
             row = self._ifile_reader(file)
-            newfilename = px + nameonly + self._suffix_pattern + ext
+            newfilename = px + nameonly + self.args.suffix_pattern + ext
 
-            if self._dest_dir:
-                os.makedirs(self._dest_dir, exist_ok=True)
-                dest_dir = self._dest_dir
-            else:
-                dest_dir = self._src_dir
+            dest_dir = self.args.resolve_dest_dir()
             has_left = True
             index = 1
             while has_left:
@@ -460,8 +385,8 @@ class FileDivide(FileBaseTransform):
                 index = index + 1
 
     def _ifile_reader(self, filepath):
-        with open(filepath, encoding=self._encoding) as i:
-            if self._header is True:
+        with open(filepath, encoding=self.args.encoding) as i:
+            if self.args.header is True:
                 i.readline()
             for line in i:
                 yield line
@@ -469,13 +394,13 @@ class FileDivide(FileBaseTransform):
     def _ofile_generator(self, filepath, row):
         left = False
         written = False
-        with open(filepath, mode="w", encoding=self._encoding) as o:
-            if self._header is True:
+        with open(filepath, mode="w", encoding=self.args.encoding) as o:
+            if self.args.header is True:
                 o.write(self._header_row)
             for i, line in enumerate(row):
                 written = True
                 o.write(line)
-                if i + 1 >= self._divide_rows:
+                if i + 1 >= self.args.divide_rows:
                     left = True
                     break
         if written is False:
@@ -488,14 +413,13 @@ class FileRename(FileBaseTransform):
     Change file names with adding either prefix or suffix.
     """
 
-    def __init__(self):
-        super().__init__()
-        self._prefix = ""
-        self._suffix = ""
-        self._regex_pattern = None
-        self._rep_str = None
-        self._ext = ""
-        self._without_ext = True
+    class Arguments(FileBaseTransform.Arguments):
+        prefix: str = ""
+        suffix: str = ""
+        regex_pattern: str | None = None
+        rep_str: str | None = None
+        ext: str = ""
+        without_ext: bool = True
 
     def prefix(self, prefix):
         self._prefix = prefix
@@ -516,15 +440,11 @@ class FileRename(FileBaseTransform):
         self._without_ext = without_ext
 
     def execute(self, *args):
-        # essential parameters check
-        valid = EssentialParameters(self.__class__.__name__, [self._src_dir, self._src_pattern])
-        valid()
-
-        files = super().get_target_files(self._src_dir, self._src_pattern)
+        files = self.get_src_files()
         self.check_file_existence(files)
-        if self._rep_str is None and self._regex_pattern is not None:
+        if self.args.rep_str is None and self.args.regex_pattern is not None:
             raise InvalidParameter("Replace string is not defined in yaml file: rep_str")
-        if self._rep_str is not None and self._regex_pattern is None:
+        if self.args.rep_str is not None and self.args.regex_pattern is None:
             raise InvalidParameter(
                 "The conversion pattern is not defined in yaml file: regex_pattern"
             )
@@ -533,13 +453,15 @@ class FileRename(FileBaseTransform):
             dirname = os.path.dirname(file)
             basename = os.path.basename(file)
 
-            if self._without_ext is False:
-                if self._prefix != "" or self._suffix != "" or self._ext != "":
+            if self.args.without_ext is False:
+                if self.args.prefix != "" or self.args.suffix != "" or self.args.ext != "":
                     raise InvalidParameter("Cannot be specified in without_ext mode")
                 self._replace(
                     dirname,
                     file,
-                    os.path.join(dirname, re.sub(self._regex_pattern, self._rep_str, basename)),
+                    os.path.join(
+                        dirname, re.sub(self.args.regex_pattern, self.args.rep_str, basename)
+                    ),
                 )
             else:
                 px = ""
@@ -554,19 +476,19 @@ class FileRename(FileBaseTransform):
                     nameonly = basename
                     extension = ""
 
-                if self._regex_pattern is not None and self._rep_str is not None:
-                    nameonly = re.sub(self._regex_pattern, self._rep_str, nameonly)
+                if self.args.regex_pattern is not None and self.args.rep_str is not None:
+                    nameonly = re.sub(self.args.regex_pattern, self.args.rep_str, nameonly)
 
-                if self._ext:
-                    extension = "." + self._ext
+                if self.args.ext:
+                    extension = "." + self.args.ext
 
-                newfilename = self._prefix + px + nameonly + self._suffix + extension
+                newfilename = self.args.prefix + px + nameonly + self.args.suffix + extension
                 self._replace(dirname, file, newfilename)
 
     def _replace(self, dirname, file, newfilename):
         newfilepath = os.path.join(dirname, newfilename)
         os.rename(file, newfilepath)
-        self._logger.info("File name changed %s -> %s" % (file, newfilepath))
+        self.logger.info("File name changed %s -> %s" % (file, newfilepath))
 
 
 class FileConvert(FileBaseTransform):
@@ -574,44 +496,27 @@ class FileConvert(FileBaseTransform):
     Convert file encoding
     """
 
-    def __init__(self):
-        super().__init__()
-        self._encoding_from = None
-        self._encoding_to = None
-        self._errors = None
-
-    def encoding_from(self, encoding_from):
-        self._encoding_from = encoding_from
-
-    def encoding_to(self, encoding_to):
-        self._encoding_to = encoding_to
-
-    def errors(self, errors):
-        self._errors = errors
+    class Arguments(FileBaseTransform.Arguments):
+        encoding_from: str
+        encoding_to: str
+        errors: str | None = None
 
     def execute(self, *args):
-        # essential parameters check
-        valid = EssentialParameters(
-            self.__class__.__name__,
-            [self._src_dir, self._src_pattern, self._encoding_from, self._encoding_to],
-        )
-        valid()
-
-        files = super().get_target_files(self._src_dir, self._src_pattern)
+        files = self.get_src_files()
         self.check_file_existence(files)
 
-        super().io_files(files, func=self.convert)
+        self.io_files(files, func=self.convert)
 
     def convert(self, fi, fo):
         File().convert_encoding(
             fi,
             fo,
-            self._encoding_from,
-            self._encoding_to,
-            self._errors,
+            self.args.encoding_from,
+            self.args.encoding_to,
+            self.args.errors,
         )
 
-        self._logger.info("Encoded file %s" % fi)
+        self.logger.info("Encoded file %s" % fi)
 
 
 class FileArchive(FileBaseTransform):
@@ -619,52 +524,34 @@ class FileArchive(FileBaseTransform):
     Create archeve object.a
     """
 
-    def __init__(self):
-        super().__init__()
-        self._format = None
-        self._create_dir = False
-
-    def format(self, format):
-        self._format = format.lower()
-
-    def create_dir(self, create_dir):
-        self._create_dir = create_dir
+    class Arguments(FileBaseTransform.Arguments):
+        dest_name: str
+        format: Literal["zip", "tar"]
+        create_dir: bool = False
 
     def execute(self, *args):
-        valid = EssentialParameters(
-            self.__class__.__name__,
-            [self._src_dir, self._src_pattern, self._format],
-        )
-        valid()
-
-        files = super().get_target_files(self._src_dir, self._src_pattern)
+        files = self.get_src_files()
         self.check_file_existence(files)
 
-        if self._dest_dir:
-            os.makedirs(self._dest_dir, exist_ok=True)
-            dir = self._dest_dir
-        else:
-            dir = self._src_dir
+        dest_dir = self.args.resolve_dest_dir()
 
-        valid = EssentialParameters(self.__class__.__name__, [self._dest_name])
-        valid()
-        dest_path = os.path.join(dir, (self._dest_name + ".%s" % self._format))
+        dest_path = os.path.join(dest_dir, (self.args.dest_name + ".%s" % self.args.format))
 
-        if self._format == "tar":
+        if self.args.format == "tar":
             with tarfile.open(dest_path, "w") as tar:
                 for file in files:
                     arcname = (
-                        os.path.join(self._dest_name, os.path.basename(file))
-                        if self._create_dir
+                        os.path.join(self.args.dest_name, os.path.basename(file))
+                        if self.args.create_dir
                         else os.path.basename(file)
                     )
                     tar.add(file, arcname=arcname)
-        elif self._format == "zip":
+        elif self.args.format == "zip":
             with zipfile.ZipFile(dest_path, "w") as zp:
                 for file in files:
                     arcname = (
-                        os.path.join(self._dest_name, os.path.basename(file))
-                        if self._create_dir
+                        os.path.join(self.args.dest_name, os.path.basename(file))
+                        if self.args.create_dir
                         else os.path.basename(file)
                     )
                     zp.write(file, arcname=arcname)

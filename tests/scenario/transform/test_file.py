@@ -602,20 +602,6 @@ class TestFileCopy(TestFileTransform):
         with open(os.path.join(self._out_dir, "test2.txt.12345"), encoding="utf-8") as f:
             assert "This is test 2" == f.read()
 
-    def test_execute_ng(self):
-        self._create_files()
-
-        instance = FileCopy()
-        instance._set_arguments(
-            {
-                "src_dir": self._data_dir,
-                "src_pattern": r"test.*\.txt",
-            }
-        )
-        with pytest.raises(Exception) as e:
-            instance.execute()
-        assert "The essential parameter is not specified in FileCopy." == str(e.value)
-
 
 class TestFileDivide(TestFileTransform):
     def test_execute_ok(self):

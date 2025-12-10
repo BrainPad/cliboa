@@ -16,48 +16,45 @@ import re
 
 from cliboa.adapter.ftp import FtpAdapter
 from cliboa.scenario.ftp import BaseFtp
-from cliboa.scenario.validator import EssentialParameters
+from cliboa.util.base import _warn_deprecated
 from cliboa.util.constant import StepStatus
 
 
 class FtpExtract(BaseFtp):
     def __init__(self):
         super().__init__()
+        self.logger.warning(
+            _warn_deprecated(
+                "cliboa.scenario.extract.ftp.FtpExtract",
+                "3.0",
+                "4.0",
+                "cliboa.scenario.ftp.BaseFtp",
+            )
+        )
 
 
-class FtpDownload(FtpExtract):
+class FtpDownload(BaseFtp):
     """
     Download files from ftp server
     """
 
-    def __init__(self):
-        super().__init__()
-        self._quit = False
-
-    def quit(self, quit):
-        self._quit = quit
+    class Arguments(BaseFtp.Arguments):
+        dest_dir: str
+        quit: bool = False
 
     def execute(self, *args):
-        # essential parameters check
-        valid = EssentialParameters(
-            self.__class__.__name__,
-            [self._host, self._user, self._src_dir, self._src_pattern],
+        os.makedirs(self.args.dest_dir, exist_ok=True)
+
+        adapter = self.get_adapter()
+        obj = adapter.list_files(
+            dir=self.args.src_dir,
+            dest=self.args.dest_dir,
+            pattern=re.compile(self.args.src_pattern),
         )
-        valid()
+        files = adapter.execute(obj)
 
-        os.makedirs(self._dest_dir, exist_ok=True)
-
-        obj = FtpAdapter().list_files(
-            dir=self._src_dir,
-            dest=self._dest_dir,
-            pattern=re.compile(self._src_pattern),
-        )
-
-        adaptor = super().get_adaptor()
-        files = adaptor.execute(obj)
-
-        if self._quit is True and len(files) == 0:
-            self._logger.info("No file was found. After process will not be processed")
+        if self.args.quit is True and len(files) == 0:
+            self.logger.info("No file was found. After process will not be processed")
             return StepStatus.SUCCESSFUL_TERMINATION
 
         # cache downloaded file names
@@ -69,30 +66,31 @@ class FtpDownloadFileDelete(FtpExtract):
     Delete all downloaded files.
     """
 
-    def __init__(self):
-        super().__init__()
-
     def execute(self, *args):
         files = self.get_from_context()
 
-        if files is not None and len(files) > 0:
-            self._logger.info("Delete files %s" % files)
+        if files is None or len(files) == 0:
+            self.logger.info("No files to delete.")
+            return
 
-            self._host = super().get_step_argument("host")
-            self._user = super().get_step_argument("user")
-            self._password = super().get_step_argument("password")
-            self._timeout = super().get_step_argument("timeout")
-            self._retry_count = super().get_step_argument("retry_count")
-            self._port = super().get_step_argument("port")
-            self._tls = super().get_step_argument("tls")
+        self.logger.info("Delete files %s" % files)
 
-            adaptor = super().get_adaptor()
-            for file in files:
-                obj = FtpAdapter().remove_specific_file(
-                    dir=self._src_dir,
-                    fname=file,
-                )
-                adaptor.execute(obj)
-                self._logger.info("%s is successfully deleted." % file)
-        else:
-            self._logger.info("No files to delete.")
+        adapter = self._resolve(
+            "adapter_ftp",
+            FtpAdapter,
+            host=self.get_step_argument("host"),
+            user=self.get_step_argument("user"),
+            password=self.get_step_argument("password"),
+            timeout=self.get_step_argument("timeout"),
+            retryTimes=self.get_step_argument("retry_count"),
+            port=self.get_step_argument("port"),
+            tls=self.get_step_argument("tls"),
+        )
+
+        for file in files:
+            obj = adapter.remove_specific_file(
+                dir=self.get_step_argument("src_dir"),
+                fname=file,
+            )
+            adapter.execute(obj)
+            self.logger.info("%s is successfully deleted." % file)

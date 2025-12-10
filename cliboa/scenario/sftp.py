@@ -12,73 +12,109 @@
 # all copies or substantial portions of the Software.
 #
 
+from pydantic import BaseModel
+
 from cliboa.adapter.sftp import SftpAdapter
 from cliboa.scenario.base import BaseStep
+from cliboa.util.base import _warn_deprecated, _warn_deprecated_args
 
 
 class BaseSftp(BaseStep):
-    def __init__(self):
-        super().__init__()
+    class Arguments(BaseModel):
+        src_dir: str
+        src_pattern: str
+        dest_dir: str = ""
+        host: str
+        port: int = 22
+        user: str
+        password: str | None = None
+        key: str | None = None
+        passphrase: str | None = None
+        endfile_suffix: str | None = None
+        timeout: int = 30
+        retry_count: int = 3
 
-        self._src_dir = None
-        self._src_pattern = None
-        self._dest_dir = ""
-        self._host = None
-        self._port = 22
-        self._user = None
-        self._password = None
-        self._key = None
-        self._passphrase = None
-        self._endfile_suffix = None
-        self._timeout = 30
-        self._retry_count = 3
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _src_dir(self):
+        return self.args.src_dir
 
-    def src_dir(self, src_dir):
-        self._src_dir = src_dir
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _src_pattern(self):
+        return self.args.src_pattern
 
-    def src_pattern(self, src_pattern):
-        self._src_pattern = src_pattern
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _dest_dir(self):
+        return self.args.dest_dir
 
-    def dest_dir(self, dest_dir):
-        self._dest_dir = dest_dir
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _host(self):
+        return self.args.host
 
-    def host(self, host):
-        self._host = host
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _port(self):
+        return self.args.port
 
-    def port(self, port):
-        self._port = port
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _user(self):
+        return self.args.user
 
-    def user(self, user):
-        self._user = user
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _password(self):
+        return self.args.password
 
-    def password(self, password):
-        self._password = password
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _key(self):
+        return self.args.key
 
-    def key(self, key):
-        if not isinstance(key, str):
-            raise ValueError("arguments 'key' must be str.")
-        self._key = key
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _passphrase(self):
+        return self.args.passphrase
 
-    def passphrase(self, passphrase):
-        self._passphrase = passphrase
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _endfile_suffix(self):
+        return self.args.endfile_suffix
 
-    def endfile_suffix(self, endfile_suffix):
-        self._endfile_suffix = endfile_suffix
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _timeout(self):
+        return self.args.timeout
 
-    def timeout(self, timeout):
-        self._timeout = timeout
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _retry_count(self):
+        return self.args.retry_count
 
-    def retry_count(self, retry_count):
-        self._retry_count = retry_count
+    def get_adapter(self):
+        return self._resolve(
+            "adapter_sftp",
+            SftpAdapter,
+            host=self.args.host,
+            user=self.args.user,
+            password=self.args.password,
+            key=self.args.key,
+            passphrase=self.args.passphrase,
+            timeout=self.args.timeout,
+            retryTimes=self.args.retry_count,
+            port=self.args.port,
+        )
 
     def get_adaptor(self):
-        return SftpAdapter(
-            host=self._host,
-            user=self._user,
-            password=self._password,
-            key=self._key,
-            passphrase=self._passphrase,
-            timeout=self._timeout,
-            retryTimes=self._retry_count,
-            port=self._port,
+        self.logger.info(
+            _warn_deprecated(
+                "cliboa.scenario.sftp.BaseSftp.get_adaptor",
+                "3.0",
+                "4.0",
+                "cliboa.scenario.sftp.BaseSftp.get_adapter",
+            )
         )
+        return self.get_adapter()

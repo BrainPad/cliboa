@@ -85,8 +85,7 @@ class S3DownloadFileDelete(BaseS3):
     Delete all downloaded files from S3
     """
 
-    def __init__(self):
-        super().__init__()
+    Arguments = None
 
     def execute(self, *args):
         stored = self.get_from_context()
@@ -94,26 +93,26 @@ class S3DownloadFileDelete(BaseS3):
         keys = stored.get("keys")
 
         if keys is not None and len(keys) > 0:
-            self._region = self.get_symbol_argument("region")
-            self._access_key = self.get_symbol_argument("access_key")
-            self._secret_key = self.get_symbol_argument("secret_key")
-            self._profile = self.get_symbol_argument("profile")
-            self._bucket = self.get_symbol_argument("bucket")
-            self._key = self.get_symbol_argument("key")
-            self._prefix = self.get_symbol_argument("prefix")
-            self._delimiter = self.get_symbol_argument("delimiter")
-            self._src_pattern = self.get_symbol_argument("src_pattern")
+            symbol_access_key = self.get_symbol_argument("access_key")
+            symbol_secret_key = self.get_symbol_argument("secret_key")
+            symbol_profile = self.get_symbol_argument("profile")
+            symbol_role_arn = self.get_symbol_argument("role_arn")
+            symbol_external_id = self.get_symbol_argument("external_id")
 
             adapter = S3Adapter(
-                self._access_key, self._secret_key, self._profile, self._role_arn, self._external_id
+                symbol_access_key,
+                symbol_secret_key,
+                symbol_profile,
+                symbol_role_arn,
+                symbol_external_id,
             )
             client = adapter.get_client()
 
             for key in keys:
                 client.delete_object(Bucket=bucket, Key=key)
-                self._logger.info("%s is successfully deleted." % bucket + "/" + key)
+                self.logger.info("%s is successfully deleted." % bucket + "/" + key)
         else:
-            self._logger.info("No files to delete.")
+            self.logger.info("No files to delete.")
 
 
 class S3Delete(BaseS3):

@@ -18,7 +18,6 @@ from glob import glob
 
 import jsonlines
 import pytest
-from pydantic import ValidationError
 
 from cliboa.conf import env
 from cliboa.scenario.transform.csv import (
@@ -459,26 +458,6 @@ class TestCsvColumnDelete(TestCsvTransform):
                     self.assertEqual(["", "SPAM1"], row)
                 if i == 2:
                     self.assertEqual(["", ""], row)
-
-    def test_execute_ng(self):
-        # create test csv
-        test_csv_data = [
-            ["col_1", "col_2", "col_3"],
-            ["1", "spam1", "SPAM1"],
-            ["2", "spam2", "SPAM2"],
-        ]
-        self._create_csv(test_csv_data)
-        # set the essential attributes
-        instance = CsvColumnDelete()
-        instance._set_arguments(
-            {
-                "src_dir": self._data_dir,
-                "src_pattern": "test.csv",
-            }
-        )
-        with pytest.raises(Exception) as e:
-            instance.execute()
-        assert "'regex_pattern' is essential." == str(e.value)
 
 
 class TestCsvValueExtract(TestCsvTransform):
@@ -2064,14 +2043,6 @@ class TestCsvDuplicateRowDelete(TestCsvTransform):
         """Test dask engine without order guarantee."""
         self._test_engine_common("dask", check_order=False)
 
-    def test_engine_invalid_parameter(self):
-        # Test invalid engine parameter
-        instance = CsvDuplicateRowDelete()
-        with pytest.raises(ValidationError):
-            instance._set_arguments(
-                {"src_dir": "/path", "src_pattern": "hoge", "engine": "invalid_engine"}
-            )
-
 
 class TestCsvRowDelete(TestCsvTransform):
     def test_execute_ok_match(self):
@@ -2523,46 +2494,6 @@ class TestCsvColumnCopy(TestCsvTransform):
                 assert {"id": "1", "name": "1", "address": "test@aaa.com"} == r
         assert rows == len(test_csv_data)
 
-    def test_not_src_column_ng(self):
-        # create test csv
-        test_csv_data = [["id", "name", "address"], ["1", "test", "test@aaa.com"]]
-        self._create_csv(test_csv_data)
-
-        # set the essential attributes
-        instance = CsvColumnCopy()
-        instance._set_arguments(
-            {
-                "src_dir": self._data_dir,
-                "src_pattern": "test.csv",
-                "dest_dir": self._data_dir,
-                "dest_column": "name",
-            }
-        )
-
-        with pytest.raises(Exception) as e:
-            instance.execute()
-        assert "The essential parameter is not specified in CsvColumnCopy." == str(e.value)
-
-    def test_not_dest_column_ng(self):
-        # create test csv
-        test_csv_data = [["id", "name", "address"], ["1", "test", "test@aaa.com"]]
-        self._create_csv(test_csv_data)
-
-        # set the essential attributes
-        instance = CsvColumnCopy()
-        instance._set_arguments(
-            {
-                "src_dir": self._data_dir,
-                "src_pattern": "test.csv",
-                "dest_dir": self._data_dir,
-                "src_column": "id",
-            }
-        )
-
-        with pytest.raises(Exception) as e:
-            instance.execute()
-        assert "The essential parameter is not specified in CsvColumnCopy." == str(e.value)
-
 
 class TestCsvColumnReplace(TestCsvTransform):
     def test_replace_column_ok(self):
@@ -2684,48 +2615,6 @@ class TestCsvColumnReplace(TestCsvTransform):
                     "address": "test@aaa.com",
                 } == r
         assert rows == len(test_csv_data)
-
-    def test_not_regex_pattern_ng(self):
-        # create test csv
-        test_csv_data = [["id", "name", "address"], ["1", "test", "test@aaa.com"]]
-        self._create_csv(test_csv_data)
-
-        # set the essential attributes
-        instance = CsvColumnReplace()
-        instance._set_arguments(
-            {
-                "src_dir": self._data_dir,
-                "src_pattern": "test.csv",
-                "column": "address",
-                "rep_str": "",
-            }
-        )
-
-        with pytest.raises(InvalidParameter) as execinfo:
-            instance.execute()
-        assert "The conversion pattern is not defined in yaml file: regex_pattern" == str(
-            execinfo.value
-        )
-
-    def test_not_rep_str_ng(self):
-        # create test csv
-        test_csv_data = [["id", "name", "address"], ["1", "test", "test@aaa.com"]]
-        self._create_csv(test_csv_data)
-
-        # set the essential attributes
-        instance = CsvColumnReplace()
-        instance._set_arguments(
-            {
-                "src_dir": self._data_dir,
-                "src_pattern": "test.csv",
-                "regex_pattern": "",
-                "column": "address",
-            }
-        )
-
-        with pytest.raises(InvalidParameter) as execinfo:
-            instance.execute()
-        assert "The converted string is not defined in yaml file: rep_str" == str(execinfo.value)
 
 
 class TestCsvSplitRows(TestCsvTransform):

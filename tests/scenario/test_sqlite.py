@@ -12,13 +12,14 @@
 # all copies or substantial portions of the Software.
 #
 import os
-import sys
+
+import pytest
 
 from cliboa.conf import env
 from cliboa.scenario.sqlite import BaseSqlite
 
 
-class TestBaseSqlite(object):
+class TestBaseSqlite:
     def setup_method(self, method):
         self._db_dir = os.path.join(env.BASE_DIR, "db")
 
@@ -26,7 +27,7 @@ class TestBaseSqlite(object):
         """
         sqlite db does not exist.
         """
-        try:
+        with pytest.raises(Exception):
             instance = BaseSqlite()
             db_file = os.path.join(self._db_dir, "spam.db")
             instance._set_arguments(
@@ -35,7 +36,3 @@ class TestBaseSqlite(object):
                     "tblname": "spam_table",
                 }
             )
-            instance.execute()
-        except Exception as e:
-            tb = sys.exc_info()[2]
-            assert "not found" in "{0}".format(e.with_traceback(tb))

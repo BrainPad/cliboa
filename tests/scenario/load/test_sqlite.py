@@ -18,7 +18,7 @@ from cliboa.adapter.sqlite import SqliteAdapter
 from cliboa.scenario.load.sqlite import SqliteImport
 
 
-class TestSqliteImport(object):
+class TestSqliteImport:
 
     DB_NAME = "test.db"
     TBL_NAME = "foo"
@@ -189,12 +189,7 @@ class TestSqliteImport(object):
             instance = self._create_instance(TEST_FILE_1, True)
             instance.execute()
 
-            instance = self._create_instance(TEST_FILE_2, False)
-            instance._set_arguments(
-                {
-                    "force_insert": True,
-                }
-            )
+            instance = self._create_instance(TEST_FILE_2, False, True)
             instance.execute()
 
             adapter = SqliteAdapter()
@@ -295,7 +290,7 @@ class TestSqliteImport(object):
             d[col[0]] = row[i]
         return d
 
-    def _create_instance(self, pattern, refresh):
+    def _create_instance(self, pattern, refresh, force_insert: bool = False):
         instance = SqliteImport()
         instance._set_arguments(
             {
@@ -304,6 +299,7 @@ class TestSqliteImport(object):
                 "src_pattern": pattern,
                 "tblname": self.TBL_NAME,
                 "refresh": refresh,
+                "force_insert": force_insert,
             }
         )
         return instance

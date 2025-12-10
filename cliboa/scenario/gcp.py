@@ -11,8 +11,10 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+from pydantic import BaseModel
+
 from cliboa.scenario.base import BaseStep
-from cliboa.scenario.validator import EssentialParameters
+from cliboa.util.base import _warn_deprecated_args
 
 
 class BaseGcp(BaseStep):
@@ -20,25 +22,22 @@ class BaseGcp(BaseStep):
     Base class of Gcp usage.
     """
 
-    def __init__(self):
-        super().__init__()
-        self._project_id = None
-        self._credentials = None
+    class Arguments(BaseModel):
+        project_id: str
+        credentials: str
 
-    def project_id(self, project_id):
-        self._project_id = project_id
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _project_id(self):
+        return self.args.project_id
 
-    def credentials(self, credentials):
-        if not isinstance(credentials, str):
-            raise ValueError("arguments 'credentials' must be str.")
-        self._credentials = credentials
-
-    def execute(self, *args):
-        valid = EssentialParameters(self.__class__.__name__, [self._project_id])
-        valid()
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _credentials(self):
+        return self.args.credentials
 
     def get_credentials(self):
-        return self._credentials
+        return self.args.credentials
 
 
 class BaseBigQuery(BaseGcp):
@@ -47,26 +46,25 @@ class BaseBigQuery(BaseGcp):
 
     """
 
-    def __init__(self):
-        super().__init__()
+    class Arguments(BaseGcp.Arguments):
+        dataset: str
+        tblname: str
+        location: str
 
-        self._dataset = None
-        self._tblname = None
-        self._location = None
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _dataset(self):
+        return self.args.dataset
 
-    def dataset(self, dataset):
-        self._dataset = dataset
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _tblname(self):
+        return self.args.tblname
 
-    def tblname(self, tblname):
-        self._tblname = tblname
-
-    def location(self, location):
-        self._location = location
-
-    def execute(self, *args):
-        super().execute()
-        valid = EssentialParameters(self.__class__.__name__, [self._location, self._dataset])
-        valid()
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _location(self):
+        return self.args.location
 
 
 class BaseGcs(BaseGcp):
@@ -75,17 +73,13 @@ class BaseGcs(BaseGcp):
 
     """
 
-    def __init__(self):
-        super().__init__()
-        self._bucket = None
+    class Arguments(BaseGcp.Arguments):
+        bucket: str
 
-    def bucket(self, bucket):
-        self._bucket = bucket
-
-    def execute(self, *args):
-        super().execute()
-        valid = EssentialParameters(self.__class__.__name__, [self._bucket])
-        valid()
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _bucket(self):
+        return self.args.bucket
 
 
 class BaseFirestore(BaseGcp):
@@ -94,13 +88,6 @@ class BaseFirestore(BaseGcp):
 
     """
 
-    def __init__(self):
-        super().__init__()
-        self._collection = None
-        self._document = None
-
-    def collection(self, collection):
-        self._collection = collection
-
-    def document(self, document):
-        self._document = document
+    class Arguments(BaseGcp.Arguments):
+        collection: str
+        document: str | None = None

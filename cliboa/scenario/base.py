@@ -70,7 +70,7 @@ class AbstractStep(_BaseObject):
         Either way, the method must be implemented
         to set the value for the class parameter like below.
 
-        -- eg1 (recommended) --
+        -- eg1 (Recommended) --
         from pydantic import BaseModel
         class Foo(BaseStep):
             # no need to define __init__
@@ -82,7 +82,7 @@ class AbstractStep(_BaseObject):
                 # access via self.args
                 self.logger.info(f"bar is {self.args.bar}")
 
-        -- eg2 --
+        -- eg2 (WARNING: scheduled for deprecation in future) --
         class Foo2(BaseStep):
             def __init__(self):
                 self._bar = None
@@ -90,7 +90,7 @@ class AbstractStep(_BaseObject):
             def bar(self, bar):
                 self._bar = bar
 
-        -- eg3 --
+        -- eg3 (WARNING: scheduled for deprecation in future) --
         class Foo3(BaseStep):
             def __init__(self):
                 self._bar = None
