@@ -98,9 +98,10 @@ cd sample
 python bin/cliboa.py simple-etl
 ```
 
-# YAML Configuration
+# Scenario Configuration
 Should create scenario.yml if make ETL(ELT) processing activate.
-See [YAML Configuration](/docs/yaml_configuration.md)
+See [Scenario Configuration](/docs/scenario_configuration.md)
 
 # How to Implement Additional ETL Modules
-see [additional_etl_modules.md](/docs/additional_etl_modules.md)
+
+See [additional_etl_modules.md](/docs/developersadditional_etl_modules.md) for developers.

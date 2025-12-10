@@ -67,7 +67,7 @@ As a simple ETL processing, write scenario.yml in simple-etl as below.
 
 The following example is just download a gzip file from the local sftp server, decompress it, and upload it to the local sftp server.
 
-See [Examples](docs/yaml_configuration.md#examples)
+See [Examples](docs/scenario_configuration.md#examples)
 
 ## Set an Environment
 To make the above scenario available, set a local machine as a sftp server according to respective environments. Also, put "test.csv.gz" under /usr/local.
@@ -76,7 +76,7 @@ To make the above scenario available, set a local machine as a sftp server accor
 After wrote scenario.yml and set the environment, execute a scenario by as below command.
 ```
 cd sample
-poetry run python3 bin/clibomanager.py simple-etl
+python bin/clibomanager.py simple-etl
 ```
 
 

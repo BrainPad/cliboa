@@ -1,3 +1,8 @@
+> [!CAUTION]
+> **OBSOLETE DATA ALERT**
+> The information provided in this document is old and has not been updated.
+> Use it only as a rough reference until the content is formally merged and revised. **Do not rely on this for current implementation.**
+
 # Table of Contents
 * [Additional ETL Modules](#additional-etl-modules)
 * [How to Implement Additional ETL Modules](#how-to-implement-additional-etl-modules)

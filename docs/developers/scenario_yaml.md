@@ -1,3 +1,8 @@
+> [!CAUTION]
+> **OBSOLETE DATA ALERT**
+> The information provided in this document is old and has not been updated.
+> Use it only as a rough reference until the content is formally merged and revised. **Do not rely on this for current implementation.**
+
 # *Chapter1: Create scenario.yml and basic usage*
 
 There are two things that you need to understand scenario.yml for Cliboa is "scenario", and "step"
