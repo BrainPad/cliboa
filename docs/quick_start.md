@@ -1,82 +1,67 @@
-# Table of Contents
-
-* [Quick Start](#quick-start)
-  * [Install cliboa](#install-cliboa)
-  * [Configuration of a Simple ETL Processing](#configuration-of-a-simple-etl-processing)
-  * [Directory Tree](#directory-tree)
-  * [Install PyPI packages](#install-pypi-packages)
-  * [Write a Scenario of ETL Processing](#write-a-scenario-of-etl-processing)
-  * [Set an environment](#set-an-environment)
-  * [Execute a scenario of ETL Processing](#execute-a-scenario-of-etl-processing)
-
 # Quick Start
-## Requirements
-Available on macOS and any Linux distributions, like Debian, Ubuntu, CentOS, REL, or etc.
 
-## Install cliboa
-Python version 3.10 or later and poetry are required. In the environment which pip can be used, execute as below.
+This guide describes how to set up and run a simple project using **cliboa**.
 
+## Prerequisites
+
+Before getting started, ensure your environment meets the following requirements:
+
+* **OS:** macOS or Linux distribution
+* **Package Manager:** [Poetry](https://python-poetry.org/docs/#installation) must be installed.
+
+> [!Note]
+> This guide demonstrates the setup using Poetry. If you prefer other package managers (e.g., `uv`, `rye`), please adapt the installation and execution commands to suit your environment.
+
+## Installation & Execution
+
+Follow these steps to set up a sample project and verify the installation.
+
+### 1. Setup Workspace
+
+Create a new directory for your project and navigate into it.
+
+```bash
+mkdir cliboa-quickstart
+cd cliboa-quickstart
 ```
-sudo pip3 install poetry
-sudo pip3 install cliboa
-```
+### 2. Initialize Poetry
 
-## Configuration of a Simple ETL Processing
-After installed cliboa, 'cliboadmin' can be used as an administrator command. 
+Initialize a new poetry project. You can press *Enter* to accept the default values for the prompts.
 
-Create an executable environment of cliboa by using cliboadmin.
-
-```
-$ cd /usr/local
-$ sudo cliboadmin init sample
-$ cd sample
-$ sudo cliboadmin create simple-etl
-```
-
-## Directory Tree
-Directory tree which was created aforementioned commands is as below.
-
-```
-sample
-├── pyproject.toml
-├── bin
-│   └── clibomanager.py
-├── cliboa
-│   └── conf
-├── common
-│   ├── __init__.py
-│   ├── environment.py
-│   └── scenario
-├── conf
-│   └── logging.conf
-├── logs
-├── project
-│   └── simple-etl
-│       ├── scenario
-│       └── scenario.yml
+```bash
+poetry init
 ```
 
-## Install PyPI packages
-```
-$ cd sample
-$ poetry install
-```
+### 3. Install cliboa
 
-## Write a Scenario of ETL Processing
-As a simple ETL processing, write scenario.yml in simple-etl as below.
+Add cliboa to your project dependencies.
 
-The following example is just download a gzip file from the local sftp server, decompress it, and upload it to the local sftp server.
-
-See [Examples](docs/yaml_configuration.md#examples)
-
-## Set an Environment
-To make the above scenario available, set a local machine as a sftp server according to respective environments. Also, put "test.csv.gz" under /usr/local.
-
-## Execute a Scenario of ETL Processing
-After wrote scenario.yml and set the environment, execute a scenario by as below command.
-```
-cd sample
-poetry run python3 bin/clibomanager.py simple-etl
+```bash
+poetry add cliboa
 ```
 
+### 4. Initialize your Application using cliboa.
 
+Initialize the directory structure for cliboa. This creates the `cb_app` directory.
+
+```bash
+poetry run cliboadmin init -a cb_app
+```
+
+### 5. Create a New Project
+
+Create a sample project named `test_project`.
+
+```bash
+poetry run cliboadmin pj -p test_project
+```
+
+### 6. Run the Project
+
+Execute the project using the `cliboa_run.py` script.
+
+```bash
+poetry run python cb_app/cliboa_run.py test_project
+```
+
+If the installation and execution were successful, you will see the `Hello cliboa!` message printed to your standard output.

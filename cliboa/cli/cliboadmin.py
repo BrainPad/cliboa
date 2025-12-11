@@ -16,106 +16,131 @@
 
 import argparse
 import os
-import sys
-from importlib import import_module
+from pathlib import Path
 from shutil import copyfile
 
 import cliboa
 
 
-class CliboAdmin(object):
+class CliboAdmin:
     """
     cliboa administrator command
     """
 
     def __init__(self, args):
         self._args = args
-        self._cmn_dir = None
-        self._bin_dir = None
+        self._cwd = Path.cwd().resolve()
+        print(f"Working root dir is {self._cwd}")
+        self._cliboa_install_path = os.path.dirname(cliboa.__path__[0])
 
     def main(self):
         """
         Usage:
-            cliboadmin init $directory_name
-            cliboadmin create $project_name
+            cliboadmin init $app_name
+            cliboadmin project|pj $project_name
         """
-        if self._args.option == "init":
-            self._init_project(self._args.dir_name)
-            print("Initialization of cliboa project '" + self._args.dir_name + "' was successful.")
-        elif self._args.option == "create":
-            self._create_new_project(self._args.dir_name)
-            print("Adding a new project '" + self._args.dir_name + "' was successful.")
+        if self._args.cmd == "init":
+            self._init_project(self._args.app)
+        elif self._args.cmd in ("project", "pj"):
+            if self._args.project:
+                self._create_new_project(self._args.project)
+            else:
+                print("Please specify -p PROJECT_NAME.")
 
-    def _init_project(self, ini_dir):
+    def _init_project(self, app_name: str | None):
         """
         Initialize program configuration
         """
-        self._create_ess_dirs(ini_dir)
-        self._create_ess_files(ini_dir)
+        self._create_dir("common")
+        self._create_dir("project")
+        if self._create_dir("conf"):
+            self._copy_file(
+                self._get_cliboa_path("cli", "template", "logging.conf"),
+                self._get_dest_path("conf", "logging.conf"),
+            )
+            self._create_dir("logs")
+        if app_name:
+            self._create_dir(app_name)
+            dest_path = self._get_dest_path(app_name, "cliboa_run.py")
+            self._copy_file(self._get_cliboa_path("cli", "template", "cliboa_run.py"), dest_path)
+            self._replace_app_in_file(dest_path, app_name)
+            self._copy_file(
+                self._get_cliboa_path("conf", "default_environment.py"),
+                self._get_dest_path(app_name, "cliboa_environment.py"),
+            )
 
-    def _create_ess_dirs(self, ini_dir):
+    def _create_dir(self, *args) -> bool:
+        target = self._get_dest_path(*args)
+        print(f"Create {target}")
+        try:
+            if os.path.isdir(target):
+                print(f"Already exists {target}")
+                return True
+            os.makedirs(target, exist_ok=False)
+            return True
+        except Exception as e:
+            print(f"Warning: Failed create dir {target}: {e}")
+            return False
+
+    def _copy_file(self, src: str, dest: str) -> bool:
+        try:
+            print(f"Create {dest}")
+            if os.path.isfile(dest):
+                print(f"Warning: Already exists {dest}")
+                return False
+            copyfile(src, dest)
+            return True
+        except Exception as e:
+            print(f"Warning: Failed create file {dest}: {e}")
+            return False
+
+    def _get_cliboa_path(self, *args):
+        return os.path.join(self._cliboa_install_path, "cliboa", *args)
+
+    def _get_dest_path(self, *args):
+        return os.path.join(self._cwd, *args)
+
+    def _replace_app_in_file(self, dest_path: str, app_name: str) -> bool:
         """
-        create essential directories
+        Convert "app.cliboa_environment"
         """
-        os.makedirs(ini_dir, exist_ok=False)
-        self._bin_dir = os.path.join(ini_dir, "bin")
-        os.makedirs(self._bin_dir, exist_ok=False)
-        self._cmn_dir = os.path.join(ini_dir, "common")
-        os.makedirs(self._cmn_dir, exist_ok=False)
-        os.makedirs(os.path.join(self._cmn_dir, "scenario"), exist_ok=False)
-        os.makedirs(os.path.join(ini_dir, "cliboa/conf"), exist_ok=False)
-        os.makedirs(os.path.join(ini_dir, "conf"), exist_ok=False)
-        os.makedirs(os.path.join(ini_dir, "logs"), exist_ok=False)
-        os.makedirs(os.path.join(ini_dir, "project"), exist_ok=False)
+        if not os.path.exists(dest_path):
+            return False
+        original_string = "app.cliboa_environment"
+        replacement_string = f"{app_name}.cliboa_environment"
+        try:
+            with open(dest_path, "r", encoding="utf-8") as f:
+                content = f.read()
+            new_content = content.replace(original_string, replacement_string)
+            if new_content != content:
+                with open(dest_path, "w", encoding="utf-8") as f:
+                    f.write(new_content)
+            return True
+        except Exception:
+            print(f"Warning: Failed update {dest_path} for {app_name}")
+            return False
 
-    def _create_ess_files(self, ini_dir):
-        """
-        create essential files
-        """
-        cliboa_install_path = os.path.dirname(cliboa.__path__[0])
-
-        run_cmd_path = os.path.join(
-            cliboa_install_path, "cliboa", "cli", "template", "bin", "clibomanager.py"
-        )
-        copyfile(run_cmd_path, os.path.join(self._bin_dir, "clibomanager.py"))
-
-        # copy environment.py
-        cmn_env_path = os.path.join(cliboa_install_path, "cliboa", "conf", "default_environment.py")
-        copyfile(cmn_env_path, os.path.join(self._cmn_dir, "environment.py"))
-
-        # copy logging.conf
-        conf_path = os.path.join(cliboa_install_path, "cliboa", "cli", "template", "logging.conf")
-        copyfile(conf_path, os.path.join(ini_dir, "conf", "logging.conf"))
-
-        # create __init__.py
-        cmn_ini_path = os.path.join(ini_dir, "common", "__init__.py")
-        open(cmn_ini_path, "w").close()
-
-    def _create_new_project(self, new_project_dir):
+    def _create_new_project(self, pj_name: str):
         """
         Create an individual project configuration
         """
-        # check if being under cliboa project directory
-        sys.path.append(os.getcwd())
-        import_module("common.environment")
-
-        # make essential directories and files
-        os.makedirs(os.path.join("project", new_project_dir), exist_ok=False)
-        os.makedirs(os.path.join("project", new_project_dir, "scenario"), exist_ok=False)
-        with open(os.path.join("project", new_project_dir, "scenario.yml"), "w") as yaml:
-            yaml.write("scenario:" + "\n")
+        if self._create_dir("project", pj_name):
+            self._copy_file(
+                self._get_cliboa_path("cli", "template", "scenario-sample.yml"),
+                self._get_dest_path("project", pj_name, "scenario.yml"),
+            )
+        self._create_dir("project", pj_name, "scenario")
 
 
-class CommandArgumentParser(object):
+class CommandArgumentParser:
     def parse(self):
         """
         Parse cliboadmin arguments
         """
         parser = argparse.ArgumentParser()
-        parser.add_argument("option", choices=["init", "create"], help="init or create")
-        parser.add_argument(
-            "dir_name", help="init $directory_name or create $project_directory_name"
-        )
+        parser.add_argument("cmd", choices=["init", "project", "pj"], help="init or project(pj)")
+        parser.add_argument("-a", "--app", help="Your application name")
+        parser.add_argument("-p", "--project", help="Project name")
         return parser.parse_args()
 
 
