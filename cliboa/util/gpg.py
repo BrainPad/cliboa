@@ -3,12 +3,13 @@ import os
 
 import gnupg
 
+from cliboa.util.base import _BaseObject
 from cliboa.util.exception import CliboaException
 
 
-class Gpg(object):
-    def __init__(self, gnupghome):
-        super().__init__()
+class Gpg(_BaseObject):
+    def __init__(self, gnupghome, **kwargs):
+        super().__init__(**kwargs)
 
         if not os.path.exists(gnupghome):
             os.makedirs(gnupghome, exist_ok=True)

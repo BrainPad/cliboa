@@ -17,10 +17,10 @@ from datetime import datetime
 from ftplib import FTP, FTP_TLS  # nosec
 from time import sleep
 
-from cliboa.util.log import _get_logger
+from cliboa.util.base import _BaseObject
 
 
-class FtpAdapter(object):
+class FtpAdapter(_BaseObject):
     """
     Ftp Adaptor
     """
@@ -29,14 +29,7 @@ class FtpAdapter(object):
     RETRY_SEC = 10
 
     def __init__(
-        self,
-        host,
-        user,
-        password,
-        timeout=TIMEOUT_SEC,
-        retryTimes=3,
-        port=21,
-        tls=False,
+        self, host, user, password, timeout=TIMEOUT_SEC, retryTimes=3, port=21, tls=False, **kwargs
     ):
         """
         Must set whether password or key
@@ -50,6 +43,7 @@ class FtpAdapter(object):
             port=21 (int): port number
             tls=False (bool): use secure connection
         """
+        super().__init__(**kwargs)
 
         self._host = host
         self._user = user
@@ -58,7 +52,6 @@ class FtpAdapter(object):
         self._retryTimes = retryTimes
         self._port = port
         self._tls = tls
-        self._logger = _get_logger(__name__)
 
     def execute(self, obj):
         """

@@ -18,8 +18,11 @@ from time import sleep
 
 from paramiko import AutoAddPolicy, SSHClient
 
+from cliboa.util.base import _BaseObject
+from cliboa.util.log import _get_logger
 
-class SftpAdapter(object):
+
+class SftpAdapter(_BaseObject):
     """
     Sftp Adaptor
     """
@@ -36,6 +39,7 @@ class SftpAdapter(object):
         timeout=TIMEOUT_SEC,
         retryTimes=3,
         port=22,
+        **kwargs,
     ):
         """
         Must set whether password or key
@@ -52,7 +56,7 @@ class SftpAdapter(object):
         Raises:
             ValueError: both password and private key are empty, or both specified.
         """
-
+        super().__init__(**kwargs)
         logging.getLogger("paramiko").setLevel(logging.CRITICAL)
 
         if (not password and not key) or (password and key):
@@ -66,7 +70,6 @@ class SftpAdapter(object):
         self._timeout = timeout
         self._retryTimes = retryTimes
         self._port = 22 if port is None else port
-        self._logger = logging.getLogger(__name__)
 
     def execute(self, obj):
         """
@@ -386,7 +389,7 @@ def _transfer_with_callback(reader, writer, file_size, callback):
     For Debug
     """
     size = 0
-    _logger = logging.getLogger(__name__)
+    _logger = _get_logger(__name__)
     _logger.debug("Call back method")
     while True:
         data = reader.read(32768)

@@ -221,11 +221,18 @@ class BaseStep(AbstractStep):
         )
         return self.get_symbol_argument(name)
 
+    def _warn_deprecated_args(self, module_name: str, class_name: str, end_version: str) -> None:
+        _warn_deprecated(
+            f"directly arguments of {module_name}.{class_name}",
+            f"definition of {module_name}.{class_name}.Arguments",
+            end_version,
+        )
+
     def get_target_files(self, src_dir: str, src_pattern: str, *args, **kwargs) -> List[str]:
         """
         Alias of cliboa.adapter.File.get_target_files
         """
-        return self._resolve("adapter_file", File).get_target_files(
+        return self._resolve("adaptor_file", File).get_target_files(
             src_dir, src_pattern, *args, **kwargs
         )
 

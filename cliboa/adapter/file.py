@@ -17,8 +17,10 @@ import os
 import re
 from typing import List
 
+from cliboa.util.base import _BaseObject
 
-class File:
+
+class File(_BaseObject):
     def remove_csv_col(self, input_file, output_file, remains, enc="utf-8"):
         """
         Extract only the necessary columns from the CSV data and output a new CSV

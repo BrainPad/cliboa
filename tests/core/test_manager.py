@@ -47,7 +47,6 @@ class TestScenarioManager:
         dummy_args = ("pos_arg1",)
         mock_logger = MagicMock()
         dummy_kwargs = {
-            "kw_arg1": "val1",
             "di_scenario_builder": MockBuilder,
             "di_logger": mock_logger,
         }
@@ -84,7 +83,7 @@ class TestScenarioManager:
 
         created_executor_instances = []
 
-        dummy_kwargs = {"kw_arg_exec": "val_exec"}
+        dummy_kwargs = {"di_arg_exec": "val_exec"}
 
         # --- Define Mock Classes ---
         class MockBuilder:
@@ -96,7 +95,7 @@ class TestScenarioManager:
                 # Checkpoint 2: Assert constructor argument
                 assert steps == mock_steps, "Executor did not receive correct steps"
 
-                assert "kw_arg_exec" in kwargs
+                assert "di_arg_exec" in kwargs
                 assert kwargs["di_logger"] is mock_logger_instance
 
                 self.register_listener = mock_executor_register
@@ -105,7 +104,7 @@ class TestScenarioManager:
 
         class MockListener:
             def __init__(self, *args, **kwargs):
-                assert "kw_arg_exec" in kwargs
+                assert "di_arg_exec" in kwargs
                 assert kwargs["di_logger"] is mock_logger_instance
 
         sm_kwargs = dummy_kwargs | {

@@ -13,8 +13,10 @@
 from google.cloud import bigquery, firestore, storage
 from google.oauth2 import service_account
 
+from cliboa.util.base import _BaseObject
 
-class ServiceAccount(object):
+
+class ServiceAccount(_BaseObject):
     """
     Service Account api wrapper
     Creates a Signer instance from a service account .json file path
@@ -29,7 +31,7 @@ class ServiceAccount(object):
         return service_account.Credentials.from_service_account_file(credentials)
 
 
-class GcsAdapter(object):
+class GcsAdapter(_BaseObject):
     """
     Gcp Adaptor
     """
@@ -43,7 +45,7 @@ class GcsAdapter(object):
         )
 
 
-class BigQueryAdapter(object):
+class BigQueryAdapter(_BaseObject):
     """
     BigQuery Adaptor
     """
@@ -93,7 +95,7 @@ class BigQueryAdapter(object):
         return format_and_dest_format.get(ext)
 
 
-class FireStoreAdapter(object):
+class FireStoreAdapter(_BaseObject):
     """
     FireStore Adaptor
     """
