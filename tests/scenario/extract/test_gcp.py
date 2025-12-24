@@ -23,7 +23,7 @@ class TestBigQueryRead(BaseCliboaTest):
     @patch.object(BigQueryAdapter, "get_client")
     def test_execute_with_only_key(self, m_get_client):
         instance = BigQueryRead()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "project_id": "test_dataset",
                 "credentials": "test_tblname",
@@ -57,7 +57,7 @@ class TestBigQueryRead(BaseCliboaTest):
         m_get_write_disposition,
     ):
         instance = BigQueryRead()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "project_id": "test_dataset",
                 "credentials": "test_tblname",
@@ -84,7 +84,7 @@ class TestGcsFileExistsCheck(BaseCliboaTest):
         m_pagenate.return_value = m_contents
         # テスト処理
         instance = GcsFileExistsCheck()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "project_id": "hoge",
                 "bucket": "piyo",
@@ -103,7 +103,7 @@ class TestGcsFileExistsCheck(BaseCliboaTest):
         m_pagenate.return_value = m_contents
         # テスト処理
         instance = GcsFileExistsCheck()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "project_id": "hoge",
                 "bucket": "piyo",

@@ -383,7 +383,7 @@ class TestScenarioBuilderExecute:
     def test_execute_with_symbol(self):
         main_scenario = {
             "scenario": [
-                {"step": "Step1", "class": "SampleStepSub", "arguments": {"memo": "val1"}},
+                {"step": "Step1", "class": "SampleStep", "arguments": {"memo": "val1"}},
                 {"step": "Step2", "class": "SampleStepSub", "symbol": "Step1"},
             ]
         }
@@ -393,16 +393,22 @@ class TestScenarioBuilderExecute:
         builder = _ScenarioBuilder(
             scenario_file="main.yml",
             di_loader=DummyLoaderCls,
-            # di_factory=MockFactorySub(),
             di_logger=mock_logger,
         )
 
         steps = builder.execute()
         assert type(steps[1].step) is SampleStepSub
+        # steps[0].execute()
         steps[0].step.put_to_context("xyz")
+        # self.debug_print(steps[1].step)
+        # mock_logger.debug(f"{steps[1].step}: {steps[1].step.__dict__}")
         steps[1].execute()
 
-        print(mock_logger)
-        print(mock_logger.info.call_args_list)
+        # print(mock_logger)
+        # print(f"debug: {mock_logger.debug.call_args_list}")
+        # print(f"info: {mock_logger.info.call_args_list}")
+        # print(f"warning: {mock_logger.warning.call_args_list}")
+        # print(f"error: {mock_logger.error.call_args_list}")
+        # print(f"exception: {mock_logger.exception.call_args_list}")
         mock_logger.info.assert_any_call("symbol memo is val1")
         mock_logger.info.assert_any_call("symbol context is xyz")

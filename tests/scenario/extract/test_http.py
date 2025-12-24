@@ -43,7 +43,7 @@ class TestHttpDownload(object):
 
         try:
             instance = HttpDownload()
-            instance._set_properties(
+            instance._set_arguments(
                 {
                     # use Postman echo
                     "src_url": "https://postman-echo.com",
@@ -79,7 +79,7 @@ class TestDownloadViaBasicAuth(BaseCliboaTest):
         try:
             os.makedirs(self._data_dir, exist_ok=True)
             instance = HttpDownloadViaBasicAuth()
-            instance._set_properties(
+            instance._set_arguments(
                 {
                     # use Postman echo
                     "src_url": "https://postman-echo.com",
@@ -106,7 +106,7 @@ class TestDownloadViaBasicAuth(BaseCliboaTest):
         mock_get.side_effect = HTTPError("Http request failed. HTTP Status code: 401")
 
         instance = HttpDownloadViaBasicAuth()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 # use Postman echo
                 "src_url": "https://postman-echo.com",
@@ -146,7 +146,7 @@ class TestHttpGet(object):
         try:
             os.makedirs(self._data_dir, exist_ok=True)
             instance = HttpGet()
-            instance._set_properties(
+            instance._set_arguments(
                 {
                     # use Postman echo
                     "src_url": "https://postman-echo.com/get?foo1=bar1&foo2=bar2",
@@ -176,7 +176,7 @@ class TestHttpGet(object):
         try:
             os.makedirs(self._data_dir, exist_ok=True)
             instance = HttpGet()
-            instance._set_properties(
+            instance._set_arguments(
                 {
                     # use Postman echo
                     "src_url": "https://postman-echo.com/basic-auth",
@@ -203,7 +203,7 @@ class TestHttpGet(object):
         mock_get.side_effect = HTTPError("Http request failed. HTTP Status code: 404")
 
         instance = HttpGet()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 # use Postman echo
                 "src_url": "https://spam.com/get?foo1=bar1&foo2=bar2",
@@ -223,7 +223,7 @@ class TestHttpGet(object):
         mock_get.side_effect = HTTPError("Http request failed. HTTP Status code: 401")
 
         instance = HttpGet()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 # use Postman echo
                 "src_url": "https://postman-echo.com/basic-auth",

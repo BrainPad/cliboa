@@ -32,7 +32,7 @@ class TestFtpDownload(BaseCliboaTest):
             os.makedirs(self._data_dir)
             instance = FtpDownload()  # noqa
             """
-            instance._set_properties({
+            instance._set_arguments({
                 "host": "test.rebex.net",
                 "user": "demo",
                 "password": "password",

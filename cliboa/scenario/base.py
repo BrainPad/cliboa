@@ -17,6 +17,8 @@ import tempfile
 from abc import abstractmethod
 from typing import Any, List, Optional
 
+from pydantic import BaseModel
+
 from cliboa.adapter.file import File
 from cliboa.scenario.interface import IParentStep
 from cliboa.util.base import _BaseObject, _warn_deprecated
@@ -31,9 +33,12 @@ class AbstractStep(_BaseObject):
     This class is minimum implemented to be needed by core layer.
     """
 
+    Arguments: type[BaseModel] | None = None
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._parent = None
+        self._args = None
 
     @property
     def logger(self) -> logging.Logger:
@@ -41,6 +46,10 @@ class AbstractStep(_BaseObject):
         logger instance
         """
         return self._logger
+
+    @property
+    def args(self) -> BaseModel | None:
+        return self._args
 
     @property
     def parent(self) -> IParentStep | None:
@@ -56,23 +65,35 @@ class AbstractStep(_BaseObject):
         """
         self._parent = parent
 
-    def _set_properties(self, properties: dict[str, Any]) -> None:
+    def _set_arguments(self, arguments: dict[str, Any]) -> None:
         """
         This method allows you to set a value
         to the class with either method directly or via property setter.
         Either way, the method must be implemented
         to set the value for the class parameter like below.
 
-        -- eg1 --
+        -- eg1 (recommended) --
+        from pydantic import BaseModel
         class Foo(BaseStep):
+            # no need to define __init__
+
+            class Arguments(BaseModel):
+                bar: string
+
+            def execute(self):
+                # access via self.args
+                self.logger.info(f"bar is {self.args.bar}")
+
+        -- eg2 --
+        class Foo2(BaseStep):
             def __init__(self):
                 self._bar = None
 
             def bar(self, bar):
                 self._bar = bar
 
-        -- eg2 --
-        class Foo2(BaseStep):
+        -- eg3 --
+        class Foo3(BaseStep):
             def __init__(self):
                 self._bar = None
 
@@ -83,10 +104,25 @@ class AbstractStep(_BaseObject):
             @bar.setter
             def bar(self, bar):
                 self._bar = bar
-
-        TODO: can specify pydantic arguments model.
         """
-        for k, v in properties.items():
+        props = arguments.copy()
+        if self.Arguments is not None:
+            self.logger.debug(f"Set arguments using {self.__class__.__name__}.Arguments")
+            self._args = self.Arguments.model_validate(props)
+            for field_name, field_info in self.Arguments.model_fields.items():
+                if isinstance(field_info.validation_alias, str):
+                    props.pop(field_info.validation_alias, None)
+                elif field_info.alias:
+                    props.pop(field_info.alias, None)
+                else:
+                    props.pop(field_name, None)
+            if len(props) > 0:
+                self.logger.warning(
+                    f"There are {len(props)} unused arguments after assigned to pydantic model."
+                )
+
+        self.logger.debug("Set arguments to property directly.")
+        for k, v in props.items():
             if isinstance(getattr(type(self), k, None), property):
                 setattr(self, k, v)
             else:
@@ -94,7 +130,10 @@ class AbstractStep(_BaseObject):
                 if callable(call):
                     call(v)
                 else:
-                    self.logger.warning(f"Failed to set property {k}")
+                    if self.Arguments is not None:
+                        self.logger.warning(f"Failed to set mixed argument {k}")
+                    else:
+                        self.logger.warning(f"Failed to set argument {k}")
 
     @abstractmethod
     def execute(self, *args, **kwargs) -> Optional[int]:
@@ -140,9 +179,6 @@ class BaseStep(AbstractStep):
 
     This class has additional implement from AbstractStep to be useful on common cases.
     """
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
 
     @property
     def _step(self) -> str:

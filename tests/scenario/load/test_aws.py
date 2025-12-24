@@ -28,7 +28,7 @@ from tests import BaseCliboaTest
 class TestDynamoDBWrite(BaseCliboaTest):
     def _get_dynamodb_write_instance(self, file_format):
         instance = DynamoDBWrite()
-        instance._set_properties(
+        instance._set_arguments(
             {
                 "table_name": "test_table",
                 "src_dir": "/test/dir",
@@ -223,7 +223,7 @@ class TestS3Upload(BaseCliboaTest):
                 f.write("test content")
 
             instance = S3Upload()
-            instance._set_properties(
+            instance._set_arguments(
                 {
                     "bucket": "test-bucket",
                     "src_dir": tmp_dir,
