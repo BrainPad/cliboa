@@ -6,7 +6,6 @@
 black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square)](https://github.com/psf/black)
 [![Contributions Welcome](https://img.shields.io/static/v1.svg?label=Contributions&message=Welcome&color=0059b3&style=flat-square)](https://github.com/BrainPad/cliboa/blob/master/CONTRIBUTING.md)
 [![Repo Size](https://img.shields.io/github/repo-size/BrainPad/cliboa)](https://github.com/BrainPad/cliboa)
-[![Gitter](https://badges.gitter.im/cliboa/users.svg)](https://gitter.im/cliboa/users?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 > [!IMPORTANT]
 > **Note on Future Development**
@@ -35,10 +34,10 @@ cliboa is an application framework which can implement ETL(ELT) pipeline. It eas
 
 * [QuickStart](/docs/quick_start.md)
 * [MANUAL](/docs/manual.md)
-  * [YAML Configuration](/docs/yaml_configuration.md)
+  * [Scenario Configuration](/docs/scenario_configuration.md)
   * [Default ETL Modules](/docs/default_etl_modules.md)
 * [How to Contribute](/CONTRIBUTING.md)
   * [Coding Style Guide](/docs/developers/coding_style_guide.md)
   * [Layered Architecture](/docs/developers/layered_architecture.md)
-  * [How to Implement Additional ETL Modules](/docs/additional_etl_modules.md)
+  * [How to Implement Additional ETL Modules](/docs/developers/additional_etl_modules.md)
     * [Step Class Extention](/docs/developers/step_class_extention.md)
