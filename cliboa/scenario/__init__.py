@@ -12,7 +12,7 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-from .base import AbstractStep, BaseStep
+from .base import BaseStep
 from .extract.aws import DynamoDBRead, S3Delete, S3Download, S3DownloadFileDelete, S3FileExistsCheck
 from .extract.azure import AzureBlobDownload
 from .extract.ftp import FtpDownload, FtpDownloadFileDelete

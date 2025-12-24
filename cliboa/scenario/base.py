@@ -22,12 +22,12 @@ from cliboa.scenario.interface import IParentStep
 from cliboa.util.base import _BaseObject, _warn_deprecated
 
 
-class AbstractStep(_BaseObject):
+class BaseStep(_BaseObject):
     """
-    Abstract class of all the step classes.
+    Base class of all the step classes.
 
     ALL step classes are required to inherit this class.
-    This class is minimum implemented to be needed by core layer.
+    This class is minimum implemented to be needed within cliboa.
     """
 
     Arguments: type[BaseModel] | None = None
@@ -41,7 +41,7 @@ class AbstractStep(_BaseObject):
     @property
     def logger(self) -> logging.Logger:
         """
-        logger instance
+        logger instance - set in _BaseObject.__init__
         """
         return self._logger
 
@@ -170,12 +170,8 @@ class AbstractStep(_BaseObject):
             return None
         return self.parent.get_from_context(target)
 
-
-class BaseStep(AbstractStep):
     """
-    Base class of all the step classes.
-
-    This class has additional implement from AbstractStep to be useful on common cases.
+    Deprecated functions and properties to keep backward compatibility are below:
     """
 
     @property
@@ -188,7 +184,7 @@ class BaseStep(AbstractStep):
                 "cliboa.scenario.base.BaseStep._step",
                 "3.0",
                 "4.0",
-                "cliboa.scenario.base.AbstractStep.put_to_context",
+                "cliboa.scenario.base.BaseStep.put_to_context",
             )
         )
         return self.parent.step_name if self.parent else ""
@@ -203,7 +199,7 @@ class BaseStep(AbstractStep):
                 "cliboa.scenario.base.BaseStep._symbol",
                 "3.0",
                 "4.0",
-                "cliboa.scenario.base.AbstractStep.get_from_context",
+                "cliboa.scenario.base.BaseStep.get_from_context",
             )
         )
         return self.parent.symbol_name if self.parent else None
@@ -217,7 +213,7 @@ class BaseStep(AbstractStep):
                 "cliboa.scenario.base.BaseStep.get_step_argument",
                 "3.0",
                 "4.0",
-                "cliboa.scenario.base.AbstractStep.get_symbol_argument",
+                "cliboa.scenario.base.BaseStep.get_symbol_argument",
             )
         )
         return self.get_symbol_argument(name)

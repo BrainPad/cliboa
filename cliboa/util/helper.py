@@ -43,7 +43,7 @@ class Helper(object):
             "cliboa.util.helper.Helepr.set_property",
             "3.0",
             "4.0",
-            "cliboa.scenario.base.AbstractStep._set_arguments",
+            "cliboa.scenario.base.BaseStep._set_arguments",
         )
         attr = getattr(type(cls), method, None)
         if isinstance(attr, property):

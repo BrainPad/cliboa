@@ -20,7 +20,7 @@ from cliboa import state
 from cliboa.core.interface import _IContext, _IExecute
 from cliboa.core.model import CommandArgument, StepModel
 from cliboa.listener.interface import IScenarioExecutor
-from cliboa.scenario.base import AbstractStep
+from cliboa.scenario.base import BaseStep
 from cliboa.scenario.interface import IParentStep
 from cliboa.util.base import _BaseObject
 from cliboa.util.cache import ObjectStore
@@ -143,7 +143,7 @@ class _StepExecutor(_BaseExecutor, IParentStep):
 
     def __init__(
         self,
-        step: AbstractStep,
+        step: BaseStep,
         model: StepModel,
         cmd_arg: CommandArgument | None = None,
         context: _IContext | None = None,
@@ -161,7 +161,7 @@ class _StepExecutor(_BaseExecutor, IParentStep):
         self._exec_kwargs = copy.deepcopy(cmd_arg.kwargs) if cmd_arg and cmd_arg.kwargs else {}
 
     @property
-    def step(self) -> AbstractStep:
+    def step(self) -> BaseStep:
         return self._step
 
     @property

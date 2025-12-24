@@ -140,13 +140,13 @@ class _CliboaFactory(_BaseObject):
             if not isinstance(
                 instance,
                 (
-                    AbstractStep,  # noqa
+                    BaseStep,  # noqa
                     BaseListener,
                 ),
             ):
                 self._logger.warning(
                     f"{instance.__class__.__name__} does not inherit from "
-                    "cliboa.scenario.base.AbstractStep or cliboa.listener.base.BaseListener"
+                    "cliboa.scenario.base.BaseStep or cliboa.listener.base.BaseListener"
                 )
             return instance
         except Exception:

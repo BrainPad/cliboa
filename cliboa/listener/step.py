@@ -19,7 +19,7 @@ from pydantic import BaseModel
 from cliboa import state
 from cliboa.conf import env
 from cliboa.listener.base import BaseStepListener
-from cliboa.scenario.base import AbstractStep
+from cliboa.scenario.base import BaseStep
 
 
 class StepStatusListener(BaseStepListener):
@@ -44,7 +44,7 @@ class StepStatusListener(BaseStepListener):
         self._partial_pattern = partial_pattern
         self._partial_num = partial_num
 
-    def before(self, step: AbstractStep) -> None:
+    def before(self, step: BaseStep) -> None:
         state.set(step.__class__.__name__)
         props_dict = {}
         props_values = step.__dict__.copy()
@@ -84,8 +84,8 @@ class StepStatusListener(BaseStepListener):
         )
         self.logger.info("Start step execution. %s" % step.__class__.__name__)
 
-    def after(self, step: AbstractStep) -> None:
+    def after(self, step: BaseStep) -> None:
         self.logger.info("Finish step execution. %s" % step.__class__.__name__)
 
-    def completion(self, step: AbstractStep) -> None:
+    def completion(self, step: BaseStep) -> None:
         self.logger.info("Complete step execution. %s" % step.__class__.__name__)
