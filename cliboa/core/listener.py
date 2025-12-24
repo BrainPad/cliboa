@@ -20,8 +20,9 @@ from cliboa.util.base import _warn_deprecated
 _warn_deprecated_step_listener = partial(
     _warn_deprecated,
     "cliboa.core.listener.StepListener",
-    "cliboa.listener.base.BaseStepListener",
     "3.0",
+    "4.0",
+    "cliboa.listener.base.BaseStepListener",
 )
 
 

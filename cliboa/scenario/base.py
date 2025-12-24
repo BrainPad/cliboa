@@ -188,8 +188,9 @@ class BaseStep(AbstractStep):
         self.logger.warning(
             _warn_deprecated(
                 "cliboa.scenario.base.BaseStep._step",
-                "cliboa.scenario.base.AbstractStep.put_to_context",
                 "3.0",
+                "4.0",
+                "cliboa.scenario.base.AbstractStep.put_to_context",
             )
         )
         return self.parent.step_name if self.parent else ""
@@ -202,8 +203,9 @@ class BaseStep(AbstractStep):
         self.logger.warning(
             _warn_deprecated(
                 "cliboa.scenario.base.BaseStep._symbol",
-                "cliboa.scenario.base.AbstractStep.get_from_context",
                 "3.0",
+                "4.0",
+                "cliboa.scenario.base.AbstractStep.get_from_context",
             )
         )
         return self.parent.symbol_name if self.parent else None
@@ -215,17 +217,21 @@ class BaseStep(AbstractStep):
         self.logger.warning(
             _warn_deprecated(
                 "cliboa.scenario.base.BaseStep.get_step_argument",
-                "cliboa.scenario.base.AbstractStep.get_symbol_argument",
                 "3.0",
+                "4.0",
+                "cliboa.scenario.base.AbstractStep.get_symbol_argument",
             )
         )
         return self.get_symbol_argument(name)
 
-    def _warn_deprecated_args(self, module_name: str, class_name: str, end_version: str) -> None:
+    def _warn_deprecated_args(
+        self, module_name: str, class_name: str, end_version: str, removal_version: str
+    ) -> None:
         _warn_deprecated(
             f"directly arguments of {module_name}.{class_name}",
-            f"definition of {module_name}.{class_name}.Arguments",
             end_version,
+            removal_version,
+            f"definition of {module_name}.{class_name}.Arguments",
         )
 
     def get_target_files(self, src_dir: str, src_pattern: str, *args, **kwargs) -> List[str]:

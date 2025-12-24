@@ -16,17 +16,18 @@ from cliboa.util.base import _BaseObject
 from cliboa.util.exception import InvalidParameter, SqliteInvalid
 
 
-class EssentialParameters:
+class EssentialParameters(_BaseObject):
     """
     Validation for the essential parameters of step class
     """
 
-    def __init__(self, cls_name, param_list):
+    def __init__(self, cls_name, param_list, **kwargs):
         """
         Args:
             cls_name: class name which has validation target parameters
             param_list: list of validation target parameters
         """
+        super().__init__(**kwargs)
         self._cls_name = cls_name
         self._param_list = param_list
 

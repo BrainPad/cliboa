@@ -33,7 +33,7 @@ class ObjectStore:
             v (dict): Cache value
         """
         if not quiet:
-            _warn_deprecated("cliboa.util.cache.ObjectStore.put", end_version="3.0")
+            _warn_deprecated("cliboa.util.cache.ObjectStore.put", "3.0", "4.0")
         _PROCESS_STORE_CACHE[k] = v
 
     @staticmethod
@@ -47,5 +47,5 @@ class ObjectStore:
         Returns:
             dict: Value. Returns None if the key does not exist
         """
-        _warn_deprecated("cliboa.util.cache.ObjectStore.get", end_version="3.0")
+        _warn_deprecated("cliboa.util.cache.ObjectStore.get", "3.0", "4.0")
         return _PROCESS_STORE_CACHE.get(k)
