@@ -11,62 +11,46 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+from pydantic import BaseModel
+
 from cliboa.adapter.ftp import FtpAdapter
 from cliboa.scenario.base import BaseStep
+from cliboa.util.base import _warn_deprecated
 
 
 class BaseFtp(BaseStep):
-    def __init__(self):
-        super().__init__()
+    class Arguments(BaseModel):
+        src_dir: str
+        src_pattern: str
+        dest_dir: str = ""
+        host: str
+        port: int = 21
+        user: str
+        password: str | None = None
+        timeout: int = 30
+        retry_count: int = 3
+        tls: bool = False
 
-        self._src_dir = None
-        self._src_pattern = None
-        self._dest_dir = ""
-        self._host = None
-        self._port = 21
-        self._user = None
-        self._password = None
-        self._timeout = 30
-        self._retry_count = 3
-        self._tls = False
-
-    def src_dir(self, src_dir):
-        self._src_dir = src_dir
-
-    def src_pattern(self, src_pattern):
-        self._src_pattern = src_pattern
-
-    def dest_dir(self, dest_dir):
-        self._dest_dir = dest_dir
-
-    def host(self, host):
-        self._host = host
-
-    def port(self, port):
-        self._port = port
-
-    def user(self, user):
-        self._user = user
-
-    def password(self, password):
-        self._password = password
-
-    def timeout(self, timeout):
-        self._timeout = timeout
-
-    def retry_count(self, retry_count):
-        self._retry_count = retry_count
-
-    def tls(self, tls):
-        self._tls = tls
+    def get_adapter(self):
+        return self._resolve(
+            "adapter_ftp",
+            FtpAdapter,
+            host=self.args.host,
+            user=self.args.user,
+            password=self.args.password,
+            timeout=self.args.timeout,
+            retryTimes=self.args.retry_count,
+            port=self.args.port,
+            tls=self.args.tls,
+        )
 
     def get_adaptor(self):
-        return FtpAdapter(
-            host=self._host,
-            user=self._user,
-            password=self._password,
-            timeout=self._timeout,
-            retryTimes=self._retry_count,
-            port=self._port,
-            tls=self._tls,
+        self.logger.info(
+            _warn_deprecated(
+                "cliboa.scenario.ftp.BaseFtp.get_adaptor",
+                "3.0",
+                "4.0",
+                "cliboa.scenario.ftp.BaseFtp.get_adapter",
+            )
         )
+        return self.get_adapter()

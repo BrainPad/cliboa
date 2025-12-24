@@ -11,102 +11,90 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+from pydantic import Field
+
 from cliboa.adapter.csv import Csv
+from cliboa.scenario.file import FileRead
 from cliboa.scenario.sqlite import SqliteTransaction
-from cliboa.scenario.validator import EssentialParameters
+from cliboa.util.base import _warn_deprecated_args
 from cliboa.util.exception import CliboaException, FileNotFound
 
 
-class SqliteImport(SqliteTransaction):
-    def __init__(self):
-        super().__init__()
-        self._src_dir = None
-        self._src_pattern = None
-        self._tblname = None
-        self._primary_key = None
-        self._index = []
-        self._refresh = True
-        self._force_insert = False
-        self._encoding = "utf-8"
+class SqliteImport(SqliteTransaction, FileRead):
+    class Arguments(SqliteTransaction.Arguments, FileRead.Arguments):
+        tblname: str
+        primary_key: str | None = None
+        index: list[str] = Field(default_factory=list)
+        refresh: bool = True
+        force_insert: bool = False
 
-    def src_dir(self, src_dir):
-        self._src_dir = src_dir
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _tblname(self):
+        return self.args.tblname
 
-    def src_pattern(self, src_pattern):
-        self._src_pattern = src_pattern
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _primary_key(self):
+        return self.args.primary_key
 
-    def tblname(self, tblname):
-        self._tblname = tblname
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _index(self):
+        return self.args.index
 
-    def primary_key(self, primary_key):
-        self._primary_key = primary_key
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _refresh(self):
+        return self.args.refresh
 
-    def index(self, index):
-        self._index = index
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _force_insert(self):
+        return self.args.force_insert
 
-    def refresh(self, refresh):
-        self._refresh = refresh
-
-    def force_insert(self, force_insert):
-        self._force_insert = force_insert
-
-    def encoding(self, encoding):
-        self._encoding = encoding
-
-    def execute(self, *args):
-        # essential parameters check
-        valid = EssentialParameters(
-            self.__class__.__name__, [self._src_dir, self._src_pattern, self._tblname]
-        )
-        valid()
-
-        files = super().get_target_files(self._src_dir, self._src_pattern)
-        self._logger.info("Files found %s" % files)
-
-        if len(files) == 0:
+    def process(self):
+        files = self.get_src_files()
+        if not self.check_file_existence(files):
             raise FileNotFound("No csv file was found.")
 
         files.sort()
+        # Find csv columns from all csv files
+        csv_columns = []
+        for file in files:
+            csv_columns.extend(Csv.get_column_names(file))
+        csv_columns = sorted(set(csv_columns), key=csv_columns.index)
 
-        def func():
-            # Find csv columns from all csv files
-            csv_columns = []
-            for file in files:
-                csv_columns.extend(Csv.get_column_names(file))
-            csv_columns = sorted(set(csv_columns), key=csv_columns.index)
+        if self.args.refresh is True:
+            # Drop table in advance, If refresh is True
+            self._sqlite_adptr.drop_table(self.args.tblname)
+            self._sqlite_adptr.create_table(self.args.tblname, csv_columns, self.args.primary_key)
+        else:
+            self._sqlite_adptr.create_table(self.args.tblname, csv_columns, self.args.primary_key)
 
-            if self._refresh is True:
-                # Drop table in advance, If refresh is True
-                self._sqlite_adptr.drop_table(self._tblname)
-                self._sqlite_adptr.create_table(self._tblname, csv_columns, self._primary_key)
+            if self.args.force_insert is True:
+                db_columns = self._sqlite_adptr.get_column_names(self.args.tblname)
+                result = list(set(csv_columns) - set(db_columns))
+                self._sqlite_adptr.add_columns(self.args.tblname, result)
             else:
-                self._sqlite_adptr.create_table(self._tblname, csv_columns, self._primary_key)
+                # Make sure if csv columns and db table names are exactly the same
+                db_columns = self._sqlite_adptr.get_column_names(self.args.tblname)
+                if self._sqlite_adptr.escape_columns(
+                    csv_columns
+                ) != self._sqlite_adptr.escape_columns(db_columns):
+                    raise CliboaException(
+                        "Csv columns %s were not matched to table column %s."
+                        % (csv_columns, db_columns)
+                    )
 
-                if self._force_insert is True:
-                    db_columns = self._sqlite_adptr.get_column_names(self._tblname)
-                    result = list(set(csv_columns) - set(db_columns))
-                    self._sqlite_adptr.add_columns(self._tblname, result)
-                else:
-                    # Make sure if csv columns and db table names are exactly the same
-                    db_columns = self._sqlite_adptr.get_column_names(self._tblname)
-                    if self._sqlite_adptr.escape_columns(
-                        csv_columns
-                    ) != self._sqlite_adptr.escape_columns(db_columns):
-                        raise CliboaException(
-                            "Csv columns %s were not matched to table column %s."
-                            % (csv_columns, db_columns)
-                        )
+        for file in files:
+            self._sqlite_adptr.import_table(
+                file, self.args.tblname, refresh=False, encoding=self.args.encoding
+            )
 
-            for file in files:
-                self._sqlite_adptr.import_table(
-                    file, self._tblname, refresh=False, encoding=self._encoding
-                )
-
-            if self._index and len(self._index) > 0:
-                """
-                Create index (Add the index at the end for
-                better performance when insert data is large)
-                """
-                self._sqlite_adptr.add_index(self._tblname, self._index)
-
-        super().execute(func)
+        if self.args.index and len(self.args.index) > 0:
+            """
+            Create index (Add the index at the end for
+            better performance when insert data is large)
+            """
+            self._sqlite_adptr.add_index(self.args.tblname, self.args.index)

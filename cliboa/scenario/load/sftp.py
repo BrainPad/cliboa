@@ -13,68 +13,81 @@
 #
 import os
 
+from cliboa.adapter.file import File
 from cliboa.adapter.sftp import SftpAdapter
 from cliboa.scenario.sftp import BaseSftp
-from cliboa.scenario.validator import EssentialParameters
+from cliboa.util.base import _warn_deprecated, _warn_deprecated_args
 from cliboa.util.constant import StepStatus
 
 
 class SftpBaseLoad(BaseSftp):
     def __init__(self):
         super().__init__()
+        self.logger.warning(
+            _warn_deprecated(
+                "cliboa.scenario.load.sftp.SftpBaseLoad",
+                "3.0",
+                "4.0",
+                "cliboa.scenario.sftp.BaseSftp",
+            )
+        )
 
 
-class SftpUpload(SftpBaseLoad):
+class SftpUpload(BaseSftp):
     """
     Upload file to sftp server
     """
 
-    def __init__(self):
-        super().__init__()
-        self._quit = False
-        self._ignore_empty_file = False
-        self._put_intermediation = "."
+    class Arguments(BaseSftp.Arguments):
+        dest_dir: str
+        quit: bool = False
+        ignore_empty_file: bool = False
+        put_intermediation: str = "."
 
-    def quit(self, quit):
-        self._quit = quit
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _quit(self):
+        return self.args.quit
 
-    def ignore_empty_file(self, ignore_empty_file):
-        self._ignore_empty_file = ignore_empty_file
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _ignore_empty_file(self):
+        return self.args.ignore_empty_file
 
-    def put_intermediation(self, put_intermediation):
-        self._put_intermediation = put_intermediation
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _put_intermediation(self):
+        return self.args.put_intermediation
 
     def execute(self, *args):
-        # essential parameters check
-        valid = EssentialParameters(
-            self.__class__.__name__,
-            [self._host, self._user, self._src_dir, self._src_pattern, self._dest_dir],
+        files = self._resolve("adapter_file", File).get_target_files(
+            self.args.src_dir, self.args.src_pattern
         )
-        valid()
-
-        files = super().get_target_files(self._src_dir, self._src_pattern)
-        adaptor = super().get_adaptor()
+        adaptor = self.get_adapter()
         if len(files) > 0:
             for file in files:
-                if self._ignore_empty_file and os.path.getsize(file) == 0:
-                    self._logger.info("0 byte file will no be uploaded %s." % file)
+                if self.args.ignore_empty_file and os.path.getsize(file) == 0:
+                    self.logger.info("0 byte file will no be uploaded %s." % file)
                     continue
 
                 obj = SftpAdapter(
-                    host=self._host, user=self._user, password=self._password, key=self._key
+                    host=self.args.host,
+                    user=self.args.user,
+                    password=self.args.password,
+                    key=self.args.key,
                 ).put_file(
                     src=file,
-                    dest=os.path.join(self._dest_dir, os.path.basename(file)),
-                    put_intermediation=self._put_intermediation,
-                    endfile_suffix=self._endfile_suffix,
+                    dest=os.path.join(self.args.dest_dir, os.path.basename(file)),
+                    put_intermediation=self.args.put_intermediation,
+                    endfile_suffix=self.args.endfile_suffix,
                 )
                 adaptor.execute(obj)
-                self._logger.info("%s is successfully uploaded." % file)
+                self.logger.info("%s is successfully uploaded." % file)
         else:
-            self._logger.info(
+            self.logger.info(
                 "Files to upload do not exist. File pattern: {}".format(
-                    os.path.join(self._src_dir, self._src_pattern)
+                    os.path.join(self.args.src_dir, self.args.src_pattern)
                 )
             )
-            if self._quit is True:
+            if self.args.quit is True:
                 return StepStatus.SUCCESSFUL_TERMINATION

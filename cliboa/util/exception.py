@@ -66,11 +66,6 @@ class StepExecutionFailed(CliboaException):
     pass
 
 
-class SqliteInvalid(CliboaException):
-    # Exception when specified file not found
-    pass
-
-
 class DatabaseException(CliboaException):
     # Database error
     pass

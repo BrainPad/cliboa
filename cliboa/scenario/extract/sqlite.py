@@ -13,52 +13,58 @@
 #
 import os
 
+from pydantic import Field
+
 from cliboa.scenario.sqlite import BaseSqlite
-from cliboa.scenario.validator import EssentialParameters
+from cliboa.util.base import _warn_deprecated_args
 
 
 class SqliteExport(BaseSqlite):
-    def __init__(self):
-        super().__init__()
-        self._tblname = None
-        self._dest_path = None
-        self._encoding = "utf-8"
-        self._order = []
-        self._no_duplicate = False
+    class Arguments(BaseSqlite.Arguments):
+        tblname: str
+        dest_path: str
+        encoding: str = "utf-8"
+        order: list[str] = Field(default_factory=list)
+        no_duplicate: bool = False
 
-    def tblname(self, tblname):
-        self._tblname = tblname
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _tblname(self):
+        return self.args.tblname
 
-    def dest_path(self, dest_path):
-        self._dest_path = dest_path
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _dest_path(self):
+        return self.args.dest_path
 
-    def encoding(self, encoding):
-        self._encoding = encoding
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _encoding(self):
+        return self.args.encoding
 
-    def order(self, order):
-        self._order = order
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _order(self):
+        return self.args.order
 
-    def no_duplicate(self, no_duplicate):
-        self._no_duplicate = no_duplicate
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _no_duplicate(self):
+        return self.args.no_duplicate
 
     def execute(self, *args):
-        super().execute()
-
-        valid = EssentialParameters(self.__class__.__name__, [self._dest_path])
-        valid()
-
-        dest_dir = os.path.dirname(self._dest_path)
+        dest_dir = os.path.dirname(self.args.dest_path)
         if dest_dir:
             os.makedirs(dest_dir, exist_ok=True)
 
-        self._sqlite_adptr.connect(self._dbname)
+        self._sqlite_adptr.connect(self.args.dbname)
         try:
             self._sqlite_adptr.export_table(
-                self._tblname,
-                self._dest_path,
-                encoding=self._encoding,
-                order=self._order,
-                no_duplicate=self._no_duplicate,
+                self.args.tblname,
+                self.args.dest_path,
+                encoding=self.args.encoding,
+                order=self.args.order,
+                no_duplicate=self.args.no_duplicate,
             )
         finally:
             self._close_database()

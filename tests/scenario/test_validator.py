@@ -11,15 +11,10 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-import os
-import shutil
-import sqlite3
-
 import pytest
 
-from cliboa.conf import env
-from cliboa.scenario.validator import EssentialParameters, SqliteTableExistence
-from cliboa.util.exception import CliboaException, SqliteInvalid
+from cliboa.scenario.validator import EssentialParameters
+from cliboa.util.exception import CliboaException
 
 
 class TestEssentialParameters(object):
@@ -31,63 +26,3 @@ class TestEssentialParameters(object):
             valid = EssentialParameters("DummyClass", [""])
             valid()
         assert "is not specified" in str(excinfo.value)
-
-
-class TestSqliteTableExistence(object):
-    def setup_method(self, method):
-        self._db_dir = os.path.join(env.BASE_DIR, "db")
-
-    def test_table_existence_ng_with_exc(self):
-        """
-        SqliteTableExistende invalid case
-        """
-        # create test db and insert dummy data
-        os.makedirs(self._db_dir)
-        db_file = os.path.join(self._db_dir, "spam.db")
-        conn = sqlite3.connect(db_file)
-        conn.execute("create table spam_table (id, name, age);")
-        conn.execute("insert into spam_table (id, name, age) values(1,1,1);")
-        conn.commit()
-        conn.close()
-
-        with pytest.raises(SqliteInvalid) as excinfo:
-            valid = SqliteTableExistence(db_file, "spam_table2")
-            valid()
-        shutil.rmtree(self._db_dir)
-        assert "not found" in str(excinfo.value)
-
-    def test_table_existence_ng_with_bool(self):
-        """
-        SqliteTableExistence invalid case
-        """
-        # create test db and insert dummy data
-        os.makedirs(self._db_dir)
-        db_file = os.path.join(self._db_dir, "spam.db")
-        conn = sqlite3.connect(db_file)
-        conn.execute("create table spam_table (id, name, age);")
-        conn.execute("insert into spam_table (id, name, age) values(1,1,1);")
-        conn.commit()
-        conn.close()
-
-        valid = SqliteTableExistence(db_file, "spam_table2", True)
-        exists_tbl = valid()
-        shutil.rmtree(self._db_dir)
-        assert exists_tbl is False
-
-    def test_table_existence_ok_with_bool(self):
-        """
-        SqliteTableExistence invalid case
-        """
-        # create test db and insert dummy data
-        os.makedirs(self._db_dir)
-        db_file = os.path.join(self._db_dir, "spam.db")
-        conn = sqlite3.connect(db_file)
-        conn.execute("create table spam_table (id, name, age);")
-        conn.execute("insert into spam_table (id, name, age) values(1,1,1);")
-        conn.commit()
-        conn.close()
-
-        valid = SqliteTableExistence(db_file, "spam_table", True)
-        exists_tbl = valid()
-        shutil.rmtree(self._db_dir)
-        assert exists_tbl is True

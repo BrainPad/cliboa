@@ -11,6 +11,7 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+import functools
 import inspect
 import warnings
 from abc import ABC
@@ -48,8 +49,8 @@ class _BaseObject(ABC):
             raise CliboaException(f"Failed to resolve cliboa class. {key}:{type(dependency)}")
         return dependency
 
-    def _resolve(self, key: str, default_cls: type[T], *args, **kwargs) -> T:
-        dependency = self._di_map.get(key, default_cls)
+    def _resolve(self, _di_key: str, _default_cls: type[T], *args, **kwargs) -> T:
+        dependency = self._di_map.get(_di_key, _default_cls)
         if not inspect.isclass(dependency):
             return dependency
         merged_kwargs = self._di_kwargs | kwargs
@@ -76,6 +77,38 @@ def _warn_deprecated(
         stacklevel=stacklevel,
     )
     return err_mes
+
+
+def _warn_deprecated_args(end_version: str, removal_version: str):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            instance = args[0] if args else None
+            full_name = f"{func.__module__}.{func.__qualname__}"
+            skip_log = False
+            if instance and hasattr(instance, "_deprecated_warn_log"):
+                if full_name in instance._deprecated_warn_log:
+                    skip_log = True
+                else:
+                    instance._deprecated_warn_log.append(full_name)
+
+            if not skip_log:
+                full_split = full_name.split(".")
+                prop_name = full_split.pop()
+                if prop_name.startswith("_"):
+                    prop_name = prop_name[1:]
+                full_split.append("args")
+                full_split.append(prop_name)
+                instead_name = ".".join(full_split)
+
+                log_mes = _warn_deprecated(full_name, end_version, removal_version, instead_name)
+                if instance and hasattr(instance, "logger"):
+                    instance.logger.warning(log_mes)
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
 
 
 def _warn_removed(deprecated: str, removal_version: str, stacklevel: int = 3) -> str:

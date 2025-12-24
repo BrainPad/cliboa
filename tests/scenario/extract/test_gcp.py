@@ -87,6 +87,7 @@ class TestGcsFileExistsCheck(BaseCliboaTest):
         instance._set_arguments(
             {
                 "project_id": "hoge",
+                "credentials": "fuga",
                 "bucket": "piyo",
                 "src_pattern": "spam",
             }
@@ -106,6 +107,7 @@ class TestGcsFileExistsCheck(BaseCliboaTest):
         instance._set_arguments(
             {
                 "project_id": "hoge",
+                "credentials": "fuga",
                 "bucket": "piyo",
                 "src_pattern": "spam1",
             }
