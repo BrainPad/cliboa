@@ -16,7 +16,7 @@ import re
 import subprocess
 from typing import Any, Tuple
 
-from pydantic import BaseModel, Field, PrivateAttr, model_validator
+from pydantic import BaseModel, Field, PrivateAttr, field_validator, model_validator
 
 # 'typing.Self' is available in Python 3.11+
 from typing_extensions import Self
@@ -252,3 +252,12 @@ class ScenarioModel(_BaseWithVars):
 class CommandArgument(BaseModel):
     args: list[Any] = Field(default_factory=list)
     kwargs: dict[str, Any] = Field(default_factory=dict)
+
+    @field_validator("args", mode="before")
+    @classmethod
+    def convert_single_string_to_list(cls, value):
+        if not isinstance(value, list) and isinstance(value, str):
+            if value == "":
+                return []
+            return [value]
+        return value

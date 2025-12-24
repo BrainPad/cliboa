@@ -14,16 +14,18 @@
 #
 # -*- coding: utf-8 -*-
 
+import logging
 import os
 import sys
 
 if __name__ == "__main__":
     # setting of environment values
     sys.path.append(os.getcwd())
-    os.environ.setdefault("CLIBOA_ENV", "common.environment")
+    os.environ.setdefault("CLIBOA_ENV", "app.cliboa_environment")
     try:
         from cliboa.interface import run
 
         run()
-    except Exception as e:
-        print("Exception occurred. %s ", e.args)
+    except Exception:
+        logging.exception("Caught Exception in root application runner.")
+        exit(1)
