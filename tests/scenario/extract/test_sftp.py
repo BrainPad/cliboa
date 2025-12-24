@@ -137,32 +137,6 @@ class TestSftpDownload:
 
             instance.execute()
 
-    def test_execute_with_key_content(self):
-        instance = SftpDownload()
-        mock_parent = Mock(
-            step_name="sftp_class",
-        )
-        instance.parent = mock_parent
-        instance._set_arguments(
-            {
-                "host": "dummy.host",
-                "user": "dummy_user",
-                "key": {"content": "dummy_rsa"},
-                "src_dir": "/",
-                "src_pattern": ".*.txt",
-                "dest_dir": self._data_dir,
-            }
-        )
-
-        with ExitStack() as stack:
-            mock_sftp = stack.enter_context(patch("cliboa.adapter.sftp.SftpAdapter.execute"))
-            mock_sftp.return_value = ["test.txt"]
-
-            instance.execute()
-
-            assert mock_sftp.called
-            mock_parent.put_to_context.assert_called_once_with(["test.txt"])
-
 
 class TestSftpFileExistsCheck:
     def test_execute_file_found(self):

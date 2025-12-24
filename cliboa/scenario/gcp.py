@@ -29,6 +29,8 @@ class BaseGcp(BaseStep):
         self._project_id = project_id
 
     def credentials(self, credentials):
+        if not isinstance(credentials, str):
+            raise ValueError("arguments 'credentials' must be str.")
         self._credentials = credentials
 
     def execute(self, *args):
@@ -36,10 +38,7 @@ class BaseGcp(BaseStep):
         valid()
 
     def get_credentials(self):
-        if isinstance(self._credentials, str):
-            return self._credentials
-        else:
-            return self._source_path_reader(self._credentials)
+        return self._credentials
 
 
 class BaseBigQuery(BaseGcp):

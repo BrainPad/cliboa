@@ -55,6 +55,8 @@ class BaseSftp(BaseStep):
         self._password = password
 
     def key(self, key):
+        if not isinstance(key, str):
+            raise ValueError("arguments 'key' must be str.")
         self._key = key
 
     def passphrase(self, passphrase):
@@ -70,16 +72,11 @@ class BaseSftp(BaseStep):
         self._retry_count = retry_count
 
     def get_adaptor(self):
-        if isinstance(self._key, str):
-            key_filepath = self._key
-        else:
-            key_filepath = self._source_path_reader(self._key)
-
         return SftpAdapter(
             host=self._host,
             user=self._user,
             password=self._password,
-            key=key_filepath,
+            key=self._key,
             passphrase=self._passphrase,
             timeout=self._timeout,
             retryTimes=self._retry_count,

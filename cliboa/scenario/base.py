@@ -12,8 +12,6 @@
 # all copies or substantial portions of the Software.
 #
 import logging
-import os
-import tempfile
 from abc import abstractmethod
 from typing import Any, List, Optional
 
@@ -22,7 +20,6 @@ from pydantic import BaseModel
 from cliboa.adapter.file import File
 from cliboa.scenario.interface import IParentStep
 from cliboa.util.base import _BaseObject, _warn_deprecated
-from cliboa.util.exception import FileNotFound, InvalidParameter
 
 
 class AbstractStep(_BaseObject):
@@ -241,21 +238,3 @@ class BaseStep(AbstractStep):
         return self._resolve("adaptor_file", File).get_target_files(
             src_dir, src_pattern, *args, **kwargs
         )
-
-    def _source_path_reader(self, src, encoding="utf-8"):
-        """
-        Returns an path to temporary file contains content specify in src if src is dict,
-        returns src if not
-        """
-        if src is None:
-            return src
-        elif isinstance(src, dict) and "content" in src:
-            with tempfile.NamedTemporaryFile(mode="w", encoding=encoding, delete=False) as fp:
-                fp.write(src["content"])
-                return fp.name
-        elif isinstance(src, dict) and "file" in src:
-            if os.path.exists(src["file"]) is False:
-                raise FileNotFound(src)
-            return src["file"]
-        else:
-            raise InvalidParameter("The parameter is invalid.")

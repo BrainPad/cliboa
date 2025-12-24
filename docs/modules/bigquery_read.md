@@ -7,8 +7,7 @@
 |----------|-----------|--------|-------|-------|
 |project_id|GCP project id|Yes|None||
 |location|GCP location|Yes|None||
-|credentials.file|A service account .json file path|No|None||
-|credentials.content|A dictionary containing service account info in Google format|No|None||
+|credentials|A service account .json file path|No|None||
 |dataset|BigQuery dataset|Yes|None||
 |tblname|BigQuery table name to insert|Yes|None||
 |key|the key of cache|No|None|If specified, load data saved to on-memory. Specifying either key or bucket is essential.|
@@ -25,8 +24,7 @@
   arguments:
     project_id: test_gcp
     location: asia-northeast1
-    credentials:
-      file: /root/gcp_credential.json
+    credentials: /root/gcp_credential.json
     dataset: test_dataset
     tblname: test_tbl
     key: spam
@@ -39,25 +37,7 @@
   arguments:
     project_id: test_gcp
     location: asia-northeast1
-    credentials:
-      file: /root/gcp_credential.json
-    dataset: test_dataset
-    tblname: test_tbl
-    bucket: test
-    dest_dir: tmp/test
-
-# Embed contents of credentials at scenario.yml
-- step:
-  class: BigQueryRead
-  arguments:
-    project_id: test_gcp
-    location: asia-northeast1
-    credentials:
-      content: |
-        {
-          "type": "service_account",
-          ...
-        }
+    credentials: /root/gcp_credential.json
     dataset: test_dataset
     tblname: test_tbl
     bucket: test
