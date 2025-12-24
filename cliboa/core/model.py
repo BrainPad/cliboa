@@ -172,7 +172,7 @@ class ParallelStepModel(BaseModel):
 
 
 class ScenarioModel(_BaseWithVars):
-    scenario: Tuple[StepModel | ParallelStepModel, ...] = Field(min_length=1, frozen=True)
+    scenario: list[StepModel | ParallelStepModel, ...]
     parallel_config: ParallelConfigModel = Field(default_factory=ParallelConfigModel)
 
     def merge(self, cmn: Self) -> None:
