@@ -28,8 +28,8 @@ class Http(_BaseObject, ABC):
     Http client abstract class
     """
 
-    def __init__(self, url, dest_path, timeout, retry_cnt, retry_intvl_sec, params):
-        super().__init__()
+    def __init__(self, url, dest_path, timeout, retry_cnt, retry_intvl_sec, params, **kwargs):
+        super().__init__(**kwargs)
         self._url = url
         self._dest_path = dest_path
         self._timeout = timeout
@@ -73,15 +73,19 @@ class Download(Http):
     """
 
     def __init__(
-        self, url, dest_path, timeout, retry_cnt=2, retry_intvl_sec=10, query_string=None, **params
+        self,
+        url,
+        dest_path,
+        timeout,
+        retry_cnt=2,
+        retry_intvl_sec=10,
+        query_string=None,
+        params={},
+        **kwargs,
     ):
-        # params is the **kwargs argument of request.get()
-        super().__init__(url, dest_path, timeout, retry_cnt, retry_intvl_sec, params)
+        super().__init__(url, dest_path, timeout, retry_cnt, retry_intvl_sec, params, **kwargs)
         # only when using request.get()
         self._query_string = query_string
-
-    def execute(self):
-        super().execute()
 
     def request(self):
         self._logger.info("Http GET url: %s" % self._url)
@@ -95,12 +99,10 @@ class Upload(Http):
     Upload via simple Http POST
     """
 
-    def __init__(self, url, dest_path, timeout, retry_cnt=2, retry_intvl_sec=10, **params):
-        # params is the **kwargs argument of request.post()
-        super().__init__(url, dest_path, timeout, retry_cnt, retry_intvl_sec, params)
-
-    def execute(self):
-        super().execute()
+    def __init__(
+        self, url, dest_path, timeout, retry_cnt=2, retry_intvl_sec=10, params={}, **kwargs
+    ):
+        super().__init__(url, dest_path, timeout, retry_cnt, retry_intvl_sec, params, **kwargs)
 
     def request(self):
         self._logger.info("Http POST url: %s" % self._url)
@@ -117,12 +119,10 @@ class Update(Http):
     Update via simple Http PUT
     """
 
-    def __init__(self, url, dest_path, timeout, retry_cnt=2, retry_intvl_sec=10, **params):
-        # params is the **kwargs argument of request.put()
-        super().__init__(url, dest_path, timeout, retry_cnt, retry_intvl_sec, params)
-
-    def execute(self):
-        super().execute()
+    def __init__(
+        self, url, dest_path, timeout, retry_cnt=2, retry_intvl_sec=10, params={}, **kwargs
+    ):
+        super().__init__(url, dest_path, timeout, retry_cnt, retry_intvl_sec, params, **kwargs)
 
     def request(self):
         self._logger.info("Http PUT url: %s" % self._url)
@@ -139,12 +139,10 @@ class Remove(Http):
     Remove via simple Http DELETE
     """
 
-    def __init__(self, url, dest_path, timeout, retry_cnt=2, retry_intvl_sec=10, **params):
-        # params is the **kwargs argument of request.delete()
-        super().__init__(url, dest_path, timeout, retry_cnt, retry_intvl_sec, params)
-
-    def execute(self):
-        super().execute()
+    def __init__(
+        self, url, dest_path, timeout, retry_cnt=2, retry_intvl_sec=10, params={}, **kwargs
+    ):
+        super().__init__(url, dest_path, timeout, retry_cnt, retry_intvl_sec, params, **kwargs)
 
     def request(self):
         self._logger.info("Http DELETE url: %s" % self._url)
