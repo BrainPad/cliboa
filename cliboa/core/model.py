@@ -53,7 +53,7 @@ class _BaseWithVars(BaseModel):
 
     def _merge_static_vars(self, data: dict[str, str]) -> None:
         """
-        merge calc result
+        merge calc result (not overwrite)
         """
         self._with_static_vars = data | self._with_static_vars
 
@@ -92,6 +92,7 @@ class StepModel(_BaseWithVars):
     def replace_vars(self) -> None:
         """
         Replace variable expressions in arguments.
+        This is need to be called after call calc.
         """
         self.arguments = self._replace_arguments(self.arguments)
 
@@ -134,6 +135,9 @@ class ParallelConfigModel(BaseModel):
     force_continue: bool | None = None
 
     def merge(self, model: Self) -> None:
+        """
+        Merge model's props (only when self value is None)
+        """
         if not isinstance(model, ParallelConfigModel):
             return
         for k, v in self.model_dump().items():
@@ -143,6 +147,9 @@ class ParallelConfigModel(BaseModel):
                     setattr(self, k, r)
 
     def fill_default(self) -> Self:
+        """
+        Set defalut values if they are None
+        """
         if self.multi_process_count is None:
             self.multi_process_count = 2
         if self.force_continue is None:
@@ -156,6 +163,9 @@ class ParallelStepModel(BaseModel):
     parallel_config: ParallelConfigModel = Field(default_factory=ParallelConfigModel)
 
     def _merge_parallel_config(self, data: ParallelConfigModel) -> None:
+        """
+        merge ParallelConfig to under this model.
+        """
         if not isinstance(data, ParallelConfigModel):
             return
         self.parallel_config.merge(data)
@@ -192,9 +202,17 @@ class ScenarioModel(_BaseWithVars):
             return
 
     def setup(self) -> None:
+        """
+        Prepare to use scenario.
+
+        1. calc scenario's with_vars
+        2. calc step's  with_vars
+        3. propagate calculated with_vars and parallel_config from scenario to steps
+        4. replace step's arguments with calculated with_vars
+        """
         self.calc()
         self._calc_steps()
-        self.propagate()
+        self._propagate()
         self._replace_vars_steps()
 
     def _apply_steps(self, func: str, *args, **kwargs) -> None:
@@ -216,7 +234,7 @@ class ScenarioModel(_BaseWithVars):
         """
         self._apply_steps("calc")
 
-    def propagate(self) -> None:
+    def _propagate(self) -> None:
         """
         merge _with_static_vars and parallel_config to scenario steps.
         """
