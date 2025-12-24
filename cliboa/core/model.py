@@ -21,6 +21,7 @@ from pydantic import BaseModel, Field, PrivateAttr, field_validator, model_valid
 # 'typing.Self' is available in Python 3.11+
 from typing_extensions import Self
 
+from cliboa.util.base import _warn_deprecated
 from cliboa.util.exception import InvalidFormat, InvalidParameter, ScenarioFileInvalid
 
 
@@ -58,6 +59,9 @@ class _BaseWithVars(BaseModel):
         self._with_static_vars = data | self._with_static_vars
 
 
+_warned_with_vars: bool = False
+
+
 class StepModel(_BaseWithVars):
     step: str = Field(frozen=True)
     class_name: str = Field(alias="class", frozen=True)
@@ -76,6 +80,15 @@ class StepModel(_BaseWithVars):
             if "with_vars" in data:
                 raise InvalidFormat("duplicate definition 'with_vars'")
             data["with_vars"] = arguments.pop("with_vars")
+            global _warned_with_vars
+            if not _warned_with_vars:
+                _warn_deprecated(
+                    "scenario file's scenario.[].arguments.with_vars",
+                    "3.x",
+                    "4.0",
+                    "scenario.[].with_vars",
+                )
+                _warned_with_vars = True
         return data
 
     def get_listeners(self) -> list[str]:

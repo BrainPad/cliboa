@@ -17,6 +17,7 @@ from cliboa.util.exception import InvalidParameter
 
 class EssentialParameters(_BaseObject):
     """
+    WARNING: scheduled for deprecation in future.
     Validation for the essential parameters of step class
     """
 
