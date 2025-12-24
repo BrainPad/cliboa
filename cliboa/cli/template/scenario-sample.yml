@@ -2,6 +2,5 @@ scenario:
 - step: sample step
   class: ExecuteShellScript
   arguments:
-    command:
-      content: |
-        echo Hello cliboa!
+    command: |
+      echo Hello cliboa!
