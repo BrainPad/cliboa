@@ -21,4 +21,4 @@ The definitions are as follows:
 * **Private properties (including methods) of a private class:** Accessed only from within the class itself.
 
 > **Note on "Internal Cliboa use only":**
-> These interfaces are considered non-public APIs. They may be changed without notice or a major version update.
+> These interfaces are considered non-public APIs. They may be changed with a (minor or patch) version update without notice.

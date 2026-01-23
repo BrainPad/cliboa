@@ -1,88 +1,95 @@
-> [!CAUTION]
-> **OBSOLETE DATA ALERT**
-> The information provided in this document is old and has not been updated.
-> Use it only as a rough reference until the content is formally merged and revised. **Do not rely on this for current implementation.**
+# Class extention
 
-# Table of Contents
-* [Additional ETL Modules](#additional-etl-modules)
-* [How to Implement Additional ETL Modules](#how-to-implement-additional-etl-modules)
-* [How to Make Additional Modules Activate](#how-to-make-additional-modules-activate)
+If default classes provided by Cliboa are not enough for you, you can create a new class and use it.
+In this part, let us show you how to create a custom step for Cliboa(class extension).
 
-# Additional ETL Modules
-Can implement additional modules for ETL(ELT) Processing easily if default prepared modules of cliboa are not enough.
+In Cliboa, the module you want to use must be defined as "class".
+Also, parent class of all classes must be BaseStep class.
+Here, as an example, create a custom class which just outputs the log.
 
-# How to Implement Additional ETL Modules
-## Implement an Additional Step Class
-If would like to add NewExtract class, inherit BaseStep class and implement attributes and an execute method.
+## Custom class implementation guide
 
-## Example
+The first thing you need to do is create a new file and define a custom class which has BaseStep class as parent.
+And then, override a method "execute" which is actually do something.
+
+You can implement in execute method whatever you want.
+
+*example.py*
 ```
-class NewExtract(BaseStep):
- 
-    def __init__(self):
-        super().__init__()
-        """
-        Implement attributes to be set in scenario.yml
-        """
-        self._spam = spam
-     
-    def spam(self, spam):
-        self._spam = spam
- 
-    def execute(self, *args):
-        """
-        Implement processes which would like to do
-        """
+from cliboa.scenario import BaseStep
+
+class CustomStep(BaseStep):
+
+    def execute(self, *args, **kwargs):
+        print("This is custom class.")
 ```
 
-### Returns
-Method 'execute' should return a response.
+## Defining Arguments
+
+If you want, You can define parameters for your custom class using a nested Arguments class - by inherit Pydantic's BaseModel.
+The nested **Arguments** class is instantiated with arguments defined in the scenario file. This is automatically handled within cliboa, and the arguments instance become accessible as self.args when the execute method is run.
+
+*example.py*
 ```
-0: Process ends immediately.
-others: Process ends immediately(safely returns but output an error to log).
-None: Process continue (Default)
+from cliboa.scenario import BaseStep
+from pydantic import BaseModel
+
+class CustomStep(BaseStep):
+    class Arguments(BaseModel):
+        foo: str
+
+    def execute(self, *args, **kwargs):
+        print("This is custom class.")
+        print(self.args.foo)
 ```
 
-# How to Make Additional Modules Activate
-## Configuration
-Put additional ETL modules in the following directories.
-- If additional modules are used commonly, put them under common/scenario directory of an executable environment of cliboa.
+## Registration your custom classes in environment.py(Either PROJECT_CUSTOM_CLASSES or COMMON_CUSTOM_CLASSES) 
+
+*environment.py*
 ```
-|-- bin
-|   `-- clibomanager.py
-|-- common
-|   |-- scenario # here
+COMMON_CUSTOM_CLASSES = ["example.CustomStep"]
 ```
 
-- If additional modules are used only in each projects, put them under project/scenario directory of an executable environment of cliboa.
+### Tips: How custom classes are discovered in cliboa
+
+As you know, cliboa reads configuration values from the path defined by the `CLIBOA_ENV` environment variable.
+cliboa uses one of the following combinations of defined configuration values to search for custom classes:
+
+1. `COMMON_CUSTOM_ROOT_PATHS` and `COMMON_CUSTOM_CLASSES`
+2. `PROJECT_CUSTOM_ROOT_PATHS`, `PROJECT_SCENARIO_DIR_NAME`, and `PROJECT_CUSTOM_CLASSES`
+
+Only the class name is written in the class field of the scenario file.
+The discovery process uses the class name specified in the class field as a key, searching first for custom classes, then project classes, and finally cliboa default classes.
+
+While this search order is guaranteed, if multiple classes with the same name exist within either the custom classes or the project classes, the precedence is not guaranteed. It is recommended to adopt unique class names wherever possible.
+
+## Use your custom step
+
+Now new custom class is available like an example below.
+
+*scenario.yml*
 ```
-|-- bin
-|   `-- clibomanager.py
-`-- project
-    `-- simple-etl
-        |-- scenario # here
+scenario:
+  - step: call custom step
+    class: CustomStep
+    arguments:
+      foo: Hello
 ```
 
-See [MANUAL.md](../MANUAL.md#user-content-example), regarding an executable environment of cliboa.
+# Listener extention
 
-## Add File Paths
-Should add paths of additional ETL modules in common/environment.py
+Listeners can be extended in the same way as custom steps by inheriting from BaseStepListener.
+Just like custom steps, custom listeners must be registered in environment.py to be recognized by Cliboa.
+
+*example_listener.py*
 ```
-|-- bin
-|   `-- clibomanager.py
-|-- common
-|   |-- environment.py # here
+from cliboa.listener import BaseStepListener
+from cliboa.scenario import BaseStep
+
+
+class CustomListener(BaseStepListener):
+
+    def completion(self, step: BaseStep):
+        print("Complete step log in custom listener.")
 ```
 
-## Example
-```
-# path of modules which put in a common directory
-COMMON_CUSTOM_CLASSES = [
-    '$module_name.$class_name'
-]
- 
-# path of modules which put in project directories
-PROJECT_CUSTOM_CLASSES = [
-    '$module_name.$class_name'
-]
-```
