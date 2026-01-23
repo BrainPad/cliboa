@@ -98,11 +98,28 @@ Although we expect this to be a rare case, action is required if you were using 
 The classes removed from the scenario and utils layers are as follows:
 
 - `cliboa.scenario.extras.ExceptionHandler`
+- `cliboa.scenario.validator.SqliteTableExistence`
 - `cliboa.util.cache.StepArgument`
 - `cliboa.util.class_util.ClassUtil`
 - `cliboa.util.exception.SqliteInvalid`
 - `cliboa.util.lisboa_log.LisboaLog`
 - `cliboa.util.rdbms_util.Rdbms_Util`
+
+#### Renamed of Some Classes
+
+The key renamed classes are as follows.
+
+- `cliboa.util.log_record.CliboaLogRecord` -> `cliboa.util.log.CliboaLogRecord`
+- `cliboa.uti.state.StateManager` -> Change to private class
+
+#### Added of Some Classes
+
+The key added classes are as follows.
+
+- `cliboa.listener.base.BaseScenarioListener`
+- `cliboa.listener.base.BaseStepListener`
+- `cliboa.scenario.file.FileRead`
+- `cliboa.scenario.file.FileWrite`
 
 ### Undocumented Breaking Changes
 
