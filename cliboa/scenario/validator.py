@@ -11,13 +11,16 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-from cliboa.util.base import _BaseObject
+from cliboa.util.base import _BaseObject, _warn_deprecated
 from cliboa.util.exception import InvalidParameter
+
+_warn_deprecated("cliboa.scenario.validator", "3.0", "4.0")
 
 
 class EssentialParameters(_BaseObject):
     """
-    WARNING: scheduled for deprecation in future.
+    DEPRECATED: Use cliboa.scenario.validator.EssentialParameters instead.
+
     Validation for the essential parameters of step class
     """
 
@@ -30,6 +33,14 @@ class EssentialParameters(_BaseObject):
         super().__init__(**kwargs)
         self._cls_name = cls_name
         self._param_list = param_list
+        self._logger.warning(
+            _warn_deprecated(
+                ".".join(("cliboa.scenario.validator", self.__class__.__name__)),
+                "3.0",
+                "4.0",
+                "cliboa.scenario.base.BaseStep.Arguments",
+            )
+        )
 
     def __call__(self):
         for p in self._param_list:
