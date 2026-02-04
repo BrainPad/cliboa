@@ -15,4 +15,5 @@
 Module directly under cliboa should only handle global states that are not deprecated.
 Operationally, this layer is expected to be treated as virtually identical to the utils layer.
 """
+
 from .util.state import state  # noqa
