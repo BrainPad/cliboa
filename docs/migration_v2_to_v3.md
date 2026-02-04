@@ -13,7 +13,7 @@ For general users, the following steps are expected to be the minimum required f
 2.  **Update the constants** defined in `environment.py` (specified by the `CLIBOA_ENV` environment variable). [See details](#changes-to-configuration-definitions)
 3.  **Modify custom listener classes**, if you have created any. [See details](#listener-redesign)
 4.  **Modify your code** if you are using deprecated or removed features in custom scenario classes. [See details](#breaking-changes)
-5.  **Fix implementations relying on `sys.path.append`** in your local code, if any. [See details](#abolishment-of-system_append_paths)
+5.  **Fix implementations relying on `sys.path.append`** in your local code, if any. [See details](#removal-of-system_append_paths)
 6.  **Rewrite scenario files** if you are using parallel execution. [See details](#changes-to-scenario-file-syntax)
 7.  **Run your application and check for warnings.** Since some features are deprecated in v3 even if they maintain backward compatibility, `DeprecationWarning`s may be output. If you wish to suppress them, modify your code according to the warning contents. [See details](#deprecated-features)
 
@@ -55,18 +55,18 @@ Additionally, the following **required constants have been added**:
 
 Other changes to required and optional constants are omitted here. For detailed information on v3 configuration, please refer to the code comments in `/cliboa/conf/default_environment.py`.
 
-#### Abolishment of SYSTEM_APPEND_PATHS
+#### Removal of SYSTEM_APPEND_PATHS
 
-Among the removed constants, the abolishment of `SYSTEM_APPEND_PATHS` may have a significant impact depending on your usage.
+Among the removed constants, the removal of `SYSTEM_APPEND_PATHS` may have a significant impact depending on your usage.
 If your implementation is Pythonic, you likely do not rely on `SYSTEM_APPEND_PATHS`. However, if you did rely on it, Python module imports may fail because the system path will no longer be automatically added.
 If this is the case, it is a good opportunity to refactor your code to a Pythonic implementation. We recommend fixing your import statements.
 
 *Note: If fixing the imports is difficult, a workaround would be to execute `sys.path.append` at the beginning of your application code (although cliboa does not officially support this).*
 
-#### Abolishment of cliboa.ini
+#### Removal of cliboa.ini
 
 `cliboa.ini` contained only settings for logging masks.
-This has been abolished in v3 and is now included in the constant definitions. If not configured, the default cliboa mask settings will apply.
+This has been removed in v3 and is now included in the constant definitions. If not configured, the default cliboa mask settings will apply.
 
 ### Changes to Scenario File Syntax
 
@@ -85,13 +85,13 @@ In v2, step listener classes forcibly injected parent step class properties usin
 Presumably, this was done to provide easy access to the arguments of the parent step instance. However, this was not a good implementation practice and led to unstable behavior.
 Step listener class methods receive the step instance itself as an argument. It has been possible since v2 to access the `arguments` of the step instance by referencing its properties, without relying on forcibly injected properties.
 
-In v3, we have removed this **flawed** implementation. Therefore, listener classes that previously relied on their own properties must now be modified to reference the properties of the instance passed as an argument.
+In v3, we have removed this **legacy** implementation. Therefore, listener classes that previously relied on their own properties must now be modified to reference the properties of the instance passed as an argument.
 
 ### Changes to Authentication File Specification for Some Scenarios
 
-In scenario classes that access services like GCP or SFTP, there was a method to specify authentication information directly as `content`. This has been abolished, and specification is now limited to the path of the authentication file only. For details, please refer to the [documentation for each class](/docs/default_etl_modules.md).
+In scenario classes that access services like GCP or SFTP, there was a method to specify authentication information directly as `content`. This method has been removed, and specification is now limited to the path of the authentication file only. For details, please refer to the [documentation for each class](/docs/default_etl_modules.md), or refer to the [PR #614](https://github.com/BrainPad/cliboa/pull/614).
 
-### Removal of Some Classes
+#### Removal of Some Classes
 
 Some classes determined to be unnecessary have been removed. Their functionality may have been integrated into other classes.
 Although we expect this to be a rare case, action is required if you were using these classes directly.
@@ -105,14 +105,28 @@ The classes removed from the scenario and utils layers are as follows:
 - `cliboa.util.lisboa_log.LisboaLog`
 - `cliboa.util.rdbms_util.Rdbms_Util`
 
-#### Renamed of Some Classes
+#### Renamed Classes
 
 The key renamed classes are as follows.
 
 - `cliboa.util.log_record.CliboaLogRecord` -> `cliboa.util.log.CliboaLogRecord`
-- `cliboa.uti.state.StateManager` -> Change to private class
+- `cliboa.util.state.StateManager` -> Change to private class
 
-#### Added of Some Classes
+#### Changes to Class Interfaces
+
+While the following classes have not been removed, their public interfaces - specifically the **constructor arguments** - have undergone breaking changes.
+If you are inheriting from these classes or instantiating them directly, you must update your implementation.
+
+Key classes with interface changes are as follows:
+- `cliboa.adapter.http.Http`
+- `cliboa.adapter.http.Download`
+- `cliboa.adapter.http.Upload`
+- `cliboa.adapter.http.Update`
+- `cliboa.adapter.http.Remove`
+
+For more details on the new interface definitions, please refer to the source code directly.
+
+#### Added Classes
 
 The key added classes are as follows.
 
@@ -125,7 +139,7 @@ The key added classes are as follows.
 
 We have made various modifications to the core features in conjunction with the update to v3. These modifications range from architectural reviews and improved type safety via modeling to fixes for potential bugs.
 We have strived to maintain backward compatibility as much as possible and have conducted tests, primarily unit tests.
-However, as we are human, we cannot guarantee zero mistakes, and there is a possibility that backward compatibility has been broken unintentionally (or that we missed documenting it).
+While we have strived for a seamless transition, some unintentional breaking changes may exist.
 
 If you discover any breaking changes between v2 and v3 not listed here, please open an Issue to let us know. We will consider either fixing it as a bug or adding it to this documentation.
 
@@ -146,23 +160,22 @@ Note that modifying values via these wrappers is considered an unintended use ca
 
 ### Major Deprecations and Alternatives
 
-Many classes and functions in the scenario, adapter, and util layers have been deprecated.
-It is difficult to list them all here, but executing deprecated features will output a warning to standard error.
-The following are some of the most representative deprecated features and properties:
+Many classes and functions in the scenario, adapter, and util layers have been deprecated in v3.0.
+While we have maintained backward compatibility for now, executing these deprecated features will output a `DeprecationWarning` to standard error.
+
+The following are some of the most representative deprecated features and their recommended alternatives:
 
 | Deprecated Feature | Alternative |
 |:-------------------|-------------|
 | `cliboa.scenario.base.BaseStep.get_target_files` | `cliboa.scenario.file.FileRead.get_src_files` |
 | `cliboa.scenario.base.BaseStep.get_step_argument` | `cliboa.scenario.base.BaseStep.get_symbol_argument` |
 | `cliboa.scenario.base.BaseStep._step` <br> `cliboa.scenario.base.BaseStep._symbol` <br> `cliboa.util.cache.ObjectStore` | `cliboa.scenario.base.BaseStep.put_to_context` <br> and/or <br> `cliboa.scenario.base.BaseStep.get_from_context` |
+| `cliboa.scenario.validator.EssentialParameters` | `cliboa.scenario.base.BaseStep.Arguments` ( **Nested Arguments Class** using pydantic ) |
 | `cliboa.util.helper` | `cliboa.scenario.base.BaseStep._set_arguments` |
 
-### Deprecated in Near Future
-
-The legacy method of managing arguments using class properties and assignment functions will be deprecated. `cliboa.scenario.validator.EssentialParameters` is also subject to this.
-While compatibility is still maintained as of v3.0, it is decided that these will be deprecated within the v3 lifecycle (in v3.x updates). Compatibility is planned to be removed when updating to v4.0 in the future.
-
-Going forward, please migrate to defining a **Nested Arguments Class** using Pydantic v2 models.
+> [!NOTE]
+> Compatibility for these features is planned to be **removed in v4.0**.
+> We strongly recommend migrating to the alternative implementations during the v3 lifecycle.
 
 ## Additional Notes
 

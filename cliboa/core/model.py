@@ -84,7 +84,7 @@ class StepModel(_BaseWithVars):
             if not _warned_with_vars:
                 _warn_deprecated(
                     "scenario file's scenario.[].arguments.with_vars",
-                    "3.x",
+                    "3.0",
                     "4.0",
                     "scenario.[].with_vars",
                 )

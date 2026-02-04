@@ -1,4 +1,4 @@
-# Class extention
+# Class extension
 
 If default classes provided by Cliboa are not enough for you, you can create a new class and use it.
 In this part, let us show you how to create a custom step for Cliboa(class extension).
@@ -10,7 +10,7 @@ Here, as an example, create a custom class which just outputs the log.
 ## Custom class implementation guide
 
 The first thing you need to do is create a new file and define a custom class which has BaseStep class as parent.
-And then, override a method "execute" which is actually do something.
+And then, override a method "execute" to define your custom logic.
 
 You can implement in execute method whatever you want.
 
@@ -26,7 +26,7 @@ class CustomStep(BaseStep):
 
 ## Defining Arguments
 
-If you want, You can define parameters for your custom class using a nested Arguments class - by inherit Pydantic's BaseModel.
+If you want, You can define parameters for your custom class using a nested Arguments class - by inheriting from Pydantic's BaseModel.
 The nested **Arguments** class is instantiated with arguments defined in the scenario file. This is automatically handled within cliboa, and the arguments instance become accessible as self.args when the execute method is run.
 
 *example.py*
@@ -43,7 +43,28 @@ class CustomStep(BaseStep):
         print(self.args.foo)
 ```
 
-## Registration your custom classes in environment.py(Either PROJECT_CUSTOM_CLASSES or COMMON_CUSTOM_CLASSES) 
+## Accessing Cliboa's Eco-system
+
+You can access cliboa's eco-system via BaseStep's properties and methods.
+These allow you to pass values between steps with using eco-system in your custom implementation and using parameter `symbol` in `scenario.yml`.
+
+```
+class CustomStep(BaseStep):
+    def execute(self, *args, **kwargs):
+        self.logger.info("You can use logger instance easily.")
+
+        symbol_foo = self.get_symbol_argument("foo")
+        self.logger.debug(f"You can get symbol step's arguments value: {symbol_foo}")
+
+        context_value = self.get_from_context()
+        self.logger.info(f"You can get symbol step's context value: {context_value}")
+
+        self.put_to_context(context_value)
+        self.logger.debug("You can put value to context, it can be used in another step.")
+```
+
+
+## Registering custom classes in environment.py(Either PROJECT_CUSTOM_CLASSES or COMMON_CUSTOM_CLASSES) 
 
 *environment.py*
 ```
@@ -76,9 +97,10 @@ scenario:
       foo: Hello
 ```
 
-# Listener extention
+# Listener extension
 
-Listeners can be extended in the same way as custom steps by inheriting from BaseStepListener.
+If you want to do some common processing(ex. log output) before and after steps, listener is very suitable.
+Listeners can be extended in the same way as custom steps by inheriting from [BaseStepListener](/cliboa/listener/base.py).
 Just like custom steps, custom listeners must be registered in environment.py to be recognized by Cliboa.
 
 *example_listener.py*
@@ -91,5 +113,22 @@ class CustomListener(BaseStepListener):
 
     def completion(self, step: BaseStep):
         print("Complete step log in custom listener.")
+```
+
+Listeners can access step's properties via the step argument.
+
+```
+    def completion(self, step: BaseStep):
+        print(f"Access arguments.foo: {step.args.foo}")
+```
+
+In addition, you can add any extra listeners like below.
+```
+scenario:
+  - step: execute sample step
+    listeners: YourCustomListener
+    class: SampleStep
+    arguments:
+      foo: test value
 ```
 
