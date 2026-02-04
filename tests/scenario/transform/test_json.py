@@ -153,7 +153,7 @@ class TestJsonlToCsv(TestJsonTransform):
                 "src_pattern": "test.*.json",
                 "dest_dir": self._result_dir,
                 "quote": "QUOTE_NONE",
-                "escape_char": ",",
+                "escape_char": "\\",
             }
         )
         instance.execute()

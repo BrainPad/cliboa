@@ -19,6 +19,9 @@ Thumbs.db
 __pycache__
 .pydevproject
 
+# pyenv
+.python-version
+
 # cliboa
 .coverage*
 .eggs
