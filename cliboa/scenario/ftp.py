@@ -45,12 +45,10 @@ class BaseFtp(BaseStep):
         )
 
     def get_adaptor(self):
-        self.logger.info(
-            _warn_deprecated(
-                "cliboa.scenario.ftp.BaseFtp.get_adaptor",
-                "3.0",
-                "4.0",
-                "cliboa.scenario.ftp.BaseFtp.get_adapter",
-            )
+        _warn_deprecated(
+            "cliboa.scenario.ftp.BaseFtp.get_adaptor",
+            "3.0",
+            "4.0",
+            "cliboa.scenario.ftp.BaseFtp.get_adapter",
         )
         return self.get_adapter()

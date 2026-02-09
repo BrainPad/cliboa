@@ -23,13 +23,11 @@ from cliboa.util.constant import StepStatus
 class FtpExtract(BaseFtp):
     def __init__(self):
         super().__init__()
-        self.logger.warning(
-            _warn_deprecated(
-                "cliboa.scenario.extract.ftp.FtpExtract",
-                "3.0",
-                "4.0",
-                "cliboa.scenario.ftp.BaseFtp",
-            )
+        _warn_deprecated(
+            "cliboa.scenario.extract.ftp.FtpExtract",
+            "3.0",
+            "4.0",
+            "cliboa.scenario.ftp.BaseFtp",
         )
 
 

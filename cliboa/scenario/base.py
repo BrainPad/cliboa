@@ -36,7 +36,6 @@ class BaseStep(_BaseObject):
         super().__init__(**kwargs)
         self._parent = None
         self._args = None
-        self._deprecated_warn_log = []
 
     @property
     def logger(self) -> logging.Logger:

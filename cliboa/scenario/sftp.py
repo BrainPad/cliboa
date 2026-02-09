@@ -109,12 +109,10 @@ class BaseSftp(BaseStep):
         )
 
     def get_adaptor(self):
-        self.logger.info(
-            _warn_deprecated(
-                "cliboa.scenario.sftp.BaseSftp.get_adaptor",
-                "3.0",
-                "4.0",
-                "cliboa.scenario.sftp.BaseSftp.get_adapter",
-            )
+        _warn_deprecated(
+            "cliboa.scenario.sftp.BaseSftp.get_adaptor",
+            "3.0",
+            "4.0",
+            "cliboa.scenario.sftp.BaseSftp.get_adapter",
         )
         return self.get_adapter()

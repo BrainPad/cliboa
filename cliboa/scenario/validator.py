@@ -19,7 +19,7 @@ _warn_deprecated("cliboa.scenario.validator", "3.0", "4.0")
 
 class EssentialParameters(_BaseObject):
     """
-    DEPRECATED: Use cliboa.scenario.validator.EssentialParameters instead.
+    DEPRECATED: Use cliboa.scenario.base.BaseStep.Arguments instead.
 
     Validation for the essential parameters of step class
     """

@@ -23,13 +23,11 @@ from cliboa.util.constant import StepStatus
 class SftpBaseLoad(BaseSftp):
     def __init__(self):
         super().__init__()
-        self.logger.warning(
-            _warn_deprecated(
-                "cliboa.scenario.load.sftp.SftpBaseLoad",
-                "3.0",
-                "4.0",
-                "cliboa.scenario.sftp.BaseSftp",
-            )
+        _warn_deprecated(
+            "cliboa.scenario.load.sftp.SftpBaseLoad",
+            "3.0",
+            "4.0",
+            "cliboa.scenario.sftp.BaseSftp",
         )
 
 

@@ -25,11 +25,9 @@ _warn_deprecated(
 class FileRead(_FR):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.logger.warning(
-            _warn_deprecated(
-                "cliboa.scenario.load.file.FileRead",
-                "3.0",
-                "4.0",
-                "cliboa.scenario.file.FileRead",
-            )
+        _warn_deprecated(
+            "cliboa.scenario.load.file.FileRead",
+            "3.0",
+            "4.0",
+            "cliboa.scenario.file.FileRead",
         )

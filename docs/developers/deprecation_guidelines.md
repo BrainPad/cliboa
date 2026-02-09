@@ -22,7 +22,7 @@ When a deprecated function is called, a DeprecationWarning must be output to not
 
 #### Required Output Destination
 The DeprecationWarning must **always** be output to **stderr**.
-Additionally, it may be output as a warning-level log through a logger.
+Additionally, it may be output as a warning-level log through a logger when it is core warning.
 
 > [!NOTE]
 > We recommend using a common utility function `cliboa.util.base._warn_deprecated` for outputting DeprecationWarnings to stderr.
