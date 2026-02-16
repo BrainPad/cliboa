@@ -172,6 +172,10 @@ class _StepExecutor(_BaseExecutor, IParentStep):
     def symbol_name(self) -> str | None:
         return self._model.symbol
 
+    @property
+    def raw_arguments(self) -> dict[str, Any]:
+        return self._model.arguments
+
     def get_symbol_arguments(self) -> dict[str, Any]:
         if self._symbol_model:
             return self._symbol_model.arguments

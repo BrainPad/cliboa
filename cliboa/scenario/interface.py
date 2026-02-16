@@ -39,6 +39,11 @@ class IParentStep(ABC):
 
     @property
     @abstractmethod
+    def raw_arguments(self) -> dict[str, Any]:
+        raise NotImplementedError()
+
+    @property
+    @abstractmethod
     def step_name(self) -> str:
         raise NotImplementedError()
 

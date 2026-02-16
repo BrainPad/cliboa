@@ -115,7 +115,7 @@ class BaseStep(_BaseObject):
                 else:
                     props.pop(field_name, None)
             if len(props) > 0:
-                self.logger.warning(
+                self.logger.debug(
                     f"There are {len(props)} unused arguments after assigned to pydantic model."
                 )
 
