@@ -82,7 +82,7 @@ class BaseStep(_BaseObject):
                 # access via self.args
                 self.logger.info(f"bar is {self.args.bar}")
 
-        -- eg2 (WARNING: scheduled for deprecation in future) --
+        -- eg2 (WARNING: Deprecated) --
         class Foo2(BaseStep):
             def __init__(self):
                 self._bar = None
@@ -90,7 +90,7 @@ class BaseStep(_BaseObject):
             def bar(self, bar):
                 self._bar = bar
 
-        -- eg3 (WARNING: scheduled for deprecation in future) --
+        -- eg3 (WARNING: Deprecated) --
         class Foo3(BaseStep):
             def __init__(self):
                 self._bar = None

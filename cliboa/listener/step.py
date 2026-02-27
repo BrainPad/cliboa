@@ -19,7 +19,6 @@ from pydantic import BaseModel
 from cliboa import state
 from cliboa.conf import env
 from cliboa.listener.base import BaseStepListener
-from cliboa.scenario.base import BaseStep
 
 
 class StepStatusListener(BaseStepListener):
@@ -44,10 +43,10 @@ class StepStatusListener(BaseStepListener):
         self._partial_pattern = partial_pattern
         self._partial_num = partial_num
 
-    def before(self, step: BaseStep) -> None:
-        state.set(step.__class__.__name__)
+    def before(self) -> None:
+        state.set(self.step.__class__.__name__)
         props_dict = {}
-        props_values = step.__dict__.copy()
+        props_values = self.step.__dict__.copy()
         if isinstance(props_values.get("_args"), BaseModel):
             args = props_values.pop("_args")
             props_values.update(args.model_dump())
@@ -82,10 +81,16 @@ class StepStatusListener(BaseStepListener):
         self.logger.info(
             "Step properties: %s" % json.dumps(props_dict, ensure_ascii=False, default=str)
         )
-        self.logger.info("Start step execution. %s" % step.__class__.__name__)
+        self.logger.info("Start step execution. %s" % self.step.__class__.__name__)
 
-    def after(self, step: BaseStep) -> None:
-        self.logger.info("Finish step execution. %s" % step.__class__.__name__)
+    def after(self) -> None:
+        self.logger.info("Finish step execution. %s" % self.step.__class__.__name__)
 
-    def completion(self, step: BaseStep) -> None:
-        self.logger.info("Complete step execution. %s" % step.__class__.__name__)
+    def error(self, e: Exception) -> None:
+        self.logger.warning(
+            "Exception %s occurred in step execution. %s"
+            % (e.__class__.__name__, self.step.__class__.__name__)
+        )
+
+    def completion(self) -> None:
+        self.logger.info("Complete step execution. %s" % self.step.__class__.__name__)

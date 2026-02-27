@@ -19,6 +19,7 @@ from typing import Any
 from cliboa import state
 from cliboa.core.interface import _IContext, _IExecute
 from cliboa.core.model import CommandArgument, StepModel
+from cliboa.listener.base import BaseListener, BaseScenarioListener, BaseStepListener
 from cliboa.listener.interface import IScenarioExecutor
 from cliboa.scenario.base import BaseStep
 from cliboa.scenario.interface import IParentStep
@@ -37,11 +38,16 @@ class _BaseExecutor(_BaseObject, _IExecute):
         super().__init__(**kwargs)
         self._listeners = []
 
-    def register_listener(self, listener) -> None:
+    def register_listener(self, listener: BaseListener) -> None:
         self._listeners.append(listener)
 
-    def _get_listener_arg(self) -> Any:
-        return self
+    def _prepare_listener(self) -> None:
+        for lis in self._listeners:
+            self._prepare_each_listener(lis)
+
+    @abstractmethod
+    def _prepare_each_listener(self, lis: BaseListener) -> None:
+        raise NotImplementedError()
 
     def _execute_listener(self, kind: str, e: Exception | None = None) -> None:
         for lis in self._listeners:
@@ -49,9 +55,9 @@ class _BaseExecutor(_BaseObject, _IExecute):
                 target = getattr(lis, kind)
                 if callable(target):
                     if e:
-                        target(self._get_listener_arg(), e)
+                        target(e)
                     else:
-                        target(self._get_listener_arg())
+                        target()
             except Exception:
                 self._logger.exception(
                     f"Error occurred during {lis.__class__.__name__}.{kind}"
@@ -63,6 +69,7 @@ class _BaseExecutor(_BaseObject, _IExecute):
         Execute with listeners.
         """
         try:
+            self._prepare_listener()
             self._execute_listener("before")
             res = self._execute_main()
             self._execute_listener("after")
@@ -95,6 +102,9 @@ class _ScenarioExecutor(_BaseExecutor, IScenarioExecutor):
         super().__init__(**kwargs)
         self._steps = steps
         self._max_steps_size = len(steps)
+
+    def _prepare_each_listener(self, lis: BaseScenarioListener) -> None:
+        lis._prepare(self)
 
     @property
     def max_steps_size(self) -> int:
@@ -160,6 +170,9 @@ class _StepExecutor(_BaseExecutor, IParentStep):
         self._exec_args = copy.deepcopy(cmd_arg.args) if cmd_arg and cmd_arg.args else []
         self._exec_kwargs = copy.deepcopy(cmd_arg.kwargs) if cmd_arg and cmd_arg.kwargs else {}
 
+    def _prepare_each_listener(self, lis: BaseStepListener) -> None:
+        lis._prepare(self, self.step)
+
     @property
     def step(self) -> BaseStep:
         return self._step
@@ -193,9 +206,6 @@ class _StepExecutor(_BaseExecutor, IParentStep):
             target = self.symbol_name
         if self._context:
             return self._context.get(target)
-
-    def _get_listener_arg(self) -> Any:
-        return self.step
 
     def _execute_main(self) -> int | None:
         candidates = (

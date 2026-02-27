@@ -14,9 +14,13 @@
 import logging
 from abc import abstractmethod
 
+from pydantic import BaseModel
+
 from cliboa.listener.interface import IScenarioExecutor
 from cliboa.scenario.base import BaseStep
+from cliboa.scenario.interface import IParentStep
 from cliboa.util.base import _BaseObject
+from cliboa.util.exception import CliboaException
 
 
 class BaseListener(_BaseObject):
@@ -24,33 +28,37 @@ class BaseListener(_BaseObject):
     Base listener for all the listener classes
     """
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._executor = None
+
     @property
     def logger(self) -> logging.Logger:
         return self._logger
 
     @abstractmethod
-    def before(self, obj) -> None:
+    def before(self) -> None:
         """
         Execute before main logic start.
         """
         pass
 
     @abstractmethod
-    def after(self, obj) -> None:
+    def after(self) -> None:
         """
         Execute after main logic end normally.
         """
         pass
 
     @abstractmethod
-    def error(self, obj, e: Exception) -> None:
+    def error(self, e: Exception) -> None:
         """
         Execute after main logic raises Exception.
         """
         pass
 
     @abstractmethod
-    def completion(self, obj) -> None:
+    def completion(self) -> None:
         """
         Execute after main logic always.
         """
@@ -62,16 +70,25 @@ class BaseScenarioListener(BaseListener):
     Listener for scenario
     """
 
-    def before(self, executor: IScenarioExecutor) -> None:
+    def _prepare(self, executor: IScenarioExecutor) -> None:
+        self._executor = executor
+
+    @property
+    def executor(self) -> IScenarioExecutor:
+        if not self._executor:
+            raise CliboaException("No scenario executor instance found.")
+        return self._executor
+
+    def before(self) -> None:
         pass
 
-    def after(self, executor: IScenarioExecutor) -> None:
+    def after(self) -> None:
         pass
 
-    def error(self, executor: IScenarioExecutor, e: Exception) -> None:
+    def error(self, e: Exception) -> None:
         pass
 
-    def completion(self, executor: IScenarioExecutor) -> None:
+    def completion(self) -> None:
         pass
 
 
@@ -80,14 +97,43 @@ class BaseStepListener(BaseListener):
     Listener for step
     """
 
-    def before(self, step: BaseStep) -> None:
+    Arguments: type[BaseModel] | None = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._step = None
+        self._args = None
+
+    def _prepare(self, executor: IParentStep, step: BaseStep) -> None:
+        self._executor = executor
+        self._step = step
+        if self.Arguments is not None:
+            self._args = self.Arguments.model_validate(executor.raw_arguments)
+
+    @property
+    def parent(self) -> IParentStep:
+        if not self._executor:
+            raise CliboaException("No step executor instance found.")
+        return self._executor
+
+    @property
+    def step(self) -> BaseStep:
+        if not self._step:
+            raise CliboaException("No step instance found.")
+        return self._step
+
+    @property
+    def args(self) -> BaseModel | None:
+        return self._args
+
+    def before(self) -> None:
         pass
 
-    def after(self, step: BaseStep) -> None:
+    def after(self) -> None:
         pass
 
-    def error(self, step: BaseStep, e: Exception) -> None:
+    def error(self, e: Exception) -> None:
         pass
 
-    def completion(self, step: BaseStep) -> None:
+    def completion(self) -> None:
         pass
