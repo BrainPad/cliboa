@@ -13,7 +13,6 @@
 #
 from cliboa import state
 from cliboa.listener.base import BaseScenarioListener
-from cliboa.listener.interface import IScenarioExecutor
 
 
 class ScenarioStatusListener(BaseScenarioListener):
@@ -21,18 +20,20 @@ class ScenarioStatusListener(BaseScenarioListener):
     Listener for scenario execution status
     """
 
-    def before(self, executor: IScenarioExecutor) -> None:
-        state.set("_ExecuteScenario")
-        self.logger.info(f"Start scenario execution. StepQueue size is {executor.max_steps_size}")
-
-    def after(self, executor: IScenarioExecutor) -> None:
-        state.set("_ExecuteScenario")
-
-    def error(self, executor: IScenarioExecutor, e: Exception) -> None:
-        state.set("_ExecuteScenario")
-
-    def completion(self, executor: IScenarioExecutor) -> None:
+    def before(self) -> None:
         state.set("_ExecuteScenario")
         self.logger.info(
-            f"Complete scenario execution. StepQueue size is {executor.current_steps_size}"
+            f"Start scenario execution. StepQueue size is {self.executor.max_steps_size}"
+        )
+
+    def after(self) -> None:
+        state.set("_ExecuteScenario")
+
+    def error(self, e: Exception) -> None:
+        state.set("_ExecuteScenario")
+
+    def completion(self) -> None:
+        state.set("_ExecuteScenario")
+        self.logger.info(
+            f"Complete scenario execution. StepQueue size is {self.executor.current_steps_size}"
         )

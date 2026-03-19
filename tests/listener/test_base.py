@@ -31,13 +31,14 @@ class TestScenarioStatusListener:
         self._mock_logger = Mock()
         self._listener = ScenarioStatusListener(di_logger=self._mock_logger)
         self._executor = _ScenarioExecutor([])
+        self._listener._prepare(self._executor)
 
     def test_completion(self):
         """
         Test completion log using mock.
         Ensures completion log is the last log message.
         """
-        self._listener.completion(self._executor)
+        self._listener.completion()
 
         assert self._mock_logger.info.call_count > 0
         args, kwargs = self._mock_logger.info.call_args
@@ -49,7 +50,7 @@ class TestScenarioStatusListener:
         Test before log using mock.
         Ensures before log is the last log message.
         """
-        self._listener.before(self._executor)
+        self._listener.before()
 
         assert self._mock_logger.info.call_count > 0
         args, kwargs = self._mock_logger.info.call_args
@@ -69,13 +70,14 @@ class TestStepStatusListener:
         self._mock_logger = Mock()
         self._listener = StepStatusListener(di_logger=self._mock_logger)
         self._step = SampleCustomStep()
+        self._listener._prepare(Mock(), self._step)
 
     def test_after(self):
         """
         Test after log using mock.
         Ensures after log is the last log message.
         """
-        self._listener.after(self._step)
+        self._listener.after()
 
         assert self._mock_logger.info.call_count > 0
         args, kwargs = self._mock_logger.info.call_args
@@ -89,7 +91,7 @@ class TestStepStatusListener:
         Test before log using mock.
         Ensures before log is the last log message.
         """
-        self._listener.before(self._step)
+        self._listener.before()
 
         assert self._mock_logger.info.call_count > 0
         args, kwargs = self._mock_logger.info.call_args
