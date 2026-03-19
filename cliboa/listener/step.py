@@ -57,7 +57,6 @@ class StepStatusListener(BaseStepListener):
                 "_logger",
                 "_parent",
                 "_args",
-                "_deprecated_warn_log",
             ):
                 continue
             if v is not None and self._pattern is not None and self._pattern.search(k):
