@@ -30,12 +30,19 @@ class ScenarioManager(_BaseObject):
         common_file: str | list[str] | None = None,
         file_format: str = "yaml",
         cmd_arg: CommandArgument | None = None,
+        project_name: str | None = None,
         *args,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
         self._builder = self._resolve(
-            "scenario_builder", _ScenarioBuilder, scenario_file, common_file, file_format, cmd_arg
+            "scenario_builder",
+            _ScenarioBuilder,
+            scenario_file,
+            common_file,
+            file_format,
+            cmd_arg,
+            project_name,
         )
 
     def execute(self) -> int:

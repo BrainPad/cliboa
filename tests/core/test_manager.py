@@ -35,11 +35,12 @@ class TestScenarioManager:
 
         # A mock builder class to be injected via DI
         class MockBuilder:
-            def __init__(self, file, cmn_file, fmt, cmd, *args, **kwargs):
+            def __init__(self, file, cmn_file, fmt, cmd, project_name, *args, **kwargs):
                 self.file = file
                 self.cmn_file = cmn_file
                 self.fmt = fmt
                 self.cmd = cmd
+                self.project_name = project_name
                 self.args = args  # Inherited from _BaseObject
                 self.kwargs = kwargs  # Inherited from _BaseObject
 
@@ -50,10 +51,13 @@ class TestScenarioManager:
             "di_scenario_builder": MockBuilder,
             "di_logger": mock_logger,
         }
+        project_name = "spam_pj"
 
         # Instantiate ScenarioManager using DI
         # (di_scenario_builder and di_logger)
-        manager = ScenarioManager("test.yml", None, "yaml", dummy_cmd, *dummy_args, **dummy_kwargs)
+        manager = ScenarioManager(
+            "test.yml", None, "yaml", dummy_cmd, project_name, *dummy_args, **dummy_kwargs
+        )
 
         # Verify that _builder is an instance of MockBuilder
         assert isinstance(manager._builder, MockBuilder)
@@ -66,6 +70,7 @@ class TestScenarioManager:
         assert manager._builder.file == "test.yml"
         assert manager._builder.fmt == "yaml"
         assert manager._builder.cmd is dummy_cmd
+        assert manager._builder.project_name == project_name
 
         assert len(manager._builder.args) == 0
         assert manager._builder.kwargs == dummy_kwargs
