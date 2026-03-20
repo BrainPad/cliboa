@@ -28,20 +28,4 @@ File check via SFTP.
     src_pattern: *\.tsv
     timeout: 100
     retry_count: 10
-
-- step: Embed contents of key at scenario.yml
-  class: SftpFileExistsCheck
-  arguments:
-    host: xxx.xxx.xxx.xxx
-    user: xxxxx
-    key:
-      content: |
-        -----BEGIN RSA PRIVATE KEY-----
-        .......
-        -----END RSA PRIVATE KEY-----
-    passphrase: xxxxx
-    src_dir: /root
-    src_pattern: *\.tsv
-    timeout: 100
-    retry_count: 10
 ```

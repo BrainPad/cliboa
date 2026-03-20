@@ -1,7 +1,13 @@
+from cliboa.util.base import _warn_deprecated
+
+_warn_deprecated("cliboa.util.helper", "3.0", "4.0")
+
+
 class Helper(object):
     @staticmethod
     def set_property(cls, method, value):
         """
+        !!! Deprecated !!!
         This method allows you to set a value
         to the class with either method directly or via property setter.
         Either way, the method must be implemented
@@ -33,6 +39,12 @@ class Helper(object):
             method (str): method name
             value (any): value to set
         """
+        _warn_deprecated(
+            "cliboa.util.helper.Helepr.set_property",
+            "3.0",
+            "4.0",
+            "cliboa.scenario.base.BaseStep._set_arguments",
+        )
         attr = getattr(type(cls), method, None)
         if isinstance(attr, property):
             # Set property via property.setter

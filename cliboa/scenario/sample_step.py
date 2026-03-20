@@ -11,8 +11,9 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+from pydantic import BaseModel
+
 from cliboa.scenario.base import BaseStep
-from cliboa.util.lisboa_log import LisboaLog
 
 
 class SampleStep(BaseStep):
@@ -20,21 +21,14 @@ class SampleStep(BaseStep):
     For unit test
     """
 
-    def __init__(self):
-        super().__init__()
-        self._retry_count = 3
-        self._memo = None
-        self._logger = LisboaLog.get_logger(__name__)
+    class Arguments(BaseModel):
+        retry_count: int = 3
+        memo: str | None = None
 
-    def retry_count(self, retry_count):
-        self._retry_count = retry_count
-
-    def memo(self, memo):
-        self._memo = memo
-
-    def execute(self, *args):
-        self._logger.info("Start %s" % self.__class__.__name__)
-        self._logger.info("Finish %s" % self.__class__.__name__)
+    def execute(self):
+        self.logger.info("Start %s" % self.__class__.__name__)
+        self.logger.info(f"my memo is {self.args.memo}")
+        self.logger.info("Finish %s" % self.__class__.__name__)
 
 
 class SampleStepSub(SampleStep):
@@ -42,12 +36,19 @@ class SampleStepSub(SampleStep):
     For unit test
     """
 
-    def __init__(self):
-        super().__init__()
+    class Arguments(SampleStep.Arguments):
+        name: str | None = None
 
-    def execute(self, *args):
-        self._logger.info("Start %s" % self.__class__.__name__)
-        self._logger.info("Finish %s" % self.__class__.__name__)
+    def execute(self, **kwargs):
+        self.logger.info(f"Start {self}")
+        self.logger.info(f"kwargs is {kwargs}")
+        self.logger.info(f"my name is {self.args.name}")
+        self.logger.info(f"my memo is {self.args.memo}")
+        symbol_memo = self.get_symbol_argument("memo")
+        self.logger.info(f"symbol memo is {symbol_memo}")
+        symbol_context = self.get_from_context()
+        self.logger.info(f"symbol context is {symbol_context}")
+        self.logger.info("Finish %s" % self.__class__.__name__)
 
 
 class SampleCustomStep(BaseStep):
@@ -55,24 +56,12 @@ class SampleCustomStep(BaseStep):
     For unit test
     """
 
-    def __init__(self):
-        super().__init__()
-        self._password = None
-        self._access_key = None
-        self._secret_key = None
-        self._retry_count = 3
+    class Arguments(BaseModel):
+        password: str | None = None
+        access_key: str | None = None
+        secret_key: str | None = None
+        access_token: str | None = None
+        retry_count: int = 3
 
-    def password(self, password):
-        self._password = password
-
-    def access_key(self, access_key):
-        self._access_key = access_key
-
-    def secret_key(self, secret_key):
-        self._secret_key = secret_key
-
-    def retry_count(self, retry_count):
-        self._retry_count = retry_count
-
-    def execute(self, *args):
-        self._logger.info("unit test")
+    def execute(self):
+        pass

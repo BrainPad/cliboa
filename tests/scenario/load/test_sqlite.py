@@ -16,11 +16,9 @@ import os
 
 from cliboa.adapter.sqlite import SqliteAdapter
 from cliboa.scenario.load.sqlite import SqliteImport
-from cliboa.util.helper import Helper
-from cliboa.util.lisboa_log import LisboaLog
 
 
-class TestSqliteImport(object):
+class TestSqliteImport:
 
     DB_NAME = "test.db"
     TBL_NAME = "foo"
@@ -191,8 +189,7 @@ class TestSqliteImport(object):
             instance = self._create_instance(TEST_FILE_1, True)
             instance.execute()
 
-            instance = self._create_instance(TEST_FILE_2, False)
-            Helper.set_property(instance, "force_insert", True)
+            instance = self._create_instance(TEST_FILE_2, False, True)
             instance.execute()
 
             adapter = SqliteAdapter()
@@ -293,14 +290,18 @@ class TestSqliteImport(object):
             d[col[0]] = row[i]
         return d
 
-    def _create_instance(self, pattern, refresh):
+    def _create_instance(self, pattern, refresh, force_insert: bool = False):
         instance = SqliteImport()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "dbname", self.DB_NAME)
-        Helper.set_property(instance, "src_dir", ".")
-        Helper.set_property(instance, "src_pattern", pattern)
-        Helper.set_property(instance, "tblname", self.TBL_NAME)
-        Helper.set_property(instance, "refresh", refresh)
+        instance._set_arguments(
+            {
+                "dbname": self.DB_NAME,
+                "src_dir": ".",
+                "src_pattern": pattern,
+                "tblname": self.TBL_NAME,
+                "refresh": refresh,
+                "force_insert": force_insert,
+            }
+        )
         return instance
 
     def _clean(self, path):

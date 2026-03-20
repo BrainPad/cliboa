@@ -1,0 +1,114 @@
+#
+# Copyright BrainPad Inc. All Rights Reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+import functools
+import inspect
+import warnings
+from abc import ABC
+from typing import TypeVar
+
+from cliboa.util.exception import CliboaException
+from cliboa.util.log import _get_logger
+
+T = TypeVar("T")
+
+
+class _BaseObject(ABC):
+    def __init__(self, *args, **kwargs):
+        try:
+            super().__init__(*args, **kwargs)
+        except TypeError as e:
+            if "object.__init__()" in str(e):
+                super().__init__()
+            else:
+                raise e
+        self._di_map = {}
+        self._di_kwargs = {}
+        for k, v in kwargs.items():
+            if k.startswith("di_"):
+                self._di_kwargs[k] = v
+                key = k[3:]
+                self._di_map[key] = v
+        self._logger = self._resolve(
+            "logger", _get_logger(self.__class__.__module__ + "." + self.__class__.__name__)
+        )
+
+    def _resolve_cls(self, key: str, default_cls: type[T], *args, **kwargs) -> type[T]:
+        dependency = self._di_map.get(key, default_cls)
+        if not inspect.isclass(dependency):
+            raise CliboaException(f"Failed to resolve cliboa class. {key}:{type(dependency)}")
+        return dependency
+
+    def _resolve(self, _di_key: str, _default_cls: type[T], *args, **kwargs) -> T:
+        dependency = self._di_map.get(_di_key, _default_cls)
+        if not inspect.isclass(dependency):
+            return dependency
+        merged_kwargs = self._di_kwargs | kwargs
+        return dependency(*args, **merged_kwargs)
+
+
+def _warn_deprecated(
+    deprecated: str,
+    end_version: str,
+    removal_version: str,
+    instead: str | None = None,
+    stacklevel: int = 3,
+) -> str:
+    err_mes = f"{deprecated} is deprecated."
+    if instead:
+        err_mes += f" Use {instead} instead."
+    err_mes += (
+        f" It is no longer supported since version {end_version},"
+        f" and it will be removed in version {removal_version}."
+    )
+    warnings.warn(
+        err_mes,
+        DeprecationWarning,
+        stacklevel=stacklevel,
+    )
+    return err_mes
+
+
+def _warn_deprecated_args(end_version: str, removal_version: str):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            full_name = f"{func.__module__}.{func.__qualname__}"
+
+            full_split = full_name.split(".")
+            prop_name = full_split.pop()
+            if prop_name.startswith("_"):
+                prop_name = prop_name[1:]
+            full_split.append("args")
+            full_split.append(prop_name)
+            instead_name = ".".join(full_split)
+
+            _warn_deprecated(full_name, end_version, removal_version, instead_name)
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+
+def _warn_removed(deprecated: str, removal_version: str, stacklevel: int = 3) -> str:
+    err_mes = (
+        f"{deprecated} has been removed in version {removal_version}."
+        " Refer to the documentation for migration details."
+    )
+    warnings.warn(
+        err_mes,
+        DeprecationWarning,
+        stacklevel=stacklevel,
+    )
+    return err_mes

@@ -13,10 +13,11 @@
 #
 import csv
 
+from cliboa.util.base import _BaseObject
 from cliboa.util.exception import CliboaException
 
 
-class Csv(object):
+class Csv(_BaseObject):
     @staticmethod
     def quote_convert(string):
         """

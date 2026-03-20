@@ -37,8 +37,6 @@ from cliboa.scenario.transform.file import (
     FileRename,
 )
 from cliboa.util.exception import CliboaException, FileNotFound, InvalidParameter
-from cliboa.util.helper import Helper
-from cliboa.util.lisboa_log import LisboaLog
 from tests import BaseCliboaTest
 
 
@@ -66,18 +64,26 @@ class TestFileTransform(BaseCliboaTest):
 class TestFileTransformFunctions(TestFileTransform):
     def test_execute(self):
         instance = FileBaseTransform()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", "in")
-        Helper.set_property(instance, "src_pattern", r".*")
-        Helper.set_property(instance, "dest_dir", "out")
-        Helper.set_property(instance, "dest_name", "result.txt")
-        Helper.set_property(instance, "encoding", "utf-8")
-        Helper.set_property(instance, "nonfile_error", True)
+        instance._set_arguments(
+            {
+                "src_dir": "in",
+                "src_pattern": r".*",
+                "dest_dir": "out",
+                "dest_name": "result.txt",
+                "encoding": "utf-8",
+                "nonfile_error": True,
+            }
+        )
         instance.execute()
 
     def test_io_files_unset_directory(self):
         instance = FileBaseTransform()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        instance._set_arguments(
+            {
+                "src_dir": "",
+                "src_pattern": "",
+            }
+        )
         files = self._create_files()
         instance.io_files(files, func=self._func)
         assert os.path.exists(os.path.join(self._data_dir, "test1.txt")) is True
@@ -85,8 +91,13 @@ class TestFileTransformFunctions(TestFileTransform):
 
     def test_io_files_same_directory(self):
         instance = FileBaseTransform()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "dest_dir", self._data_dir)
+        instance._set_arguments(
+            {
+                "src_dir": "",
+                "src_pattern": "",
+                "dest_dir": self._data_dir,
+            }
+        )
         files = self._create_files()
         instance.io_files(files, func=self._func)
         assert os.path.exists(os.path.join(self._data_dir, "test1.txt")) is True
@@ -94,8 +105,13 @@ class TestFileTransformFunctions(TestFileTransform):
 
     def test_io_files_different_directory(self):
         instance = FileBaseTransform()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "dest_dir", self._out_dir)
+        instance._set_arguments(
+            {
+                "src_dir": "",
+                "src_pattern": "",
+                "dest_dir": self._out_dir,
+            }
+        )
         files = self._create_files()
         instance.io_files(files, func=self._func)
         assert os.path.exists(os.path.join(self._out_dir, "test1.txt")) is True
@@ -105,8 +121,7 @@ class TestFileTransformFunctions(TestFileTransform):
 
     def test_io_files_secret_file_name(self):
         instance = FileBaseTransform()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "dest_dir", self._out_dir)
+        instance._set_arguments({"src_dir": "", "src_pattern": "", "dest_dir": self._out_dir})
         files = []
         for file in self._create_files():
             root, name = os.path.split(file)
@@ -121,7 +136,12 @@ class TestFileTransformFunctions(TestFileTransform):
 
     def test_io_files_specify_ext(self):
         instance = FileBaseTransform()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        instance._set_arguments(
+            {
+                "src_dir": "",
+                "src_pattern": "",
+            }
+        )
         files = self._create_files()
         instance.io_files(files, ext="csv", func=self._func)
         assert os.path.exists(os.path.join(self._data_dir, "test1.txt")) is True
@@ -131,7 +151,12 @@ class TestFileTransformFunctions(TestFileTransform):
 
     def test_io_files_specify_ext_2(self):
         instance = FileBaseTransform()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        instance._set_arguments(
+            {
+                "src_dir": "",
+                "src_pattern": "",
+            }
+        )
         files = self._create_files()
         instance.io_files(files, ext=".csv", func=self._func)
         assert os.path.exists(os.path.join(self._data_dir, "test1.txt")) is True
@@ -141,7 +166,12 @@ class TestFileTransformFunctions(TestFileTransform):
 
     def test_io_writers_write_text(self):
         instance = FileBaseTransform()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        instance._set_arguments(
+            {
+                "src_dir": "",
+                "src_pattern": "",
+            }
+        )
         files = self._create_files()
         for reader, writer in instance.io_writers(files):
             writer.write(reader.read())
@@ -155,7 +185,12 @@ class TestFileTransformFunctions(TestFileTransform):
 
     def test_io_writers_write_binary(self):
         instance = FileBaseTransform()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        instance._set_arguments(
+            {
+                "src_dir": "",
+                "src_pattern": "",
+            }
+        )
         files = self._create_files()
         for reader, writer in instance.io_writers(files, mode="b"):
             writer.write(reader.read())
@@ -169,7 +204,12 @@ class TestFileTransformFunctions(TestFileTransform):
 
     def test_io_writers_overwrite_text(self):
         instance = FileBaseTransform()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
+        instance._set_arguments(
+            {
+                "src_dir": "",
+                "src_pattern": "",
+            }
+        )
         files = self._create_files()
         for reader, writer in instance.io_writers(files):
             writer.write(reader.read())
@@ -184,7 +224,6 @@ class TestFileTransformFunctions(TestFileTransform):
 
     def test_io_writers_invalid_parameter(self):
         instance = FileBaseTransform()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
         files = self._create_files()
         with pytest.raises(InvalidParameter) as execinfo:
             for reader, writer in instance.io_writers(files, mode="s"):
@@ -193,24 +232,21 @@ class TestFileTransformFunctions(TestFileTransform):
 
     def test_file_check_exist(self):
         instance = FileBaseTransform()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
         ret = instance.check_file_existence(["test.txt"])
-        assert ret is None
+        assert ret is True
 
     def test_file_check_nofile_error(self):
         instance = FileBaseTransform()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "nonfile_error", True)
+        instance._set_arguments({"src_dir": "", "src_pattern": "", "nonfile_error": True})
         with pytest.raises(FileNotFound) as execinfo:
             instance.check_file_existence([])
         assert "No files are found." == str(execinfo.value)
 
     def test_file_check_nofile_noerror(self):
         instance = FileBaseTransform()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "nonfile_error", False)
+        instance._set_arguments({"src_dir": "", "src_pattern": "", "nonfile_error": False})
         ret = instance.check_file_existence([])
-        assert ret is None
+        assert ret is False
 
     def _func(self, fi, fo):
         pass
@@ -228,10 +264,13 @@ class TestFileDecompress(TestFileTransform):
                 o.write(file, arcname=os.path.basename(file))
 
         instance = FileDecompress()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test.*\.txt\.zip")
-        Helper.set_property(instance, "dest_dir", self._out_dir)
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test.*\.txt\.zip",
+                "dest_dir": self._out_dir,
+            }
+        )
         instance.execute()
 
         decompressed_file_1 = os.path.join(self._out_dir, "test1.txt")
@@ -255,11 +294,14 @@ class TestFileDecompress(TestFileTransform):
                     o.write(buf)
 
         instance = FileDecompress()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test.*\.txt\.gz")
-        Helper.set_property(instance, "dest_dir", self._out_dir)
-        Helper.set_property(instance, "chunk_size", 1024)
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test.*\.txt\.gz",
+                "dest_dir": self._out_dir,
+                "chunk_size": 1024,
+            }
+        )
         instance.execute()
 
         decompressed_file_1 = os.path.join(self._out_dir, "test1.txt")
@@ -283,11 +325,14 @@ class TestFileDecompress(TestFileTransform):
                     o.write(buf)
 
         instance = FileDecompress()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test.*\.txt\.bz2")
-        Helper.set_property(instance, "dest_dir", self._out_dir)
-        Helper.set_property(instance, "chunk_size", 1024)
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test.*\.txt\.bz2",
+                "dest_dir": self._out_dir,
+                "chunk_size": 1024,
+            }
+        )
         instance.execute()
 
         decompressed_file_1 = os.path.join(self._out_dir, "test1.txt")
@@ -305,10 +350,13 @@ class TestFileDecompress(TestFileTransform):
             f.add(self._data_dir, arcname="/")
 
         instance = FileDecompress()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test\.tar")
-        Helper.set_property(instance, "dest_dir", self._out_dir)
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test\.tar",
+                "dest_dir": self._out_dir,
+            }
+        )
         instance.execute()
 
         decompressed_file_1 = os.path.join(self._out_dir, "test1.txt")
@@ -326,10 +374,13 @@ class TestFileDecompress(TestFileTransform):
             f.write("This is test 1")
 
         instance = FileDecompress()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test\.rar")
-        Helper.set_property(instance, "dest_dir", self._out_dir)
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test\.rar",
+                "dest_dir": self._out_dir,
+            }
+        )
         with pytest.raises(CliboaException) as execinfo:
             instance.execute()
         assert "Unmatched any available decompress type" in str(execinfo.value)
@@ -340,12 +391,15 @@ class TestFileCompress(TestFileTransform):
         self._create_files()
 
         instance = FileCompress()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
-        Helper.set_property(instance, "dest_dir", self._out_dir)
-        Helper.set_property(instance, "format", "zip")
-        Helper.set_property(instance, "chunk_size", 1024)
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test.*\.txt",
+                "dest_dir": self._out_dir,
+                "format": "zip",
+                "chunk_size": 1024,
+            }
+        )
         instance.execute()
 
         compressed_file_1 = os.path.join(self._out_dir, "test1.txt.zip")
@@ -367,12 +421,15 @@ class TestFileCompress(TestFileTransform):
         self._create_files()
 
         instance = FileCompress()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
-        Helper.set_property(instance, "dest_dir", self._out_dir)
-        Helper.set_property(instance, "format", "gz")
-        Helper.set_property(instance, "chunk_size", 1024)
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test.*\.txt",
+                "dest_dir": self._out_dir,
+                "format": "gz",
+                "chunk_size": 1024,
+            }
+        )
         instance.execute()
 
         compressed_file_1 = os.path.join(self._out_dir, "test1.txt.gz")
@@ -404,12 +461,15 @@ class TestFileCompress(TestFileTransform):
         self._create_files()
 
         instance = FileCompress()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
-        Helper.set_property(instance, "dest_dir", self._out_dir)
-        Helper.set_property(instance, "format", "bz2")
-        Helper.set_property(instance, "chunk_size", 1024)
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test.*\.txt",
+                "dest_dir": self._out_dir,
+                "format": "bz2",
+                "chunk_size": 1024,
+            }
+        )
         instance.execute()
 
         compressed_file_1 = os.path.join(self._out_dir, "test1.txt.bz2")
@@ -451,11 +511,14 @@ class TestDateFormatConvert(TestFileTransform):
                 writer.writerow(r)
 
         instance = DateFormatConvert()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test\.csv")
-        Helper.set_property(instance, "columns", ["date"])
-        Helper.set_property(instance, "formatter", "%Y-%m-%d %H:%M")
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test\.csv",
+                "columns": ["date"],
+                "formatter": "%Y-%m-%d %H:%M",
+            }
+        )
         instance.execute()
         rows = 0
         with open(src, mode="r", encoding="utf-8") as f:
@@ -475,9 +538,12 @@ class TestExcelConvert(TestFileTransform):
 
         # set the essential attributes
         instance = ExcelConvert()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test\.xlxs")
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test\.xlxs",
+            }
+        )
         instance.execute()
 
         exists_csv = glob(os.path.join(self._data_dir, "test.csv"))
@@ -489,10 +555,13 @@ class TestFileCopy(TestFileTransform):
         self._create_files()
 
         instance = FileCopy()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
-        Helper.set_property(instance, "dest_dir", self._out_dir)
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test.*\.txt",
+                "dest_dir": self._out_dir,
+            }
+        )
         instance.execute()
 
         assert os.path.exists(os.path.join(self._data_dir, "test1.txt"))
@@ -513,11 +582,13 @@ class TestFileCopy(TestFileTransform):
             os.rename(file, os.path.join(root, name + ".12345"))
 
         instance = FileCopy()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
-        Helper.set_property(instance, "src_pattern", r"test.*")
-        Helper.set_property(instance, "dest_dir", self._out_dir)
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test.*",
+                "dest_dir": self._out_dir,
+            }
+        )
         instance.execute()
 
         assert os.path.exists(os.path.join(self._data_dir, "test1.txt.12345"))
@@ -531,17 +602,6 @@ class TestFileCopy(TestFileTransform):
         with open(os.path.join(self._out_dir, "test2.txt.12345"), encoding="utf-8") as f:
             assert "This is test 2" == f.read()
 
-    def test_execute_ng(self):
-        self._create_files()
-
-        instance = FileCopy()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
-        with pytest.raises(Exception) as e:
-            instance.execute()
-        assert "The essential parameter is not specified in FileCopy." == str(e.value)
-
 
 class TestFileDivide(TestFileTransform):
     def test_execute_ok(self):
@@ -552,12 +612,15 @@ class TestFileDivide(TestFileTransform):
                 f.write("%s\n" % str(i))
 
         instance = FileDivide()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test\.txt")
-        Helper.set_property(instance, "dest_dir", self._out_dir)
-        Helper.set_property(instance, "divide_rows", 10)
-        Helper.set_property(instance, "header", True)
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test\.txt",
+                "dest_dir": self._out_dir,
+                "divide_rows": 10,
+                "header": True,
+            }
+        )
         instance.execute()
 
         row_index = 0
@@ -580,11 +643,14 @@ class TestFileDivide(TestFileTransform):
                 f.write("%s\n" % str(i))
 
         instance = FileDivide()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"\.test\.txt")
-        Helper.set_property(instance, "dest_dir", self._out_dir)
-        Helper.set_property(instance, "divide_rows", 10)
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"\.test\.txt",
+                "dest_dir": self._out_dir,
+                "divide_rows": 10,
+            }
+        )
         instance.execute()
 
         row_index = 0
@@ -607,11 +673,14 @@ class TestFileDivide(TestFileTransform):
                 f.write("%s\n" % str(i))
 
         instance = FileDivide()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test\.txt.12345")
-        Helper.set_property(instance, "dest_dir", self._out_dir)
-        Helper.set_property(instance, "divide_rows", 10)
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test\.txt.12345",
+                "dest_dir": self._out_dir,
+                "divide_rows": 10,
+            }
+        )
         instance.execute()
 
         row_index = 0
@@ -634,11 +703,14 @@ class TestFileDivide(TestFileTransform):
                 f.write("%s\n" % str(i))
 
         instance = FileDivide()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test")
-        Helper.set_property(instance, "dest_dir", self._out_dir)
-        Helper.set_property(instance, "divide_rows", 10)
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test",
+                "dest_dir": self._out_dir,
+                "divide_rows": 10,
+            }
+        )
         instance.execute()
 
         row_index = 0
@@ -662,13 +734,16 @@ class TestFileDivide(TestFileTransform):
                 f.write("%s\n" % str(i))
 
         instance = FileDivide()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test\.txt")
-        Helper.set_property(instance, "dest_dir", self._out_dir)
-        Helper.set_property(instance, "divide_rows", 10)
-        Helper.set_property(instance, "header", True)
-        Helper.set_property(instance, "suffix_pattern", "_%d")
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test\.txt",
+                "dest_dir": self._out_dir,
+                "divide_rows": 10,
+                "header": True,
+                "suffix_pattern": "_%d",
+            }
+        )
         instance.execute()
 
         row_index = 0
@@ -692,13 +767,16 @@ class TestFileDivide(TestFileTransform):
                 f.write("%s\n" % str(i))
 
         instance = FileDivide()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test\.txt")
-        Helper.set_property(instance, "dest_dir", self._out_dir)
-        Helper.set_property(instance, "divide_rows", 10)
-        Helper.set_property(instance, "header", True)
-        Helper.set_property(instance, "suffix_pattern", ".%02d")
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test\.txt",
+                "dest_dir": self._out_dir,
+                "divide_rows": 10,
+                "header": True,
+                "suffix_pattern": ".%02d",
+            }
+        )
         instance.execute()
 
         row_index = 0
@@ -725,13 +803,16 @@ class TestFileDivide(TestFileTransform):
                 f.write("%s\n" % str(i))
 
         instance = FileDivide()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test\.txt")
-        Helper.set_property(instance, "dest_dir", self._out_dir)
-        Helper.set_property(instance, "divide_rows", 1)
-        Helper.set_property(instance, "header", True)
-        Helper.set_property(instance, "suffix_pattern", ".%1d")
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test\.txt",
+                "dest_dir": self._out_dir,
+                "divide_rows": 1,
+                "header": True,
+                "suffix_pattern": ".%1d",
+            }
+        )
         instance.execute()
 
         row_index = 0
@@ -753,11 +834,14 @@ class TestFileRename(TestFileTransform):
         self._create_files()
 
         instance = FileRename()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
-        Helper.set_property(instance, "prefix", "PRE-")
-        Helper.set_property(instance, "suffix", "-SUF")
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test.*\.txt",
+                "prefix": "PRE-",
+                "suffix": "-SUF",
+            }
+        )
         instance.execute()
 
         assert os.path.exists(os.path.join(self._data_dir, "PRE-test1-SUF.txt"))
@@ -770,11 +854,14 @@ class TestFileRename(TestFileTransform):
             os.rename(file, os.path.join(root, "." + name))
 
         instance = FileRename()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"\.test.*\.txt")
-        Helper.set_property(instance, "prefix", "PRE-")
-        Helper.set_property(instance, "suffix", "-SUF")
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"\.test.*\.txt",
+                "prefix": "PRE-",
+                "suffix": "-SUF",
+            }
+        )
         instance.execute()
 
         assert os.path.exists(os.path.join(self._data_dir, "PRE-.test1-SUF.txt"))
@@ -788,11 +875,14 @@ class TestFileRename(TestFileTransform):
             os.rename(file, os.path.join(root, name + ".12345"))
 
         instance = FileRename()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test.*\.txt\.12345")
-        Helper.set_property(instance, "prefix", "PRE-")
-        Helper.set_property(instance, "suffix", "-SUF")
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test.*\.txt\.12345",
+                "prefix": "PRE-",
+                "suffix": "-SUF",
+            }
+        )
         instance.execute()
 
         assert os.path.exists(os.path.join(self._data_dir, "PRE-test1-SUF.txt.12345"))
@@ -806,11 +896,14 @@ class TestFileRename(TestFileTransform):
             os.rename(file, os.path.join(root, os.path.splitext(name)[0]))
 
         instance = FileRename()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test.*")
-        Helper.set_property(instance, "prefix", "PRE-")
-        Helper.set_property(instance, "suffix", "-SUF")
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test.*",
+                "prefix": "PRE-",
+                "suffix": "-SUF",
+            }
+        )
         instance.execute()
 
         assert os.path.exists(os.path.join(self._data_dir, "PRE-test1-SUF"))
@@ -820,11 +913,14 @@ class TestFileRename(TestFileTransform):
         self._create_files()
 
         instance = FileRename()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
-        Helper.set_property(instance, "regex_pattern", "[te]")
-        Helper.set_property(instance, "rep_str", "d")
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test.*\.txt",
+                "regex_pattern": "[te]",
+                "rep_str": "d",
+            }
+        )
         instance.execute()
 
         assert os.path.exists(os.path.join(self._data_dir, "ddsd1.txt"))
@@ -834,13 +930,16 @@ class TestFileRename(TestFileTransform):
         self._create_files()
 
         instance = FileRename()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
-        Helper.set_property(instance, "prefix", "PRE-")
-        Helper.set_property(instance, "suffix", "-SUF")
-        Helper.set_property(instance, "regex_pattern", "test1")
-        Helper.set_property(instance, "rep_str", "dummy3")
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test.*\.txt",
+                "prefix": "PRE-",
+                "suffix": "-SUF",
+                "regex_pattern": "test1",
+                "rep_str": "dummy3",
+            }
+        )
         instance.execute()
 
         assert os.path.exists(os.path.join(self._data_dir, "PRE-dummy3-SUF.txt"))
@@ -850,14 +949,17 @@ class TestFileRename(TestFileTransform):
         self._create_files()
 
         instance = FileRename()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
-        Helper.set_property(instance, "prefix", "PRE-")
-        Helper.set_property(instance, "suffix", "-SUF")
-        Helper.set_property(instance, "regex_pattern", "test1")
-        Helper.set_property(instance, "rep_str", "dummy3")
-        Helper.set_property(instance, "ext", "csv")
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test.*\.txt",
+                "prefix": "PRE-",
+                "suffix": "-SUF",
+                "regex_pattern": "test1",
+                "rep_str": "dummy3",
+                "ext": "csv",
+            }
+        )
         instance.execute()
 
         assert os.path.exists(os.path.join(self._data_dir, "PRE-dummy3-SUF.csv"))
@@ -867,11 +969,14 @@ class TestFileRename(TestFileTransform):
         self._create_files()
 
         instance = FileRename()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
-        Helper.set_property(instance, "regex_pattern", "")
-        Helper.set_property(instance, "rep_str", "")
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test.*\.txt",
+                "regex_pattern": "",
+                "rep_str": "",
+            }
+        )
         instance.execute()
 
         assert os.path.exists(os.path.join(self._data_dir, "test1.txt"))
@@ -881,11 +986,14 @@ class TestFileRename(TestFileTransform):
         self._create_files()
 
         instance = FileRename()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
-        Helper.set_property(instance, "regex_pattern", "t")
-        Helper.set_property(instance, "rep_str", "")
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test.*\.txt",
+                "regex_pattern": "t",
+                "rep_str": "",
+            }
+        )
         instance.execute()
 
         assert os.path.exists(os.path.join(self._data_dir, "es1.txt"))
@@ -895,11 +1003,14 @@ class TestFileRename(TestFileTransform):
         self._create_files()
 
         instance = FileRename()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
-        Helper.set_property(instance, "regex_pattern", "")
-        Helper.set_property(instance, "rep_str", "a")
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test.*\.txt",
+                "regex_pattern": "",
+                "rep_str": "a",
+            }
+        )
         instance.execute()
 
         assert os.path.exists(os.path.join(self._data_dir, "ataeasata1a.txt"))
@@ -909,12 +1020,15 @@ class TestFileRename(TestFileTransform):
         self._create_files()
 
         instance = FileRename()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
-        Helper.set_property(instance, "regex_pattern", "test")
-        Helper.set_property(instance, "rep_str", "test_")
-        Helper.set_property(instance, "without_ext", False)
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test.*\.txt",
+                "regex_pattern": "test",
+                "rep_str": "test_",
+                "without_ext": False,
+            }
+        )
         instance.execute()
 
         assert os.path.exists(os.path.join(self._data_dir, "test_1.txt"))
@@ -928,12 +1042,15 @@ class TestFileRename(TestFileTransform):
             os.rename(file, os.path.join(root, name + ".12345"))
 
         instance = FileRename()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test.*\.txt\.12345")
-        Helper.set_property(instance, "regex_pattern", ".txt")
-        Helper.set_property(instance, "rep_str", "_txt")
-        Helper.set_property(instance, "without_ext", False)
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test.*\.txt\.12345",
+                "regex_pattern": ".txt",
+                "rep_str": "_txt",
+                "without_ext": False,
+            }
+        )
         instance.execute()
 
         assert os.path.exists(os.path.join(self._data_dir, "test1_txt.12345"))
@@ -943,12 +1060,15 @@ class TestFileRename(TestFileTransform):
         self._create_files()
 
         instance = FileRename()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
-        Helper.set_property(instance, "prefix", "PRE-")
-        Helper.set_property(instance, "suffix", "-SUF")
-        Helper.set_property(instance, "regex_pattern", "test1")
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test.*\.txt",
+                "prefix": "PRE-",
+                "suffix": "-SUF",
+                "regex_pattern": "test1",
+            }
+        )
         with pytest.raises(InvalidParameter) as execinfo:
             instance.execute()
         assert "Replace string is not defined in yaml file: rep_str" == str(execinfo.value)
@@ -957,12 +1077,15 @@ class TestFileRename(TestFileTransform):
         self._create_files()
 
         instance = FileRename()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
-        Helper.set_property(instance, "prefix", "PRE-")
-        Helper.set_property(instance, "suffix", "-SUF")
-        Helper.set_property(instance, "rep_str", "test1")
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test.*\.txt",
+                "prefix": "PRE-",
+                "suffix": "-SUF",
+                "rep_str": "test1",
+            }
+        )
         with pytest.raises(InvalidParameter) as execinfo:
             instance.execute()
         assert "The conversion pattern is not defined in yaml file: regex_pattern" == str(
@@ -973,12 +1096,15 @@ class TestFileRename(TestFileTransform):
         self._create_files()
 
         instance = FileRename()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
-        Helper.set_property(instance, "prefix", "PRE-")
-        Helper.set_property(instance, "suffix", "-SUF")
-        Helper.set_property(instance, "regex_pattern", "")
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test.*\.txt",
+                "prefix": "PRE-",
+                "suffix": "-SUF",
+                "regex_pattern": "",
+            }
+        )
         with pytest.raises(InvalidParameter) as execinfo:
             instance.execute()
         assert "Replace string is not defined in yaml file: rep_str" == str(execinfo.value)
@@ -987,12 +1113,15 @@ class TestFileRename(TestFileTransform):
         self._create_files()
 
         instance = FileRename()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
-        Helper.set_property(instance, "prefix", "PRE-")
-        Helper.set_property(instance, "suffix", "-SUF")
-        Helper.set_property(instance, "rep_str", "")
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test.*\.txt",
+                "prefix": "PRE-",
+                "suffix": "-SUF",
+                "rep_str": "",
+            }
+        )
         with pytest.raises(InvalidParameter) as execinfo:
             instance.execute()
         assert "The conversion pattern is not defined in yaml file: regex_pattern" == str(
@@ -1003,11 +1132,14 @@ class TestFileRename(TestFileTransform):
         self._create_files()
 
         instance = FileRename()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
-        Helper.set_property(instance, "prefix", "PRE-")
-        Helper.set_property(instance, "without_ext", False)
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test.*\.txt",
+                "prefix": "PRE-",
+                "without_ext": False,
+            }
+        )
         with pytest.raises(InvalidParameter) as execinfo:
             instance.execute()
         assert "Cannot be specified in without_ext mode" == str(execinfo.value)
@@ -1016,11 +1148,14 @@ class TestFileRename(TestFileTransform):
         self._create_files()
 
         instance = FileRename()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
-        Helper.set_property(instance, "suffix", "-SUF")
-        Helper.set_property(instance, "without_ext", False)
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test.*\.txt",
+                "suffix": "-SUF",
+                "without_ext": False,
+            }
+        )
         with pytest.raises(InvalidParameter) as execinfo:
             instance.execute()
         assert "Cannot be specified in without_ext mode" == str(execinfo.value)
@@ -1029,11 +1164,14 @@ class TestFileRename(TestFileTransform):
         self._create_files()
 
         instance = FileRename()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test.*\.txt")
-        Helper.set_property(instance, "ext", "csv")
-        Helper.set_property(instance, "without_ext", False)
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test.*\.txt",
+                "ext": "csv",
+                "without_ext": False,
+            }
+        )
         with pytest.raises(InvalidParameter) as execinfo:
             instance.execute()
         assert "Cannot be specified in without_ext mode" == str(execinfo.value)
@@ -1049,11 +1187,14 @@ class TestFileConvert(TestFileTransform):
 
         # set the essential attributes
         instance = FileConvert()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test\.txt")
-        Helper.set_property(instance, "encoding_from", "utf-8")
-        Helper.set_property(instance, "encoding_to", "utf-16")
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test\.txt",
+                "encoding_from": "utf-8",
+                "encoding_to": "utf-16",
+            }
+        )
         instance.execute()
 
         with open(test_file, mode="rb") as t:
@@ -1075,12 +1216,15 @@ class TestFileConvert(TestFileTransform):
 
         # set the essential attributes
         instance = FileConvert()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test\.txt")
-        Helper.set_property(instance, "encoding_from", "utf-8")
-        Helper.set_property(instance, "encoding_to", "shift_jis")
-        Helper.set_property(instance, "errors", "ignore")
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test\.txt",
+                "encoding_from": "utf-8",
+                "encoding_to": "shift_jis",
+                "errors": "ignore",
+            }
+        )
         instance.execute()
 
         with open(test_file, encoding="shift_jis", errors="ignore") as t:
@@ -1098,12 +1242,15 @@ class TestFileConvert(TestFileTransform):
 
         # set the essential attributes
         instance = FileConvert()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test\.txt")
-        Helper.set_property(instance, "encoding_from", "utf-8")
-        Helper.set_property(instance, "encoding_to", "shift_jis")
-        Helper.set_property(instance, "errors", "strict")
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test\.txt",
+                "encoding_from": "utf-8",
+                "encoding_to": "shift_jis",
+                "errors": "strict",
+            }
+        )
         with pytest.raises(UnicodeEncodeError):
             instance.execute()
 
@@ -1117,11 +1264,14 @@ class TestFileArchive(TestFileTransform):
 
         # set the essential attributes
         instance = FileArchive()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test\.txt")
-        Helper.set_property(instance, "format", "tar")
-        Helper.set_property(instance, "dest_name", "foo")
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test\.txt",
+                "format": "tar",
+                "dest_name": "foo",
+            }
+        )
         instance.execute()
 
         files = glob(os.path.join(self._data_dir, "*.tar"))
@@ -1136,11 +1286,14 @@ class TestFileArchive(TestFileTransform):
 
         # set the essential attributes
         instance = FileArchive()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test\.txt")
-        Helper.set_property(instance, "format", "zip")
-        Helper.set_property(instance, "dest_name", "foo")
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test\.txt",
+                "format": "zip",
+                "dest_name": "foo",
+            }
+        )
         instance.execute()
 
         files = glob(os.path.join(self._data_dir, "*.zip"))
@@ -1157,12 +1310,15 @@ class TestFileArchive(TestFileTransform):
 
         # set the essential attributes
         instance = FileArchive()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "src_dir", self._data_dir)
-        Helper.set_property(instance, "src_pattern", r"test\.txt")
-        Helper.set_property(instance, "format", "zip")
-        Helper.set_property(instance, "dest_dir", result_dir)
-        Helper.set_property(instance, "dest_name", "foo")
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test\.txt",
+                "format": "zip",
+                "dest_dir": result_dir,
+                "dest_name": "foo",
+            }
+        )
         instance.execute()
 
         files = glob(os.path.join(result_dir, "foo.zip"))

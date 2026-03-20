@@ -1,0 +1,6 @@
+scenario:
+- step: sample step
+  class: ExecuteShellScript
+  arguments:
+    command: |
+      echo Hello cliboa!

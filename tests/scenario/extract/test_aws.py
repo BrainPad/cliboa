@@ -16,7 +16,7 @@ import json
 import os
 import tempfile
 from decimal import Decimal
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from cliboa.adapter.aws import S3Adapter
 from cliboa.scenario.extract.aws import (
@@ -26,8 +26,6 @@ from cliboa.scenario.extract.aws import (
     S3DownloadFileDelete,
     S3FileExistsCheck,
 )
-from cliboa.util.helper import Helper
-from cliboa.util.lisboa_log import LisboaLog
 from tests import BaseCliboaTest
 
 
@@ -41,9 +39,13 @@ class TestS3Download(BaseCliboaTest):
             m_pagenate.return_value = m_contents
 
             instance = S3Download()
-            Helper.set_property(instance, "bucket", "spam")
-            Helper.set_property(instance, "src_pattern", "spam")
-            Helper.set_property(instance, "dest_dir", tmp_dir)
+            instance._set_arguments(
+                {
+                    "bucket": "spam",
+                    "src_pattern": "spam",
+                    "dest_dir": tmp_dir,
+                }
+            )
             instance.execute()
 
             assert m_get_object.call_args_list == []
@@ -56,11 +58,15 @@ class TestS3Download(BaseCliboaTest):
             m_pagenate.return_value = [{"Contents": [{"Key": "test.txt"}]}]
 
             instance = S3Download()
-            Helper.set_property(instance, "bucket", "test-bucket")
-            Helper.set_property(instance, "src_pattern", "test.*")
-            Helper.set_property(instance, "dest_dir", tmp_dir)
-            Helper.set_property(instance, "role_arn", "arn:aws:iam::123456789012:role/TestRole")
-            Helper.set_property(instance, "external_id", "test-external-id")
+            instance._set_arguments(
+                {
+                    "bucket": "test-bucket",
+                    "src_pattern": "test.*",
+                    "dest_dir": tmp_dir,
+                    "role_arn": "arn:aws:iam::123456789012:role/TestRole",
+                    "external_id": "test-external-id",
+                }
+            )
 
             instance.execute()
 
@@ -77,8 +83,12 @@ class TestS3Delete(BaseCliboaTest):
         m_pagenate.return_value = m_contents
 
         instance = S3Delete()
-        Helper.set_property(instance, "bucket", "spam")
-        Helper.set_property(instance, "src_pattern", "spam")
+        instance._set_arguments(
+            {
+                "bucket": "spam",
+                "src_pattern": "spam",
+            }
+        )
         instance.execute()
 
         assert m_get_object.call_args_list == []
@@ -90,10 +100,14 @@ class TestS3Delete(BaseCliboaTest):
         m_pagenate.return_value = [{"Contents": [{"Key": "test.txt"}]}]
 
         instance = S3Delete()
-        Helper.set_property(instance, "bucket", "test-bucket")
-        Helper.set_property(instance, "src_pattern", "test.*")
-        Helper.set_property(instance, "role_arn", "arn:aws:iam::123456789012:role/TestRole")
-        Helper.set_property(instance, "external_id", "test-external-id")
+        instance._set_arguments(
+            {
+                "bucket": "test-bucket",
+                "src_pattern": "test.*",
+                "role_arn": "arn:aws:iam::123456789012:role/TestRole",
+                "external_id": "test-external-id",
+            }
+        )
 
         instance.execute()
 
@@ -109,9 +123,12 @@ class TestS3FileExistsCheck(BaseCliboaTest):
         m_pagenate.return_value = [{"Contents": [{"Key": "spam"}]}]
         # テスト処理
         instance = S3FileExistsCheck()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "bucket", "spam")
-        Helper.set_property(instance, "src_pattern", "spam")
+        instance._set_arguments(
+            {
+                "bucket": "spam",
+                "src_pattern": "spam",
+            }
+        )
         instance.execute()
         # 処理の正常終了を確認
         assert m_get_object.call_args_list == []
@@ -123,9 +140,12 @@ class TestS3FileExistsCheck(BaseCliboaTest):
         m_pagenate.return_value = [{"Contents": [{"Key": "spam"}]}]
         # テスト処理
         instance = S3FileExistsCheck()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "bucket", "spam")
-        Helper.set_property(instance, "src_pattern", "hoge")
+        instance._set_arguments(
+            {
+                "bucket": "spam",
+                "src_pattern": "hoge",
+            }
+        )
         instance.execute()
         # 処理の正常終了を確認
         assert m_get_object.call_args_list == []
@@ -137,11 +157,14 @@ class TestS3FileExistsCheck(BaseCliboaTest):
         m_pagenate.return_value = [{"Contents": [{"Key": "test.txt"}]}]
 
         instance = S3FileExistsCheck()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "bucket", "test-bucket")
-        Helper.set_property(instance, "src_pattern", "test.*")
-        Helper.set_property(instance, "role_arn", "arn:aws:iam::123456789012:role/TestRole")
-        Helper.set_property(instance, "external_id", "test-external-id")
+        instance._set_arguments(
+            {
+                "bucket": "test-bucket",
+                "src_pattern": "test.*",
+                "role_arn": "arn:aws:iam::123456789012:role/TestRole",
+                "external_id": "test-external-id",
+            }
+        )
 
         instance.execute()
 
@@ -153,16 +176,21 @@ class TestS3DownloadFileDelete(BaseCliboaTest):
     @patch.object(S3Adapter, "get_client")
     def test_cross_account_role_properties(self, m_get_client):
         """Test S3DownloadFileDelete with cross-account IAM role properties"""
-        # Mock ObjectStore data (simulating previous S3Download step)
-        from cliboa.util.cache import ObjectStore
-
-        ObjectStore.put("dl1", [{"Key": "test.txt"}])
 
         instance = S3DownloadFileDelete()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "bucket", "test-bucket")
-        Helper.set_property(instance, "role_arn", "arn:aws:iam::123456789012:role/TestRole")
-        Helper.set_property(instance, "external_id", "test-external-id")
+        mock_parent = Mock(
+            symbol_name="dl1",
+        )
+        mock_parent.get_from_context.return_value = {"keys": ["test.txt"]}
+        mock_parent.get_symbol_arguments.return_value = {}
+        instance.parent = mock_parent
+        instance._set_arguments(
+            {
+                "bucket": "test-bucket",
+                "role_arn": "arn:aws:iam::123456789012:role/TestRole",
+                "external_id": "test-external-id",
+            }
+        )
 
         instance.execute()
 
@@ -287,12 +315,15 @@ class TestDynamoDBRead(BaseCliboaTest):
 
         with tempfile.TemporaryDirectory() as temp_dir:
             instance = DynamoDBRead()
-            Helper.set_property(instance, "table_name", "test_table")
-            Helper.set_property(instance, "file_name", f"output.{file_format}")
-            Helper.set_property(instance, "dest_dir", temp_dir)
-            Helper.set_property(instance, "file_format", file_format)
-            Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-            Helper.set_property(instance, "region", "us-east-1")
+            instance._set_arguments(
+                {
+                    "table_name": "test_table",
+                    "file_name": f"output.{file_format}",
+                    "dest_dir": temp_dir,
+                    "file_format": file_format,
+                    "region": "us-east-1",
+                }
+            )
             instance.execute()
 
             output_file_path = os.path.join(temp_dir, instance._file_name)

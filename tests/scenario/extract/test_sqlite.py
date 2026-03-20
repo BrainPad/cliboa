@@ -18,8 +18,6 @@ import pytest
 
 from cliboa.adapter.sqlite import SqliteAdapter
 from cliboa.scenario.extract.sqlite import SqliteExport
-from cliboa.util.helper import Helper
-from cliboa.util.lisboa_log import LisboaLog
 
 
 class TestSqliteExport(object):
@@ -62,8 +60,11 @@ class TestSqliteExport(object):
         try:
             self._insert_test_data(test_data)
 
-            instance = self._create_instance()
-            Helper.set_property(instance, "order", ["No"])
+            instance = self._create_instance(
+                {
+                    "order": ["No"],
+                }
+            )
             instance.execute()
 
             with open(self._RESULT_FILE, "r") as o:
@@ -98,9 +99,12 @@ class TestSqliteExport(object):
         try:
             self._insert_test_data(test_data)
 
-            instance = self._create_instance()
-            Helper.set_property(instance, "order", ["No"])
-            Helper.set_property(instance, "no_duplicate", True)
+            instance = self._create_instance(
+                {
+                    "order": ["No"],
+                    "no_duplicate": True,
+                }
+            )
             instance.execute()
 
             with open(self._RESULT_FILE, "r") as o:
@@ -119,12 +123,16 @@ class TestSqliteExport(object):
             self._clean(self._DB_NAME)
             self._clean(self._RESULT_FILE)
 
-    def _create_instance(self):
+    def _create_instance(self, add_arguments: dict = {}):
         instance = SqliteExport()
-        Helper.set_property(instance, "logger", LisboaLog.get_logger(__name__))
-        Helper.set_property(instance, "dbname", self._DB_NAME)
-        Helper.set_property(instance, "dest_path", self._RESULT_FILE)
-        Helper.set_property(instance, "tblname", self._TBL_NAME)
+        instance._set_arguments(
+            {
+                "dbname": self._DB_NAME,
+                "dest_path": self._RESULT_FILE,
+                "tblname": self._TBL_NAME,
+            }
+            | add_arguments
+        )
         return instance
 
     def _clean(self, path):

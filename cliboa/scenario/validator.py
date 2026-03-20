@@ -11,24 +11,36 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-from cliboa.adapter.sqlite import SqliteAdapter
-from cliboa.util.exception import InvalidParameter, SqliteInvalid
-from cliboa.util.lisboa_log import LisboaLog
+from cliboa.util.base import _BaseObject, _warn_deprecated
+from cliboa.util.exception import InvalidParameter
+
+_warn_deprecated("cliboa.scenario.validator", "3.0", "4.0")
 
 
-class EssentialParameters(object):
+class EssentialParameters(_BaseObject):
     """
+    DEPRECATED: Use cliboa.scenario.base.BaseStep.Arguments instead.
+
     Validation for the essential parameters of step class
     """
 
-    def __init__(self, cls_name, param_list):
+    def __init__(self, cls_name, param_list, **kwargs):
         """
         Args:
             cls_name: class name which has validation target parameters
             param_list: list of validation target parameters
         """
+        super().__init__(**kwargs)
         self._cls_name = cls_name
         self._param_list = param_list
+        self._logger.warning(
+            _warn_deprecated(
+                ".".join(("cliboa.scenario.validator", self.__class__.__name__)),
+                "3.0",
+                "4.0",
+                "cliboa.scenario.base.BaseStep.Arguments",
+            )
+        )
 
     def __call__(self):
         for p in self._param_list:
@@ -36,38 +48,3 @@ class EssentialParameters(object):
                 raise InvalidParameter(
                     "The essential parameter is not specified in %s." % self._cls_name
                 )
-
-
-class SqliteTableExistence(object):
-    """
-    Validation for the table of sqlite
-    """
-
-    def __init__(self, dbname, tblname, returns_bool=False):
-        """
-        Args:
-            dbname: database name
-            tblname: table name
-            returns_bool: return bool or not
-        """
-        self._sqlite_adptr = SqliteAdapter()
-        self._dbname = dbname
-        self._tblname = tblname
-        self._returns_bool = returns_bool
-        self._logger = LisboaLog.get_logger(__name__)
-
-    def __call__(self):
-        try:
-            self._sqlite_adptr.connect(self._dbname)
-            cur = self._sqlite_adptr.fetch(
-                'SELECT name FROM sqlite_master WHERE type="table" AND name="%s"' % self._tblname
-            )
-            result = cur.fetchall()
-            if self._returns_bool is True:
-                return True if result else False
-
-            if not result and self._returns_bool is False:
-                raise SqliteInvalid("Sqlite table %s not found" % self._tblname)
-
-        finally:
-            self._sqlite_adptr.close()

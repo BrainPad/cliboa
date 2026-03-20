@@ -92,7 +92,7 @@ class HttpDownload(HttpExtract):
             url = self._src_url
             dest_path = os.path.join(self._dest_dir, self._dest_name)
 
-        d = Download(url, dest_path, self._timeout, self._retry_count, **self.get_params())
+        d = Download(url, dest_path, self._timeout, self._retry_count, params=self.get_params())
         d.execute()
 
     def get_params(self):
@@ -149,6 +149,6 @@ class HttpGet(HttpBase):
             self._timeout,
             self._retry_count,
             self._retry_intvl_sec,
-            **super().get_params(),
+            params=super().get_params(),
         )
         d.execute()

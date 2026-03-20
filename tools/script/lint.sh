@@ -42,15 +42,15 @@ echo "[${CURRENT_PROCESS}/${MAX_PROCESS}] check isort"
 poetry run isort --check .
 
 CURRENT_PROCESS=$((CURRENT_PROCESS+1))
-echo "[${CURRENT_PROCESS}/${MAX_PROCESS}] execute unittest and instrument coverage"
-poetry run pytest --cov cliboa --cov-report term-missing --cov-report=xml
-
-CURRENT_PROCESS=$((CURRENT_PROCESS+1))
 echo "[${CURRENT_PROCESS}/${MAX_PROCESS}] execute bandit"
 poetry run bandit --severity-level high -r cliboa
 
 CURRENT_PROCESS=$((CURRENT_PROCESS+1))
 echo "[${CURRENT_PROCESS}/${MAX_PROCESS}] check layer dependency"
 poetry run lint-imports
+
+CURRENT_PROCESS=$((CURRENT_PROCESS+1))
+echo "[${CURRENT_PROCESS}/${MAX_PROCESS}] execute unittest and instrument coverage"
+poetry run pytest --cov cliboa --cov-report term-missing --cov-report=xml
 
 echo "Complete!"

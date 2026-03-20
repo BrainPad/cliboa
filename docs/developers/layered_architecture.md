@@ -10,11 +10,13 @@ Roles of each layers is below:
     * The interface to use cliboa application easily.
 2. core
     * Main logic of cliboa.
-3. scenario
+3. listener
+    * Classes of ETL listeners.
+4. scenario
     * Classes of ETL steps.
-4. adapter
+5. adapter
     * Adapter classes and functions for external communication.
-5. util
+6. util
     * Reusable helper, or foundational, classes and functions - they are not involved in external communication.
-6. conf
+7. conf
     * Load environment variables.

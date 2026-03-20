@@ -52,8 +52,10 @@ class HttpPost(HttpBase):
             self._timeout,
             self._retry_count,
             self._retry_intvl_sec,
-            data=self._payload,
-            headers=self._headers,
+            params={
+                "data": self._payload,
+                "headers": self._headers,
+            },
         )
         u.execute()
 
@@ -92,8 +94,10 @@ class HttpPut(HttpBase):
             self._timeout,
             self._retry_count,
             self._retry_intvl_sec,
-            data=self._payload,
-            headers=self._headers,
+            params={
+                "data": self._payload,
+                "headers": self._headers,
+            },
         )
         u.execute()
 
@@ -124,6 +128,6 @@ class HttpDelete(HttpBase):
             self._timeout,
             self._retry_count,
             self._retry_intvl_sec,
-            **super().get_params(),
+            params=self.get_params(),
         )
         r.execute()

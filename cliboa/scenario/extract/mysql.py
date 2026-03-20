@@ -16,8 +16,13 @@ from cliboa.scenario.rdbms import BaseRdbmsRead
 
 
 class MysqlRead(BaseRdbmsRead):
-    def __init__(self):
-        super().__init__()
-
     def get_adaptor(self):
-        return MysqlAdaptor(self._host, self._user, self._password, self._dbname, self._port)
+        return self._resolve(
+            "adaptor_db",
+            MysqlAdaptor,
+            self.args.host,
+            self.args.user,
+            self.args.password,
+            self.args.dbname,
+            self.args.port,
+        )

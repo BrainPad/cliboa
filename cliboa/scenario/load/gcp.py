@@ -18,13 +18,12 @@ import os
 import pandas
 
 from cliboa.adapter.gcp import BigQueryAdapter, FireStoreAdapter, GcsAdapter, ServiceAccount
+from cliboa.scenario.file import FileRead
 from cliboa.scenario.gcp import BaseBigQuery, BaseFirestore, BaseGcs
-from cliboa.scenario.load.file import FileWrite
-from cliboa.scenario.validator import EssentialParameters
 from cliboa.util.exception import FileNotFound, InvalidFormat
 
 
-class BigQueryWrite(BaseBigQuery, FileWrite):
+class BigQueryWrite(BaseBigQuery, FileRead):
     """
     Read csv and Insert data into BigQuery table
     """
@@ -38,44 +37,32 @@ class BigQueryWrite(BaseBigQuery, FileWrite):
 
     def __init__(self):
         super().__init__()
-        self._table_schema = None
-        self._replace = True
         self._columns = []
-        self._has_header = True
 
-    def table_schema(self, table_schema):
-        self._table_schema = table_schema
-
-    def replace(self, replace):
-        self._replace = replace
-
-    def has_header(self, has_header):
-        self._has_header = has_header
+    class Arguments(BaseBigQuery.Arguments, FileRead.Arguments):
+        table_schema: list[dict]
+        replace: bool = True
+        has_header: bool = True
 
     def execute(self, *args):
-        BaseBigQuery.execute(self)
-
-        param_valid = EssentialParameters(self.__class__.__name__, [self._table_schema])
-        param_valid()
-
-        files = super().get_target_files(self._src_dir, self._src_pattern)
-        if len(files) == 0:
-            raise FileNotFound("The specified csv file not found.")
-        self._logger.info("insert target files %s" % files)
+        files = self.get_src_files()
+        if not self.check_file_existence(files):
+            return 1
+        self.logger.info("insert target files %s" % files)
 
         is_inserted = False
         # initial if_exists
-        if_exists = self._REPLACE if self._replace is True else self._APPEND
-        self._columns = [name_and_type["name"] for name_and_type in self._table_schema]
+        if_exists = self._REPLACE if self.args.replace is True else self._APPEND
+        self._columns = [name_and_type["name"] for name_and_type in self.args.table_schema]
         for file in files:
             insert_rows = []
-            with open(file, "r", encoding=self._encoding) as f:
+            with open(file, "r", encoding=self.args.encoding) as f:
                 reader = (
                     csv.DictReader(f, delimiter=",")
-                    if self._has_header is True
+                    if self.args.has_header is True
                     else csv.reader(f, delimiter=",")
                 )
-                if self._has_header is True:
+                if self.args.has_header is True:
                     for r in reader:
                         # extract only the specified columns
                         contents = {}
@@ -123,15 +110,15 @@ class BigQueryWrite(BaseBigQuery, FileWrite):
         if is_inserted is True:
             # if_exists after the first insert execution
             if_exists = self._APPEND
-        dest_tbl = self._dataset + "." + self._tblname
-        self._logger.info("Start insert %s rows to %s" % (len(insert_rows), dest_tbl))
+        dest_tbl = self.args.dataset + "." + self.args.tblname
+        self.logger.info("Start insert %s rows to %s" % (len(insert_rows), dest_tbl))
 
         df.to_gbq(
             dest_tbl,
-            project_id=self._project_id,
+            project_id=self.args.project_id,
             if_exists=if_exists,
-            table_schema=self._table_schema,
-            location=self._location,
+            table_schema=self.args.table_schema,
+            location=self.args.location,
             credentials=ServiceAccount().auth(self.get_credentials()),
         )
 
@@ -157,77 +144,44 @@ class BigQueryWrite(BaseBigQuery, FileWrite):
         return insert_data
 
 
-class GcsUpload(BaseGcs):
+class GcsUpload(BaseGcs, FileRead):
     """
     Upload local files to GCS
     """
 
-    def __init__(self):
-        super().__init__()
-        self._src_dir = None
-        self._src_pattern = None
-        self._dest_dir = ""
-
-    def src_dir(self, src_dir):
-        self._src_dir = src_dir
-
-    def src_pattern(self, src_pattern):
-        self._src_pattern = src_pattern
-
-    def dest_dir(self, dest_dir):
-        self._dest_dir = dest_dir
+    class Arguments(BaseGcs.Arguments, FileRead.Arguments):
+        dest_dir: str = ""
 
     def execute(self, *args):
-        super().execute()
-
-        valid = EssentialParameters(self.__class__.__name__, [self._src_dir, self._src_pattern])
-        valid()
-
         gcs_client = GcsAdapter().get_client(credentials=self.get_credentials())
-        bucket = gcs_client.bucket(self._bucket)
-        files = super().get_target_files(self._src_dir, self._src_pattern)
-        self._logger.info("Upload files %s" % files)
+        bucket = gcs_client.bucket(self.args.bucket)
+        files = self.get_src_files()
+        self.logger.info("Upload files %s" % files)
         for file in files:
-            self._logger.info("Start upload %s" % file)
-            blob = bucket.blob(os.path.join(self._dest_dir, os.path.basename(file)))
+            self.logger.info("Start upload %s" % file)
+            blob = bucket.blob(os.path.join(self.args.dest_dir, os.path.basename(file)))
             blob.upload_from_filename(file)
-            self._logger.info("Finish upload %s" % file)
+            self.logger.info("Finish upload %s" % file)
 
 
-class FirestoreDocumentCreate(BaseFirestore):
+class FirestoreDocumentCreate(BaseFirestore, FileRead):
     """
     Create document on FIrestore
     """
 
-    def __init__(self):
-        super().__init__()
-        self._src_dir = None
-        self._src_pattern = None
-
-    def src_dir(self, src_dir):
-        self._src_dir = src_dir
-
-    def src_pattern(self, src_pattern):
-        self._src_pattern = src_pattern
+    class Arguments(BaseFirestore.Arguments, FileRead.Arguments):
+        pass
 
     def execute(self, *args):
-        super().execute()
-
-        valid = EssentialParameters(
-            self.__class__.__name__,
-            [self._collection, self._src_dir, self._src_pattern],
-        )
-        valid()
-
-        files = super().get_target_files(self._src_dir, self._src_pattern)
-        if len(files) == 0:
+        files = self.get_src_files()
+        if not self.check_file_existence(files):
             raise FileNotFound("No files are found.")
 
         firestore_client = FireStoreAdapter().get_client(self.get_credentials())
         for file in files:
             with open(file) as f:
                 fname = os.path.splitext(os.path.basename(file))[0]
-                doc = firestore_client.collection(self._collection).document(fname)
+                doc = firestore_client.collection(self.args.collection).document(fname)
                 doc.set(json.load(f))
 
 
@@ -236,37 +190,24 @@ class BigQueryCopy(BaseBigQuery):
     Copy Bigquery from one table to another
     """
 
-    def __init__(self):
-        super().__init__()
-
-        self._dest_dataset = None
-        self._dest_tblname = None
-
-    def dest_dataset(self, dest_dataset):
-        self._dest_dataset = dest_dataset
-
-    def dest_tblname(self, dest_tblname):
-        self._dest_tblname = dest_tblname
+    class Arguments(BaseBigQuery.Arguments):
+        dest_dataset: str
+        dest_tblname: str
 
     def execute(self, *args):
-        super().execute()
-        valid = EssentialParameters(
-            self.__class__.__name__,
-            [self._dataset, self._tblname, self._location, self._dest_dataset, self._dest_tblname],
-        )
-        valid()
-
         # Define Source Table and Destination Table
-        source_table_id = "{}.{}.{}".format(self._project_id, self._dataset, self._tblname)
+        source_table_id = "{}.{}.{}".format(
+            self.args.project_id, self.args.dataset, self.args.tblname
+        )
         destination_table_id = "{}.{}.{}".format(
-            self._project_id, self._dest_dataset, self._dest_tblname
+            self.args.project_id, self.args.dest_dataset, self.args.dest_tblname
         )
 
         # Client Setup
         gbq_client = BigQueryAdapter().get_client(
             credentials=self.get_credentials(),
-            project=self._project_id,
-            location=self._location,
+            project=self.args.project_id,
+            location=self.args.location,
         )
 
         # Create Copy Job
@@ -275,4 +216,4 @@ class BigQueryCopy(BaseBigQuery):
         # Wait for the job to complete.
         job.result()
 
-        print("A copy of the table created.")
+        self.logger.info("A copy of the table created.")

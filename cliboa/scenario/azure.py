@@ -12,8 +12,10 @@
 # all copies or substantial portions of the Software.
 #
 
+from pydantic import BaseModel
+
 from cliboa.scenario.base import BaseStep
-from cliboa.scenario.validator import EssentialParameters
+from cliboa.util.base import _warn_deprecated_args
 
 
 class BaseAzure(BaseStep):
@@ -21,20 +23,25 @@ class BaseAzure(BaseStep):
     Base class of Azure related classes
     """
 
-    def __init__(self):
-        super().__init__()
-        self._account_url = None
-        self._account_access_key = None
-        self._connection_string = None
+    class Arguments(BaseModel):
+        account_url: str | None = None
+        account_access_key: str | None = None
+        connection_string: str | None = None
 
-    def account_url(self, account_url):
-        self._account_url = account_url
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _account_url(self):
+        return self.args.account_url
 
-    def account_access_key(self, account_access_key):
-        self._account_access_key = account_access_key
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _account_access_key(self):
+        return self.args.account_access_key
 
-    def connection_string(self, connection_string):
-        self._connection_string = connection_string
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _connection_string(self):
+        return self.args.connection_string
 
 
 class BaseAzureBlob(BaseAzure):
@@ -42,14 +49,10 @@ class BaseAzureBlob(BaseAzure):
     Base class of Azure Blob Storage related classes
     """
 
-    def __init__(self):
-        super().__init__()
-        self._container_name = None
+    class Arguments(BaseAzure.Arguments):
+        container_name: str
 
-    def container_name(self, container_name):
-        self._container_name = container_name
-
-    def execute(self, *args):
-        super().execute()
-        valid = EssentialParameters(self.__class__.__name__, [self._container_name])
-        valid()
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _container_name(self):
+        return self.args.container_name

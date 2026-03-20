@@ -1,0 +1,223 @@
+#
+# Copyright BrainPad Inc. All Rights Reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+import copy
+import inspect
+from abc import abstractmethod
+from typing import Any
+
+from cliboa import state
+from cliboa.core.interface import _IContext, _IExecute
+from cliboa.core.model import CommandArgument, StepModel
+from cliboa.listener.base import BaseListener, BaseScenarioListener, BaseStepListener
+from cliboa.listener.interface import IScenarioExecutor
+from cliboa.scenario.base import BaseStep
+from cliboa.scenario.interface import IParentStep
+from cliboa.util.base import _BaseObject
+from cliboa.util.cache import ObjectStore
+from cliboa.util.constant import StepStatus
+
+
+class _BaseExecutor(_BaseObject, _IExecute):
+    """
+    Base class of executor.
+    Execute main logic with handling listeners.
+    """
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._listeners = []
+
+    def register_listener(self, listener: BaseListener) -> None:
+        self._listeners.append(listener)
+
+    def _prepare_listener(self) -> None:
+        for lis in self._listeners:
+            self._prepare_each_listener(lis)
+
+    @abstractmethod
+    def _prepare_each_listener(self, lis: BaseListener) -> None:
+        raise NotImplementedError()
+
+    def _execute_listener(self, kind: str, e: Exception | None = None) -> None:
+        for lis in self._listeners:
+            try:
+                target = getattr(lis, kind)
+                if callable(target):
+                    if e:
+                        target(e)
+                    else:
+                        target()
+            except Exception:
+                self._logger.exception(
+                    f"Error occurred during {lis.__class__.__name__}.{kind}"
+                    f" in {self.__class__.__name__}"
+                )
+
+    def execute(self) -> int | None:
+        """
+        Execute with listeners.
+        """
+        try:
+            self._prepare_listener()
+            self._execute_listener("before")
+            res = self._execute_main()
+            self._execute_listener("after")
+            return res
+        except Exception as e:
+            self._logger.exception(
+                "{}({}) occurred during the execution of {}.{}".format(
+                    e.__class__.__name__,
+                    str(e),
+                    self.__class__.__module__,
+                    self.__class__.__name__,
+                )
+            )
+            self._execute_listener("error", e)
+            return StepStatus.ABNORMAL_TERMINATION
+        finally:
+            self._execute_listener("completion")
+
+    @abstractmethod
+    def _execute_main(self) -> int | None:
+        raise NotImplementedError()
+
+
+class _ScenarioExecutor(_BaseExecutor, IScenarioExecutor):
+    """
+    Executor for scenario
+    """
+
+    def __init__(self, steps: list[_IExecute], **kwargs):
+        super().__init__(**kwargs)
+        self._steps = steps
+        self._max_steps_size = len(steps)
+
+    def _prepare_each_listener(self, lis: BaseScenarioListener) -> None:
+        lis._prepare(self)
+
+    @property
+    def max_steps_size(self) -> int:
+        """
+        Get max inisteps size (set during initialization).
+        """
+        return self._max_steps_size
+
+    @property
+    def current_steps_size(self) -> int:
+        """
+        Get current remaining steps size.
+        """
+        return len(self._steps)
+
+    def _execute_main(self) -> int:
+        """
+        Wrap steps with _StepExecutor and execute.
+        """
+        state.set_steps_max(self.current_steps_size)
+        state.set_steps_current(0)
+        state.set_in_steps(True)
+        res = None
+        while self.current_steps_size > 0:
+            step = self._steps.pop(0)
+            state.set_steps_current(state.steps_max - self.current_steps_size)
+            res = step.execute()
+            if res is None:
+                continue
+            elif res == StepStatus.SUCCESSFUL_TERMINATION:
+                self._logger.info("Step response [successful termination]. Scenario will be end.")
+                break
+            else:
+                self._logger.error(
+                    f"Step response [abnormal termination: {res}]. Scenario will be end."
+                )
+                break
+        state.set_in_steps(False)
+        return StepStatus.SUCCESSFUL_TERMINATION if res is None else res
+
+
+class _StepExecutor(_BaseExecutor, IParentStep):
+    """
+    Executor for step
+    """
+
+    def __init__(
+        self,
+        step: BaseStep,
+        model: StepModel,
+        cmd_arg: CommandArgument | None = None,
+        context: _IContext | None = None,
+        symbol_model: StepModel | None = None,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        step.parent = self
+        step._set_arguments(model.arguments)
+        self._step = step
+        self._model = model
+        self._context = context
+        self._symbol_model = symbol_model
+        self._exec_args = copy.deepcopy(cmd_arg.args) if cmd_arg and cmd_arg.args else []
+        self._exec_kwargs = copy.deepcopy(cmd_arg.kwargs) if cmd_arg and cmd_arg.kwargs else {}
+
+    def _prepare_each_listener(self, lis: BaseStepListener) -> None:
+        lis._prepare(self, self.step)
+
+    @property
+    def step(self) -> BaseStep:
+        return self._step
+
+    @property
+    def step_name(self) -> str:
+        return self._model.step
+
+    @property
+    def symbol_name(self) -> str | None:
+        return self._model.symbol
+
+    @property
+    def raw_arguments(self) -> dict[str, Any]:
+        return self._model.arguments
+
+    def get_symbol_arguments(self) -> dict[str, Any]:
+        if self._symbol_model:
+            return self._symbol_model.arguments
+        else:
+            return {}
+
+    def put_to_context(self, value: Any) -> None:
+        if self._context:
+            self._context.put(self.step_name, value)
+        # v2 backward compability
+        ObjectStore.put(self.step_name, value, quiet=True)
+
+    def get_from_context(self, target: str | None = None) -> Any:
+        if target is None:
+            target = self.symbol_name
+        if self._context:
+            return self._context.get(target)
+
+    def _execute_main(self) -> int | None:
+        candidates = (
+            (self._exec_args, self._exec_kwargs),
+            ([], self._exec_kwargs),
+            (self._exec_args, {}),
+        )
+        sig = inspect.signature(self.step.execute)
+        for args, kwargs in candidates:
+            try:
+                sig.bind(*args, **kwargs)
+            except TypeError:
+                continue
+            return self.step.execute(*args, **kwargs)
+        return self.step.execute()

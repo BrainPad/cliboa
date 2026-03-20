@@ -21,6 +21,11 @@ class CliboaException(Exception):
     pass
 
 
+class InvalidScenarioClass(CliboaException):
+    # Exception when scenario class is invalid
+    pass
+
+
 class DirStructureInvalid(CliboaException):
     # Exception when directory structure invalid
     pass
@@ -58,11 +63,6 @@ class ScenarioFileInvalid(CliboaException):
 
 class StepExecutionFailed(CliboaException):
     # Exception when step execution was failed
-    pass
-
-
-class SqliteInvalid(CliboaException):
-    # Exception when specified file not found
     pass
 
 

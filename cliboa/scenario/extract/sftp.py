@@ -16,189 +16,146 @@ import re
 
 from cliboa.adapter.sftp import SftpAdapter
 from cliboa.scenario.sftp import BaseSftp
-from cliboa.scenario.validator import EssentialParameters
-from cliboa.util.cache import ObjectStore
+from cliboa.util.base import _warn_deprecated, _warn_deprecated_args
 from cliboa.util.constant import StepStatus
 
 
 class SftpExtract(BaseSftp):
     def __init__(self):
         super().__init__()
+        _warn_deprecated(
+            "cliboa.scenario.load.extract.SftpExtract",
+            "3.0",
+            "4.0",
+            "cliboa.scenario.sftp.BaseSftp",
+        )
 
 
-class SftpDownload(SftpExtract):
+class SftpDownload(BaseSftp):
     """
     Download files from sftp server
     """
 
-    def __init__(self):
-        super().__init__()
-        self._quit = False
-        self._ignore_empty_file = False
+    class Arguments(BaseSftp.Arguments):
+        quit: bool = False
+        ignore_empty_file: bool = False
 
-    def quit(self, quit):
-        self._quit = quit
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _quit(self):
+        return self.args.quit
 
-    def ignore_empty_file(self, ignore_empty_file):
-        self._ignore_empty_file = ignore_empty_file
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _ignore_empty_file(self):
+        return self.args.ignore_empty_file
 
     def execute(self, *args):
-        # essential parameters check
-        valid = EssentialParameters(
-            self.__class__.__name__,
-            [self._host, self._user, self._src_dir, self._src_pattern],
+        os.makedirs(self.args.dest_dir, exist_ok=True)
+
+        adapter = self.get_adapter()
+        obj = adapter.list_files(
+            dir=self.args.src_dir,
+            dest=self.args.dest_dir,
+            pattern=re.compile(self.args.src_pattern),
+            endfile_suffix=self.args.endfile_suffix,
+            ignore_empty_file=self.args.ignore_empty_file,
         )
-        valid()
+        files = adapter.execute(obj)
 
-        os.makedirs(self._dest_dir, exist_ok=True)
-
-        obj = SftpAdapter(
-            host=self._host, user=self._user, password=self._password, key=self._key
-        ).list_files(
-            dir=self._src_dir,
-            dest=self._dest_dir,
-            pattern=re.compile(self._src_pattern),
-            endfile_suffix=self._endfile_suffix,
-            ignore_empty_file=self._ignore_empty_file,
-        )
-
-        adaptor = super().get_adaptor()
-        files = adaptor.execute(obj)
-
-        if self._quit is True and len(files) == 0:
-            self._logger.info("No file was found. After process will not be processed")
+        if self.args.quit is True and len(files) == 0:
+            self.logger.info("No file was found. After process will not be processed")
             return StepStatus.SUCCESSFUL_TERMINATION
 
-        self._logger.info("Files downloaded %s" % files)
+        self.logger.info("Files downloaded %s" % files)
 
         # cache downloaded file names
-        ObjectStore.put(self._step, files)
+        self.put_to_context(files)
 
 
-class SftpDelete(SftpExtract):
+class SftpDelete(BaseSftp):
     """
     Delete file from sftp server
     """
 
-    def __init__(self):
-        super().__init__()
-
     def execute(self, *args):
-        # essential parameters check
-        valid = EssentialParameters(
-            self.__class__.__name__,
-            [self._host, self._user, self._src_dir, self._src_pattern],
+        adapter = self.get_adapter()
+        obj = adapter.clear_files(
+            dir=self.args.src_dir,
+            pattern=re.compile(self.args.src_pattern),
         )
-        valid()
-
-        obj = SftpAdapter(
-            host=self._host,
-            user=self._user,
-            password=self._password,
-            key=self._key,
-            timeout=self._timeout,
-            port=self._port,
-        ).clear_files(
-            dir=self._src_dir,
-            pattern=re.compile(self._src_pattern),
-        )
-
-        adaptor = super().get_adaptor()
-        adaptor.execute(obj)
+        adapter.execute(obj)
 
 
-class SftpDownloadFileDelete(SftpExtract):
+class SftpDownloadFileDelete(BaseSftp):
     """
     Delete all downloaded files.
     """
 
-    def __init__(self):
-        super().__init__()
+    Arguments = None
 
     def execute(self, *args):
-        files = ObjectStore.get(self._symbol)
+        files = self.get_from_context()
+        if files is None or len(files) == 0:
+            self.logger.info("No files to delete.")
+            return
 
-        if files is not None and len(files) > 0:
-            self._logger.info("Delete files %s" % files)
+        self.logger.info("Delete files %s" % files)
+        adapter = self._resolve(
+            "adapter_sftp",
+            SftpAdapter,
+            host=self.get_symbol_argument("host"),
+            user=self.get_symbol_argument("user"),
+            password=self.get_symbol_argument("password"),
+            key=self.get_symbol_argument("key"),
+            passphrase=self.get_symbol_argument("passphrase"),
+            timeout=self.get_symbol_argument("timeout"),
+            retryTimes=self.get_symbol_argument("retry_count"),
+            port=self.get_symbol_argument("port"),
+        )
+        symbol_src_dir = self.get_symbol_argument("src_dir")
+        symbol_endfile_suffix = self.get_symbol_argument("endfile_suffix")
 
-            self._host = super().get_step_argument("host")
-            self._user = super().get_step_argument("user")
-            self._password = super().get_step_argument("password")
-            self._key = super().get_step_argument("key")
-            self._timeout = super().get_step_argument("timeout")
-            self._retry_count = super().get_step_argument("retry_count")
-            self._port = super().get_step_argument("port")
-            self._endfile_suffix = super().get_step_argument("endfile_suffix")
-            self._src_dir = super().get_step_argument("src_dir")
+        for file in files:
+            obj = adapter.remove_specific_file(
+                dir=symbol_src_dir,
+                fname=file,
+            )
+            adapter.execute(obj)
+            self.logger.info("%s is successfully deleted." % file)
 
-            adaptor = super().get_adaptor()
-
-            endfile_suffix = super().get_step_argument("endfile_suffix")
-            for file in files:
-                obj = SftpAdapter(
-                    host=self._host,
-                    user=self._user,
-                    password=self._password,
-                    key=self._key,
-                    timeout=self._timeout,
-                    port=self._port,
-                ).remove_specific_file(
-                    dir=self._src_dir,
-                    fname=file,
+            if symbol_endfile_suffix:
+                obj = adapter.remove_specific_file(
+                    dir=symbol_src_dir,
+                    fname=file + symbol_endfile_suffix,
                 )
-                adaptor.execute(obj)
-                self._logger.info("%s is successfully deleted." % file)
-
-                if endfile_suffix:
-                    obj = SftpAdapter(
-                        host=self._host,
-                        user=self._user,
-                        password=self._password,
-                        key=self._key,
-                        timeout=self._timeout,
-                        port=self._port,
-                    ).remove_specific_file(
-                        dir=self._src_dir,
-                        fname=file + endfile_suffix,
-                    )
-                    self._logger.info("%s is successfully deleted." % (file + endfile_suffix))
-        else:
-            self._logger.info("No files to delete.")
+                self.logger.info("%s is successfully deleted." % (file + symbol_endfile_suffix))
 
 
-class SftpFileExistsCheck(SftpExtract):
+class SftpFileExistsCheck(BaseSftp):
     """
     File check in sftp server
     """
 
-    def __init__(self):
-        super().__init__()
-        self._ignore_empty_file = False
+    class Arguments(BaseSftp.Arguments):
+        ignore_empty_file: bool = False
 
-    def ignore_empty_file(self, ignore_empty_file):
-        self._ignore_empty_file = ignore_empty_file
+    @property
+    @_warn_deprecated_args("3.0", "4.0")
+    def _ignore_empty_file(self):
+        return self.args.ignore_empty_file
 
     def execute(self, *args):
-        # essential parameters check
-        valid = EssentialParameters(
-            self.__class__.__name__,
-            [self._host, self._user, self._src_dir, self._src_pattern],
+        adapter = self.get_adapter()
+        obj = adapter.file_exists_check(
+            dir=self.args.src_dir,
+            pattern=re.compile(self.args.src_pattern),
+            ignore_empty_file=self.args.ignore_empty_file,
         )
-        valid()
-
-        obj = SftpAdapter(
-            host=self._host, user=self._user, password=self._password, key=self._key
-        ).file_exists_check(
-            dir=self._src_dir,
-            pattern=re.compile(self._src_pattern),
-            ignore_empty_file=self._ignore_empty_file,
-        )
-
-        adaptor = super().get_adaptor()
-        files = adaptor.execute(obj)
+        files = adapter.execute(obj)
 
         if len(files) == 0:
-            self._logger.info("File not found. After process will not be processed")
+            self.logger.info("File not found. After process will not be processed")
             return StepStatus.SUCCESSFUL_TERMINATION
 
-        self._logger.info("File was found. After process will be processed")
+        self.logger.info("File was found. After process will be processed")

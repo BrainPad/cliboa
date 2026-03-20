@@ -13,10 +13,11 @@
 import boto3
 from boto3.session import Session
 
+from cliboa.util.base import _BaseObject
 from cliboa.util.exception import InvalidParameter
 
 
-class S3Adapter(object):
+class S3Adapter(_BaseObject):
     """
     Adapter of AWS S3
     """
@@ -28,8 +29,9 @@ class S3Adapter(object):
         profile: str = None,
         role_arn: str = None,
         external_id: str = None,
+        **kwargs,
     ):
-
+        super().__init__(**kwargs)
         # Validate credential combinations
         # 1) access_key and secret_key must be specified together
         if (access_key is None) ^ (secret_key is None):
