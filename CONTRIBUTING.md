@@ -12,7 +12,10 @@
     * [3-3. Review Process](#3-3-review-process)
     * [3-4. Core Maintainer Definition](#3-4-core-maintainer-definition)
     * [3-5. Review Process Exception](#3-5-review-process-exception)
-* [4. Licensing](#4-licensing)
+* [4. Versioning Policy](#4-versioning-policy)
+    * [4-1. Versioning Rules](#4-1-versioning-rules)
+    * [4-2. Release Stages and Branching](#4-2-release-stages-and-branching)
+* [5. Licensing](#5-licensing)
 
 ## 1. Welcome
 
@@ -97,7 +100,29 @@ The details of self-merging are as follows.
 3.  **CI Requirement:**
     * All PRs, regardless of the path, **must have all continuous integration (CI) checks in a passing (green) state** before merging.
 
-## 4. Licensing
+## 4. Versioning Policy
+
+cliboa follows [Semantic Versioning 2.0.0](https://semver.org/).
+The timing and branch selection for all version releases are determined at the discretion of the **Core Maintainers**.
+
+### 4-1. Versioning Rules
+- **Major (x.0.0)**: Significant breaking changes.
+- **Minor (0.x.0)**: New features or enhancements that do not break backward compatibility (excluding bug fixes).
+- **Patch (0.0.x)**: Backward-compatible bug fixes and documentation updates.
+
+### 4-2. Release Stages and Branching
+We use pre-release tags to indicate development status. The release source branch depends on the stage:
+
+* **Alpha**: Experimental versions intended for developers. Breaking changes are expected.
+    * **Release Branch**: Can be released from **any branch** (not limited to `master`).
+* **Beta**: Indicates the library is still maturing. While we strive for stability, breaking changes may occur if necessary.
+    * **Release Branch**: Must be released only from the **`master` branch**.
+    * *Note on v3.x Beta*: Unlike v2.x (which was essentially in "permanent beta"), v3.x is labeled as beta because while core logic has been migrated, the overall transition of all components from v2.x is not yet 100% complete.
+* **Stable**: Official releases without alpha/beta tags.
+    * **Release Branch**: Must be released only from the **`master` branch**.
+    * **Timeline**: A stable version will be released once the migration of all features from v2.x to v3.x is fully completed.
+
+## 5. Licensing
 
 By contributing your code to the cliboa project, you agree to license your contributions under the project's [LICENSE](/LICENSE).
 
