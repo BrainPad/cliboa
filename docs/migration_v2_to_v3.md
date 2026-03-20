@@ -135,6 +135,16 @@ The key added classes are as follows.
 - `cliboa.scenario.file.FileRead`
 - `cliboa.scenario.file.FileWrite`
 
+### Potential Impact on Custom Classes using Inheritance
+
+If you have implemented custom classes that rely on **multiple inheritance**, please be aware that these may not function correctly in v3 without modification.
+
+While the implementation of custom classes is at the user's discretion and responsibility, the internal requirements for using multiple inheritance have changed due to the architectural rewrite. Therefore, implementations that worked in v2 might encounter unexpected behavior or errors in v3.
+
+Additionally, it is important to ensure that parent constructors are explicitly called (e.g., `super().__init__(**kwargs)`) within your custom classes.
+In v2, some implementations may have functioned correctly even without explicitly calling the parent constructor; however, in v3, omitting this call is highly likely to cause initialization failures.
+While we expect most users who follow standard Python best practices to remain unaffected, we are noting this here as a precaution for those with unique custom implementations.
+
 ### Undocumented Breaking Changes
 
 We have made various modifications to the core features in conjunction with the update to v3. These modifications range from architectural reviews and improved type safety via modeling to fixes for potential bugs.
