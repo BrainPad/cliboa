@@ -30,7 +30,13 @@ from .extract.sftp import SftpDelete, SftpDownload, SftpDownloadFileDelete, Sftp
 from .extract.sqlite import SqliteExport
 from .load.aws import DynamoDBWrite, S3Upload
 from .load.azure import AzureBlobUpload
-from .load.gcp import BigQueryCopy, BigQueryWrite, FirestoreDocumentCreate, GcsUpload
+from .load.gcp import (
+    BigQueryCopy,
+    BigQueryWrite,
+    FirestoreDocumentCreate,
+    GcsUpload,
+    GoogleSheetImport,
+)
 from .load.http import HttpDelete, HttpPost
 from .load.mysql import MysqlWrite
 from .load.postgres import PostgresqlWrite
