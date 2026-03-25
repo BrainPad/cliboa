@@ -401,6 +401,7 @@ class CsvMerge(FileBaseTransform):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        # not parameter
         self._target_df = None
 
     class Arguments(FileBaseTransform.Arguments):
@@ -408,6 +409,7 @@ class CsvMerge(FileBaseTransform):
         target_path: str
         join_on: str
         engine: Literal["pandas", "dask"] = "pandas"
+        dtype: str | dict = "str"
 
     def execute(self, *args):
         self.args.resolve_dest_dir()
@@ -435,11 +437,15 @@ class CsvMerge(FileBaseTransform):
         """
         merge using dask
         """
-        dd_target = dask_df.read_csv(target_file, encoding=self.args.encoding)
+        dd_target = dask_df.read_csv(
+            target_file, encoding=self.args.encoding, dtype=self.args.dtype
+        )
 
         for source_file in source_files:
             dest_path = os.path.join(self.args.dest_dir, os.path.basename(source_file))
-            dd_source = dask_df.read_csv(source_file, encoding=self.args.encoding)
+            dd_source = dask_df.read_csv(
+                source_file, encoding=self.args.encoding, dtype=self.args.dtype
+            )
             merged_dd = dask_df.merge(dd_source, dd_target, on=self.args.join_on)
             merged_dd.to_csv(dest_path, single_file=True, index=False, encoding=self.args.encoding)
 
@@ -448,14 +454,16 @@ class CsvMerge(FileBaseTransform):
         merge using pandas
         NOTE: if target file is too large, use dask engine.
         """
-        self._target_df = pandas.read_csv(target_file)
+        self._target_df = pandas.read_csv(target_file, dtype=self.args.dtype)
         for source_file in source_files:
             chunk_size_handling(self._pandas_merge_one, source_file)
 
     def _pandas_merge_one(self, chunksize: int, source_file: str) -> None:
         dest_path = os.path.join(self.args.dest_dir, os.path.basename(source_file))
 
-        chunks = pandas.read_csv(source_file, chunksize=chunksize, encoding=self.args.encoding)
+        chunks = pandas.read_csv(
+            source_file, chunksize=chunksize, encoding=self.args.encoding, dtype=self.args.dtype
+        )
         is_first_chunk = True
         for chunk in chunks:
             merged_chunk = pandas.merge(chunk, self._target_df, on=self.args.join_on)
