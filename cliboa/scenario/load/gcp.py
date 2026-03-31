@@ -226,13 +226,12 @@ class BigQueryCopy(BaseBigQuery):
 class GoogleSheetImport(FileRead, BaseGcp):
     """
     Import a single CSV file into a specified Google Sheet.
+
+    Notice: Google Sheets has a limit of "10 million cells" for a single spreadsheet.
+    FYI: https://support.google.com/drive/answer/37603
     """
 
     class Arguments(FileRead.Arguments, BaseGcp.Arguments):
-        """
-        Pydantic v2 model for argument definition.
-        """
-
         book_id: str
         sheet_name: str
         retry_count: int = Field(default=3, ge=1)
