@@ -14,12 +14,16 @@
 import csv
 import json
 import os
+import time
 
+import gspread
 import pandas
+from google.oauth2.service_account import Credentials
+from pydantic import Field
 
 from cliboa.adapter.gcp import BigQueryAdapter, FireStoreAdapter, GcsAdapter, ServiceAccount
 from cliboa.scenario.file import FileRead
-from cliboa.scenario.gcp import BaseBigQuery, BaseFirestore, BaseGcs
+from cliboa.scenario.gcp import BaseBigQuery, BaseFirestore, BaseGcp, BaseGcs
 from cliboa.util.exception import FileNotFound, InvalidFormat
 
 
@@ -217,3 +221,104 @@ class BigQueryCopy(BaseBigQuery):
         job.result()
 
         self.logger.info("A copy of the table created.")
+
+
+class GoogleSheetImport(FileRead, BaseGcp):
+    """
+    Import a single CSV file into a specified Google Sheet.
+
+    Notice: Google Sheets has a limit of "10 million cells" for a single spreadsheet.
+    FYI: https://support.google.com/drive/answer/37603
+    """
+
+    class Arguments(FileRead.Arguments, BaseGcp.Arguments):
+        book_id: str
+        sheet_name: str
+        retry_count: int = Field(default=3, ge=1)
+        retry_intvl_sec: int = Field(default=10, ge=1)
+
+    @staticmethod
+    def _http_status_code_from_error(exc: BaseException) -> int | None:
+        resp = getattr(exc, "response", None)
+        if resp is None:
+            return None
+        code = getattr(resp, "status_code", None)
+        return code if isinstance(code, int) else None
+
+    @staticmethod
+    def _should_retry_google_sheet_after_error(status_code: int | None) -> bool:
+        if status_code is None:
+            return True
+        if 400 <= status_code < 500 and status_code != 429:
+            return False
+        return True
+
+    def execute(self):
+        files = self.get_src_files()
+
+        if len(files) != 1:
+            self.logger.error(
+                f"Import failed. Expected exactly 1 file, but found {len(files)}: {files}"
+            )
+            return 1
+
+        target_file = files[0]
+        df = pandas.read_csv(target_file)
+        df = df.fillna("")
+
+        scopes = [
+            "https://www.googleapis.com/auth/spreadsheets",
+            "https://www.googleapis.com/auth/drive",
+        ]
+        attempts = self.args.retry_count
+        for attempt in range(attempts):
+            try:
+                creds = Credentials.from_service_account_file(self.args.credentials, scopes=scopes)
+                client = gspread.authorize(creds)
+
+                self.logger.info(f"Opening spreadsheet (ID: {self.args.book_id})...")
+                sh = client.open_by_key(self.args.book_id)
+
+                try:
+                    worksheet = sh.worksheet(self.args.sheet_name)
+                    worksheet.clear()
+                    self.logger.info(f"Existing sheet '{self.args.sheet_name}' cleared.")
+                except gspread.exceptions.WorksheetNotFound:
+                    worksheet = sh.add_worksheet(
+                        title=self.args.sheet_name,
+                        rows=max(len(df) + 1, 1),
+                        cols=max(len(df.columns), 1),
+                    )
+                    self.logger.info(f"New sheet '{self.args.sheet_name}' created.")
+
+                data_to_update = [df.columns.values.tolist()] + df.values.tolist()
+                worksheet.update(data_to_update, value_input_option="USER_ENTERED")
+
+                self.logger.info(f"Successfully imported {target_file} to {self.args.sheet_name}")
+                return
+            except Exception as e:
+                status = self._http_status_code_from_error(e)
+                if not self._should_retry_google_sheet_after_error(status):
+                    raise
+                if attempt + 1 >= attempts:
+                    self.logger.error(
+                        "Google Sheet API failed after %s attempt(s)%s: %s"
+                        % (
+                            attempts,
+                            (" (HTTP %s)" % status) if status is not None else "",
+                            e,
+                        )
+                    )
+                    raise
+                status_label = "HTTP %s" % status if status is not None else "no HTTP status"
+                self.logger.warning(
+                    "Google Sheet API error %s (attempt %s/%s): %s. Retrying in %ss..."
+                    % (
+                        status_label,
+                        attempt + 1,
+                        attempts,
+                        e,
+                        self.args.retry_intvl_sec,
+                    )
+                )
+                time.sleep(self.args.retry_intvl_sec)
