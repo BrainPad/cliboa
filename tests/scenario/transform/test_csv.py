@@ -1635,6 +1635,111 @@ class TestCsvConcat(TestCsvTransform):
             instance.execute()
         assert "Cannot specify both 'src_pattern' and 'src_filenames'." in str(execinfo.value)
 
+    def test_execute_group_mode_user_src_pattern(self):
+        # ^(.+_names)_\d+(\.csv)$ -> dest basename is group1 + group2 (e.g. cat_names + .csv)
+        cat_a = [["k", "v"], ["1", "a"]]
+        cat_b = [["k", "v"], ["2", "b"]]
+        dog_a = [["k", "v"], ["3", "c"]]
+        self._create_csv(cat_a, fname="cat_names_00.csv")
+        self._create_csv(cat_b, fname="cat_names_01.csv")
+        self._create_csv(dog_a, fname="dog_names_00.csv")
+
+        instance = CsvConcat()
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"^(.+_names)_\d+(\.csv)$",
+                "dest_dir": self._data_dir,
+                "mode": "group",
+            }
+        )
+        instance.execute()
+
+        with open(os.path.join(self._data_dir, "cat_names.csv")) as t:
+            assert list(csv.reader(t)) == [["k", "v"], ["1", "a"], ["2", "b"]]
+        with open(os.path.join(self._data_dir, "dog_names.csv")) as t:
+            assert list(csv.reader(t)) == [["k", "v"], ["3", "c"]]
+
+    def test_execute_group_mode_non_capturing_suffix_pattern(self):
+        # (?:_\d+) drops the numeric suffix from captures; same outputs as user pattern.
+        cat_a = [["k", "v"], ["1", "a"]]
+        cat_b = [["k", "v"], ["2", "b"]]
+        dog_a = [["k", "v"], ["3", "c"]]
+        self._create_csv(cat_a, fname="cat_names_00.csv")
+        self._create_csv(cat_b, fname="cat_names_01.csv")
+        self._create_csv(dog_a, fname="dog_names_00.csv")
+
+        instance = CsvConcat()
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"^(.+_names)(?:_\d+)(\.csv)$",
+                "dest_dir": self._data_dir,
+                "mode": "group",
+            }
+        )
+        instance.execute()
+
+        with open(os.path.join(self._data_dir, "cat_names.csv")) as t:
+            assert list(csv.reader(t)) == [["k", "v"], ["1", "a"], ["2", "b"]]
+        with open(os.path.join(self._data_dir, "dog_names.csv")) as t:
+            assert list(csv.reader(t)) == [["k", "v"], ["3", "c"]]
+
+    def test_execute_group_mode_three_groups(self):
+        cat_a = [["h", "x"], ["1", "ca"]]
+        cat_b = [["h", "x"], ["2", "cb"]]
+        dog_a = [["h", "x"], ["3", "d"]]
+        bird_a = [["h", "x"], ["4", "e"]]
+        bird_b = [["h", "x"], ["5", "f"]]
+        self._create_csv(cat_a, fname="cat_names_00.csv")
+        self._create_csv(cat_b, fname="cat_names_01.csv")
+        self._create_csv(dog_a, fname="dog_names_00.csv")
+        self._create_csv(bird_a, fname="bird_names_00.csv")
+        self._create_csv(bird_b, fname="bird_names_01.csv")
+
+        instance = CsvConcat()
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"^(.+_names)(?:_\d+)(\.csv)$",
+                "dest_dir": self._data_dir,
+                "mode": "group",
+            }
+        )
+        instance.execute()
+
+        with open(os.path.join(self._data_dir, "cat_names.csv")) as t:
+            assert list(csv.reader(t)) == [["h", "x"], ["1", "ca"], ["2", "cb"]]
+        with open(os.path.join(self._data_dir, "dog_names.csv")) as t:
+            assert list(csv.reader(t)) == [["h", "x"], ["3", "d"]]
+        with open(os.path.join(self._data_dir, "bird_names.csv")) as t:
+            assert list(csv.reader(t)) == [["h", "x"], ["4", "e"], ["5", "f"]]
+
+    def test_execute_group_mode_nested_capturing_groups(self):
+        # ((.+)_names) nests (.+); dest is concat of all groups: cat_names + cat + .csv
+        cat_a = [["a", "b"], ["1", "x"]]
+        cat_b = [["a", "b"], ["2", "y"]]
+        dog_a = [["a", "b"], ["3", "z"]]
+        self._create_csv(cat_a, fname="cat_names_00.csv")
+        self._create_csv(cat_b, fname="cat_names_01.csv")
+        self._create_csv(dog_a, fname="dog_names_00.csv")
+
+        instance = CsvConcat()
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"^((.+)_names)_\d+(\.csv)$",
+                "dest_dir": self._data_dir,
+                "mode": "group",
+            }
+        )
+        instance.execute()
+
+        with open(os.path.join(self._data_dir, "cat_namescat.csv")) as t:
+            assert list(csv.reader(t)) == [["a", "b"], ["1", "x"], ["2", "y"]]
+        with open(os.path.join(self._data_dir, "dog_namesdog.csv")) as t:
+            assert list(csv.reader(t)) == [["a", "b"], ["3", "z"]]
+
 
 class TestCsvConvert(TestCsvTransform):
     def test_convert_header(self):

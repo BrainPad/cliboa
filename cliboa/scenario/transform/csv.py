@@ -18,6 +18,7 @@ import os
 import re
 import shutil
 from datetime import datetime
+from functools import cached_property
 from typing import Literal, Set, Tuple
 
 import dask.dataframe as dask_df
@@ -31,7 +32,7 @@ from cliboa.adapter.sqlite import SqliteAdapter
 from cliboa.scenario.transform.file import FileBaseTransform
 from cliboa.scenario.validator import EssentialParameters
 from cliboa.util.base import _BaseObject  # _warn_deprecated_args
-from cliboa.util.exception import FileNotFound, InvalidCount, InvalidParameter
+from cliboa.util.exception import CliboaException, FileNotFound, InvalidCount, InvalidParameter
 from cliboa.util.string import StringUtil
 
 
@@ -533,9 +534,10 @@ class CsvConcat(FileBaseTransform):
         src_pattern: str | None = None
         src_filenames: list[str] | None = None
         dest_dir: str
-        dest_name: str
+        mode: Literal["all", "group"] = "all"
 
         @model_validator(mode="before")
+        @classmethod
         def check_exclusive_fields(cls, data: dict) -> dict:
             if not isinstance(data, dict):
                 raise ValueError(f"arguments is not dict: {data}")
@@ -548,7 +550,29 @@ class CsvConcat(FileBaseTransform):
                 )
             elif pattern_present and filenames_present:
                 raise InvalidParameter("Cannot specify both 'src_pattern' and 'src_filenames'.")
+
+            if data.get("mode", "all") == "group" and filenames_present:
+                raise InvalidParameter("Cannot specify 'src_filenames' when mode is 'group'.")
             return data
+
+        @model_validator(mode="after")
+        def validate_mode_dest_name_and_pattern(self) -> "CsvConcat.Arguments":
+            if self.mode == "all":
+                if not self.dest_name:
+                    raise InvalidParameter("dest_name is required when mode is 'all'.")
+            elif self.mode == "group":
+                if self.dest_name is not None:
+                    raise InvalidParameter("dest_name must not be specified when mode is 'group'.")
+                if self.src_compiled_pattern.groups < 1:
+                    raise InvalidParameter(
+                        "src_pattern must contain at least one capturing group"
+                        " when mode is 'group'."
+                    )
+            return self
+
+        @cached_property
+        def src_compiled_pattern(self) -> re.Pattern:
+            return re.compile(self.src_pattern)
 
     def execute(self, *args):
         if self.args.src_pattern:
@@ -564,6 +588,14 @@ class CsvConcat(FileBaseTransform):
             self.logger.warning("Two or more input files are required.")
 
         # Create output headers to conform to the concat specification.
+        if self.args.mode == "all":
+            self._concat_files(files, self.args.dest_name)
+        elif self.args.mode == "group":
+            grouped_files = self._group_files(files)
+            for dest_name, group_files in grouped_files.items():
+                self._concat_files(group_files, dest_name)
+
+    def _concat_files(self, files: list[str], dest_name: str) -> None:
         file_1 = files[0]
         output_header = pandas.read_csv(
             file_1, dtype=str, encoding=self.args.encoding, nrows=0, na_filter=False
@@ -577,10 +609,14 @@ class CsvConcat(FileBaseTransform):
                     ),
                 ]
             )
+        chunk_size_handling(
+            self._read_csv_func,
+            files,
+            output_header,
+            os.path.join(self.args.resolve_dest_dir(), dest_name),
+        )
 
-        chunk_size_handling(self._read_csv_func, files, output_header)
-
-    def _read_csv_func(self, chunksize, files, output_header):
+    def _read_csv_func(self, chunksize, files, output_header, dest_path: str):
         # Used in chunk_size_handling
         first_write = True
         for file in files:
@@ -595,13 +631,43 @@ class CsvConcat(FileBaseTransform):
                 # Change the header order to the one you plan to output.
                 df = pandas.concat([output_header, df])
                 df.to_csv(
-                    os.path.join(self.args.resolve_dest_dir(), self.args.dest_name),
+                    dest_path,
                     encoding=self.args.encoding,
                     header=True if first_write else False,
                     index=False,
                     mode="w" if first_write else "a",
                 )
                 first_write = False
+
+    def _group_files(self, files: list[str]) -> dict[str, list[str]]:
+        grouped_files: dict[str, list[str]] = {}
+        for path in files:
+            basename = os.path.basename(path)
+            dest_basename = self._build_grouped_dest_basename(basename)
+            grouped_files.setdefault(dest_basename, []).append(path)
+        return grouped_files
+
+    def _build_grouped_dest_basename(self, basename: str) -> str:
+        # Build dest basename by concatenating capturing group substrings in group number order.
+        match = self.args.src_compiled_pattern.fullmatch(basename)
+        if not match:
+            raise CliboaException(
+                "File name %r does not fully match src_pattern %r."
+                % (basename, self.args.src_pattern)
+            )
+        last = match.lastindex or 0
+        parts: list[str] = []
+        for i in range(1, last + 1):
+            chunk = match.group(i)
+            if chunk is not None:
+                parts.append(chunk)
+        dest = "".join(parts)
+        if not dest:
+            raise CliboaException(
+                "Capturing groups yielded an empty output basename for file name %r"
+                " (src_pattern %r)." % (basename, self.args.src_pattern)
+            )
+        return dest
 
 
 class CsvConvert(FileBaseTransform):
