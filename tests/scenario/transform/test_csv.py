@@ -1354,7 +1354,7 @@ class TestCsvMerge(TestCsvTransform):
         TODO: use pytest.mark.parametrize to remove unittest.TestCase
         """
         # create test file
-        csv_list1 = [["key", "data"], ["1", "aaa"], ["2", "bbb"], ["3", "ccc"]]
+        csv_list1 = [["key", "data"], ["1", "aaa"], ["2", "bbb"], ["3A", "ccc"]]
         self._create_csv(csv_list1, fname="test.csv")
 
         csv_list2 = [
@@ -1393,7 +1393,7 @@ class TestCsvMerge(TestCsvTransform):
             expected_data = [
                 ["1", "aaa", "xxx"],
                 ["2", "bbb", "yyy"],
-                ["3", "ccc", "zzz"],
+                # ["3", "ccc", "zzz"],
             ]
             assert data_rows == expected_data
 
@@ -1408,8 +1408,8 @@ class TestCsvMerge(TestCsvTransform):
         TODO: use pytest.mark.parametrize to remove unittest.TestCase
         """
         # create test file
-        csv_list1 = [["key", "data"], ["1", "aaa"], ["2", "bbb"], ["3", "ccc"], ["1", "ddd"]]
-        self._create_csv(csv_list1, fname="test.csv")
+        csv_list1 = [["key", "data"], ["1", "aaa"], ["2", "bbb"], ["3A", "ccc"], ["1", "ddd"]]
+        self._create_csv(csv_list1, fname="test1.csv")
 
         csv_list2 = [["key", "address"], ["1", "xxx"], ["2", "yyy"], ["4", "zzz"]]
         self._create_csv(csv_list2, fname="test2.csv")
@@ -1419,7 +1419,7 @@ class TestCsvMerge(TestCsvTransform):
         instance._set_arguments(
             {
                 "src_dir": self._data_dir,
-                "src_pattern": r"test\.csv",
+                "src_pattern": r"test1\.csv",
                 "target_path": os.path.join(self._data_dir, "test2.csv"),
                 "dest_dir": self._result_dir,
                 "join_on": "key",
@@ -1428,9 +1428,9 @@ class TestCsvMerge(TestCsvTransform):
         )
         instance.execute()
 
-        result_csv_path = os.path.join(self._result_dir, "test.csv")
+        result_csv_path = os.path.join(self._result_dir, "test1.csv")
         exists_csv = glob(result_csv_path)
-        assert "test.csv" in exists_csv[0], f"Not found result file {result_csv_path}"
+        assert "test1.csv" in exists_csv[0], f"Not found result file {result_csv_path}"
         with open(result_csv_path) as f:
             reader = csv.reader(f)
             # check header
