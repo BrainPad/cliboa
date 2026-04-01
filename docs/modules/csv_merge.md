@@ -10,6 +10,7 @@ This class behaves in much the same way as the method 'pandas.merge'.
 |target_path|File path of target file to merge for source files.|Yes|None||
 |dest_dir|Path of the directory which is for output files.|Yes|None|If a non-existent directory path is specified, the directory is automatically created.|
 |join_on|Column name to join on|Yes|None||
+|dtype|Column data type definition|No|str||
 |engine|Can specify to merge engine - pandas or dask|No|pandas||
 |encoding|Character encoding when read and write|No|utf-8||
 
