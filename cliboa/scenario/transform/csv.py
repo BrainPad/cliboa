@@ -579,10 +579,10 @@ class CsvConcat(FileBaseTransform):
             files = self.get_src_files()
         else:
             _warn_deprecated(
-                "CsvConcat.src_filenames",
-                end_version="3.0",
+                "CsvConcat.Arguments.src_filenames",
+                end_version="3.1",
                 removal_version="4.0",
-                instead="src_pattern",
+                instead="CsvConcat.Arguments.src_pattern",
             )
             files = []
             for file in self.args.src_filenames:
