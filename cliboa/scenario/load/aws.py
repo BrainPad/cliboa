@@ -70,6 +70,7 @@ class S3Upload(BaseS3):
                     bucket.upload_file(Key=s, Filename=f)
                 else:
                     bucket.upload_file(Key=os.path.basename(f), Filename=f)
+            self.logger.info("%s files are successfully uploaded to s3." % len(files))
         else:
             self._logger.info(
                 "Files to upload do not exist. File pattern: {}".format(

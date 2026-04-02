@@ -76,6 +76,7 @@ class S3Download(BaseS3):
                 client.download_file(self._bucket, path, dest_path)
                 keys.append(path)
 
+        self.logger.info("%s files are successfully downloaded from S3." % len(keys))
         # cache
         self.put_to_context({"bucket": self._bucket, "keys": keys})
 
