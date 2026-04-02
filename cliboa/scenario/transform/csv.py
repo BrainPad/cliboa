@@ -31,7 +31,7 @@ from cliboa.adapter.file import File
 from cliboa.adapter.sqlite import SqliteAdapter
 from cliboa.scenario.transform.file import FileBaseTransform
 from cliboa.scenario.validator import EssentialParameters
-from cliboa.util.base import _BaseObject  # _warn_deprecated_args
+from cliboa.util.base import _BaseObject, _warn_deprecated  # _warn_deprecated_args
 from cliboa.util.exception import CliboaException, FileNotFound, InvalidCount, InvalidParameter
 from cliboa.util.string import StringUtil
 
@@ -578,6 +578,12 @@ class CsvConcat(FileBaseTransform):
         if self.args.src_pattern:
             files = self.get_src_files()
         else:
+            _warn_deprecated(
+                "CsvConcat.src_filenames",
+                end_version="3.0",
+                removal_version="4.0",
+                instead="src_pattern",
+            )
             files = []
             for file in self.args.src_filenames:
                 files.append(os.path.join(self.args.src_dir, file))
