@@ -1469,7 +1469,8 @@ class TestCsvConcat(TestCsvTransform):
                 "dest_name": "test.csv",
             }
         )
-        instance.execute()
+        with pytest.warns(DeprecationWarning, match="src_filenames"):
+            instance.execute()
 
         with open(os.path.join(self._data_dir, "test.csv")) as t:
             reader = csv.reader(t)
@@ -1601,7 +1602,8 @@ class TestCsvConcat(TestCsvTransform):
                 "dest_name": "test.csv",
             }
         )
-        instance.execute()
+        with pytest.warns(DeprecationWarning, match="src_filenames"):
+            instance.execute()
 
         with open(os.path.join(self._data_dir, "test.csv")) as t:
             reader = csv.reader(t)
@@ -1739,6 +1741,22 @@ class TestCsvConcat(TestCsvTransform):
             assert list(csv.reader(t)) == [["a", "b"], ["1", "x"], ["2", "y"]]
         with open(os.path.join(self._data_dir, "dog_namesdog.csv")) as t:
             assert list(csv.reader(t)) == [["a", "b"], ["3", "z"]]
+
+    def test_execute_src_filenames_emits_deprecation_warning(self):
+        self._create_csv([["key", "data"], ["c1", "001"]], fname="test1.csv")
+        self._create_csv([["key", "data"], ["c2", "002"]], fname="test2.csv")
+
+        instance = CsvConcat()
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_filenames": ["test1.csv", "test2.csv"],
+                "dest_dir": self._data_dir,
+                "dest_name": "out.csv",
+            }
+        )
+        with pytest.warns(DeprecationWarning, match="src_filenames"):
+            instance.execute()
 
 
 class TestCsvConvert(TestCsvTransform):
