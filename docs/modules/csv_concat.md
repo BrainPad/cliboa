@@ -9,7 +9,7 @@ You can concatenate **all** matched files into a single output (`mode: all`, def
 |----------|-----------|--------|-------|-------|
 |src_dir|Path of the directory which target files are placed.|Yes|None||
 |src_pattern|Regex which is to find target files.|Conditional|None|Required unless `src_filenames` is specified (deprecated). Used as `fullmatch` against each file **name** (not the full path). With `mode: group`, the pattern must include at least one **capturing** group; see below.|
-|src_filenames|Deprecated since v3.0. Use `src_pattern` instead.|No|None|Will be removed in v4.0.|
+|src_filenames|Deprecated since v3.1. Use `src_pattern` instead.|No|None|Will be removed in v4.0.|
 |dest_dir|Path of the directory which is for output files.|Yes|None|If a non-existent directory path is specified, the directory is automatically created.|
 |dest_name|Output file name.|Conditional|None|Required when `mode` is `all`. Must **not** be set when `mode` is `group` (output names come from `src_pattern`).|
 |mode|How inputs are combined.|No|`all`|`all`: merge every target file into one file named `dest_name`. `group`: split targets into groups that share the same derived output basename, then write one file per group.|
