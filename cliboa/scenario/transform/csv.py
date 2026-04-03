@@ -412,7 +412,7 @@ class CsvMerge(FileBaseTransform):
         engine: Literal["pandas", "dask"] = "pandas"
         dtype: str | dict = "str"
 
-    def execute(self, *args):
+    def execute(self):
         self.args.resolve_dest_dir()
 
         source_files = self.get_src_files()
@@ -429,10 +429,13 @@ class CsvMerge(FileBaseTransform):
             self.logger.error("Hit target files %s" % target_files)
             raise InvalidCount("Target files must be only one.")
 
+        self.merge(source_files, target_files[0])
+
+    def merge(self, source_files: list[str], target_file: str) -> None:
         if self.args.engine == "dask":
-            self._dask_merge(source_files, target_files[0])
+            self._dask_merge(source_files, target_file)
         else:
-            self._pandas_merge(source_files, target_files[0])
+            self._pandas_merge(source_files, target_file)
 
     def _dask_merge(self, source_files: list[str], target_file: str) -> None:
         """
