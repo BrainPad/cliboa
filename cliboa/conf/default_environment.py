@@ -77,7 +77,11 @@ PROJECT_SCENARIO_DIR_NAME = "scenario"
 
 # REQUIRED: common custom classes to make available.
 # You can define empty list this value if you do not use common custom classes.
-COMMON_CUSTOM_CLASSES = ["sample_step.SampleStep", "sample_step.SampleStepSub"]
+COMMON_CUSTOM_CLASSES = [
+    "sample_step.SampleStep",
+    "sample_step.SampleStepSub",
+    "sample_step.SampleStepSubV2",
+]
 
 # REQUIRED: project congenital classes to make available.
 # You can define empty list this value if you do not use project custom classes.
