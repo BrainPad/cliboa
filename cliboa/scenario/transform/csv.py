@@ -591,9 +591,10 @@ class CsvConcat(FileBaseTransform):
             for file in self.args.src_filenames:
                 files.append(os.path.join(self.args.src_dir, file))
 
-        self.logger.info(f"{len(files)} input files are found.")
         if len(files) == 0:
             raise FileNotFound("No files are found.")
+
+        self.logger.info(f"{len(files)} input files are found.")
 
         # Create output headers to conform to the concat specification.
         if self.args.mode == "all":
