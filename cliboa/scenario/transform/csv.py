@@ -593,8 +593,8 @@ class CsvConcat(FileBaseTransform):
 
         if len(files) == 0:
             raise FileNotFound("No files are found.")
-        elif len(files) == 1:
-            self.logger.warning("Two or more input files are required.")
+
+        self.logger.info(f"{len(files)} input files are found.")
 
         # Create output headers to conform to the concat specification.
         if self.args.mode == "all":
