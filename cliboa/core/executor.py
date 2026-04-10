@@ -23,7 +23,7 @@ from cliboa.listener.base import BaseListener, BaseScenarioListener, BaseStepLis
 from cliboa.listener.interface import IScenarioExecutor
 from cliboa.scenario.base import BaseStep
 from cliboa.scenario.interface import IParentStep
-from cliboa.util.base import _BaseObject
+from cliboa.util.base import _BaseObject, _warn_deprecated
 from cliboa.util.cache import ObjectStore
 from cliboa.util.constant import StepStatus
 
@@ -157,7 +157,7 @@ class _StepExecutor(_BaseExecutor, IParentStep):
         model: StepModel,
         cmd_arg: CommandArgument | None = None,
         context: _IContext | None = None,
-        symbol_model: StepModel | None = None,
+        symbol_step: BaseStep | None = None,
         **kwargs,
     ):
         super().__init__(**kwargs)
@@ -166,7 +166,7 @@ class _StepExecutor(_BaseExecutor, IParentStep):
         self._step = step
         self._model = model
         self._context = context
-        self._symbol_model = symbol_model
+        self._symbol_step = symbol_step
         self._exec_args = copy.deepcopy(cmd_arg.args) if cmd_arg and cmd_arg.args else []
         self._exec_kwargs = copy.deepcopy(cmd_arg.kwargs) if cmd_arg and cmd_arg.kwargs else {}
 
@@ -190,8 +190,22 @@ class _StepExecutor(_BaseExecutor, IParentStep):
         return self._model.arguments
 
     def get_symbol_arguments(self) -> dict[str, Any]:
-        if self._symbol_model:
-            return self._symbol_model.arguments
+        if self._symbol_step:
+            if self._symbol_step.args:
+                return self._symbol_step.args.model_dump()
+            else:
+                self._logger.warning(
+                    _warn_deprecated("symbol for step using deprecated arguments", "3.0", "4.0")
+                )
+                backward_arguments = {}
+                for k, v in self._symbol_step.__dict__.items():
+                    if callable(v):
+                        continue
+                    if k.startswith("_"):
+                        backward_arguments[k[1:]] = v
+                        continue
+                    backward_arguments[k] = v
+                return backward_arguments
         else:
             return {}
 

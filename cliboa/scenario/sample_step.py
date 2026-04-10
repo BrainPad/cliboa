@@ -51,6 +51,34 @@ class SampleStepSub(SampleStep):
         self.logger.info("Finish %s" % self.__class__.__name__)
 
 
+class SampleStepSubV2(BaseStep):
+    """
+    for backward compatibility unit test
+    """
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._memo = None
+        self._retry_count = 3
+        self._version = "v2"
+
+    def memo(self, value: str):
+        self._memo = value
+
+    def retry_count(self, value: int):
+        self._retry_count = value
+
+    def version(self, value: str):
+        self._version = value
+
+    def execute(self):
+        self.logger.info("Start %s" % self.__class__.__name__)
+        self.logger.info(f"my memo is {self._memo}")
+        self.logger.info(f"my retry count is {self._retry_count}")
+        self.logger.info(f"my version is {self._version}")
+        self.logger.info("Finish %s" % self.__class__.__name__)
+
+
 class SampleCustomStep(BaseStep):
     """
     For unit test

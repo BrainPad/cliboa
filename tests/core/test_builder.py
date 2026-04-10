@@ -412,3 +412,59 @@ class TestScenarioBuilderExecute:
         # print(f"exception: {mock_logger.exception.call_args_list}")
         mock_logger.info.assert_any_call("symbol memo is val1")
         mock_logger.info.assert_any_call("symbol context is xyz")
+
+    def test_execute_with_symbol_returns_instance_arguments_with_defaults(self):
+        """
+        Builder wires symbol_step to the referenced BaseStep; get_symbol_arguments()
+        must expose Pydantic Arguments defaults absent from YAML.
+        """
+        main_scenario = {
+            "scenario": [
+                {"step": "Step1", "class": "SampleStep", "arguments": {"memo": "val1"}},
+                {"step": "Step2", "class": "SampleStepSub", "symbol": "Step1"},
+            ]
+        }
+        DummyLoaderCls = self._create_dummy_loader_cls(main_scenario)
+        mock_logger = MagicMock()
+
+        builder = _ScenarioBuilder(
+            scenario_file="main.yml",
+            di_loader=DummyLoaderCls,
+            di_logger=mock_logger,
+        )
+
+        steps = builder.execute()
+        assert len(steps) == 2
+
+        sym_args = steps[1].get_symbol_arguments()
+        assert sym_args.get("memo") == "val1"
+        assert sym_args.get("retry_count") == 3
+        assert "retry_count" not in steps[0].raw_arguments
+
+    def test_execute_with_symbol_returns_instance_arguments_with_defaults_v2(self):
+        """
+        Builder wires symbol_step to the referenced BaseStep; get_symbol_arguments()
+        must expose instance arguments with defaults absent from YAML.
+        """
+        main_scenario = {
+            "scenario": [
+                {"step": "Step1", "class": "SampleStepSubV2", "arguments": {"memo": "val1"}},
+                {"step": "Step2", "class": "SampleStepSub", "symbol": "Step1"},
+            ]
+        }
+        DummyLoaderCls = self._create_dummy_loader_cls(main_scenario)
+        mock_logger = MagicMock()
+
+        builder = _ScenarioBuilder(
+            scenario_file="main.yml",
+            di_loader=DummyLoaderCls,
+            di_logger=mock_logger,
+        )
+
+        steps = builder.execute()
+        assert len(steps) == 2
+
+        sym_args = steps[1].get_symbol_arguments()
+        assert sym_args.get("memo") == "val1"
+        assert sym_args.get("retry_count") == 3
+        assert "retry_count" not in steps[0].raw_arguments

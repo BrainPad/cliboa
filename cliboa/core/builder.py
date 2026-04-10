@@ -53,7 +53,6 @@ class _ScenarioBuilder(_BaseObject):
         self._scenario_model_cls = self._resolve_cls("scenario_model", ScenarioModel)
         self._factory = self._resolve("factory", _CliboaFactory, project_name)
         self._cmd_arg = cmd_arg
-        self._step_model_map = {}
         self._context = self._resolve("context", _CliboaContext)
 
     def execute(self) -> list[_IExecute]:
@@ -96,48 +95,29 @@ class _ScenarioBuilder(_BaseObject):
         self._logger.info("Complete to parse scenario files.")
         return main_scenario
 
-    def _setup_step_model_map(self, scenario: ScenarioModel) -> None:
-        for step in scenario.scenario:
-            if isinstance(step, StepModel):
-                key = step.step
-                if key in self._step_model_map:
-                    self._logger.warning(f"Duplicate step: {key}")
-                # Last-one-wins if duplicated
-                self._step_model_map[key] = step
-            elif isinstance(step, ParallelStepModel):
-                for p_step in step.parallel:
-                    key = p_step.step
-                    if key in self._step_model_map:
-                        self._logger.warning(f"Duplicate step: {key}")
-                    # Last-one-wins if duplicated
-                    self._step_model_map[key] = p_step
-            else:
-                raise CliboaException(f"Unexpected step instance: {step.__class__.__name__}")
-
     def _create_steps(self, scenario: ScenarioModel) -> list[_IExecute]:
         """
         Add executable instance to the queue
         """
-        self._setup_step_model_map(scenario)
         steps = []
         for step in scenario.scenario:
-            instance = self._create_step_instance(step)
+            instance = self._create_step_instance(step, steps)
             steps.append(instance)
         return steps
 
     def _create_step_instance(
-        self, step: StepModel | ParallelStepModel
+        self, step: StepModel | ParallelStepModel, steps: list[_StepExecutor | _ParallelProcessor]
     ) -> _StepExecutor | _ParallelProcessor:
         """
         Create executable instances
         """
         if isinstance(step, StepModel):
-            instance = self._create_executor(step)
+            instance = self._create_executor(step, steps)
             return instance
         elif isinstance(step, ParallelStepModel):
             instances = []
             for p_step in step.parallel:
-                instance = self._create_executor(p_step)
+                instance = self._create_executor(p_step, steps)
                 instances.append(instance)
             return self._resolve(
                 "parallel_processor", _ParallelProcessor, instances, step.parallel_config
@@ -145,7 +125,9 @@ class _ScenarioBuilder(_BaseObject):
         else:
             raise CliboaException(f"Unexpected step instance: {step.__class__.__name__}")
 
-    def _create_executor(self, step: StepModel) -> _StepExecutor:
+    def _create_executor(
+        self, step: StepModel, steps: list[_StepExecutor | _ParallelProcessor]
+    ) -> _StepExecutor:
         """
         Create _StepExecutor instance - wraps BaseStep.
         """
@@ -153,7 +135,20 @@ class _ScenarioBuilder(_BaseObject):
         self._logger.debug("Create %s instance" % cls_name)
 
         instance = self._factory.create(cls_name, **self._di_kwargs)
-        symbol_model = self._step_model_map.get(step.symbol) if step.symbol else None
+        symbol_step = None
+        if step.symbol:
+            for s in steps:
+                if isinstance(s, _StepExecutor):
+                    if step.symbol == s.step_name:
+                        symbol_step = s.step
+                        break
+                elif isinstance(s, _ParallelProcessor):
+                    for ps in s._steps:
+                        if isinstance(ps, _StepExecutor) and step.symbol == s.step_name:
+                            symbol_step = s.step
+                            break
+                else:
+                    raise CliboaException(f"Unexpected step executor: {s.__class__.__name__}")
 
         executor = self._resolve(
             "step_executor",
@@ -162,7 +157,7 @@ class _ScenarioBuilder(_BaseObject):
             step,
             self._cmd_arg,
             self._context,
-            symbol_model,
+            symbol_step,
         )
 
         for lis in self._create_listeners(step):
