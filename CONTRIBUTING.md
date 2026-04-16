@@ -12,6 +12,7 @@
     * [3-3. Review Process](#3-3-review-process)
     * [3-4. Core Maintainer Definition](#3-4-core-maintainer-definition)
     * [3-5. Review Process Exception](#3-5-review-process-exception)
+    * [3-6. Pull Request Quality and Policy](#3-6-pull-request-quality-and-policy)
 * [4. Versioning Policy](#4-versioning-policy)
     * [4-1. Versioning Rules](#4-1-versioning-rules)
     * [4-2. Release Stages and Branching](#4-2-release-stages-and-branching)
@@ -99,6 +100,24 @@ The details of self-merging are as follows.
     * However if you, as the Core Maintainer, **feel a review is necessary, you may request a review** from another Core Maintainer.
 3.  **CI Requirement:**
     * All PRs, regardless of the path, **must have all continuous integration (CI) checks in a passing (green) state** before merging.
+
+### 3-6. Pull Request Quality and Policy
+
+To maintain the project's sustainability, we enforce the following policies:
+
+#### 3-6-1. Contributor Responsibility
+
+All submitted code will be treated as the work of the contributor, regardless of how it was authored (e.g., hand-written or generated using AI tools).
+While contributors are not required to provide exhaustive documentation upfront, they are responsible for being able to explain 100% of the logic and design decisions behind their changes if requested.
+
+#### 3-6-2. Respecting Reviewer Efficiency
+
+We value our maintainers' time.
+If a Pull Request is deemed to require "excessive feedback" for reasons such as those listed below, we may close the PR as **"Lacking Self-Review"** without providing line-by-line comments:
+
+* **Ignoring Context:** Changes are made without considering the existing design philosophy or the context of the surrounding code.
+* **Presence of Hallucinations:** The code includes non-existent APIs, nonsensical logic, or other clear signs of insufficient verification.
+* **Excessive Issues:** The maintainer determines that the number of issues requiring correction is simply too high.
 
 ## 4. Versioning Policy
 
