@@ -115,6 +115,7 @@ class _ScenarioBuilder(_BaseObject):
             instance = self._create_executor(step, steps)
             return instance
         elif isinstance(step, ParallelStepModel):
+            # Unsupported feature. See docs/scenario_configuration.md.
             instances = []
             for p_step in step.parallel:
                 instance = self._create_executor(p_step, steps)
