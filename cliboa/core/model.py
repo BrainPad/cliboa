@@ -144,6 +144,13 @@ class StepModel(_BaseWithVars):
 
 
 class ParallelConfigModel(BaseModel):
+    """
+    Configuration for the parallel execution feature.
+
+    Warning:
+        Unsupported feature. See ``docs/scenario_configuration.md``.
+    """
+
     multi_process_count: int | None = Field(default=None, ge=2)
     force_continue: bool | None = None
 
@@ -171,6 +178,13 @@ class ParallelConfigModel(BaseModel):
 
 
 class ParallelStepModel(BaseModel):
+    """
+    Scenario step model representing a ``parallel:`` block.
+
+    Warning:
+        Unsupported feature. See ``docs/scenario_configuration.md``.
+    """
+
     step: str | None = Field(default=None, frozen=True)
     parallel: Tuple[StepModel, ...] = Field(min_length=1, frozen=True)
     parallel_config: ParallelConfigModel = Field(default_factory=ParallelConfigModel)
