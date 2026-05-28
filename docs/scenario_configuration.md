@@ -3,6 +3,7 @@
 * [File Locations & Scope](#file-locations--scope)
 * [Syntax](#syntax)
 * [Advanced Configuration](#advanced-configuration)
+* [Unsupported Features](#unsupported-features)
 * [Examples](#examples)
 
 # Scenario Configuration
@@ -72,6 +73,23 @@ scenario:
     class: SftpDownloadFileDelete
     symbol: file download
 ```
+
+# Unsupported Features
+
+The syntax described in this section exists in the codebase and continues to function for backward compatibility, but is **officially designated as "unsupported"** by the cliboa maintainers.
+
+## Parallel Execution (`parallel:` blocks)
+
+Cliboa accepts a `parallel:` key inside the scenario list that lets multiple steps run concurrently in separate worker processes. The implementation lives in [`ParallelStepModel`](/cliboa/core/model.py) and [`_ParallelProcessor`](/cliboa/core/processor.py).
+
+### Status
+
+This feature is **unsupported**. Concretely:
+
+* It does not receive active maintenance from the core maintainers.
+* The project's correctness guarantees (test coverage, behavior across releases, interaction with other features) do **not** extend to scenarios that use `parallel:`.
+* It is **not** marked as *deprecated*: no `DeprecationWarning` is emitted at runtime. See [Deprecation Guideline](/docs/developers/deprecation_guidelines.md) for what *deprecated* means in cliboa — "unsupported" is a separate designation.
+* Community contributions that improve, test, or document this feature are welcome via Pull Requests.
 
 # Examples
 
