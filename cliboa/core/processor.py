@@ -28,6 +28,9 @@ from cliboa.util.log import _get_logger
 class _ParallelProcessor(_BaseObject, _IExecute):
     """
     Parallel processing decorator class for _StepExecutor instances.
+
+    Warning:
+        Unsupported feature. See ``docs/scenario_configuration.md``.
     """
 
     def __init__(
