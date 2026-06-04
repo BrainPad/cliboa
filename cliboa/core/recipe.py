@@ -11,13 +11,15 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
-"""Recipe expansion: replace ``RecipeStepModel`` entries in a validated ``ScenarioModel``."""
+"""
+Recipe expansion: replace ``RecipeStepModel`` entries in a validated ``ScenarioModel``.
+"""
 
 from os import path
 
 from pydantic import ValidationError
 
-from cliboa.core.loader import ScenarioFormat
+from cliboa.core.loader import _ScenarioFormat
 from cliboa.core.model import (
     ParallelStepModel,
     RecipeModel,
@@ -30,12 +32,14 @@ from cliboa.util.exception import CliboaRuntimeError, InvalidParameter, Scenario
 
 
 class _RecipeExpander(_BaseObject):
-    """Expand ``RecipeStepModel`` entries in a validated ``ScenarioModel``."""
+    """
+    Expand ``RecipeStepModel`` entries in a validated ``ScenarioModel``.
+    """
 
     def __init__(
         self,
         recipe_dirs: list[str],
-        scenario_format: ScenarioFormat,
+        scenario_format: _ScenarioFormat,
         *args,
         **kwargs,
     ):
@@ -45,7 +49,9 @@ class _RecipeExpander(_BaseObject):
         self._file_ext = scenario_format.file_ext()
 
     def expand(self, scenario: ScenarioModel) -> ScenarioModel:
-        """Replace each ``RecipeStepModel`` in ``scenario`` with substituted recipe steps."""
+        """
+        Replace each ``RecipeStepModel`` in ``scenario`` with substituted recipe steps.
+        """
         new_steps: list[StepModel | ParallelStepModel] = []
         for step in scenario.scenario:
             if isinstance(step, RecipeStepModel):
@@ -56,7 +62,9 @@ class _RecipeExpander(_BaseObject):
         return scenario
 
     def _expand_recipe(self, directive: RecipeStepModel) -> list[StepModel]:
-        """Load and substitute a single recipe, returning ready-to-splice steps."""
+        """
+        Load and substitute a single recipe, returning ready-to-splice steps.
+        """
         if not self._recipe_dirs:
             raise CliboaRuntimeError(
                 f"'recipe: {directive.recipe}' was used but RECIPE_DIRS is "
@@ -71,6 +79,8 @@ class _RecipeExpander(_BaseObject):
             recipe_model = RecipeModel.model_validate(loader())
             args_values = self._resolve_arguments(recipe_model, directive.arguments)
             recipe_model.apply_args(args_values)
+        # Pass ValidationError through raw to match the main scenario
+        # validation (we'd like to unify both later).
         except ValidationError:
             raise
         except Exception as e:
@@ -79,7 +89,9 @@ class _RecipeExpander(_BaseObject):
         return recipe_model.recipe
 
     def _resolve_recipe_path(self, raw_recipe_value: str) -> str:
-        """Normalize ``raw_recipe_value`` and locate the recipe file under ``RECIPE_DIRS``."""
+        """
+        Normalize ``raw_recipe_value`` and locate the recipe file under ``RECIPE_DIRS``.
+        """
         stripped = raw_recipe_value.strip().lstrip("/")
         if not stripped:
             raise InvalidParameter("'recipe:' path is empty after stripping.")
@@ -102,7 +114,9 @@ class _RecipeExpander(_BaseObject):
         recipe_model: RecipeModel,
         passed: dict[str, str],
     ) -> dict[str, str]:
-        """Build the ``args`` namespace by reconciling caller values with declared parameters."""
+        """
+        Build the ``args`` namespace by reconciling caller values with declared parameters.
+        """
         declared = recipe_model.parameters
 
         for name in passed:

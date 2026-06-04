@@ -1,16 +1,22 @@
 import logging
+import os
 from typing import Any, Dict, Type
 from unittest.mock import MagicMock, Mock
 
 import pytest
+import yaml
 
+import cliboa.core.builder as builder_mod
 from cliboa.core.builder import _ScenarioBuilder
 from cliboa.core.model import StepModel
 from cliboa.scenario.sample_step import SampleStepSub
+from cliboa.util.exception import CliboaRuntimeError, ScenarioFileInvalid
 
 
 class MockStepExecutor:
-    """Mock implementation of _StepExecutor."""
+    """
+    Mock implementation of _StepExecutor.
+    """
 
     def __init__(self, instance: Any, step: StepModel, cmd_arg: Any, *args, **kwargs):
         self.instance = instance
@@ -20,7 +26,9 @@ class MockStepExecutor:
 
 
 class MockParallelProcessor:
-    """Mock implementation of _ParallelProcessor."""
+    """
+    Mock implementation of _ParallelProcessor.
+    """
 
     def __init__(self, instances: list, parallel_config: Any, *args, **kwargs):
         self.instances = instances
@@ -28,7 +36,9 @@ class MockParallelProcessor:
 
 
 class MockStepStatusListener:
-    """Mock implementation of StepStatusListener."""
+    """
+    Mock implementation of StepStatusListener.
+    """
 
     pass
 
@@ -471,7 +481,9 @@ class TestScenarioBuilderExecute:
 
 
 class TestRecipeDirsValidation:
-    """Tests for _ScenarioBuilder._validate_recipe_dirs (static)."""
+    """
+    Tests for _ScenarioBuilder._validate_recipe_dirs (static).
+    """
 
     def test_none_returns_empty_list(self):
         assert _ScenarioBuilder._validate_recipe_dirs(None) == []
@@ -488,27 +500,19 @@ class TestRecipeDirsValidation:
         assert result == [str(d1), str(d2)]
 
     def test_non_list_rejected(self):
-        from cliboa.util.exception import CliboaRuntimeError
-
         with pytest.raises(CliboaRuntimeError, match="must be a list"):
             _ScenarioBuilder._validate_recipe_dirs("/some/path")
 
     def test_non_string_entry_rejected(self):
-        from cliboa.util.exception import CliboaRuntimeError
-
         with pytest.raises(CliboaRuntimeError, match="must contain path strings"):
             _ScenarioBuilder._validate_recipe_dirs([123])
 
     def test_non_existent_dir_rejected(self, tmp_path):
-        from cliboa.util.exception import CliboaRuntimeError
-
         bogus = str(tmp_path / "does_not_exist")
         with pytest.raises(CliboaRuntimeError, match="non-existent directory"):
             _ScenarioBuilder._validate_recipe_dirs([bogus])
 
     def test_one_existing_one_missing(self, tmp_path):
-        from cliboa.util.exception import CliboaRuntimeError
-
         good = tmp_path / "good"
         good.mkdir()
         bad = str(tmp_path / "bad")
@@ -529,8 +533,6 @@ class TestBuilderRecipeIntegration:
         Patch cliboa.core.builder.env.get to return a per-test RECIPE_DIRS
         while preserving other env lookups.
         """
-        import cliboa.core.builder as builder_mod
-
         original_get = builder_mod.env.get
 
         def _factory(recipe_dirs):
@@ -544,10 +546,6 @@ class TestBuilderRecipeIntegration:
         return _factory
 
     def _write_yaml(self, path, content: dict) -> None:
-        import os
-
-        import yaml
-
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w") as f:
             yaml.safe_dump(content, f, sort_keys=False)
@@ -618,8 +616,6 @@ class TestBuilderRecipeIntegration:
         assert len(steps) == 1
 
     def test_unset_recipe_dirs_errors_on_recipe_directive(self, tmp_path, patched_env):
-        from cliboa.util.exception import CliboaRuntimeError
-
         scenario_path = tmp_path / "scenario.yml"
         self._write_yaml(
             str(scenario_path),
@@ -632,8 +628,6 @@ class TestBuilderRecipeIntegration:
             builder.execute()
 
     def test_non_existent_recipe_dir_errors_at_init(self, tmp_path, patched_env):
-        from cliboa.util.exception import CliboaRuntimeError
-
         scenario_path = tmp_path / "scenario.yml"
         self._write_yaml(
             str(scenario_path),
@@ -646,8 +640,6 @@ class TestBuilderRecipeIntegration:
             _ScenarioBuilder(scenario_file=str(scenario_path), file_format="yaml")
 
     def test_common_with_recipe_directive_errors(self, tmp_path, patched_env):
-        from cliboa.util.exception import ScenarioFileInvalid
-
         recipe_dir = tmp_path / "recipe"
         scenario_path = tmp_path / "scenario.yml"
         common_path = tmp_path / "common.yml"

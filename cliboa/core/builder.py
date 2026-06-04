@@ -18,7 +18,7 @@ from cliboa.core.context import _CliboaContext
 from cliboa.core.executor import _StepExecutor
 from cliboa.core.factory import _CliboaFactory
 from cliboa.core.interface import _IExecute
-from cliboa.core.loader import ScenarioFormat, _ScenarioLoader
+from cliboa.core.loader import _ScenarioFormat, _ScenarioLoader
 from cliboa.core.model import CommandArgument, ParallelStepModel, ScenarioModel, StepModel
 from cliboa.core.processor import _ParallelProcessor
 from cliboa.core.recipe import _RecipeExpander
@@ -51,7 +51,7 @@ class _ScenarioBuilder(_BaseObject):
             self._common_files = common_file
         else:
             self._common_files = []
-        scenario_format = ScenarioFormat.from_string(file_format)
+        scenario_format = _ScenarioFormat.from_string(file_format)
         self._loader_cls: _ScenarioLoader = self._resolve_cls(
             "loader", scenario_format.loader_cls()
         )
@@ -70,7 +70,9 @@ class _ScenarioBuilder(_BaseObject):
 
     @staticmethod
     def _validate_recipe_dirs(recipe_dirs: list[str] | None) -> list[str]:
-        """Validate RECIPE_DIRS and return the normalized list of recipe directories."""
+        """
+        Validate RECIPE_DIRS and return the normalized list of recipe directories.
+        """
         if recipe_dirs is None:
             return []
         if not isinstance(recipe_dirs, list):
@@ -102,7 +104,9 @@ class _ScenarioBuilder(_BaseObject):
         return steps
 
     def _parse_scenario(self) -> ScenarioModel:
-        """Load the main (and any common) scenario, expand recipe directives, and merge them."""
+        """
+        Load the main (and any common) scenario, expand recipe directives, and merge them.
+        """
         self._logger.info("Start to parse scenario files.")
 
         self._logger.info(f"Load main scenario file {self._scenario_file}")

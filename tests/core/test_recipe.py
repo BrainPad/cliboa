@@ -18,7 +18,7 @@ import pytest
 import yaml
 from pydantic import ValidationError
 
-from cliboa.core.loader import ScenarioFormat
+from cliboa.core.loader import _ScenarioFormat
 from cliboa.core.model import (
     RecipeModel,
     RecipeParameterSpec,
@@ -31,7 +31,9 @@ from cliboa.util.exception import ScenarioFileInvalid
 
 
 def _write_recipe(dir_path: str, rel_path: str, content: dict) -> str:
-    """Write a recipe YAML file under dir_path / rel_path.yml and return the full path."""
+    """
+    Write a recipe YAML file under dir_path / rel_path.yml and return the full path.
+    """
     full = os.path.join(dir_path, rel_path + ".yml")
     os.makedirs(os.path.dirname(full), exist_ok=True)
     with open(full, "w") as f:
@@ -40,11 +42,13 @@ def _write_recipe(dir_path: str, rel_path: str, content: dict) -> str:
 
 
 def _make_expander(recipe_dirs: list[str]) -> _RecipeExpander:
-    return _RecipeExpander(recipe_dirs, ScenarioFormat.YAML)
+    return _RecipeExpander(recipe_dirs, _ScenarioFormat.YAML)
 
 
 def _expand(expander: _RecipeExpander, scenario_dict: dict) -> ScenarioModel:
-    """Validate the raw scenario dict and run the expander on the resulting model."""
+    """
+    Validate the raw scenario dict and run the expander on the resulting model.
+    """
     scenario = ScenarioModel.model_validate(scenario_dict)
     return expander.expand(scenario)
 
@@ -189,7 +193,9 @@ class TestRecipeModel:
 
 
 class TestRecipeStepModel:
-    """Tests for RecipeStepModel itself and its dispatch from ScenarioModel."""
+    """
+    Tests for RecipeStepModel itself and its dispatch from ScenarioModel.
+    """
 
     def test_recipe_field_required(self):
         with pytest.raises(ValidationError):
@@ -749,7 +755,9 @@ class TestRecipeStructure:
 
 
 class TestRecipeDirectiveInsideParallelRejected:
-    """``parallel:`` blocks may not contain ``recipe:`` (type-level enforcement)."""
+    """
+    ``parallel:`` blocks may not contain ``recipe:`` (type-level enforcement).
+    """
 
     def test_recipe_directive_inside_parallel_rejected_at_validation(self):
         # ParallelStepModel.parallel is typed as Tuple[StepModel, ...] so a

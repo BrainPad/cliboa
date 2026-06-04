@@ -18,7 +18,7 @@ import os
 from typing import Tuple
 
 from cliboa.conf import env
-from cliboa.core.loader import ScenarioFormat
+from cliboa.core.loader import _ScenarioFormat
 from cliboa.core.manager import ScenarioManager
 from cliboa.core.model import CommandArgument
 from cliboa.util.base import _warn_deprecated, _warn_removed
@@ -64,8 +64,10 @@ def _initialize_cliboa_logging():
 
 
 def _generate_scenario_path(project_name: str, scenario_format: str) -> Tuple[str, str]:
-    """Return (project_scenario_path, common_scenario_path) for the given format."""
-    ext = ScenarioFormat.from_string(scenario_format).file_ext()
+    """
+    Return (project_scenario_path, common_scenario_path) for the given format.
+    """
+    ext = _ScenarioFormat.from_string(scenario_format).file_ext()
     pj_scenario_file = os.path.join(env.PROJECT_DIR, project_name, env.SCENARIO_FILE_NAME) + ext
     cmn_scenario_file = os.path.join(env.COMMON_DIR, env.SCENARIO_FILE_NAME) + ext
     return pj_scenario_file, cmn_scenario_file
