@@ -241,6 +241,20 @@ class TestScenarioModel:
     Tests for ScenarioModel
     """
 
+    def test_is_readable_as_common_true_for_plain_steps(self):
+        m = ScenarioModel.model_validate({"scenario": [{"step": "S", "class": "X"}]})
+        assert m.is_readable_as_common() is True
+
+    def test_is_readable_as_common_false_when_parallel_present(self):
+        m = ScenarioModel.model_validate(
+            {"scenario": [{"parallel": [{"step": "A", "class": "X"}]}]}
+        )
+        assert m.is_readable_as_common() is False
+
+    def test_is_readable_as_common_false_when_recipe_directive_present(self):
+        m = ScenarioModel.model_validate({"scenario": [{"recipe": "x"}]})
+        assert m.is_readable_as_common() is False
+
     def test_merge_ok(self):
         # Test merging common scenario settings
         scenario_data = {

@@ -32,6 +32,9 @@ PROJECT_DIR = os.path.join(BASE_DIR, "project")
 # Common scenario directory path.
 COMMON_DIR = os.path.join(BASE_DIR, "common")
 
+# OPTIONAL: Recipe search directories (list of absolute paths).
+# RECIPE_DIRS = [os.path.join(COMMON_DIR, "recipe")]
+
 ##################################################
 # 2. Logging
 ##################################################

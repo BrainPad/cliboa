@@ -16,23 +16,10 @@ from importlib import import_module
 from typing import Any
 
 from cliboa.conf import env
-from cliboa.core.loader import _JsonScenarioLoader, _ScenarioLoader, _YamlScenarioLoader
 from cliboa.listener.base import BaseListener
 from cliboa.scenario import *  # noqa
 from cliboa.util.base import _BaseObject
-from cliboa.util.exception import InvalidFormat, InvalidScenarioClass
-
-
-def _get_scenario_loader_class(file_format: str) -> type[_ScenarioLoader]:
-    """
-    Create scenario loader instance
-    """
-    if file_format == "yaml":
-        return _YamlScenarioLoader
-    elif file_format == "json":
-        return _JsonScenarioLoader
-    else:
-        raise InvalidFormat(f"scenario format '{file_format}' is invalid.")
+from cliboa.util.exception import InvalidScenarioClass
 
 
 class _CliboaFactory(_BaseObject):

@@ -11,17 +11,21 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
+import os
+
+from cliboa.conf import env
 from cliboa.core.context import _CliboaContext
 from cliboa.core.executor import _StepExecutor
-from cliboa.core.factory import _CliboaFactory, _get_scenario_loader_class
+from cliboa.core.factory import _CliboaFactory
 from cliboa.core.interface import _IExecute
-from cliboa.core.loader import _ScenarioLoader
+from cliboa.core.loader import ScenarioFormat, _ScenarioLoader
 from cliboa.core.model import CommandArgument, ParallelStepModel, ScenarioModel, StepModel
 from cliboa.core.processor import _ParallelProcessor
+from cliboa.core.recipe import _RecipeExpander
 from cliboa.listener.base import BaseStepListener
 from cliboa.listener.step import StepStatusListener
 from cliboa.util.base import _BaseObject
-from cliboa.util.exception import CliboaException
+from cliboa.util.exception import CliboaException, CliboaRuntimeError, ScenarioFileInvalid
 
 
 class _ScenarioBuilder(_BaseObject):
@@ -47,13 +51,41 @@ class _ScenarioBuilder(_BaseObject):
             self._common_files = common_file
         else:
             self._common_files = []
+        scenario_format = ScenarioFormat.from_string(file_format)
         self._loader_cls: _ScenarioLoader = self._resolve_cls(
-            "loader", _get_scenario_loader_class(file_format)
+            "loader", scenario_format.loader_cls()
         )
         self._scenario_model_cls = self._resolve_cls("scenario_model", ScenarioModel)
         self._factory = self._resolve("factory", _CliboaFactory, project_name)
         self._cmd_arg = cmd_arg
         self._context = self._resolve("context", _CliboaContext)
+
+        self._recipe_dirs = self._validate_recipe_dirs(env.get("RECIPE_DIRS"))
+        self._recipe_expander: _RecipeExpander = self._resolve(
+            "recipe_expander",
+            _RecipeExpander,
+            self._recipe_dirs,
+            scenario_format,
+        )
+
+    @staticmethod
+    def _validate_recipe_dirs(recipe_dirs: list[str] | None) -> list[str]:
+        """Validate RECIPE_DIRS and return the normalized list of recipe directories."""
+        if recipe_dirs is None:
+            return []
+        if not isinstance(recipe_dirs, list):
+            raise CliboaRuntimeError(
+                f"RECIPE_DIRS must be a list of paths, got {type(recipe_dirs).__name__}."
+            )
+        for path in recipe_dirs:
+            if not isinstance(path, str):
+                raise CliboaRuntimeError(
+                    f"RECIPE_DIRS must contain path strings, "
+                    f"got {type(path).__name__}: {path!r}."
+                )
+            if not os.path.isdir(path):
+                raise CliboaRuntimeError(f"RECIPE_DIRS contains non-existent directory: '{path}'.")
+        return recipe_dirs
 
     def execute(self) -> list[_IExecute]:
         """
@@ -70,22 +102,25 @@ class _ScenarioBuilder(_BaseObject):
         return steps
 
     def _parse_scenario(self) -> ScenarioModel:
-        """
-        Load main scenario file and generate a model instance.
-
-        if common file exists, merge it to main.
-        """
+        """Load the main (and any common) scenario, expand recipe directives, and merge them."""
         self._logger.info("Start to parse scenario files.")
 
         self._logger.info(f"Load main scenario file {self._scenario_file}")
         top_dict = self._loader_cls(self._scenario_file, True)()
         main_scenario = self._scenario_model_cls.model_validate(top_dict)
+        self._recipe_expander.expand(main_scenario)
 
         for cmn_scenario_file in self._common_files:
             self._logger.info(f"Load common scenario file {cmn_scenario_file}")
             top_dict = self._loader_cls(cmn_scenario_file, False)()
             if top_dict:
                 cmn_scenario = self._scenario_model_cls.model_validate(top_dict)
+                if not cmn_scenario.is_readable_as_common():
+                    raise ScenarioFileInvalid(
+                        f"Common scenario file '{cmn_scenario_file}' must contain "
+                        f"only plain steps ('recipe:' / 'parallel:' directives "
+                        f"are not allowed). Common files are for argument defaults only."
+                    )
                 main_scenario.merge(cmn_scenario)
             else:
                 self._logger.warning(

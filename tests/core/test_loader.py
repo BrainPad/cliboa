@@ -2,8 +2,13 @@ from typing import Any
 
 import pytest
 
-from cliboa.core.loader import _ScenarioLoader
-from cliboa.util.exception import FileNotFound, ScenarioFileInvalid
+from cliboa.core.loader import (
+    ScenarioFormat,
+    _JsonScenarioLoader,
+    _ScenarioLoader,
+    _YamlScenarioLoader,
+)
+from cliboa.util.exception import FileNotFound, InvalidFormat, ScenarioFileInvalid
 
 
 class _DummyScenarioLoader(_ScenarioLoader):
@@ -58,3 +63,35 @@ class TestScenarioLoader:
         result = loader()
         assert result == expected_dict
         assert isinstance(result, dict)
+
+
+class TestScenarioFormat:
+    """Unit tests for the ScenarioFormat enum."""
+
+    def test_from_string_yaml(self):
+        assert ScenarioFormat.from_string("yaml") is ScenarioFormat.YAML
+
+    def test_from_string_json(self):
+        assert ScenarioFormat.from_string("json") is ScenarioFormat.JSON
+
+    def test_from_string_invalid(self):
+        with pytest.raises(InvalidFormat):
+            ScenarioFormat.from_string("toml")
+
+    def test_yaml_file_ext_default(self):
+        assert ScenarioFormat.YAML.file_ext() == ".yml"
+
+    def test_yaml_file_ext_respects_env_override(self, mocker):
+        from cliboa.core import loader as loader_mod
+
+        mocker.patch.object(loader_mod.env, "get", return_value=".yaml")
+        assert ScenarioFormat.YAML.file_ext() == ".yaml"
+
+    def test_json_file_ext(self):
+        assert ScenarioFormat.JSON.file_ext() == ".json"
+
+    def test_yaml_loader_cls(self):
+        assert ScenarioFormat.YAML.loader_cls() is _YamlScenarioLoader
+
+    def test_json_loader_cls(self):
+        assert ScenarioFormat.JSON.loader_cls() is _JsonScenarioLoader

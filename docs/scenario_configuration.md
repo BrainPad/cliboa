@@ -3,6 +3,8 @@
 * [File Locations & Scope](#file-locations--scope)
 * [Syntax](#syntax)
 * [Advanced Configuration](#advanced-configuration)
+  * [Symbol: Reusing Arguments](#symbol-reusing-arguments)
+  * [Recipes: Reusable Scenario Snippets](#recipes-reusable-scenario-snippets)
 * [Unsupported Features](#unsupported-features)
 * [Examples](#examples)
 
@@ -36,15 +38,19 @@ There are two locations where you can place `scenario.yml`. The location determi
 # Syntax
 The syntax structure for `scenario.yml` is defined below.
 
-| Parameter | Explanation | Required | Remarks |
-| :--- | :--- | :---: | :--- |
-| **scenario** | The root key defining the contents of the scenario. | **Yes** | |
-| **scenario.[].step** | A label or description for the step. Can be a descriptive string or a symbol. Must be unique within the scenario. | **Yes** | |
-| **scenario.[].class** | Specifies the Python class name of the step to execute. | **Yes** | |
-| **scenario.[].symbol** | Specifies a symbol name if one was defined in the `- step:` key. | No | Used for dependency management or references. |
-| **scenario.[].listeners** | Specifies listener classes to execute before/after the step. | No | |
-| **scenario.[].arguments** | Defines the attributes (variables) required by the class as key-value pairs. | No | |
-| **scenario.[].with_vars** | Allows execution of shell scripts. The output can be referenced in `arguments` using `{{ key }}` syntax. | No | Useful for dynamic values like dates. |
+A `scenario.[]` entry is either a **step** (executes a class) or a **`recipe:` directive** (expands a recipe). The two columns show each key's role for that entry type: **Required**, Optional, or `—` (not used).
+
+| Key | Description | Step | Recipe | Notes |
+| :--- | :--- | :---: | :---: | :--- |
+| **scenario** | The root key defining the contents of the scenario. | Required | Required | Root-level key, required regardless of entry type. |
+| **with_vars** | Root-level shell variables shared by every step. Output can be referenced in `arguments` using `{{ key }}` syntax. | Optional | Optional | Root-level key. A step's own `with_vars` takes precedence on name clashes. |
+| **scenario.[].step** | A label or description for the step. Can be a descriptive string or a symbol. Should generally be unique within the scenario so that `symbol` references resolve unambiguously. | Required | — | |
+| **scenario.[].class** | Specifies the Python class name of the step to execute. | Required | — | |
+| **scenario.[].recipe** | References a reusable recipe file in place of a step definition. See [Recipes](#recipes-reusable-scenario-snippets). | — | Required | |
+| **scenario.[].symbol** | Specifies a symbol name if one was defined in the `- step:` key. | Optional | — | Used for dependency management or references. |
+| **scenario.[].listeners** | Specifies listener classes to execute before/after the step. | Optional | — | |
+| **scenario.[].arguments** | Defines the attributes (variables) required by the class as key-value pairs. | Optional | Optional | For a `recipe:` directive, carries the values passed to the recipe. |
+| **scenario.[].with_vars** | Allows execution of shell scripts. The output can be referenced in `arguments` using `{{ key }}` syntax. | Optional | — | Useful for dynamic values like dates. |
 
 > [!TIP]
 > For detailed implementation and strict parameter definitions, refer to the source code: [model.py](/cliboa/core/model.py)
@@ -73,6 +79,71 @@ scenario:
     class: SftpDownloadFileDelete
     symbol: file download
 ```
+
+## Recipes: Reusable Scenario Snippets
+
+A **recipe** is a fragment of a scenario stored in its own file and pulled into a scenario via the `recipe:` directive. Use one when the same group of steps (e.g. SFTP download + unzip) recurs across scenarios: extract it once, then reference it.
+
+### Enabling the Feature
+
+List the directories holding recipe files in the `RECIPE_DIRS` constant of your environment file (`cliboa_environment.py`, copied from [`default_environment.py`](/cliboa/conf/default_environment.py)).
+
+* Entries are **searched in order; the first matching file wins.** Listing a project-local directory before a shared one therefore lets a project supply its own version of a recipe.
+* Paths should be absolute, and each listed directory must exist at scenario build time.
+* If `RECIPE_DIRS` is empty or undefined, the feature is off and any `recipe:` directive raises `CliboaRuntimeError`.
+
+### Recipe File Structure
+
+A recipe declares the `parameters` it accepts and the `recipe` steps it expands into.
+
+```yaml
+# recipe/sftp/download_and_extract.yml
+parameters:
+  src_path: "Remote path on the SFTP server"   # required (shorthand)
+  dest_path:                                    # optional, with default
+    description: "Local destination directory"
+    default: /tmp
+
+recipe:
+  - step: Download from SFTP
+    class: SftpDownload
+    arguments:
+      src_path: "{{ args.src_path }}"
+      dest_path: "{{ args.dest_path }}"
+
+  - step: Decompress
+    class: FileDecompress
+    arguments:
+      src_dir: "{{ args.dest_path }}"
+      src_pattern: '.*\.gz'
+```
+
+* `recipe` (**required**) is a non-empty list of plain steps — the same form as scenario steps, but `recipe:` / `parallel:` directives are not allowed here.
+* `parameters` (optional) maps each parameter name to a declaration. The shorthand `name: "text"` is equivalent to `{ description: "text" }`, and `description` is always required. A parameter is **required unless it has a concrete `default`** (`default: null` means no default).
+
+### Calling a Recipe
+
+Reference a recipe with `recipe:` (a path under `RECIPE_DIRS`, no extension) and pass values via `arguments:`.
+
+```yaml
+# project/myapp/scenario.yml
+scenario:
+  - recipe: sftp/download_and_extract
+    arguments:
+      src_path: "{{ base_dir }}/data.csv.gz"
+      dest_path: /tmp/work
+```
+
+The recipe's steps are spliced in at the call site, each `{{ args.x }}` replaced by the matching argument (or its `default`). The resolved file path is logged at INFO level. Unknown arguments and missing required parameters both raise an error.
+
+### Variable Resolution
+
+Recipes resolve in two passes: first `{{ args.x }}` references are filled from the call site's `arguments`, then the spliced steps go through normal variable resolution.
+Argument values may themselves contain `{{ ... }}` references — those are resolved in the second pass like any other variable.
+
+### Constraints
+
+A recipe cannot reference another recipe (no nesting — `recipe:` is not allowed inside a recipe file's `recipe:` list).
 
 # Unsupported Features
 
@@ -149,7 +220,7 @@ scenario:
     dest_dir: data
     dest_pattern: test.csv
 
-- step:
+- step: Import the csv into SQLite
   class: SqliteImport
   arguments:
     dbname: test.db
