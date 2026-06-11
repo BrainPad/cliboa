@@ -88,7 +88,10 @@ class _ScenarioFormat(Enum):
         """
         if self is _ScenarioFormat.YAML:
             return env.get("SCENARIO_YAML_EXT", ".yml")
-        return ".json"
+        elif self is _ScenarioFormat.JSON:
+            return ".json"
+        else:
+            raise NotImplementedError(f"Unsupported format: {self.name}")
 
     def loader_cls(self) -> type[_ScenarioLoader]:
         """
@@ -96,4 +99,7 @@ class _ScenarioFormat(Enum):
         """
         if self is _ScenarioFormat.YAML:
             return _YamlScenarioLoader
-        return _JsonScenarioLoader
+        elif self is _ScenarioFormat.JSON:
+            return _JsonScenarioLoader
+        else:
+            raise NotImplementedError(f"Loader not implemented for format: {self.name}")
