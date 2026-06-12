@@ -41,7 +41,7 @@ version = "0.0.0" # overwritten by poetry-dynamic-versioning
 pandas = "^2.3.3"
 dask = ">=2026.1.2"
 numpy = "^1.26.4"
-pyarrow = ">=23.0.0"
+pyarrow = ">=23.0.1"
 python-dateutil = "^2.9.0.post0"
 PyYAML = "^6.0.3"
 jsonlines = "^4.0.0"
