@@ -18,10 +18,10 @@ import os
 from typing import Tuple
 
 from cliboa.conf import env
+from cliboa.core.loader import _ScenarioFormat
 from cliboa.core.manager import ScenarioManager
 from cliboa.core.model import CommandArgument
 from cliboa.util.base import _warn_deprecated, _warn_removed
-from cliboa.util.exception import InvalidFormat
 from cliboa.util.log import CliboaLogRecord
 
 
@@ -65,19 +65,11 @@ def _initialize_cliboa_logging():
 
 def _generate_scenario_path(project_name: str, scenario_format: str) -> Tuple[str, str]:
     """
-    generate project's scenario path and common scenario path from project_name and scenario_format.
+    Return (project_scenario_path, common_scenario_path) for the given format.
     """
-    if scenario_format == "yaml":
-        ext = env.get("SCENARIO_YAML_EXT", ".yml")
-        pj_scenario_file = os.path.join(env.PROJECT_DIR, project_name, env.SCENARIO_FILE_NAME) + ext
-        cmn_scenario_file = os.path.join(env.COMMON_DIR, env.SCENARIO_FILE_NAME) + ext
-    elif scenario_format == "json":
-        ext = "." + scenario_format
-        pj_scenario_file = os.path.join(env.PROJECT_DIR, project_name, env.SCENARIO_FILE_NAME) + ext
-        cmn_scenario_file = os.path.join(env.COMMON_DIR, env.SCENARIO_FILE_NAME) + ext
-    else:
-        raise InvalidFormat(f"scenario format '{scenario_format}' is invalid.")
-
+    ext = _ScenarioFormat.from_string(scenario_format).file_ext()
+    pj_scenario_file = os.path.join(env.PROJECT_DIR, project_name, env.SCENARIO_FILE_NAME) + ext
+    cmn_scenario_file = os.path.join(env.COMMON_DIR, env.SCENARIO_FILE_NAME) + ext
     return pj_scenario_file, cmn_scenario_file
 
 

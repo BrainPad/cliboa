@@ -1,16 +1,22 @@
 import logging
+import os
 from typing import Any, Dict, Type
 from unittest.mock import MagicMock, Mock
 
 import pytest
+import yaml
 
+import cliboa.core.builder as builder_mod
 from cliboa.core.builder import _ScenarioBuilder
 from cliboa.core.model import StepModel
 from cliboa.scenario.sample_step import SampleStepSub
+from cliboa.util.exception import CliboaRuntimeError, ScenarioFileInvalid
 
 
 class MockStepExecutor:
-    """Mock implementation of _StepExecutor."""
+    """
+    Mock implementation of _StepExecutor.
+    """
 
     def __init__(self, instance: Any, step: StepModel, cmd_arg: Any, *args, **kwargs):
         self.instance = instance
@@ -20,7 +26,9 @@ class MockStepExecutor:
 
 
 class MockParallelProcessor:
-    """Mock implementation of _ParallelProcessor."""
+    """
+    Mock implementation of _ParallelProcessor.
+    """
 
     def __init__(self, instances: list, parallel_config: Any, *args, **kwargs):
         self.instances = instances
@@ -28,7 +36,9 @@ class MockParallelProcessor:
 
 
 class MockStepStatusListener:
-    """Mock implementation of StepStatusListener."""
+    """
+    Mock implementation of StepStatusListener.
+    """
 
     pass
 
@@ -468,3 +478,191 @@ class TestScenarioBuilderExecute:
         assert sym_args.get("memo") == "val1"
         assert sym_args.get("retry_count") == 3
         assert "retry_count" not in steps[0].raw_arguments
+
+
+class TestRecipeDirsValidation:
+    """
+    Tests for _ScenarioBuilder._validate_recipe_dirs (static).
+    """
+
+    def test_none_returns_empty_list(self):
+        assert _ScenarioBuilder._validate_recipe_dirs(None) == []
+
+    def test_empty_list_returns_empty_list(self):
+        assert _ScenarioBuilder._validate_recipe_dirs([]) == []
+
+    def test_existing_dirs_returned(self, tmp_path):
+        d1 = tmp_path / "a"
+        d2 = tmp_path / "b"
+        d1.mkdir()
+        d2.mkdir()
+        result = _ScenarioBuilder._validate_recipe_dirs([str(d1), str(d2)])
+        assert result == [str(d1), str(d2)]
+
+    def test_non_list_rejected(self):
+        with pytest.raises(CliboaRuntimeError, match="must be a list"):
+            _ScenarioBuilder._validate_recipe_dirs("/some/path")
+
+    def test_non_string_entry_rejected(self):
+        with pytest.raises(CliboaRuntimeError, match="must contain path strings"):
+            _ScenarioBuilder._validate_recipe_dirs([123])
+
+    def test_non_existent_dir_rejected(self, tmp_path):
+        bogus = str(tmp_path / "does_not_exist")
+        with pytest.raises(CliboaRuntimeError, match="non-existent directory"):
+            _ScenarioBuilder._validate_recipe_dirs([bogus])
+
+    def test_one_existing_one_missing(self, tmp_path):
+        good = tmp_path / "good"
+        good.mkdir()
+        bad = str(tmp_path / "bad")
+        with pytest.raises(CliboaRuntimeError, match="non-existent directory"):
+            _ScenarioBuilder._validate_recipe_dirs([str(good), bad])
+
+
+class TestBuilderRecipeIntegration:
+    """
+    End-to-end tests using real scenario.yml + recipe.yml files. The builder
+    is constructed normally (no DI for loader/expander) and the env's
+    RECIPE_DIRS is patched per-test.
+    """
+
+    @pytest.fixture
+    def patched_env(self, mocker):
+        """
+        Patch cliboa.core.builder.env.get to return a per-test RECIPE_DIRS
+        while preserving other env lookups.
+        """
+        original_get = builder_mod.env.get
+
+        def _factory(recipe_dirs):
+            def fake_get(key, default=None):
+                if key == "RECIPE_DIRS":
+                    return recipe_dirs
+                return original_get(key, default)
+
+            mocker.patch.object(builder_mod.env, "get", side_effect=fake_get)
+
+        return _factory
+
+    def _write_yaml(self, path, content: dict) -> None:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w") as f:
+            yaml.safe_dump(content, f, sort_keys=False)
+
+    def test_include_expands_end_to_end(self, tmp_path, patched_env):
+        recipe_dir = tmp_path / "recipe"
+        scenario_path = tmp_path / "scenario.yml"
+        recipe_path = recipe_dir / "echo.yml"
+
+        self._write_yaml(
+            str(scenario_path),
+            {
+                "scenario": [
+                    {
+                        "recipe": "echo",
+                        "arguments": {"msg": "hello"},
+                    }
+                ]
+            },
+        )
+        self._write_yaml(
+            str(recipe_path),
+            {
+                "parameters": {"msg": "a message"},
+                "recipe": [
+                    {
+                        "step": "Say",
+                        "class": "SampleStep",
+                        "arguments": {"memo": "{{ args.msg }}"},
+                    }
+                ],
+            },
+        )
+
+        patched_env([str(recipe_dir)])
+
+        builder = _ScenarioBuilder(
+            scenario_file=str(scenario_path),
+            file_format="yaml",
+        )
+        steps = builder.execute()
+        assert len(steps) == 1
+        # The {{ args.msg }} reference was substituted at phase 1, then phase 2
+        # (which only resolves `{{ ... }}` patterns and there are none left)
+        # leaves the value untouched. SampleStep.args.memo reflects the result.
+        assert steps[0].step.args.memo == "hello"
+
+    def test_unset_recipe_dirs_disables_feature(self, tmp_path, patched_env):
+        scenario_path = tmp_path / "scenario.yml"
+        self._write_yaml(
+            str(scenario_path),
+            {
+                "scenario": [
+                    {
+                        "step": "S",
+                        "class": "SampleStep",
+                        "arguments": {"memo": "v"},
+                    }
+                ]
+            },
+        )
+        # RECIPE_DIRS undefined: builder should construct fine and run
+        # a scenario with no recipe directives.
+        patched_env(None)
+
+        builder = _ScenarioBuilder(scenario_file=str(scenario_path), file_format="yaml")
+        steps = builder.execute()
+        assert len(steps) == 1
+
+    def test_unset_recipe_dirs_errors_on_recipe_directive(self, tmp_path, patched_env):
+        scenario_path = tmp_path / "scenario.yml"
+        self._write_yaml(
+            str(scenario_path),
+            {"scenario": [{"recipe": "any_recipe"}]},
+        )
+        patched_env(None)
+
+        builder = _ScenarioBuilder(scenario_file=str(scenario_path), file_format="yaml")
+        with pytest.raises(CliboaRuntimeError, match="RECIPE_DIRS is empty"):
+            builder.execute()
+
+    def test_non_existent_recipe_dir_errors_at_init(self, tmp_path, patched_env):
+        scenario_path = tmp_path / "scenario.yml"
+        self._write_yaml(
+            str(scenario_path),
+            {"scenario": [{"step": "S", "class": "SampleStep", "arguments": {"memo": "v"}}]},
+        )
+        bogus = str(tmp_path / "no_such_dir")
+        patched_env([bogus])
+
+        with pytest.raises(CliboaRuntimeError, match="non-existent directory"):
+            _ScenarioBuilder(scenario_file=str(scenario_path), file_format="yaml")
+
+    def test_common_with_recipe_directive_errors(self, tmp_path, patched_env):
+        recipe_dir = tmp_path / "recipe"
+        scenario_path = tmp_path / "scenario.yml"
+        common_path = tmp_path / "common.yml"
+        recipe_path = recipe_dir / "x.yml"
+
+        self._write_yaml(
+            str(scenario_path),
+            {"scenario": [{"step": "S", "class": "SampleStep", "arguments": {"memo": "v"}}]},
+        )
+        self._write_yaml(
+            str(common_path),
+            {"scenario": [{"recipe": "x"}]},
+        )
+        self._write_yaml(
+            str(recipe_path),
+            {"recipe": [{"step": "X", "class": "SampleStep"}]},
+        )
+        patched_env([str(recipe_dir)])
+
+        builder = _ScenarioBuilder(
+            scenario_file=str(scenario_path),
+            common_file=str(common_path),
+            file_format="yaml",
+        )
+        with pytest.raises(ScenarioFileInvalid, match="must contain only plain steps"):
+            builder.execute()

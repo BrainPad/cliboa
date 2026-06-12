@@ -16,7 +16,7 @@ import re
 import subprocess
 from typing import Any, Tuple
 
-from pydantic import BaseModel, Field, PrivateAttr, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, field_validator, model_validator
 
 # 'typing.Self' is available in Python 3.11+
 from typing_extensions import Self
@@ -72,7 +72,9 @@ class StepModel(_BaseWithVars):
     @model_validator(mode="before")
     @classmethod
     def _extract_with_vars(cls, data: Any) -> Any:
-        """v2 compatibility"""
+        """
+        v2 compatibility
+        """
         if not isinstance(data, dict):
             return data
         arguments = data.get("arguments")
@@ -109,30 +111,41 @@ class StepModel(_BaseWithVars):
         """
         self.arguments = self._replace_arguments(self.arguments)
 
-    def _replace_arguments(self, arguments: Any) -> Any:
+    def replace_args(self, args: dict[str, str]) -> None:
         """
-        Replace nested argments.
+        Inject ``args.*`` static vars and substitute matching references in ``arguments``.
+        """
+        self._with_static_vars.update({f"args.{k}": v for k, v in args.items()})
+        self.arguments = self._replace_arguments(self.arguments, "args")
+
+    def _replace_arguments(self, arguments: Any, var_namespace: str | None = None) -> Any:
+        """
+        Replace nested arguments, optionally limited to a single var namespace.
         """
         if isinstance(arguments, dict):
-            return {k: self._replace_arguments(v) for k, v in arguments.items()}
+            return {k: self._replace_arguments(v, var_namespace) for k, v in arguments.items()}
         elif isinstance(arguments, list):
-            return [self._replace_arguments(v) for v in arguments]
+            return [self._replace_arguments(v, var_namespace) for v in arguments]
         elif isinstance(arguments, str):
             matches = re.compile(r"{{(.*?)}}").findall(arguments)
             for match in matches:
                 var_name = match.strip()
-                arguments = self._replace_vars(arguments, var_name)
+                arguments = self._replace_vars(arguments, var_name, var_namespace)
             return arguments
         else:
             return arguments
 
-    def _replace_vars(self, value: str, var_name: str):
+    def _replace_vars(self, value: str, var_name: str, var_namespace: str | None = None) -> str:
         """
-        This method replaces the value of {{ xxx }}
+        Replace the value of ``{{ var_name }}``; skip if it is outside ``var_namespace``.
         """
         if not var_name:
             raise InvalidParameter("name in variable expression was empty.")
-        if var_name.startswith("env."):
+        # When a namespace is requested, leave references in other namespaces untouched.
+        var_prefix = var_name.split(".", 1)[0] if "." in var_name else None
+        if var_namespace is not None and var_prefix != var_namespace:
+            return value
+        if var_prefix == "env":
             replace_str = os.environ.get(var_name[4:])
         else:
             replace_str = self._with_static_vars.get(var_name)
@@ -140,7 +153,7 @@ class StepModel(_BaseWithVars):
             raise ScenarioFileInvalid(
                 "scenario file is invalid." " variable '%s' can not be resolved." % var_name
             )
-        return re.sub(r"{{(\s?)%s(\s?)}}" % var_name, replace_str, value)
+        return re.sub(r"{{\s*%s\s*}}" % re.escape(var_name), replace_str, value)
 
 
 class ParallelConfigModel(BaseModel):
@@ -177,6 +190,17 @@ class ParallelConfigModel(BaseModel):
         return self
 
 
+class RecipeStepModel(BaseModel):
+    """
+    Load-time directive representing a ``recipe:`` reference within a scenario list.
+    """
+
+    model_config = ConfigDict(coerce_numbers_to_str=True)
+
+    recipe: str = Field(frozen=True)
+    arguments: dict[str, str] = Field(default_factory=dict)
+
+
 class ParallelStepModel(BaseModel):
     """
     Scenario step model representing a ``parallel:`` block.
@@ -199,8 +223,17 @@ class ParallelStepModel(BaseModel):
 
 
 class ScenarioModel(_BaseWithVars):
-    scenario: list[StepModel | ParallelStepModel, ...]
+    scenario: list[RecipeStepModel | StepModel | ParallelStepModel, ...]
     parallel_config: ParallelConfigModel = Field(default_factory=ParallelConfigModel)
+
+    def is_readable_as_common(self) -> bool:
+        """
+        True if this scenario is shaped to be loadable as a common scenario.
+        """
+        # Common scenarios serve only as a source of argument/with_vars defaults
+        # merged by class_name into the main scenario, so every entry must be a
+        # plain StepModel (recipe / parallel directives have nothing to merge).
+        return all(isinstance(s, StepModel) for s in self.scenario)
 
     def merge(self, cmn: Self) -> None:
         """
@@ -217,10 +250,12 @@ class ScenarioModel(_BaseWithVars):
                     self._merge_step(p_step, cmn)
 
     def _merge_step(self, step: StepModel, cmn: Self) -> None:
-        """shallow marge"""
+        """
+        shallow merge
+        """
+        # ``cmn`` is guaranteed to contain only StepModel entries by upstream
+        # validation (``is_readable_as_common``), so no isinstance check here.
         for cmn_step in cmn.scenario:
-            if not isinstance(cmn_step, StepModel):
-                continue
             if step.class_name != cmn_step.class_name:
                 continue
 
@@ -288,3 +323,57 @@ class CommandArgument(BaseModel):
                 return []
             return [value]
         return value
+
+
+class RecipeParameterSpec(BaseModel):
+    """
+    A single parameter declaration in a recipe file.
+    """
+
+    model_config = ConfigDict(coerce_numbers_to_str=True)
+
+    description: str
+    default: str | None = None
+
+    @property
+    def is_required(self) -> bool:
+        """
+        True when no default is set (the caller must supply a value).
+        """
+        return self.default is None
+
+
+class RecipeModel(BaseModel):
+    """
+    Top-level model for a recipe file.
+    """
+
+    parameters: dict[str, RecipeParameterSpec] = Field(default_factory=dict)
+    recipe: list[StepModel, ...] = Field(min_length=1)
+
+    @model_validator(mode="before")
+    @classmethod
+    def _normalize_parameter_shorthand(cls, data: dict[str, Any]) -> dict[str, Any]:
+        """
+        Normalize the string shorthand of parameter declarations into the standard dict form.
+        """
+        if not isinstance(data, dict):
+            return data
+        params = data.get("parameters")
+        if not isinstance(params, dict):
+            return data
+        normalized: dict[str, Any] = {}
+        for name, spec in params.items():
+            if isinstance(spec, str):
+                normalized[name] = {"description": spec}
+            else:
+                normalized[name] = spec
+        data["parameters"] = normalized
+        return data
+
+    def apply_args(self, args: dict[str, str]) -> None:
+        """
+        Substitute ``{{ args.x }}`` references in every step under ``recipe:``.
+        """
+        for step in self.recipe:
+            step.replace_args(args)

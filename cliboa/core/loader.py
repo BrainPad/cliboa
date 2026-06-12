@@ -15,11 +15,13 @@ import json
 import os
 from abc import abstractmethod
 from collections import OrderedDict
+from enum import Enum
 
 import yaml
 
+from cliboa.conf import env
 from cliboa.util.base import _BaseObject
-from cliboa.util.exception import FileNotFound, ScenarioFileInvalid
+from cliboa.util.exception import FileNotFound, InvalidFormat, ScenarioFileInvalid
 
 
 class _ScenarioLoader(_BaseObject):
@@ -60,3 +62,44 @@ class _JsonScenarioLoader(_ScenarioLoader):
     def _load(self) -> dict:
         with open(self._scenario_file, "r") as f:
             return json.load(f, object_pairs_hook=OrderedDict)
+
+
+class _ScenarioFormat(Enum):
+    """
+    Supported scenario file formats with their loader and extension.
+    """
+
+    YAML = "yaml"
+    JSON = "json"
+
+    @classmethod
+    def from_string(cls, value: str) -> "_ScenarioFormat":
+        """
+        Return the _ScenarioFormat for a CLI/config string, or raise InvalidFormat.
+        """
+        try:
+            return cls(value)
+        except ValueError as e:
+            raise InvalidFormat(f"scenario format '{value}' is invalid.") from e
+
+    def file_ext(self) -> str:
+        """
+        Return the file extension associated with this format.
+        """
+        if self is _ScenarioFormat.YAML:
+            return env.get("SCENARIO_YAML_EXT", ".yml")
+        elif self is _ScenarioFormat.JSON:
+            return ".json"
+        else:
+            raise NotImplementedError(f"Unsupported format: {self.name}")
+
+    def loader_cls(self) -> type[_ScenarioLoader]:
+        """
+        Return the loader class for this format.
+        """
+        if self is _ScenarioFormat.YAML:
+            return _YamlScenarioLoader
+        elif self is _ScenarioFormat.JSON:
+            return _JsonScenarioLoader
+        else:
+            raise NotImplementedError(f"Loader not implemented for format: {self.name}")

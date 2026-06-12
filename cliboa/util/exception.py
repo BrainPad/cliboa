@@ -26,11 +26,6 @@ class InvalidScenarioClass(CliboaException):
     pass
 
 
-class DirStructureInvalid(CliboaException):
-    # Exception when directory structure invalid
-    pass
-
-
 class FileNotFound(CliboaException):
     # Exception when specified file not found
     pass
@@ -68,4 +63,10 @@ class StepExecutionFailed(CliboaException):
 
 class DatabaseException(CliboaException):
     # Database error
+    pass
+
+
+class CliboaRuntimeError(CliboaException):
+    # Exception when the cliboa runtime environment is misconfigured
+    # (e.g. invalid values in cliboa_environment.py)
     pass
