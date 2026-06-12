@@ -24,6 +24,7 @@ jobs:
           close-pr-message: 'This pull request was closed automatically.'
           stale-issue-label: 'stale'
           stale-pr-label: 'stale'
+          remove-stale-when-updated: false
           exempt-pr-labels: 'no-stale'
           exempt-issue-labels: 'no-stale'
           operations-per-run: 100
