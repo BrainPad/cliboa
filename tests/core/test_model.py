@@ -26,12 +26,21 @@ class TestBaseWithVars:
         assert model._with_static_vars == {"today": today_str}
 
     def test_merge_static_vars_ok(self):
-        # Test merging static vars
+        # Test merging static vars without overlap
         model = _BaseWithVars()
-        model._with_static_vars = {"a": "1", "b": "2"}
-        model._merge_static_vars({"b": "override", "c": "3"})
-        # Existing keys in _with_static_vars should take precedence
+        model._with_static_vars = {"a": "1"}
+        model._merge_static_vars({"b": "2", "c": "3"})
+        # Should merge safely when there are no conflicting keys
         assert model._with_static_vars == {"b": "2", "c": "3", "a": "1"}
+
+    def test_merge_static_vars_conflict_ng(self):
+        # Test that overlapping static vars raise InvalidFormat
+        model = _BaseWithVars()
+        model._with_static_vars = {"overlap_var": "1"}
+        with pytest.raises(InvalidFormat) as exc_info:
+            model._merge_static_vars({"overlap_var": "override", "c": "3"})
+        assert "Scope conflict in 'with_vars'" in str(exc_info.value)
+        assert "overlap_var" in str(exc_info.value)
 
 
 class TestStepModel:
@@ -256,7 +265,7 @@ class TestScenarioModel:
         assert m.is_readable_as_common() is False
 
     def test_merge_ok(self):
-        # Test merging common scenario settings
+        # Test merging common scenario settings without conflicts
         scenario_data = {
             "scenario": [
                 {"step": "s1", "class": "ClassA", "arguments": {"arg1": "step_val"}},
@@ -273,7 +282,7 @@ class TestScenarioModel:
                     "arguments": {"arg1": "cmn_val", "arg2": "cmn_val2"},
                 },
             ],
-            "with_vars": {"common_var": "val2", "scenario_var": "val_cmn"},
+            "with_vars": {"common_var": "val2"},
             "parallel_config": {"multi_process_count": 4, "force_continue": None},
         }
 
@@ -286,7 +295,7 @@ class TestScenarioModel:
         assert model.parallel_config.force_continue is True  # Original value
         assert model.parallel_config.multi_process_count == 4  # Merged value
 
-        # Test with_vars merge (scenario's 'scenario_var' overrides common's)
+        # Test with_vars merge
         assert model.with_vars == {"common_var": "val2", "scenario_var": "val1"}
 
         # Test step arguments merge (step's 'arg1' overrides common's)
@@ -295,6 +304,43 @@ class TestScenarioModel:
         assert isinstance(step1, StepModel)
         assert step1.arguments == {"arg1": "step_val", "arg2": "cmn_val2"}
         assert step2.arguments == {}
+
+    def test_merge_global_with_vars_conflict_ng(self):
+        # Test that global with_vars overlap raises InvalidFormat
+        scenario_data = {
+            "scenario": [{"step": "s1", "class": "ClassA"}],
+            "with_vars": {"shared_var": "val1"},
+        }
+        common_data = {
+            "scenario": [{"step": "c1", "class": "ClassA"}],
+            "with_vars": {"shared_var": "val2"},
+        }
+        model = ScenarioModel.model_validate(scenario_data)
+        common = ScenarioModel.model_validate(common_data)
+
+        with pytest.raises(InvalidFormat) as exc_info:
+            model.merge(common)
+        assert "Global 'with_vars' conflict: 'shared_var'" in str(exc_info.value)
+
+    def test_merge_step_with_vars_conflict_ng(self):
+        # Test that step-level with_vars overlap raises InvalidFormat
+        scenario_data = {
+            "scenario": [
+                {"step": "s1", "class": "ClassA", "with_vars": {"shared_step_var": "val1"}}
+            ]
+        }
+        common_data = {
+            "scenario": [
+                {"step": "c1", "class": "ClassA", "with_vars": {"shared_step_var": "val2"}}
+            ]
+        }
+        model = ScenarioModel.model_validate(scenario_data)
+        common = ScenarioModel.model_validate(common_data)
+
+        with pytest.raises(InvalidFormat) as exc_info:
+            model.merge(common)
+        assert "Step 'with_vars' conflict in class 'ClassA'" in str(exc_info.value)
+        assert "shared_step_var" in str(exc_info.value)
 
     def test_setup_ok(self):
         # Test the full setup process

@@ -54,8 +54,14 @@ class _BaseWithVars(BaseModel):
 
     def _merge_static_vars(self, data: dict[str, str]) -> None:
         """
-        merge calc result (not overwrite)
+        merge calc result (overwrite is strictly prohibited)
         """
+        for key in data.keys():
+            if key in self._with_static_vars:
+                raise InvalidFormat(
+                    f"Scope conflict in 'with_vars': '{key}' is defined "
+                    "in both global and step levels. It cannot be overwritten."
+                )
         self._with_static_vars = data | self._with_static_vars
 
 
@@ -240,6 +246,12 @@ class ScenarioModel(_BaseWithVars):
         Merge common scenario settings.
         """
         self.parallel_config.merge(cmn.parallel_config)
+
+        for key in cmn.with_vars.keys():
+            if key in self.with_vars:
+                raise InvalidFormat(
+                    f"Global 'with_vars' conflict: '{key}' is defined in multiple files."
+                )
         self.with_vars = cmn.with_vars | self.with_vars
 
         for step in self.scenario:
@@ -260,6 +272,13 @@ class ScenarioModel(_BaseWithVars):
                 continue
 
             step.arguments = cmn_step.arguments | step.arguments
+
+            for key in cmn_step.with_vars.keys():
+                if key in step.with_vars:
+                    raise InvalidFormat(
+                        f"Step 'with_vars' conflict in class '{step.class_name}': "
+                        f"'{key}' is defined in multiple files."
+                    )
             step.with_vars = cmn_step.with_vars | step.with_vars
             return
 
