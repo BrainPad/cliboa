@@ -216,18 +216,17 @@ class SftpAdapter(_BaseObject):
         """
         return (get_specific_file_func, {"src": src, "dest": dest})
 
-    def put_file(self, src, dest, put_intermediation, endfile_suffix=None):
+    def put_file(self, src, dest, put_intermediation=".", endfile_suffix=None):
         """
         Upload file to sftp server
 
         Args:
             src (str): local file to upload
             dest (str): destination sftp path to upload
+            put_intermediation="." (str): prefix added to the intermediate file
+                            created while uploading. "None" disables it.
             endfile_suffix=None (str): Places file with original file name
                             + "endfile_suffix" when upload completed
-        Args:
-            src (str): fetch target absolute path
-            dest (str): local directory to save file
 
         Returns (tuple):
             func: put_file_func
@@ -235,7 +234,6 @@ class SftpAdapter(_BaseObject):
 
         Raises:
             IOError: failed to upload
-            :param put_intermediation:
         """
         return (
             put_file_func,
