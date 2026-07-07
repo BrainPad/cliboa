@@ -14,6 +14,7 @@
 import csv
 import glob
 import hashlib
+import io
 import os
 import re
 import shutil
@@ -1079,10 +1080,17 @@ class CsvSplit(FileBaseTransform):
     """
 
     class Arguments(FileBaseTransform.Arguments):
-        method: Literal["rows", "grouped"]
+        method: Literal["rows", "grouped", "bytes"]
         key_column: str | None = None
         rows: int | None = None
+        max_bytes: int | None = None
         suffix_format: str = ".{:02d}"
+
+        @model_validator(mode="after")
+        def validate_method_requirements(self) -> "CsvSplit.Arguments":
+            if self.method == "bytes" and self.max_bytes is None:
+                raise InvalidParameter("max_bytes is required when method is 'bytes'.")
+            return self
 
     def execute(self, *args) -> None:
         files = self.get_src_files()
@@ -1092,6 +1100,8 @@ class CsvSplit(FileBaseTransform):
             executeInstance = _CsvSplitMethodRows(self.args)
         elif self.args.method == "grouped":
             executeInstance = _CsvSplitMethodGrouped(self.args)
+        elif self.args.method == "bytes":
+            executeInstance = _CsvSplitMethodBytes(self.args)
         else:
             raise NotImplementedError(
                 f"Defined {self.args.method} is not implemented logic in execute."
@@ -1169,6 +1179,65 @@ class _CsvSplitMethodRows(_CsvSplitMethodBase):
                     f"Generated {output_filepath} with {last_rows} rows"
                     f" by read up to line {rows_count} of the original."
                 )
+
+
+class _CsvSplitMethodBytes(_CsvSplitMethodBase):
+    def execute(self, files: list[str]) -> None:
+        for filepath in files:
+            self._split_one(filepath)
+
+    def _split_one(self, filepath: str) -> None:
+        self._logger.info("Split {:s} per {:d} bytes".format(filepath, self.args.max_bytes))
+        file_name, ext = os.path.splitext(os.path.basename(filepath))
+        with open(filepath, "r", encoding=self.args.encoding, newline="") as f_in:
+            reader = csv.reader(f_in)
+            try:
+                header = next(reader)
+            except StopIteration:
+                self._logger.error(f"Empty {filepath}")
+                return
+
+            header_line = self._serialize_row(header)
+            header_bytes = len(header_line.encode(self.args.encoding))
+
+            file_index = 0
+            f_out = None
+            output_filepath = None
+            written_bytes = 0
+
+            for row in reader:
+                line = self._serialize_row(row)
+                line_bytes = len(line.encode(self.args.encoding))
+                if header_bytes + line_bytes > self.args.max_bytes:
+                    self._logger.warning(
+                        f"A record in {filepath} exceeds max_bytes={self.args.max_bytes}"
+                        f" even in a file of its own"
+                        f" (header {header_bytes} bytes + record {line_bytes} bytes)."
+                    )
+                if f_out is None or written_bytes + line_bytes > self.args.max_bytes:
+                    if f_out:
+                        f_out.close()
+                        self._logger.info(
+                            f"Generated {output_filepath} with {written_bytes} bytes."
+                        )
+                    suffix = self.args.suffix_format.format(file_index)
+                    output_filepath = os.path.join(
+                        self.args.resolve_dest_dir(), f"{file_name}{suffix}{ext}"
+                    )
+                    f_out = open(output_filepath, "w", encoding=self.args.encoding, newline="")
+                    f_out.write(header_line)
+                    written_bytes = header_bytes
+                    file_index += 1
+                f_out.write(line)
+                written_bytes += line_bytes
+            if f_out:
+                f_out.close()
+                self._logger.info(f"Generated {output_filepath} with {written_bytes} bytes.")
+
+    def _serialize_row(self, row: list[str]) -> str:
+        buf = io.StringIO()
+        csv.writer(buf).writerow(row)
+        return buf.getvalue()
 
 
 class _CsvSplitMethodGrouped(_CsvSplitMethodBase):
