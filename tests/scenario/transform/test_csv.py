@@ -3041,3 +3041,210 @@ class TestCsvSplitGrouped(TestCsvTransform):
 
         with pytest.raises(Exception):
             instance.execute()
+
+
+class TestCsvSplitBytes(TestCsvTransform):
+    def _assert_split_files(self, dir_path, expected_results, max_bytes):
+        csv_files = [v for v in os.listdir(dir_path) if v.endswith(".csv")]
+        for file_name, expected_data in expected_results.items():
+            assert (
+                file_name in csv_files
+            ), f"Expected output {file_name} was not found, only exists {csv_files}"
+
+            file_path = os.path.join(dir_path, file_name)
+            actual_size = os.path.getsize(file_path)
+            assert actual_size <= max_bytes, (
+                f"Assertion failed for {file_name}: "
+                f"File size {actual_size} exceeds max_bytes {max_bytes}."
+            )
+            with open(file_path, newline="") as f:
+                reader = csv.reader(f)
+                actual_data = [row for row in reader]
+                assert actual_data == expected_data, (
+                    f"Assertion failed for {file_name}: Data mismatch.\n"
+                    f"Expected: {expected_data}\nActual: {actual_data}"
+                )
+
+    def test_execute_ok(self):
+        # create test file
+        csv_list1 = [
+            ["no", "name"],
+            ["1", "alpha"],
+            ["2", "beta"],
+            ["3", "gamma"],
+            ["4", "delta"],
+            ["5", "epsilon"],
+        ]
+        self._create_csv(csv_list1, fname="test1.csv")
+
+        # set the essential attributes
+        instance = CsvSplit()
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test1\.csv",
+                "dest_dir": self._result_dir,
+                "method": "bytes",
+                "max_bytes": 30,
+            }
+        )
+        instance.execute()
+
+        expected_results = {
+            "test1.00.csv": [["no", "name"], ["1", "alpha"], ["2", "beta"]],
+            "test1.01.csv": [["no", "name"], ["3", "gamma"], ["4", "delta"]],
+            "test1.02.csv": [["no", "name"], ["5", "epsilon"]],
+        }
+        self._assert_split_files(self._result_dir, expected_results, 30)
+
+    def test_execute_ok_with_custom_suffix(self):
+        # create test file
+        csv_list1 = [
+            ["no", "name"],
+            ["1", "alpha"],
+            ["2", "beta"],
+            ["3", "gamma"],
+        ]
+        self._create_csv(csv_list1, fname="test1.csv")
+
+        # set the essential attributes
+        instance = CsvSplit()
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test1\.csv",
+                "dest_dir": self._result_dir,
+                "method": "bytes",
+                "max_bytes": 30,
+                "suffix_format": "_{:03d}",
+            }
+        )
+        instance.execute()
+
+        expected_results = {
+            "test1_000.csv": [["no", "name"], ["1", "alpha"], ["2", "beta"]],
+            "test1_001.csv": [["no", "name"], ["3", "gamma"]],
+        }
+        self._assert_split_files(self._result_dir, expected_results, 30)
+
+    def test_execute_ok_quoted_newline_kept_in_one_record(self):
+        # create test file
+        csv_list1 = [
+            ["no", "name"],
+            ["1", "multi\nline"],
+            ["2", "beta"],
+        ]
+        self._create_csv(csv_list1, fname="test1.csv")
+
+        # set the essential attributes
+        instance = CsvSplit()
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test1\.csv",
+                "dest_dir": self._result_dir,
+                "method": "bytes",
+                "max_bytes": 25,
+            }
+        )
+        instance.execute()
+
+        expected_results = {
+            "test1.00.csv": [["no", "name"], ["1", "multi\nline"]],
+            "test1.01.csv": [["no", "name"], ["2", "beta"]],
+        }
+        self._assert_split_files(self._result_dir, expected_results, 25)
+
+    def test_execute_ok_size_counted_in_encoded_bytes(self):
+        # create test file
+        csv_list1 = [
+            ["no", "name"],
+            ["1", "あいう"],
+            ["2", "え"],
+        ]
+        self._create_csv(csv_list1, fname="test1.csv")
+
+        # set the essential attributes
+        instance = CsvSplit()
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test1\.csv",
+                "dest_dir": self._result_dir,
+                "method": "bytes",
+                "max_bytes": 25,
+            }
+        )
+        instance.execute()
+
+        expected_results = {
+            "test1.00.csv": [["no", "name"], ["1", "あいう"]],
+            "test1.01.csv": [["no", "name"], ["2", "え"]],
+        }
+        self._assert_split_files(self._result_dir, expected_results, 25)
+
+    def test_execute_ok_oversized_record_warns_and_is_written(self):
+        # create test file
+        csv_list1 = [
+            ["no", "name"],
+            ["1", "alpha"],
+            ["2", "beta"],
+        ]
+        self._create_csv(csv_list1, fname="test1.csv")
+
+        # set the essential attributes
+        instance = CsvSplit()
+        instance._set_arguments(
+            {
+                "src_dir": self._data_dir,
+                "src_pattern": r"test1\.csv",
+                "dest_dir": self._result_dir,
+                "method": "bytes",
+                "max_bytes": 15,
+            }
+        )
+        with self.assertLogs(
+            "cliboa.scenario.transform.csv._CsvSplitMethodBytes", level="WARNING"
+        ) as cm:
+            instance.execute()
+        assert any("exceeds max_bytes" in message for message in cm.output)
+
+        csv_files = [v for v in os.listdir(self._result_dir) if v.endswith(".csv")]
+        expected_results = {
+            "test1.00.csv": [["no", "name"], ["1", "alpha"]],
+            "test1.01.csv": [["no", "name"], ["2", "beta"]],
+        }
+        for file_name, expected_data in expected_results.items():
+            assert (
+                file_name in csv_files
+            ), f"Expected output {file_name} was not found, only exists {csv_files}"
+
+            with open(os.path.join(self._result_dir, file_name), newline="") as f:
+                reader = csv.reader(f)
+                actual_data = [row for row in reader]
+                assert actual_data == expected_data, (
+                    f"Assertion failed for {file_name}: Data mismatch.\n"
+                    f"Expected: {expected_data}\nActual: {actual_data}"
+                )
+
+    def test_execute_ng_no_max_bytes(self):
+        # create test file
+        csv_list1 = [
+            ["no", "name"],
+            ["1", "alpha"],
+        ]
+        self._create_csv(csv_list1, fname="test1.csv")
+
+        with pytest.raises(InvalidParameter) as execinfo:
+            # set the essential attributes
+            instance = CsvSplit()
+            instance._set_arguments(
+                {
+                    "src_dir": self._data_dir,
+                    "src_pattern": r"test1\.csv",
+                    "dest_dir": self._result_dir,
+                    "method": "bytes",
+                }
+            )
+            instance.execute()
+        assert "max_bytes is required when method is 'bytes'." in str(execinfo.value)
