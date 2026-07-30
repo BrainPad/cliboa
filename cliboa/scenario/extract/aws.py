@@ -212,6 +212,7 @@ class DynamoDBRead(BaseAws):
     """
 
     class Arguments(BaseAws.Arguments):
+        region: str | None = None
         table_name: str
         dest_dir: str = "."
         file_name: str
