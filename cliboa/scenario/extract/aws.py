@@ -16,8 +16,11 @@ import json
 import os
 import re
 from decimal import Decimal
+from typing import Any, Literal
 
 import boto3
+from boto3.dynamodb.conditions import Key
+from pydantic import model_validator
 
 from cliboa.adapter.aws import S3Adapter
 from cliboa.scenario.aws import BaseAws, BaseS3
@@ -208,70 +211,94 @@ class DynamoDBRead(BaseAws):
     Download data from DynamoDB and save as a CSV or JSONL file
     """
 
-    def __init__(self):
-        super().__init__()
-        self._table_name = None
-        self._dest_dir = "."
-        self._file_name = None
-        self._file_format = "csv"
+    class Arguments(BaseAws.Arguments):
+        table_name: str
+        dest_dir: str = "."
+        file_name: str
+        file_format: Literal["csv", "jsonl"] = "csv"
+        partition_key: str | None = None
+        partition_value: Any = None
+        sort_key: str | None = None
+        sort_value: Any = None
 
-    def table_name(self, table_name):
-        self._table_name = table_name
+        @model_validator(mode="before")
+        def check_key_conditions(cls, data: dict) -> dict:
+            if not isinstance(data, dict):
+                raise ValueError(f"arguments is not dict: {data}")
 
-    def dest_dir(self, dest_dir):
-        self._dest_dir = dest_dir
+            partition_key_present = "partition_key" in data
+            partition_value_present = "partition_value" in data
+            if partition_key_present != partition_value_present:
+                raise InvalidParameter(
+                    "Both 'partition_key' and 'partition_value' must be specified together."
+                )
 
-    def file_name(self, file_name):
-        self._file_name = file_name
+            sort_key_present = "sort_key" in data
+            sort_value_present = "sort_value" in data
+            if sort_key_present != sort_value_present:
+                raise InvalidParameter(
+                    "Both 'sort_key' and 'sort_value' must be specified together."
+                )
 
-    def file_format(self, file_format):
-        if file_format not in ["csv", "jsonl"]:
-            raise InvalidParameter("file_format must be either 'csv' or 'jsonl'")
-        self._file_format = file_format
+            if sort_key_present and not partition_key_present:
+                raise InvalidParameter(
+                    "'sort_key'/'sort_value' require 'partition_key'/'partition_value' "
+                    "to also be specified."
+                )
+
+            return data
 
     def execute(self, *args):
         """
-        DynamoDBからデータをダウンロードし、指定されたフォーマットでファイルに保存します。
+        Download items from a DynamoDB table and save them to a CSV or JSONL file.
+
+        If 'partition_key'/'partition_value' are specified, a query operation is used
+        (optionally narrowed further by 'sort_key'/'sort_value'). Otherwise, a scan
+        operation is used to retrieve the whole table, matching the prior behavior.
         """
-        super().execute()
-
-        valid = EssentialParameters(self.__class__.__name__, [self._table_name, self._file_name])
-        valid()
-
-        os.makedirs(self._dest_dir, exist_ok=True)
+        os.makedirs(self.args.dest_dir, exist_ok=True)
 
         dynamodb = boto3.resource(
             "dynamodb",
-            aws_access_key_id=self._access_key,
-            aws_secret_access_key=self._secret_key,
-            region_name=self._region,
+            aws_access_key_id=self.args.access_key,
+            aws_secret_access_key=self.args.secret_key,
+            region_name=self.args.region,
         )
-        table = dynamodb.Table(self._table_name)
+        table = dynamodb.Table(self.args.table_name)
 
-        file_path = os.path.join(self._dest_dir, self._file_name)
-        if self._file_format == "jsonl":
-            self._write_jsonl(self._scan_table(table), file_path)
+        if self.args.partition_key:
+            items = self._query_table(table)
         else:
-            self._write_csv(self._scan_table(table), file_path)
+            items = self._scan_table(table)
 
-        self._logger.info(f"Downloaded items from DynamoDB table {self._table_name} to {file_path}")
+        file_path = os.path.join(self.args.dest_dir, self.args.file_name)
+        if self.args.file_format == "jsonl":
+            self._write_jsonl(items, file_path)
+        else:
+            self._write_csv(items, file_path)
 
-    def _scan_table(self, table):
+        self.logger.info(
+            f"Downloaded items from DynamoDB table {self.args.table_name} to {file_path}"
+        )
+
+    def _paginate(self, operation, **kwargs):
         """
-        DynamoDBテーブルをスキャンし、全アイテムを取得するジェネレータ関数。
+        Generator that repeatedly calls a boto3 Table operation (scan or query),
+        following DynamoDB's ExclusiveStartKey/LastEvaluatedKey pagination.
 
         Args:
-            table (boto3.resources.factory.dynamodb.Table): スキャン対象のDynamoDBテーブル
+            operation: bound Table method to call, e.g. table.scan or table.query
+            **kwargs: extra arguments passed to the operation, e.g. KeyConditionExpression
 
         Yields:
-            dict: テーブルの各アイテム
+            dict: each item returned by the operation
         """
         last_evaluated_key = None
         while True:
             if last_evaluated_key:
-                response = table.scan(ExclusiveStartKey=last_evaluated_key)
+                response = operation(ExclusiveStartKey=last_evaluated_key, **kwargs)
             else:
-                response = table.scan()
+                response = operation(**kwargs)
 
             for item in response["Items"]:
                 yield item
@@ -280,12 +307,42 @@ class DynamoDBRead(BaseAws):
             if not last_evaluated_key:
                 break
 
+    def _scan_table(self, table):
+        """
+        Generator function that scans a DynamoDB table and retrieves all items.
+
+        Args:
+            table (boto3.resources.factory.dynamodb.Table): DynamoDB table to scan
+
+        Yields:
+            dict: each item from the table
+        """
+        yield from self._paginate(table.scan)
+
+    def _query_table(self, table):
+        """
+        Generator function that queries a DynamoDB table by partition key
+        (and optionally sort key), retrieving all matching items.
+
+        Args:
+            table (boto3.resources.factory.dynamodb.Table): DynamoDB table to query
+
+        Yields:
+            dict: each matching item from the table
+        """
+        key_condition = Key(self.args.partition_key).eq(self.args.partition_value)
+        if self.args.sort_key:
+            key_condition &= Key(self.args.sort_key).eq(self.args.sort_value)
+
+        yield from self._paginate(table.query, KeyConditionExpression=key_condition)
+
     def _write_jsonl(self, items, file_path):
         """
-        アイテムをJSONL形式でファイルに書き込みます。
+        Write items to a file in JSONL format.
+
         Args:
-            items (iterator): 書き込むアイテムのイテレータ
-            file_path (str): 書き込み先のファイルパス
+            items (iterator): iterator of items to write
+            file_path (str): destination file path
         """
         with open(file_path, "w") as f:
             for item in items:
@@ -296,7 +353,7 @@ class DynamoDBRead(BaseAws):
 
     def _json_serial(self, obj):
         """
-        JSONシリアライズ関数
+        JSON serialization helper for types not natively supported by json.dumps.
         """
         if isinstance(obj, Decimal):
             return int(obj) if obj % 1 == 0 else float(obj)
@@ -304,11 +361,11 @@ class DynamoDBRead(BaseAws):
 
     def _write_csv(self, items, file_path):
         """
-        アイテムをCSV形式でファイルに書き込みます。
+        Write items to a file in CSV format.
 
         Args:
-            items (iterator): 書き込むアイテムのイテレータ
-            file_path (str): 書き込み先のファイルパス
+            items (iterator): iterator of items to write
+            file_path (str): destination file path
         """
         with open(file_path, "w", newline="") as f:
             writer = None
@@ -319,7 +376,7 @@ class DynamoDBRead(BaseAws):
 
                 for key, value in item.items():
                     if isinstance(value, (dict, list)):
-                        # ネストされた属性値はJSON形式に変換
+                        # Nested attribute values are converted to JSON
                         item[key] = json.dumps(
                             value, default=self._json_serial, sort_keys=False, ensure_ascii=False
                         )

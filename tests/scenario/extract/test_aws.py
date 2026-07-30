@@ -18,6 +18,8 @@ import tempfile
 from decimal import Decimal
 from unittest.mock import Mock, patch
 
+import pytest
+
 from cliboa.adapter.aws import S3Adapter
 from cliboa.scenario.extract.aws import (
     DynamoDBRead,
@@ -26,6 +28,7 @@ from cliboa.scenario.extract.aws import (
     S3DownloadFileDelete,
     S3FileExistsCheck,
 )
+from cliboa.util.exception import InvalidParameter
 from tests import BaseCliboaTest
 
 
@@ -309,6 +312,201 @@ class TestDynamoDBRead(BaseCliboaTest):
 
         self._run_test(mock_boto_resource, test_data, expected_jsonl, "jsonl")
 
+    @patch("boto3.resource")
+    def test_execute_query_with_partition_key_only(self, mock_boto_resource):
+        test_data = {
+            "Items": [
+                {"id": "1", "name": "Item 1", "value": Decimal("100")},
+            ],
+            "Count": 1,
+            "ScannedCount": 1,
+            "LastEvaluatedKey": None,
+        }
+        expected_csv = [
+            ["id", "name", "value"],
+            ["1", "Item 1", "100"],
+        ]
+
+        mock_table = mock_boto_resource.return_value.Table.return_value
+        mock_table.query.return_value = test_data
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            instance = DynamoDBRead()
+            instance._set_arguments(
+                {
+                    "table_name": "test_table",
+                    "file_name": "output.csv",
+                    "dest_dir": temp_dir,
+                    "region": "us-east-1",
+                    "partition_key": "id",
+                    "partition_value": "1",
+                }
+            )
+            instance.execute()
+
+            output_file_path = os.path.join(temp_dir, instance.args.file_name)
+            self._verify_csv(output_file_path, expected_csv)
+
+            mock_table.query.assert_called_once()
+            mock_table.scan.assert_not_called()
+
+    @patch("boto3.resource")
+    def test_execute_query_with_partition_and_sort_key(self, mock_boto_resource):
+        test_data = {
+            "Items": [
+                {"id": "1", "sort": "a", "value": Decimal("100")},
+            ],
+            "Count": 1,
+            "ScannedCount": 1,
+            "LastEvaluatedKey": None,
+        }
+        expected_csv = [
+            ["id", "sort", "value"],
+            ["1", "a", "100"],
+        ]
+
+        mock_table = mock_boto_resource.return_value.Table.return_value
+        mock_table.query.return_value = test_data
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            instance = DynamoDBRead()
+            instance._set_arguments(
+                {
+                    "table_name": "test_table",
+                    "file_name": "output.csv",
+                    "dest_dir": temp_dir,
+                    "region": "us-east-1",
+                    "partition_key": "id",
+                    "partition_value": "1",
+                    "sort_key": "sort",
+                    "sort_value": "a",
+                }
+            )
+            instance.execute()
+
+            output_file_path = os.path.join(temp_dir, instance.args.file_name)
+            self._verify_csv(output_file_path, expected_csv)
+            mock_table.query.assert_called_once()
+
+    @patch("boto3.resource")
+    def test_execute_query_pagination(self, mock_boto_resource):
+        first_page = {
+            "Items": [{"id": "1", "value": Decimal("100")}],
+            "LastEvaluatedKey": {"id": "1"},
+        }
+        second_page = {
+            "Items": [{"id": "2", "value": Decimal("200")}],
+            "LastEvaluatedKey": None,
+        }
+        expected_csv = [
+            ["id", "value"],
+            ["1", "100"],
+            ["2", "200"],
+        ]
+
+        mock_table = mock_boto_resource.return_value.Table.return_value
+        mock_table.query.side_effect = [first_page, second_page]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            instance = DynamoDBRead()
+            instance._set_arguments(
+                {
+                    "table_name": "test_table",
+                    "file_name": "output.csv",
+                    "dest_dir": temp_dir,
+                    "region": "us-east-1",
+                    "partition_key": "id",
+                    "partition_value": "1",
+                }
+            )
+            instance.execute()
+
+            output_file_path = os.path.join(temp_dir, instance.args.file_name)
+            self._verify_csv(output_file_path, expected_csv)
+            assert mock_table.query.call_count == 2
+
+    @patch("boto3.resource")
+    def test_execute_scan_pagination(self, mock_boto_resource):
+        first_page = {
+            "Items": [{"id": "1", "value": Decimal("100")}],
+            "LastEvaluatedKey": {"id": "1"},
+        }
+        second_page = {
+            "Items": [{"id": "2", "value": Decimal("200")}],
+            "LastEvaluatedKey": None,
+        }
+        expected_csv = [
+            ["id", "value"],
+            ["1", "100"],
+            ["2", "200"],
+        ]
+
+        mock_table = mock_boto_resource.return_value.Table.return_value
+        mock_table.scan.side_effect = [first_page, second_page]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            instance = DynamoDBRead()
+            instance._set_arguments(
+                {
+                    "table_name": "test_table",
+                    "file_name": "output.csv",
+                    "dest_dir": temp_dir,
+                    "region": "us-east-1",
+                }
+            )
+            instance.execute()
+
+            output_file_path = os.path.join(temp_dir, instance.args.file_name)
+            self._verify_csv(output_file_path, expected_csv)
+            assert mock_table.scan.call_count == 2
+
+    def test_execute_ng_partition_value_without_partition_key(self):
+        with pytest.raises(InvalidParameter) as execinfo:
+            instance = DynamoDBRead()
+            instance._set_arguments(
+                {
+                    "table_name": "test_table",
+                    "file_name": "output.csv",
+                    "region": "us-east-1",
+                    "partition_value": "1",
+                }
+            )
+        assert "Both 'partition_key' and 'partition_value' must be specified together." in str(
+            execinfo.value
+        )
+
+    def test_execute_ng_sort_key_without_partition_key(self):
+        with pytest.raises(InvalidParameter) as execinfo:
+            instance = DynamoDBRead()
+            instance._set_arguments(
+                {
+                    "table_name": "test_table",
+                    "file_name": "output.csv",
+                    "region": "us-east-1",
+                    "sort_key": "sort",
+                    "sort_value": "a",
+                }
+            )
+        assert (
+            "'sort_key'/'sort_value' require 'partition_key'/'partition_value' "
+            "to also be specified." in str(execinfo.value)
+        )
+
+    def test_execute_ng_sort_value_without_sort_key(self):
+        with pytest.raises(InvalidParameter) as execinfo:
+            instance = DynamoDBRead()
+            instance._set_arguments(
+                {
+                    "table_name": "test_table",
+                    "file_name": "output.csv",
+                    "region": "us-east-1",
+                    "partition_key": "id",
+                    "partition_value": "1",
+                    "sort_key": "sort",
+                }
+            )
+        assert "Both 'sort_key' and 'sort_value' must be specified together." in str(execinfo.value)
+
     def _run_test(self, mock_boto_resource, test_data, expected_data, file_format):
         mock_table = mock_boto_resource.return_value.Table.return_value
         mock_table.scan.return_value = test_data
@@ -326,7 +524,7 @@ class TestDynamoDBRead(BaseCliboaTest):
             )
             instance.execute()
 
-            output_file_path = os.path.join(temp_dir, instance._file_name)
+            output_file_path = os.path.join(temp_dir, instance.args.file_name)
             assert os.path.exists(output_file_path)
 
             if file_format == "csv":
