@@ -61,6 +61,37 @@ class TestDownload(object):
         assert "Http request failed" in str(execinfo.value)
 
 
+    @patch("cliboa.adapter.http.sleep")
+    @patch("cliboa.adapter.http.requests.get")
+    def test_execute_ng_no_sleep_after_final_failure(self, mock_get, mock_sleep):
+        # Final failed attempt should not sleep when no further retry is scheduled.
+        mock_get.side_effect = HTTPError("Http request failed.")
+
+        url = "https://spam.com/get"
+        timeout = 1
+        retry_cnt = 1
+        retry_intvl_sec = 1
+        d = Download(url, self._dest_path, timeout, retry_cnt, retry_intvl_sec)
+        with pytest.raises(HTTPError):
+            d.execute()
+        mock_sleep.assert_not_called()
+
+    @patch("cliboa.adapter.http.sleep")
+    @patch("cliboa.adapter.http.requests.get")
+    def test_execute_ng_sleeps_between_retries(self, mock_get, mock_sleep):
+        mock_get.side_effect = HTTPError("Http request failed.")
+
+        url = "https://spam.com/get"
+        timeout = 1
+        retry_cnt = 3
+        retry_intvl_sec = 2
+        d = Download(url, self._dest_path, timeout, retry_cnt, retry_intvl_sec)
+        with pytest.raises(HTTPError):
+            d.execute()
+        assert mock_sleep.call_count == 2
+        mock_sleep.assert_called_with(2)
+
+
 class TestUpload(object):
     def setup_method(self, method):
         self._dest_path = "/tmp/test.result"

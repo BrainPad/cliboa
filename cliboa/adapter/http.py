@@ -44,7 +44,7 @@ class Http(_BaseObject, ABC):
     def execute(self):
         self._logger.info("local path: %s" % self._dest_path)
         res = None
-        for _ in range(self._retry_cnt):
+        for attempt in range(self._retry_cnt):
             try:
                 res = self.request()
                 res.raise_for_status()
@@ -55,11 +55,13 @@ class Http(_BaseObject, ABC):
             except Exception as e:
                 self._logger.warning(e)
 
-            self._logger.warning(
-                "Unexpected error occurred during http request. Retry will start in %s",
-                self._retry_intvl_sec,
-            )
-            sleep(self._retry_intvl_sec)
+            # Sleep only when another attempt is scheduled.
+            if attempt < self._retry_cnt - 1:
+                self._logger.warning(
+                    "Unexpected error occurred during http request. Retry will start in %s",
+                    self._retry_intvl_sec,
+                )
+                sleep(self._retry_intvl_sec)
 
         if res is not None:
             raise HTTPError("Http request failed. HTTP Status code: %s" % res.status_code)
