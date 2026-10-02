@@ -7,10 +7,11 @@ Split csv files by specified method.
 |src_dir|Path of the directory which input files are places.|Yes|None||
 |src_pattern|File pattern of source csv files. Regexp is available.|Yes|None||
 |dest_dir|Path of the directory which is for output files.|No|None|If a non-existent directory path is specified, the directory is automatically created.|
-|method|Split method.|Yes|None|Only `rows` or `grouped` can be specified.|
+|method|Split method.|Yes|None|Only `rows`, `grouped` or `bytes` can be specified.|
 |rows|When method is `rows`, split every N rows.|No|None|Required when method is `rows`|
-|suffix_format|When method is `rows`, output file's suffix.(used in python's str.format)|No|None||
+|suffix_format|When method is `rows` or `bytes`, output file's suffix.(used in python's str.format)|No|None||
 |key_column|When method is `grouped`, column name to use grouped split.|No|None|Required when method is `grouped`|
+|max_bytes|When method is `bytes`, upper limit of each output file size in bytes.|No|None|Required when method is `bytes`|
 |encoding|Character encoding when read and write|No|utf-8||
 
 # Examples
@@ -81,4 +82,20 @@ delta, B
 Output: /out/C.csv
 name, class
 epsilon, C
+```
+
+
+## Method: bytes
+Each output file contains the same header as the source file, and its size (header included) does not exceed `max_bytes`. A record is never split across files.
+
+```
+scenario:
+- step: Split file by byte size
+  class: CsvSplit
+  arguments:
+    src_dir: /in
+    src_pattern: data\.csv
+    dest_dir: /out
+    method: bytes
+    max_bytes: 10485115
 ```
